@@ -1,0 +1,58 @@
+26.1.2006
+Das csl-Projekt wird einmal mehr von vorne begonnen. 
+
+Alphabet:
+Die Klasse Alphabet wurde zunächst in ihrer alten Version übernommen. Hier
+bleibt nur der Wunsch von Max Hadersbeck, dass unbekannte Symbole nicht zu
+einem Programm-Abbruch führen. Stimmt, das wäre tatsächlich
+sinnvoller. Vielleicht eine Warnmeldung ... ?!
+
+TransTable:
+Die Idee, die sparse table anwendungs-unabhängig zu implementieren, ist nun
+wieder verworfen. TransTable soll eine Basisklasse werden, die auf die
+Speicherung von Wortgraphen spezialisiert ist. Ziel ist also, mit TransTable
+sowohl einen Trie als auch einen minimalen Automaten zu bedienen. Knackpunkt
+ist die Speicherung der Annotationen: Die müssen ja in beiden Strukturen
+unterschiedlich gehandhabt werden. Alternativ könnte auch der Trie mit der
+(aufwändigeren) Lösung für min. Automaten arbeiten.
+
+Idee für die Platzierung der Annotationen: in Zellen über der Stammzelle des
+Zustands:
+val3
+val2
+val1
+Stamm/val0
+label1
+label2
+
+Evtl. Interface für walk im minimalen Automaten:
+int walk(int pos, int char, int& annState);
+
+Ich denke, mit diesen beiden Ideen ist es möglich, Trie und min. Automaten mit
+der gleichen Übergangstabelle zu versorgen. TransTable läuft bereits und hat
+die ersten Tests gut überstanden. 
+
+Als nächstes soll die Trie-Konstruktion an das neue System angepasst
+werden. Das sollte einfacher werden, da das Handling mehrerer Annotationen pro
+Zustand deutlich simpler geworden und außerdem komplett in das Modul
+TransTable verlegt ist.
+
+
+2.2.2006
+Einiges ist passiert. Die Idee mit den Annotationen über der 'Stammzelle'
+funktioniert hervorragend. Eine Vererbungshierarchie 
+TransTable --> Dawg  --> Trie
+		    [--> CompDic, in Planung]
+funktioniert sehr gut, scheint fehlerfrei zu laufen.
+
+Nun sollen die Lexikon-Traversierer BestMatch und SMMatch ins neue System
+transportiert werden, geplant ist eine gemeinsame Oberklasse LevFilter. An den
+Container-Klassen für die Rückgabe der Kandidaten soll sich einiges ändern:
+Sie sollen ein Interface LevFilter::ResultSet_if implementieren, das nichts
+weiter als eine einfache push-Funktion verlangt. Das ganze TabCol etc.-Chaos
+ist überflüssig.
+
+Probleme bereitet das AhoCorasick-Projekt für Max: Hier ist völlig unklar, wo
+es in der Klassen-Hierarchie eingeordnet werden soll, so dass möglichst wenig
+Code dupliziert werden muss (etwa der Aufbau des Tries) und eine
+übersichtliche Struktur erhalten bleibt.
