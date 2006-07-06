@@ -99,9 +99,9 @@ namespace csl {
     }
 
 
-/**
-   resize the array of cells
-*/
+    /**
+     * resize the array of cells
+     */
     template< CellType CellTypeValue >
     void TransTable< CellTypeValue >::allocCells ( int newNrOfCells ) {
 	cells_ = ( Cell_t* ) realloc ( cells_, newNrOfCells * sizeof ( Cell_t ) );
