@@ -15,6 +15,6 @@ int main(int argc, char** argv) {
 
 //    t.toDot(&alph);
 //    t.printCells();
-    t.printDic();
+//    t.printDic();
 
 }

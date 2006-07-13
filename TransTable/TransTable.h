@@ -24,12 +24,28 @@ namespace csl {
 	    typedef Cell< CellTypeValue > Cell_t;
 	    typedef TempState< CellTypeValue > TempState_t;
 
-	    TransTable(int alphSize, char* binFile = NULL);
+	    /**
+	     * Constructor
+	     * All alphabet information TransTable needs is the number of possible labels. This number
+	     * is not necessarily equal to size() of the used Alphabet-object. That's why only a size_type
+	     * is passed on rather than an Alphabet-object.
+	     * If TransTable is initialized with a binFile, this file is loaded as automaton. 
+	     *
+	     * @param alphSize the used alphabet size.
+	     * @param binFile a binary file conaining an automaton
+	     *
+	     */
+	    TransTable( size_t alphSize, char* binFile = NULL );
+
+	    /**
+	     * Destructor
+	     */
 	    ~TransTable();
 
 	    /**
 	     * Loads an automaton from a binary file. (usually .dic)
 	     * @param binFile filename of the binary storing the automaton
+	     * @throw exceptions::badFileHandle
 	     */
 	    bool loadBinary(const char* binFile);
     
@@ -108,7 +124,7 @@ namespace csl {
 	       @param c the character to walk with (c already being coded according to custom alphabet)
 	    */
 	    int walk(int state, uchar c) const {
-		assert(cells_[state].isOfType(Cell_t::STATE)); // leave this assertion out for additional speed
+		assert(cells_[state].isOfType(Cell_t::STATE));
 		return (cells_[state + c].getKey() == c)? cells_[state + c].getValue() : 0;
 	    }
 
@@ -157,7 +173,7 @@ namespace csl {
 		TransIterator( const uchar* susoString ) {
 		    pos_ = susoString;
 		}
-		uchar operator* () {
+		uchar operator *() const {
 		    return *pos_;
 		}
 		TransIterator& operator++() {
@@ -165,9 +181,14 @@ namespace csl {
 		    return *this;
 		}
 		
-		bool isValid() {
+		bool isValid() const {
 		    return ( *pos_ != 0 );
 		}
+		
+		const uchar* getPointer() const {
+		    return pos_;
+		}
+
 	    private:
 		const uchar* pos_;
 	    };
@@ -197,9 +218,9 @@ namespace csl {
 
 
 	    private:
-	    int alphSize_;
+	    size_t alphSize_;
 	    Cell_t* cells_;
-	    int nrOfCells_;
+	    size_t nrOfCells_;
 
 	    uchar* susoStrings_;
 	    size_t lengthOfSusoStrings_;
@@ -220,11 +241,11 @@ namespace csl {
 	       The number of states. Note that this value is updated during construction
 	       only. If a table is loaded from a binary, this variable remains set to -1.
 	    */
-	    int nrOfStates_;
+	    size_t nrOfStates_;
 
 	    /// the first free cell of the array
-	    int firstFreeCell_;
-	    int sizeOfUsedCells_;
+	    size_t firstFreeCell_;
+	    size_t sizeOfUsedCells_;
 
 
 	    /**

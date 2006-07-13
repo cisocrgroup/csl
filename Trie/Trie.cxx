@@ -14,7 +14,7 @@ namespace csl {
 	TransTable_t::initConstruction();
 	tempStates_ = (TempState_t*) malloc(Global::lengthOfStr * sizeof(TempState_t)); // allocate memory for all tempStates
 	for(int i=0; i< Global::lengthOfStr; ++i) {
-	    new(&(tempStates_[i])) TempState_t(alph_.size()); // call constructor for all tempStates
+	    new( &(tempStates_[i] ) ) TempState_t( alph_.size() ); // call constructor for all tempStates
 	}
 	
 	std::ifstream fileHandle(txtFile);
