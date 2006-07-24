@@ -130,14 +130,14 @@ class List : public LevFilter::ResultSet_if  { // of class PermuteMatch
 	size_ = 0;
     }
 
-    void List::sort() {
+    void sort() {
 	sort(0,getSize() - 1); // private method
     }
 
 
  private:
     // quicksort: see Cormen, Introduction to algorithms, p.145ff
-    void List::sort(int left, int right) {
+    void sort(int left, int right) {
 	int q;
 	if(left<right) {
 	    q = partition(left,right);
@@ -147,7 +147,7 @@ class List : public LevFilter::ResultSet_if  { // of class PermuteMatch
     }
 
     // for quicksort
-    int List::partition(int left,int right) {
+    int partition(int left,int right) {
 	int i = left -1;
 	int j;
 	for(j=left;j<right;++j) {
@@ -162,7 +162,7 @@ class List : public LevFilter::ResultSet_if  { // of class PermuteMatch
 	return (i+1);
     }
 
-    void List::swap(int i, int j) {
+    void swap(int i, int j) {
 	Item tmp = at(i);
 	at(i) = at(j);
 	at(j) = tmp;

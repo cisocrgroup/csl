@@ -108,7 +108,7 @@ getCandscore_files = ./getCandscore/getCandscore.cxx $(OBJS)/MSMatch.o $(OBJS)/R
 $(BIN)/getCandscore: $(getCandscore_files)
 	$(GCC) $(getCandscore_files) -o $(BIN)/getCandscore
 
-permuteMatch_old_files = ./PermuteMatch/permuteMatch.cxx $(OBJS)/PermuteMatch_old.o $(OBJS)/Alphabet.o $(OBJS)/Trie.o $(OBJS)/MSMatch.o $(OBJS)/LevDEA.o
+permuteMatch_old_files = ./PermuteMatch/permuteMatch.cxx $(OBJS)/PermuteMatch_old.o $(OBJS)/Alphabet.o $(OBJS)/MSMatch.o $(OBJS)/LevDEA.o
 $(BIN)/permuteMatch_old: $(permuteMatch_old_files)
 	$(GCC) $(permuteMatch_old_files) -o $(BIN)/permuteMatch_old
 
@@ -116,7 +116,7 @@ completeMatch_files = ./StructMatch/CompleteMatch/completeMatch.cxx $(OBJS)/Comp
 $(BIN)/completeMatch: $(completeMatch_files) $(TRANSTABLE_FILES)
 	$(GCC) $(completeMatch_files) -o $(BIN)/completeMatch
 
-permuteMatch_files = ./StructMatch/PermuteMatch/permuteMatch.cxx $(OBJS)/PermuteMatch.o $(OBJS)/Alphabet.o $(TRANSTABLE_FILES) $(OBJS)/Trie.o  $(OBJS)/MSMatch.o $(OBJS)/LevDEA.o $(OBJS)/ResultSet.o
+permuteMatch_files = ./StructMatch/PermuteMatch/permuteMatch.cxx $(OBJS)/PermuteMatch.o $(OBJS)/Alphabet.o $(TRANSTABLE_FILES) $(OBJS)/MSMatch.o $(OBJS)/LevDEA.o $(OBJS)/ResultSet.o
 $(BIN)/permuteMatch: $(permuteMatch_files) $(TRANSTABLE_FILES)
 	$(GCC) $(permuteMatch_files) -o $(BIN)/permuteMatch
 

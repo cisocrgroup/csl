@@ -133,7 +133,7 @@ namespace csl {
 			printf("MATCH: %s\n",w);
 			++countCharResults;
       
-			TransTable::AnnIterator it(db_,newNewDbPos);
+			TransTable< BASIC >::AnnIterator it(db_,newNewDbPos);
 			for(;it.isValid();++it) {
 			    if(countResults >= Global::Perm::maxNrOfResults) {
 				std::cerr<<"PermuteMatch: Result buffer overflow. The variable Global::Perm::maxNrOfResults restricts the maximum number of results to"<<Global::Perm::maxNrOfResults<<". Exiting."<<std::endl;

@@ -1,6 +1,10 @@
 #ifndef CSL_TRANSTABLE_STATE
 #define CSL_TRANSTABLE_STATE CSL_TRANSTABLE_STATE
 
+#include <vector>
+#include <cassert>
+#include <iostream>
+#include "../Global.h"
 namespace csl {
 
 /**
@@ -21,12 +25,12 @@ namespace csl {
 	uchar* transitions_;
 	const int alphSize_;
 
-	std::vector<int> annotations_; 
+	std::vector< int > annotations_; 
     
 	bool isFinal_;
     
     public:
-	TempState(int alphSize) : alphSize_(alphSize) {
+	TempState( int alphSize ) : alphSize_( alphSize ) {
 	    transitions_ = new uchar[alphSize_ + 1];
 	    reset();
 	}

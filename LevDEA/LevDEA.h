@@ -87,7 +87,7 @@ namespace csl {
 
 	~LevDEA();
     
-	Pos LevDEA::walk(const Pos& p,int c) const;
+	Pos walk(const Pos& p,int c) const;
 
 
 	inline bool isFinal(const Pos& p) const {

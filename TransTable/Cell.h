@@ -7,6 +7,8 @@
    \date Jan 2005
 */
 
+#include <cassert>
+#include <iostream>
 #include "../Global.h"
 namespace csl {
 
@@ -36,7 +38,7 @@ namespace csl {
 	    value_ = 0;
 	}
 	void setKey(int key) {
-	    assert(key_ == 0);
+	    assert( key_ == 0 );
 	    key_ = key;
 	}
 	int getKey() const {
@@ -44,7 +46,7 @@ namespace csl {
 	}
 
 
-	void setValue(int value) {
+	void setValue( int value ) {
 //	assert(value_ == 0); // can not be asserted when changeTransitionTarget() is used
 	    value_ = value;
 	}
@@ -52,7 +54,7 @@ namespace csl {
 	    return value_;
 	}
 
-	void setTrans(int key, int value) {
+	void setTrans( int key, int value ) {
 	    assert(value_ == 0);
 	    setKey(key);
 	    setValue(value);

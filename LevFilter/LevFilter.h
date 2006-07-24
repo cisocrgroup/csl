@@ -31,6 +31,9 @@ namespace csl {
 
     class LevFilter::ResultSet_if {
     public:
+	virtual ~ResultSet_if() {
+	}
+
 	virtual bool push(const uchar* str, int annotation) = 0;
 	virtual void reset() = 0;
     };

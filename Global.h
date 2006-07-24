@@ -2,6 +2,7 @@
 #define CSL_GLOBAL_H CSL_GLOBAL_H
 
 #include<cstring>
+#include<string>
 #include<exception>
 #define debug(s) (std::cout<<"DEBUG: "<<s<<std::endl)
 
@@ -73,16 +74,22 @@ namespace csl {
     };
 
     namespace exceptions {
+
 	class cslException : public std::exception {
 	public:
-	    cslException() {}
-	    virtual ~cslException() throw() {}
-	    cslException( const std::string msg ) : msg_( msg ) {}
+	    cslException() {
+	    }
 
+	    cslException( const std::string& msg ) : msg_( msg ) {
+		
+	    }
+
+	    virtual ~cslException() throw() {}
+	    
 	    virtual const char* what() const throw() {
 		return msg_.c_str();
 	    }
-
+	    
 	private:
 	    const std::string msg_;
 	};
