@@ -36,7 +36,7 @@ LEVDEA_H = ./LevDEA/LevDEA.h $(GLOBAL_H) $(ALPHABET_H)
 $(OBJS)/LevDEA.o: $(LEVDEA_H) ./LevDEA/LevDEA.cxx
 	$(GCC) -c ./LevDEA/LevDEA.cxx -o $(OBJS)/LevDEA.o
 
-MSMATCH_H = ./MSMatch/MSMatch.h $(LEVFILTER_H) $(GLOBAL_H) $(LEVDEA_H) $(TRIE_H)
+MSMATCH_H = ./MSMatch/MSMatch.h $(LEVFILTER_H) $(GLOBAL_H) $(LEVDEA_H)
 $(OBJS)/MSMatch.o: $(MSMATCH_H) ./MSMatch/MSMatch.cxx
 	$(GCC) -c ./MSMatch/MSMatch.cxx -o $(OBJS)/MSMatch.o
 
@@ -44,7 +44,7 @@ LEVNDEA_H = ./LevNDEA/LevNDEA.h $(GLOBAL_H) $(ALPHABET_H)
 $(OBJS)/LevNDEA.o: $(LEVNDEA_H) ./LevNDEA/LevNDEA.cxx
 	$(GCC) -c ./LevNDEA/LevNDEA.cxx -o $(OBJS)/LevNDEA.o
 
-BESTMATCH_H = ./BestMatch/BestMatch.h $(LEVFILTER_H) $(GLOBAL_H) $(LEVNDEA_H) $(TRIE_H) $(RESULTSET_H) 
+BESTMATCH_H = ./BestMatch/BestMatch.h $(LEVFILTER_H) $(GLOBAL_H) $(LEVNDEA_H) $(TRIE_FILES) $(RESULTSET_H) 
 $(OBJS)/BestMatch.o: $(BESTMATCH_H) ./BestMatch/BestMatch.cxx
 	$(GCC) -c ./BestMatch/BestMatch.cxx -o $(OBJS)/BestMatch.o
 
@@ -54,17 +54,17 @@ $(OBJS)/ResultSet.o: $(RESULTSET_H) ./ResultSet/ResultSet.cxx
 
 
 ########### PermuteMatch OLD ####################
-PERMUTEMATCH_OLD_H = ./PermuteMatch/PermuteMatch.h ./PermuteMatch/List.h $(GLOBAL_H) $(MSMATCH_H) $(TRIE_H) 
+PERMUTEMATCH_OLD_H = ./PermuteMatch/PermuteMatch.h ./PermuteMatch/List.h $(GLOBAL_H) $(MSMATCH_H) $(TRIE_FILES) 
 $(OBJS)/PermuteMatch_old.o: $(PERMUTEMATCH_OLDH) ./PermuteMatch/PermuteMatch.cxx
 	$(GCC) -c ./PermuteMatch/PermuteMatch.cxx -o $(OBJS)/PermuteMatch_old.o
 
 
 ########### StructMatch #####################
-COMPLETEMATCH_H = ./StructMatch/CompleteMatch/CompleteMatch.h ./StructMatch/CompleteMatch/List.h $(GLOBAL_H) $(MSMATCH_H) $(TRIE_H) 
+COMPLETEMATCH_H = ./StructMatch/CompleteMatch/CompleteMatch.h ./StructMatch/CompleteMatch/List.h $(GLOBAL_H) $(MSMATCH_H) $(TRIE_FILES) 
 $(OBJS)/CompleteMatch.o: $(PERMUTEMATCH_H) ./StructMatch/CompleteMatch/CompleteMatch.cxx
 	$(GCC) -c ./StructMatch/CompleteMatch/CompleteMatch.cxx -o $(OBJS)/CompleteMatch.o
 
-PERMUTEMATCH_H = ./StructMatch/PermuteMatch/PermuteMatch.h ./StructMatch/PermuteMatch/List.h $(GLOBAL_H) $(MSMATCH_H) $(TRIE_H) 
+PERMUTEMATCH_H = ./StructMatch/PermuteMatch/PermuteMatch.h ./StructMatch/PermuteMatch/List.h $(GLOBAL_H) $(MSMATCH_H) $(TRIE_FILES) 
 $(OBJS)/PermuteMatch.o: $(PERMUTEMATCH_H) ./StructMatch/PermuteMatch/PermuteMatch.cxx
 	$(GCC) -c ./StructMatch/PermuteMatch/PermuteMatch.cxx -o $(OBJS)/PermuteMatch.o
 

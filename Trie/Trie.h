@@ -13,37 +13,37 @@ namespace csl {
     class Trie : public TransTable< BASIC > {
     public:
 	typedef TransTable< BASIC > TransTable_t;
-	Trie(const Alphabet& alph, char* binFile = NULL);
+	inline Trie(const Alphabet& alph, char* binFile = NULL);
 
 	/**
 	   The funtion that actually executes the computation of the trie.
 	   @param txtFile The dictionary (including annotations) in txt format
 	   @param compFile The name of the output binary
 	*/
-	void compileDic(char* txtFile, char* compFile);
+	inline void compileDic(char* txtFile, char* compFile);
 
 	/**
 	   processes one input line: separates the key from the annotations (if present)
 	   and performs the insertion into the trie
 	   \arg a cstring pointing to the current line
 	*/
-	void addToken(uchar* itemString);
+	inline void addToken(uchar* itemString);
 
 	/// extracts the trie to stdout
-//	void printDic(StateId initState,uchar* prefix = (uchar*)"") const;
-	void printDic(int initState) const;
+//	inline void printDic(StateId initState,uchar* prefix = (uchar*)"") const;
+	inline void printDic(int initState) const;
 
 	/// set the flag annotateByteOffset_
-	void setByteAnnotation(bool b = true) {
+	inline void setByteAnnotation(bool b = true) {
 	    annotateByteOffset_ = b;
 	}
 	
 	/// set the flag annotateWordCount_
-	void setCountAnnotation(bool b = true) {
+	inline void setCountAnnotation(bool b = true) {
 	    annotateWordCount_ = b;
 	}
 
-	int walkStr(int state, const uchar* str) const {
+	inline int walkStr(int state, const uchar* str) const {
 	    while(*str && state) {
 		state = TransTable< BASIC >::walk(state, alph_.code(*str));
 		++str;
@@ -68,7 +68,7 @@ namespace csl {
 	uchar lastKey[Global::lengthOfLongStr];
 	uchar *valueString;
 
-	void printDic_rec(int pos, int depth) const;
+	inline void printDic_rec(int pos, int depth) const;
 
     };
 
