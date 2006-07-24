@@ -74,6 +74,6 @@ namespace csl {
 
 } //eon
 
-#include "./Trie.tcc"
+#include "./Trie.cxx"
 
 #endif

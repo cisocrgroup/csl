@@ -27,31 +27,31 @@ namespace csl {
     public:
 	typedef TransTable< TOKDIC > TransTable_t;
 
-	MinDic ( const Alphabet& alph, char* binFile = NULL );
+	inline MinDic ( const Alphabet& alph, char* binFile = NULL );
 
 	/**
 	   The funtion that actually executes the computation of the trie.
 	   @param txtFile The dictionary (including annotations) in txt format
 	   @param compFile The name of the output binary
 	*/
-	void compileDic ( char* txtFile, char* compFile );
+	inline void compileDic ( char* txtFile, char* compFile );
 
 
-	void initConstruction();
-	void finishConstruction();
+	inline void initConstruction();
+	inline void finishConstruction();
 
 	/**
 	   processes one input line: separates the key from the annotations (if present)
 	   and performs the insertion into the trie
 	   \arg a cstring pointing to the current line
 	*/
-	void addToken ( const uchar* key );
+	inline void addToken ( const uchar* key );
 
 	/// extracts the trie to stdout
-	void printDic ( int initState ) const;
+	inline void printDic ( int initState ) const;
 
 
-	int walkStr ( int state, const uchar* str ) const {
+	inline int walkStr ( int state, const uchar* str ) const {
 	    while ( *str && state ) {
 		state = walk ( state, alph_.code ( *str ) );
 		++str;
@@ -59,8 +59,8 @@ namespace csl {
 	    return state;
 	}
 
-	void printDic() const;
-
+	inline void printDic() const;
+	
     private:
 #include "./StateHash.h"
 	const Alphabet& alph_;
@@ -80,14 +80,13 @@ namespace csl {
 	    if ( ( storedState = hashtable_->findState ( state ) ) == 0 ) { // if equiv. state doesn't exist
 		storedState = storeTempState ( state ); // store it
 		hashtable_->push ( state, storedState ); // add it to the hashtable
-        }
-        return storedState;
-    }
+	    }
+	    return storedState;
+	}
 
+	inline void printDic_rec ( int pos, int depth ) const;
 
-    void printDic_rec ( int pos, int depth ) const;
-
-};
+    };
 
 } //eon
 

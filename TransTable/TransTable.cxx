@@ -120,7 +120,7 @@ namespace csl {
     }
 
     template<>
-    int TransTable< BASIC >::storeTempState( TempState_t& state ) {
+    inline int TransTable< BASIC >::storeTempState( TempState_t& state ) {
 	++nrOfStates_;
 
 	size_t nrOfAnnotations = state.getNrOfAnnotations();
@@ -178,7 +178,7 @@ namespace csl {
 
 
     template<>
-    int TransTable< TOKDIC >::storeTempState( TempState_t& state ) {
+    inline int TransTable< TOKDIC >::storeTempState( TempState_t& state ) {
 	++nrOfStates_;
 
 	// add offset for susoString as value
@@ -340,7 +340,7 @@ namespace csl {
     }
 
     template<>
-    void TransTable< TOKDIC >::toDot( const Alphabet* alph ) const {
+    inline void TransTable< TOKDIC >::toDot( const Alphabet* alph ) const {
 	Cell_t * cellArray = TransTable::getCells();
     std::cout << "Digraph TransTable_out { //DOTCODE" << std::endl << "rankdir=LR; //DOTCODE" << std::endl;
     for( size_t i = 1; i < sizeOfUsedCells_; ++i ) {

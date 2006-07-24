@@ -70,7 +70,7 @@ namespace csl {
 	}
 	MinDic::finishConstruction();
 
-	TransTable::createBinary(dicFile);
+	TransTable< TOKDIC >::createBinary(dicFile);
     }
 
 

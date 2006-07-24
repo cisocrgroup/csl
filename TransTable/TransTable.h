@@ -35,51 +35,51 @@ namespace csl {
 	     * @param binFile a binary file conaining an automaton
 	     *
 	     */
-	    TransTable( size_t alphSize, char* binFile = NULL );
+	    inline TransTable( size_t alphSize, char* binFile = NULL );
 
 	    /**
 	     * Destructor
 	     */
-	    ~TransTable();
+	    inline ~TransTable();
 
 	    /**
 	     * Loads an automaton from a binary file. (usually .dic)
 	     * @param binFile filename of the binary storing the automaton
 	     * @throw exceptions::badFileHandle
 	     */
-	    bool loadBinary(const char* binFile);
+	    inline bool loadBinary(const char* binFile);
     
 	    /**
 	     * Dumps the automaton into a file
 	     * @param binFile filename to dump the automaton into (usually .dic)
 	     */
-	    void createBinary(char* binFile);
+	    inline void createBinary(char* binFile);
 
 	    /**
 	     * Call this method before adding the first state to the automaton
 	     */
-	    void initConstruction();
+	    inline void initConstruction();
 
 	    /**
 	     * Call this method to finish the construction phase
 	     */
-	    void finishConstruction();
+	    inline void finishConstruction();
 
 	    /**
 	     * @param newTempState
 	     * inserts a new state into the table, returns the state id.
 	     */ 
-	    int storeTempState(TempState_t& state);
+	    inline int storeTempState(TempState_t& state);
 	
 	    /**
 	     * declare a root (or start state) of the automaton.
 	    */
-	    void setRoot(int rootId) {
+	    inline void setRoot(int rootId) {
 		cells_[0].setValue(rootId);
 	    }
 	    
 	    /// returns the root
-	    int getRoot() const {
+	    inline int getRoot() const {
 		return cells_[0].getValue();
 	    }
 	
@@ -87,22 +87,22 @@ namespace csl {
 	     * returns true iff state is marked as final
 	     * @param state id of a state
 	     */
-	    bool isFinal(int state) const {
+	    inline bool isFinal(int state) const {
 		assert(cells_[state].isOfType(Cell_t::STATE));
 		return cells_[state].isOfType(Cell_t::FINALSTATE);
 	    }
 	
-	    void setFinal(int state, bool b = true) {
+	    inline void setFinal(int state, bool b = true) {
 		// assertion that state is really a state happens in Cell's setFinal()
 		cells_[state].setFinal(true);
 	    }
 	
-	    bool hasAnnotations(int state) const {
+	    inline bool hasAnnotations(int state) const {
 		assert(cells_[state].isOfType(Cell_t::STATE));
 		return cells_[state].isOfType(Cell_t::HAS_ANN);
 	    }
 
-	    int getFirstAnn(int state) const {
+	    inline int getFirstAnn(int state) const {
 //	    assert(hasAnnotations(state));
 		return cells_[state].getValue();
 	    }
@@ -110,11 +110,11 @@ namespace csl {
 	    /**
 	     * @return the string containing labels of all existing outgoing transitions from state
 	     */
-	    const uchar* getSusoString( int state ) const {
+	    inline const uchar* getSusoString( int state ) const {
 		return (susoStrings_ + getFirstAnn( state ) );
 	    }
 
-	    int getNrOfCells() const {
+	    inline int getNrOfCells() const {
 		return nrOfCells_;
 	    }
 
@@ -123,7 +123,7 @@ namespace csl {
 	       @param state the state to start from
 	       @param c the character to walk with (c already being coded according to custom alphabet)
 	    */
-	    int walk(int state, uchar c) const {
+	    inline int walk(int state, uchar c) const {
 		assert(cells_[state].isOfType(Cell_t::STATE));
 		return (cells_[state + c].getKey() == c)? cells_[state + c].getValue() : 0;
 	    }
@@ -136,7 +136,7 @@ namespace csl {
 	       The method is necessary for TransTable to store an Aho-Corasick-Automaton: The error links
 	       can only be processed for a complete trie.(see class csl::AhoCorasick)
 	    */
-	    void changeTransitionTarget(int state, int c, int newValue) {
+	    inline void changeTransitionTarget(int state, int c, int newValue) {
 		assert(cells_[state + c].getKey() == c);
 		cells_[state + c].setValue(newValue);
 	    }
@@ -198,22 +198,22 @@ namespace csl {
 	    }
 
 	    // getters
-	    Cell_t* getCells() const {
+	    inline Cell_t* getCells() const {
 		return cells_;
 	    }
 
-	    int getNrOfCells() {
+	    inline int getNrOfCells() {
 		return nrOfCells_;
 	    }
 	
-	    int getAlphSize() const {
+	    inline int getAlphSize() const {
 		return alphSize_;
 	    }
 	
-	    bool compareStates(const TempState_t& temp, int comp) const;
+	    inline bool compareStates(const TempState_t& temp, int comp) const;
 
-	    void printCells() const;
-	    void toDot(const Alphabet* alph = NULL) const;
+	    inline void printCells() const;
+	    inline void toDot(const Alphabet* alph = NULL) const;
 
 
 
@@ -251,9 +251,9 @@ namespace csl {
 	    /**
 	       resize the array of cells
 	    */
-	    void allocCells(int newNrOfCells);
+	    inline void allocCells(int newNrOfCells);
 
-	    int findSlot(const TempState_t& state);
+	    inline int findSlot(const TempState_t& state);
 
 	};
 
