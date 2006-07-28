@@ -6,12 +6,12 @@
 
 namespace csl {
 
-    inline MinDic::MinDic( const Alphabet& alph, char* binFile ) : TransTable_t( alph.size(), binFile ),
+    MinDic::MinDic( const Alphabet& alph, char* binFile ) : TransTable_t( alph.size(), binFile ),
 							     alph_( alph ) {
     }
 
 
-    inline void MinDic::initConstruction() {
+    void MinDic::initConstruction() {
 	TransTable_t::initConstruction();
 	tempStates_ =( TempState_t* ) malloc( Global::lengthOfStr * sizeof( TempState_t ) ); // allocate memory for all tempStates
 	for( int i = 0; i < Global::lengthOfStr; ++i ) {
@@ -23,7 +23,7 @@ namespace csl {
 	*lastKey = 0; // reset the string to ""
     }
 
-    inline void MinDic::finishConstruction() {
+    void MinDic::finishConstruction() {
 	// store the very last word
 	int i = strlen( ( char* ) lastKey );
 	int storedState = 0;
@@ -45,7 +45,7 @@ namespace csl {
 	TransTable_t::finishConstruction();
     }
 
-    inline void MinDic::compileDic( char* txtFile, char* compFile ) {
+    void MinDic::compileDic( char* txtFile, char* compFile ) {
 	initConstruction();
 
 	std::ifstream fileHandle( txtFile );
@@ -73,7 +73,7 @@ namespace csl {
     }
 
 
-    inline void MinDic::addToken( const uchar* key ) {
+    void MinDic::addToken( const uchar* key ) {
 	static int commonPrefix, i, lengthOfKey;
 	static int storedState;
 
@@ -111,12 +111,12 @@ namespace csl {
 	++count_;
     }
 
-    inline void MinDic::printDic() const {
+    void MinDic::printDic() const {
 	count_ = 0;
 	printDic_rec( getRoot(), 0 );
     }
 
-    inline void MinDic::printDic_rec( int pos, int depth ) const {
+    void MinDic::printDic_rec( int pos, int depth ) const {
 	int newPos;
 	static uchar w[Global::lengthOfStr];
 

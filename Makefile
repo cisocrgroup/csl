@@ -1,50 +1,55 @@
 ########## DIRECTORIES #######################
 BIN = ./bin
 OBJS = ./objs
-
+LIB = ./lib
 ######## COMPILER AND FLAGS ###################
 #GCC = g++ -O3 -Wall -fpermissive # use this for optimal speed results
 #GCC = g++ -O3 -Wall # use this for optimal speed results
 #GCC = g++ -Wall --no-inline
 GCC = g++ -ggdb -Wall # use this if you want to use the gdb debugger
 
+AR = ar cru
+RANLIB = ranlib
 
 
 GLOBAL_H = ./Global.h
-ALPHABET_H = ./Alphabet/Alphabet.h $(GLOBAL_H)
-$(OBJS)/Alphabet.o: $(ALPHABET_H) ./Alphabet/Alphabet.cxx
+
+ALPHABET_HEADERS = ./Alphabet/Alphabet.h $(GLOBAL_H)
+$(OBJS)/Alphabet.o: $(ALPHABET_HEADERS) ./Alphabet/Alphabet.cxx
 	$(GCC) -c ./Alphabet/Alphabet.cxx -o $(OBJS)/Alphabet.o
 
 
 ########## DAWG AND RELATED ###################
 
-TRANSTABLE_FILES = ./TransTable/TransTable.h ./TransTable/TransTable.cxx ./TransTable/Cell.h ./TransTable/TempState.h $(GLOBAL_H) $(ALPHABET_H)
+TRANSTABLE_FILES = ./TransTable/TransTable.h ./TransTable/TransTable.cxx ./TransTable/Cell.h ./TransTable/TempState.h $(GLOBAL_H) $(ALPHABET_HEADERS)
 
 HASH_FILES = ./Hash/Hash.h
 
-TRIE_FILES = ./Trie/Trie.h ./Trie/Trie.cxx $(TRANSTABLE_FILES)
+TRIE_HEADERS = ./Trie/Trie.h $(ALPHABET_HEADERS) $(TRANSTABLE_FILES)
+$(OBJS)/Trie.o: $(TRIE_HEADERS) ./Trie/Trie.cxx
+	$(GCC) -c ./Trie/Trie.cxx -o $(OBJS)/Trie.o
 
-MINDIC_FILES = ./MinDic/MinDic.h ./MinDic/MinDic.cxx ./MinDic/StateHash.h $(TRANSTABLE_FILES) $(HASH_FILES)
-$(OBJS)/MinDic.o: $(MINDIC_H) ./MinDic/MinDic.cxx
+MINDIC_HEADERS = ./MinDic/MinDic.h ./MinDic/StateHash.h $(TRANSTABLE_FILES) $(HASH_FILES)
+$(OBJS)/MinDic.o: $(MINDIC_HEADERS) ./MinDic/MinDic.cxx	
 	$(GCC) -c ./MinDic/MinDic.cxx -o $(OBJS)/MinDic.o
 
 
 ########## LEVFILTER AND RELATED #############
-LEVFILTER_H = ./LevFilter/LevFilter.h
+LEVFILTER_HEADERS = ./LevFilter/LevFilter.h
 
-LEVDEA_H = ./LevDEA/LevDEA.h $(GLOBAL_H) $(ALPHABET_H)
-$(OBJS)/LevDEA.o: $(LEVDEA_H) ./LevDEA/LevDEA.cxx
+LEVDEA_HEADERS = ./LevDEA/LevDEA.h $(GLOBAL_H) $(ALPHABET_HEADERS)
+$(OBJS)/LevDEA.o: $(LEVDEA_HEADERS) ./LevDEA/LevDEA.cxx
 	$(GCC) -c ./LevDEA/LevDEA.cxx -o $(OBJS)/LevDEA.o
 
-MSMATCH_H = ./MSMatch/MSMatch.h $(LEVFILTER_H) $(GLOBAL_H) $(LEVDEA_H)
-$(OBJS)/MSMatch.o: $(MSMATCH_H) ./MSMatch/MSMatch.cxx
+MSMATCH_HEADERS = ./MSMatch/MSMatch.h $(LEVFILTER_HEADERS) $(TRIE_HEADERS) $(GLOBAL_H) $(LEVDEA_HEADERS)
+$(OBJS)/MSMatch.o: $(MSMATCH_HEADERS) ./MSMatch/MSMatch.cxx
 	$(GCC) -c ./MSMatch/MSMatch.cxx -o $(OBJS)/MSMatch.o
 
-LEVNDEA_H = ./LevNDEA/LevNDEA.h $(GLOBAL_H) $(ALPHABET_H)
-$(OBJS)/LevNDEA.o: $(LEVNDEA_H) ./LevNDEA/LevNDEA.cxx
+LEVNDEA_HEADERS = ./LevNDEA/LevNDEA.h $(GLOBAL_H) $(ALPHABET_HEADERS)
+$(OBJS)/LevNDEA.o: $(LEVNDEA_HEADERS) ./LevNDEA/LevNDEA.cxx
 	$(GCC) -c ./LevNDEA/LevNDEA.cxx -o $(OBJS)/LevNDEA.o
 
-BESTMATCH_H = ./BestMatch/BestMatch.h $(LEVFILTER_H) $(GLOBAL_H) $(LEVNDEA_H) $(TRIE_FILES) $(RESULTSET_H) 
+BESTMATCH_H = ./BestMatch/BestMatch.h $(LEVFILTER_HEADERS) $(GLOBAL_H) $(LEVNDEA_HEADERS) $(TRIE_FILES) $(RESULTSET_H) 
 $(OBJS)/BestMatch.o: $(BESTMATCH_H) ./BestMatch/BestMatch.cxx
 	$(GCC) -c ./BestMatch/BestMatch.cxx -o $(OBJS)/BestMatch.o
 
@@ -81,17 +86,17 @@ $(BIN)/stats: ./TransTable/stats.cxx $(TRANSTABLE_FILES) $(OBJS)/Alphabet.o
 $(BIN)/trieToDot: ./Trie/trieToDot.cxx $(OBJS)/Trie.o $(TRANSTABLE_FILES) $(OBJS)/Alphabet.o
 	$(GCC) -o $(BIN)/trieToDot ./Trie/trieToDot.cxx $(OBJS)/Trie.o $(OBJS)/Alphabet.o
 
-$(BIN)/compileTrie: ./Trie/compileTrie.cxx $(TRANSTABLE_FILES) $(TRIE_FILES) $(OBJS)/Alphabet.o
-	$(GCC) -o $(BIN)/compileTrie ./Trie/compileTrie.cxx $(OBJS)/Alphabet.o
+$(BIN)/compileTrie: ./Trie/compileTrie.cxx $(TRANSTABLE_FILES) $(TRIE_HEADERS) $(ALPHABET_HEADERS)
+	$(GCC) -o $(BIN)/compileTrie ./Trie/compileTrie.cxx $(OBJS)/Trie.o $(OBJS)/Alphabet.o
 
-$(BIN)/compileMD: ./MinDic/compileMD.cxx $(TRANSTABLE_FILES) $(MINDIC_FILES) $(OBJS)/Alphabet.o
-	$(GCC) -o $(BIN)/compileMD ./MinDic/compileMD.cxx $(OBJS)/Alphabet.o
+$(BIN)/compileMD: ./MinDic/compileMD.cxx $(TRANSTABLE_FILES) $(OBJS)/MinDic.o $(OBJS)/Alphabet.o
+	$(GCC) -o $(BIN)/compileMD ./MinDic/compileMD.cxx $(OBJS)/Alphabet.o $(OBJS)/MinDic.o
 
-$(BIN)/compilePD: ./StructMatch/PermDic/compilePD.cxx $(OBJS)/PermDic.o $(TRANSTABLE_FILES) $(OBJS)/MinDic.o $(OBJS)/Alphabet.o $(TRANSTABLE_FILES)
+$(BIN)/compilePD: ./StructMatch/PermDic/compilePD.cxx $(OBJS)/PermDic.o $(TRANSTABLE_FILES) $(OBJS)/MinDic.o $(OBJS)/Alphabet.o
 	$(GCC) -o $(BIN)/compilePD StructMatch/PermDic/compilePD.cxx $(OBJS)/MinDic.o $(OBJS)/PermDic.o $(OBJS)/Alphabet.o
 
-$(BIN)/extractTrie: ./Trie/extractTrie.cxx $(TRANSTABLE_FILES) $(TRIE_FILES) $(OBJS)/Alphabet.o
-	$(GCC) -o $(BIN)/extractTrie ./Trie/extractTrie.cxx $(OBJS)/Alphabet.o
+$(BIN)/extractTrie: ./Trie/extractTrie.cxx $(TRANSTABLE_FILES) $(OBJS)/Trie.o $(OBJS)/Alphabet.o
+	$(GCC) -o $(BIN)/extractTrie ./Trie/extractTrie.cxx $(OBJS)/Trie.o $(OBJS)/Alphabet.o
 
 $(BIN)/extractMD: ./MinDic/extractMD.cxx $(TRANSTABLE_FILES) $(MINDIC_FILES) $(OBJS)/Alphabet.o
 	$(GCC) -o $(BIN)/extractMD ./MinDic/extractMD.cxx $(OBJS)/Alphabet.o
@@ -102,7 +107,6 @@ $(BIN)/bestMatch: ./BestMatch/bestMatch.cxx $(OBJS)/BestMatch.o $(OBJS)/ResultSe
 
 $(BIN)/msFilter: ./MSMatch/msFilter.cxx $(OBJS)/MSMatch.o $(OBJS)/ResultSet.o $(OBJS)/LevDEA.o $(TRANSTABLE_FILES) $(OBJS)/Trie.o $(OBJS)/Alphabet.o
 	$(GCC) -o $(BIN)/msFilter ./MSMatch/msFilter.cxx $(OBJS)/MSMatch.o $(OBJS)/ResultSet.o $(OBJS)/LevDEA.o $(OBJS)/Trie.o  $(OBJS)/Alphabet.o
-
 
 getCandscore_files = ./getCandscore/getCandscore.cxx $(OBJS)/MSMatch.o $(OBJS)/ResultSet.o $(OBJS)/LevDEA.o $(TRANSTABLE_FILES) $(OBJS)/Trie.o $(OBJS)/Alphabet.o
 $(BIN)/getCandscore: $(getCandscore_files)
@@ -116,7 +120,7 @@ completeMatch_files = ./StructMatch/CompleteMatch/completeMatch.cxx $(OBJS)/Comp
 $(BIN)/completeMatch: $(completeMatch_files) $(TRANSTABLE_FILES)
 	$(GCC) $(completeMatch_files) -o $(BIN)/completeMatch
 
-permuteMatch_files = ./StructMatch/PermuteMatch/permuteMatch.cxx $(OBJS)/PermuteMatch.o $(OBJS)/Alphabet.o $(TRANSTABLE_FILES) $(OBJS)/MSMatch.o $(OBJS)/LevDEA.o $(OBJS)/ResultSet.o
+permuteMatch_files = ./StructMatch/PermuteMatch/permuteMatch.cxx $(OBJS)/PermuteMatch.o $(OBJS)/Alphabet.o $(OBJS)/Trie.o $(OBJS)/MSMatch.o $(OBJS)/LevDEA.o $(OBJS)/ResultSet.o
 $(BIN)/permuteMatch: $(permuteMatch_files) $(TRANSTABLE_FILES)
 	$(GCC) $(permuteMatch_files) -o $(BIN)/permuteMatch
 

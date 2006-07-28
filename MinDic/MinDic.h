@@ -27,39 +27,39 @@ namespace csl {
     public:
 	typedef TransTable< TOKDIC > TransTable_t;
 
-	inline MinDic ( const Alphabet& alph, char* binFile = NULL );
+	MinDic( const Alphabet& alph, char* binFile = NULL );
 
 	/**
 	   The funtion that actually executes the computation of the trie.
 	   @param txtFile The dictionary (including annotations) in txt format
 	   @param compFile The name of the output binary
 	*/
-	inline void compileDic ( char* txtFile, char* compFile );
+	void compileDic( char* txtFile, char* compFile );
 
 
-	inline void initConstruction();
-	inline void finishConstruction();
+	void initConstruction();
+	void finishConstruction();
 
 	/**
 	   processes one input line: separates the key from the annotations (if present)
 	   and performs the insertion into the trie
 	   \arg a cstring pointing to the current line
 	*/
-	inline void addToken ( const uchar* key );
+	void addToken( const uchar* key );
 
 	/// extracts the trie to stdout
-	inline void printDic ( int initState ) const;
+	void printDic( int initState ) const;
 
 
-	inline int walkStr ( int state, const uchar* str ) const {
-	    while ( *str && state ) {
-		state = walk ( state, alph_.code ( *str ) );
+	inline int walkStr( int state, const uchar* str ) const {
+	    while( *str && state ) {
+		state = walk( state, alph_.code( *str ) );
 		++str;
 	    }
 	    return state;
 	}
 
-	inline void printDic() const;
+	void printDic() const;
 	
     private:
 #include "./StateHash.h"
@@ -75,7 +75,7 @@ namespace csl {
 	uchar lastKey[Global::lengthOfLongStr];
 	uchar *valueString;
 
-	inline int replaceOrRegister ( TempState_t& state ) {
+	inline int replaceOrRegister( TempState_t& state ) {
 	    int storedState = 0;
 	    if ( ( storedState = hashtable_->findState ( state ) ) == 0 ) { // if equiv. state doesn't exist
 		storedState = storeTempState ( state ); // store it
@@ -84,12 +84,12 @@ namespace csl {
 	    return storedState;
 	}
 
-	inline void printDic_rec ( int pos, int depth ) const;
+	void printDic_rec( int pos, int depth ) const;
 
     };
 
 } //eon
 
-#include "./MinDic.cxx"
+// #include "./MinDic.cxx"
 
 #endif

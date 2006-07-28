@@ -6,11 +6,11 @@
 
 namespace csl {
 
-    inline Trie::Trie(const Alphabet& alph, char* binFile) : TransTable< BASIC >(alph.size(),binFile), alph_(alph) {
+    Trie::Trie(const Alphabet& alph, char* binFile) : TransTable< BASIC >(alph.size(),binFile), alph_(alph) {
 	annotateByteOffset_ = false;
     }
     
-    inline void Trie::compileDic(char* txtFile, char* compFile) {
+    void Trie::compileDic(char* txtFile, char* compFile) {
 	TransTable_t::initConstruction();
 	tempStates_ = (TempState_t*) malloc(Global::lengthOfStr * sizeof(TempState_t)); // allocate memory for all tempStates
 	for(int i=0; i< Global::lengthOfStr; ++i) {
@@ -70,7 +70,7 @@ namespace csl {
     /**
     @except out_of_range 
     */
-    inline void Trie::addToken(uchar* input) {
+    void Trie::addToken(uchar* input) {
 	
 	static int commonPrefix, i, lengthOfKey;
 	static int storedState;
@@ -145,13 +145,13 @@ namespace csl {
 	strcpy((char*)lastKey,(char*)key);
     }
 
-    inline void Trie::printDic(int initState) const {
+    void Trie::printDic(int initState) const {
 	if(initState==0) initState = getRoot();
 	count_ = 0;
 	printDic_rec(initState,0);
     }
 	
-    inline void Trie::printDic_rec(int pos, int depth) const {
+    void Trie::printDic_rec(int pos, int depth) const {
 	int c;
 	static int newPos;
 	static uchar w[Global::lengthOfStr];

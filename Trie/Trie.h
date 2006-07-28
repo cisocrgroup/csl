@@ -13,25 +13,25 @@ namespace csl {
     class Trie : public TransTable< BASIC > {
     public:
 	typedef TransTable< BASIC > TransTable_t;
-	inline Trie(const Alphabet& alph, char* binFile = NULL);
+	Trie(const Alphabet& alph, char* binFile = NULL);
 
 	/**
 	   The funtion that actually executes the computation of the trie.
 	   @param txtFile The dictionary (including annotations) in txt format
 	   @param compFile The name of the output binary
 	*/
-	inline void compileDic(char* txtFile, char* compFile);
+	void compileDic(char* txtFile, char* compFile);
 
 	/**
 	   processes one input line: separates the key from the annotations (if present)
 	   and performs the insertion into the trie
 	   \arg a cstring pointing to the current line
 	*/
-	inline void addToken(uchar* itemString);
+	void addToken(uchar* itemString);
 
 	/// extracts the trie to stdout
-//	inline void printDic(StateId initState,uchar* prefix = (uchar*)"") const;
-	inline void printDic(int initState) const;
+//	void printDic(StateId initState,uchar* prefix = (uchar*)"") const;
+	void printDic(int initState) const;
 
 	/// set the flag annotateByteOffset_
 	inline void setByteAnnotation(bool b = true) {
@@ -68,12 +68,12 @@ namespace csl {
 	uchar lastKey[Global::lengthOfLongStr];
 	uchar *valueString;
 
-	inline void printDic_rec(int pos, int depth) const;
+	void printDic_rec(int pos, int depth) const;
 
     };
 
 } //eon
 
-#include "./Trie.cxx"
+// #include "./Trie.cxx"
 
 #endif

@@ -8,7 +8,6 @@
 #include "../Global.h"
 
 namespace csl {
-
 /**
    MSMatch provides approximate matching in large dictionaries. It is an implementation of the concepts described in
    "S. Mihov and K. Schulz. Fast approximate search in large dictionaries. Computational Linguistics, 30, 2004."
@@ -19,7 +18,6 @@ namespace csl {
    @author Uli Reffle, <uli@reffle.de>
    @date   2006
 */
-
     class MSMatch : public LevFilter {
     private:
 	const Alphabet& alph_;

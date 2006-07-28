@@ -3,6 +3,8 @@
 
 using namespace csl;
 
+#include "./MinDic.h"
+
 int main(int argc, char** argv) {
     if(argc != 4) {
 	std::cerr<<"Use like: "<<argv[0]<<" <alph> <txtDic> <binDic>"<<std::endl;
