@@ -233,6 +233,7 @@ namespace csl {
 		CellType cType_;
 		size_t offsetCells_;
 		size_t offsetSusoStrings_;
+		size_t nrOfCells_;
 	    } Header;
 
 	    Header* header_;

@@ -22,7 +22,7 @@ namespace csl {
     
     template< CellType CellTypeValue >
     TransTable< CellTypeValue >::~TransTable() {
-	if( cells_ ) free( cells_ );
+	// if( cells_ ) free( cells_ );
 	// if( susoStrings_ ) free( susoStrings_ );
     }
 
@@ -41,7 +41,7 @@ namespace csl {
 	sizeOfUsedCells_ = 1; // cells_[0] is never used
 	header_ = new Header();
 	header_->magicNumber_ = magicNumber_; //magicNumber_;
-	header_->cType_ = TOKDIC;
+	header_->cType_ = CellTypeValue;
 	header_->offsetCells_ = sizeof( Header );
 	header_->offsetSusoStrings_ = 0;
 	susoStrings_ = 0;
@@ -54,6 +54,8 @@ namespace csl {
 
     template< CellType CellTypeValue >
     void TransTable< CellTypeValue >::finishConstruction() {
+	header_->nrOfCells_ = nrOfCells_;
+	
 	if( CellTypeValue == TOKDIC ) { // not very nice
 	    header_->offsetSusoStrings_ = header_->offsetCells_ + ( sizeOfUsedCells_ * sizeof( Cell_t ) );
 	    lengthOfSusoStrings_ = ftHash_->getLengthOfKeyStrings();
@@ -64,7 +66,7 @@ namespace csl {
     }
     
     template< CellType CellTypeValue >
-    bool TransTable<CellTypeValue>::loadBinary( const char* binFile ) {
+    bool TransTable< CellTypeValue >::loadBinary( const char* binFile ) {
 	FILE * fi;
 	struct stat f_stat;
 
@@ -77,8 +79,6 @@ namespace csl {
 					     "' for reading." );
 	}
 
-	nrOfCells_ =( int ) ( f_stat.st_size / sizeof( Cell_t ) );
-	sizeOfUsedCells_ = nrOfCells_;
 	uchar* file_ = (uchar*) malloc( f_stat.st_size );
 	fread( file_, 1, f_stat.st_size, fi );
 	fclose( fi );
@@ -92,12 +92,17 @@ namespace csl {
 	}
 	
 	if( header->cType_ != CellTypeValue ) {
-	    throw exceptions::badDictFile( "File is incompatible to dictionary type.\n" );
+	    std::cerr<<header->cType_<<"<->"<<CellTypeValue<<std::endl;
+	    throw exceptions::badDictFile( "csl::TransTable - File is incompatible to dictionary type.\n" );
 	}
 	cells_ = (Cell_t*) ( file_ + header->offsetCells_ );
 	susoStrings_ = (uchar*) ( file_ + header->offsetSusoStrings_ );
 
+	nrOfCells_ = header->nrOfCells_;
+	sizeOfUsedCells_ = nrOfCells_;
+
 	std::cerr << "Ok" << std::endl;
+	std::cerr << "nrOfCells_=" << nrOfCells_ << std::endl;
 	return true;
     }
 

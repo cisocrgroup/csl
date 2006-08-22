@@ -10,10 +10,10 @@ int main(int argc, char** argv) {
 	exit(1);
     }
 
-    Alphabet alph(argv[1]);
-    Trie t(alph);
-    t.setByteAnnotation(true);
-    t.compileDic(argv[2],argv[3]);
+    Alphabet alph( argv[1] );
+    Trie t( alph );
+    t.setByteAnnotation( true );
+    t.compileDic( argv[2], argv[3] );
 //    t.printCells();
 
 }

@@ -36,6 +36,11 @@ namespace csl {
 	TOKDIC
     } CellType ;
 
+    typedef enum { 
+	STANDARD,
+	FW_BW
+    } MSMatchMode;
+
     class Global {
     public:
 	static const int maxNrOfChars = 256;
@@ -104,6 +109,12 @@ namespace csl {
 	public:
 	    badFileHandle() {}
 	    badFileHandle( const std::string msg ) : cslException( msg ) {}
+	};
+
+	class bufferOverflow : public cslException {
+	public:
+	    bufferOverflow() {}
+	    bufferOverflow( const std::string msg ) : cslException( msg ) {}
 	};
     };
 

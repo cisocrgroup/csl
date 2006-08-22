@@ -23,9 +23,9 @@ namespace csl {
 	void compileDic(char* txtFile, char* compFile);
 
 	/**
-	   processes one input line: separates the key from the annotations (if present)
-	   and performs the insertion into the trie
-	   \arg a cstring pointing to the current line
+	 * processes one input line: separates the key from the annotations (if present)
+	 * and performs the insertion into the trie
+	 * @param itemString a cstring pointing to the current line
 	*/
 	void addToken(uchar* itemString);
 

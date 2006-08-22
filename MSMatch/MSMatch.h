@@ -18,6 +18,7 @@ namespace csl {
    @author Uli Reffle, <uli@reffle.de>
    @date   2006
 */
+    template< MSMatchMode Mode = STANDARD >
     class MSMatch : public LevFilter {
     private:
 	const Alphabet& alph_;
@@ -41,7 +42,7 @@ namespace csl {
 	static const int MAX_RESULTS = 1000; 
     };
 
-
 } // eon
 
+#include "./MSMatch.cxx"
 #endif

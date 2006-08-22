@@ -5,14 +5,17 @@
 
 namespace csl {
 
-    MSMatch::MSMatch(const Alphabet& init_alphabet,char* compdic_file, int lev_distance) : alph_(init_alphabet),dic(init_alphabet,compdic_file),levDEA2(alph_,1),levDEA(alph_,lev_distance) {
-    
+    template< MSMatchMode Mode >
+    MSMatch< Mode >::MSMatch(const Alphabet& init_alphabet,char* compdic_file, int lev_distance) : alph_(init_alphabet),dic(init_alphabet,compdic_file),levDEA2(alph_,1),levDEA(alph_,lev_distance) {
+	
     }
 
-    MSMatch::~MSMatch() {
+    template< MSMatchMode Mode >
+    MSMatch< Mode >::~MSMatch() {
     }
 
-    int MSMatch::query(const uchar* pattern, ResultSet_if& output) {
+    template< MSMatchMode Mode >
+    int MSMatch< Mode >::query(const uchar* pattern, ResultSet_if& output) {
 	output_ = &output;
 	pattern_ = pattern;
 
@@ -20,14 +23,15 @@ namespace csl {
 
 //	memset(stack,0,MAX_STACKSIZE * sizeof(int)); // should not be necessary
 
-	memset(word,0,Global::lengthOfWord * sizeof(uchar)); // prepare memory for output word
-	query_rec(dic.getRoot(), LevDEA::Pos(0,0), 0);
+	memset( word, 0, Global::lengthOfWord * sizeof( uchar ) ); // prepare memory for output word
+	query_rec( dic.getRoot(), LevDEA::Pos( 0, 0 ), 0 );
 
 
 	return 0;
     }
 
-    void MSMatch::query_rec(int dicPos, LevDEA::Pos levPos, int depth) {
+    template< MSMatchMode Mode >
+    void MSMatch< Mode >::query_rec( int dicPos, LevDEA::Pos levPos, int depth ) {
 	static int newDicPos;
 	static LevDEA::Pos newLevPos;
 	int c;
@@ -42,9 +46,8 @@ namespace csl {
 		    word[depth+1] = 0;
 		    
 		    // push word and annotated value into the output list
-		    if(!output_->push(word, dic.getFirstAnn(newDicPos))) {// if result buffer full
-			std::cerr<<"MSMatch: ResultSet overflow for pattern: "<<pattern_<<std::endl;
-			exit(1);
+		    if( ! output_->push( word, dic.getFirstAnn( newDicPos ) ) ) {// if result buffer full
+			throw exceptions::bufferOverflow( "MSMatch: ResultSet overflow for pattern: " + std::string( (char*)pattern_ ) );
 		    }
 
 		}

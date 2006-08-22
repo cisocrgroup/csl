@@ -14,25 +14,28 @@ int main(int argc,char** argv) {
     }
 
     Alphabet alph(argv[1]);
-    MSMatch matcher(alph,argv[2],atoi(argv[3]));
 
-    ResultSet list;
+    try {
+	MSMatch matcher( alph, argv[2], atoi( argv[3] ) );
+    
+	ResultSet list;
 
-    char query[200]; // = "and,artificiall,distributed,inteligence,machiene";
+	char query[200]; // = "and,artificiall,distributed,inteligence,machiene";
 
-    while(std::cin>>query) {
-	list.reset(); // forget candidates that might be stored from earlier use
-	matcher.query((uchar*)query,list);
+	while( std::cin>>query ) {
+	    list.reset(); // forget candidates that might be stored from earlier use
+	    matcher.query( (uchar*)query, list );
 
-	// print all hits
-	int i;
-	std::cout<<">>"<<query<<std::endl;
-	for(i=0;i<list.getSize();++i) {
-	    std::cout<<list[i].getStr()<<std::endl;
+	    // print all hits
+	    int i;
+	    std::cout<<">>"<<query<<std::endl;
+	    for(i=0;i<list.getSize();++i) {
+		std::cout<<list[i].getStr()<<std::endl;
+	    }
 	}
 
-
+    } catch( exceptions::cslException exc ) {
+	std::cerr<<exc.what()<<std::endl;
     }
-
     
 }
