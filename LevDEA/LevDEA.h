@@ -15,37 +15,46 @@ namespace csl {
 	int move_pattern;
     };
 
+    /**
+     * LevDEA is an implementation of the deterministic levenshtein automaton idea.
+     * It is described in 
+     * "S. Mihov and K. Schulz. Fast approximate search in large dictionaries. Computational Linguistics, 30, 2004."
+     * 
+     * @see csl::MSMatch 
+     *
+     * @author Uli Reffle, <uli@reffle.de>
+     * @date   2006
+     */
     class LevDEA {
     private:
-	/// holds the current pattern
-	uchar* pattern_;
-    
-	/// holds the pattern length
-	int patLength;
 
 	const Alphabet& alph;
 
-	/// tab holds the transition table of the automaton 
+	/// tab holds the transition table of the automaton
 	table_cell* tab;
 
 	// easy access to the table
-	inline table_cell& table(const int row,const int col) const {return tab[coresets*(row)+(col)];}
-	inline int fin_table(int row,int col) const {
+	inline table_cell& table( const int row, const int col ) const {
+	    return tab[coresets*( row )+( col )];
+	}
+	inline int fin_table( int row, int col ) const {
 	    //      std::cerr<<row<<","<<col<<std::endl;
-	    return fin[coresets*(row)+(col)];
+	    return fin[coresets * ( row ) + ( col ) ];
 	}
 
 
-	/// fin holds the information about final states (??!)
+	/**
+	 * fin holds the information about which states are final and which distance
+	 * pattern and query are in.
+	 */
 	int *fin;
+
 	/// k is the max levenshtein-distance
 	int k;
-	/// coresets is the number of states in the automaton ???
+
+	/// coresets is the number of distinct configurations of a triangular region
 	int coresets;
-    
-	bits64* charvec;
-	void calcCharvec();
-	int calc_k_charvec(const bits64& chv, int i) const;
+
 
 	// some bitvectors
 	int z2k1;
@@ -67,51 +76,79 @@ namespace csl {
 	    int position_;
 	    /// holds the current position in the pattern
 	    int pattern_pos_;
-    
+
 	public:
-	    Pos(int position = 0, int pattern_pos = 0) {
+	    Pos( int position = 0, int pattern_pos = 0 ) {
 		position_ = position;
 		pattern_pos_ = pattern_pos;
 	    }
 
-	    inline int position() const {return position_;}
-	    inline int pattern_pos() const {return pattern_pos_;}
-	    inline void set(int position,int pattern_pos) {position_=position; pattern_pos_ = pattern_pos;};
-    
+	    inline int position() const {
+		return position_;
+	    }
+	    inline int pattern_pos() const {
+		return pattern_pos_;
+	    }
+	    inline void set ( int position, int pattern_pos ) {
+		position_ = position;
+		pattern_pos_ = pattern_pos;
+	    };
+
 	};
 
-	LevDEA(const Alphabet& alphabet,int init_k);
+	class Traverser {
+	public:
+	    void loadPattern( const uchar* p );
+	    uchar* getPattern() {
+		return pattern_;
+	    }
+	    
+	    inline bool isFinal( const Pos& p ) const {
+		//      |  triangle has reached right bound |    |       fin_table gives dist >-1                           |
+		return ( ( patLength - p.pattern_pos() < 2 * k + 1 ) && ( fin_table( 2 * k - ( patLength - p.pattern_pos() ), p.position() ) != -1 ) );
+	    }
+
+	    inline int getDist( const Pos& p ) const {
+		if( patLength - p.pattern_pos() >= 2 * k + 1 ) return -1;
+		return fin_table( 2 * k - ( patLength - p.pattern_pos() ), p.position() );
+	    }
+	    
+	    Pos walk( const Pos& p, int c ) const;
+
+	private:
+	    /// holds the current pattern
+	    uchar* pattern_;
+
+	    /// holds the pattern length
+	    int patLength;
+
+	    /**
+	     * an array of characteristic bit-vectors for each symbol of the alphabet
+	     * This has to be computed for each new pattern.
+	     */
+	    bits64* charvec;
+
+	    void calcCharvec();
+	    int calc_k_charvec( const bits64& chv, int i ) const;
+	}; // class Traverser
+
+	LevDEA( const Alphabet& alphabet, int k );
 
 
 	~LevDEA();
-    
-	Pos walk(const Pos& p,int c) const;
 
 
-	inline bool isFinal(const Pos& p) const {
-	    //      |  triangle has reached right bound |    |       fin_table gives dist >-1                           |
-	    return ((patLength - p.pattern_pos() < 2*k+1) && (fin_table(2*k-(patLength-p.pattern_pos()),p.position())!=-1));    
-	}
 
-	inline int getDist(const Pos& p) const {
-	    if(patLength - p.pattern_pos() >= 2*k+1) return -1; 
-	    return fin_table(2*k-(patLength-p.pattern_pos()),p.position());    
-	}
 
-	
 
-	uchar* getPattern() {
-	    return pattern_;
-	}
 
 	void initDistance();
-	void loadPattern(const uchar* p);
-    
-	// used for debug only
-	void printTable() const;
-	void printCharvec() const;
-	void printBits(const bits64&) const;
-    };
+
+    // used for debug only
+    void printTable() const;
+    void printCharvec() const;
+    void printBits( const bits64& ) const;
+  };
 
 
 
