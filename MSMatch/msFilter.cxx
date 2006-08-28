@@ -16,7 +16,7 @@ int main(int argc,char** argv) {
     Alphabet alph(argv[1]);
 
     try {
-	MSMatch matcher( alph, argv[2], atoi( argv[3] ) );
+	MSMatch< STANDARD > matcher( alph, argv[2], atoi( argv[3] ) );
     
 	ResultSet list;
 

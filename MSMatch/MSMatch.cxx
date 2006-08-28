@@ -6,7 +6,10 @@
 namespace csl {
 
     template< MSMatchMode Mode >
-    MSMatch< Mode >::MSMatch(const Alphabet& init_alphabet,char* compdic_file, int lev_distance) : alph_(init_alphabet),dic(init_alphabet,compdic_file),levDEA2(alph_,1),levDEA(alph_,lev_distance) {
+    MSMatch< Mode >::MSMatch(const Alphabet& init_alphabet,char* compdic_file, int lev_distance) : 
+	alph_(init_alphabet),
+	dic(init_alphabet,compdic_file),
+	levDEA(alph_,lev_distance) {
 	
     }
 
@@ -30,8 +33,8 @@ namespace csl {
 	return 0;
     }
 
-    template< MSMatchMode Mode >
-    void MSMatch< Mode >::query_rec( int dicPos, LevDEA::Pos levPos, int depth ) {
+    template<>
+    void MSMatch< STANDARD >::query_rec( int dicPos, LevDEA::Pos levPos, int depth ) {
 	static int newDicPos;
 	static LevDEA::Pos newLevPos;
 	int c;

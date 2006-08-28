@@ -15,8 +15,6 @@ namespace csl {
 	int move_pattern;
     };
 
-
-
     class LevDEA {
     private:
 	/// holds the current pattern
