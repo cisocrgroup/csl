@@ -22,24 +22,24 @@ namespace csl {
      */
     class Alphabet {
     private:
-	int size_;
+	size_t size_;
 	uchar code_[256];
-	// 257, as counting chars starts with 1 
+	// 257, as counting chars starts with 1
 	uchar decode_[257];
 
     public:
 	/**
 	   The constructor takes as argument a file containing all required characterss.
 	*/
-	Alphabet(char* alphFile);
+	Alphabet( char* alphFile );
 
 	/**
 	   Function ascii-Wert --> Custom-Wert
 	*/
-	inline int code(const uchar c, bool check = true) const {
-	    if(check && code_[c] == 0 && c!=0) {
-		std::cerr<<"Alphabet: Error: Unknown character '"<<c<<"'"<<std::endl;
-		exit(1);
+	inline int code( const uchar c, bool check = true ) const {
+	    if( check && code_[c] == 0 && c != 0 ) {
+		std::cerr << "Alphabet: Error: Unknown character '" << c << "'" << std::endl;
+		exit( 1 );
 	    }
 
 	    return code_[c];
@@ -48,27 +48,29 @@ namespace csl {
 	/**
 	   Function Custom-Wert --> ascii-Wert
 	*/
-	inline int decode(const int c) const {
-	    if(c > size()) {
-		std::cerr<<"Alphabet: Error: Unknown code: '"<<c<<"'"<<std::endl;
-		exit(1);
+	inline uint_t decode( const uint_t c ) const {
+	    if( c > size() ) {
+		std::cerr << "Alphabet: Error: Unknown code: '" << c << "'" << std::endl;
+		exit( 1 );
 	    }
 
 	    return decode_[c];
 	}
-    
+
 	/**
 	   Returns the alphabet size
 	*/
-	inline int size() const {return size_;}
+	inline size_t size() const {
+	    return size_;
+	}
 
 	/**
 	   provides a string compare according to the alphabet order
-	*/
-	int strcmp(const uchar* s1, const uchar* s2) const;
+    */
+    int strcmp( const uchar* s1, const uchar* s2 ) const;
 
-    
-    };
+
+  };
 
 } // end of namespace csl
 #endif

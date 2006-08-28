@@ -41,7 +41,7 @@ LEVDEA_HEADERS = ./LevDEA/LevDEA.h $(GLOBAL_H) $(ALPHABET_HEADERS)
 $(OBJS)/LevDEA.o: $(LEVDEA_HEADERS) ./LevDEA/LevDEA.cxx
 	$(GCC) -c ./LevDEA/LevDEA.cxx -o $(OBJS)/LevDEA.o
 
-MSMATCH_HEADERS = ./MSMatch/MSMatch.h $(LEVFILTER_HEADERS) $(TRIE_HEADERS) $(GLOBAL_H) $(LEVDEA_HEADERS)
+MSMATCH_HEADERS = ./MSMatch/MSMatch.h ./MSMatch/MSMatch.cxx $(LEVFILTER_HEADERS) $(TRIE_HEADERS) $(GLOBAL_H) $(LEVDEA_HEADERS)
 
 LEVNDEA_HEADERS = ./LevNDEA/LevNDEA.h $(GLOBAL_H) $(ALPHABET_HEADERS)
 $(OBJS)/LevNDEA.o: $(LEVNDEA_HEADERS) ./LevNDEA/LevNDEA.cxx
@@ -104,7 +104,7 @@ $(BIN)/bestMatch: ./BestMatch/bestMatch.cxx $(OBJS)/BestMatch.o $(OBJS)/ResultSe
 
 
 $(BIN)/msFilter: ./MSMatch/msFilter.cxx $(MSMATCH_HEADERS) $(OBJS)/ResultSet.o $(OBJS)/LevDEA.o $(TRANSTABLE_FILES) $(OBJS)/Trie.o $(OBJS)/Alphabet.o
-	$(GCC) -o $(BIN)/msFilter ./MSMatch/msFilter.cxx $(OBJS)/MSMatch.o $(OBJS)/ResultSet.o $(OBJS)/LevDEA.o $(OBJS)/Trie.o  $(OBJS)/Alphabet.o
+	$(GCC) -o $(BIN)/msFilter ./MSMatch/msFilter.cxx $(OBJS)/ResultSet.o $(OBJS)/LevDEA.o $(OBJS)/Trie.o  $(OBJS)/Alphabet.o
 
 getCandscore_files = ./getCandscore/getCandscore.cxx $(OBJS)/MSMatch.o $(OBJS)/ResultSet.o $(OBJS)/LevDEA.o $(TRANSTABLE_FILES) $(OBJS)/Trie.o $(OBJS)/Alphabet.o
 $(BIN)/getCandscore: $(getCandscore_files)
