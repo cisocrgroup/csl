@@ -7,11 +7,11 @@
 namespace csl {
 
     /*
-      This practice of sharing the tables here is very very dangerous!
-      The first instance whose destructor is called will delete the tables
-      and leave the other instances with pointers to noone's land!!!
-      This only works as long as all instances die at the same time
-    */
+     * This practice of sharing the tables here is very very dangerous!
+     * The first instance whose destructor is called will delete the tables
+     * and leave the other instances with pointers to noone's land!!!
+     * This only works as long as all instances die at the same time
+     */
     bits32 LevDEA::tabsLoaded = 0;
     table_cell** LevDEA::tabs = new table_cell*[4];
     int** LevDEA::fins = new int*[4];
