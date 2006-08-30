@@ -11,7 +11,8 @@ namespace csl {
 	dictFW_( initAlphabet, compdicFile ),
 	dictBW_( initAlphabet ), // only as dummy
 	k_( k ) {
-	levDEAs_[k_] = new LevDEA( alph_, k_ );
+	levDEASecond_ = new LevDEA( alph_, k_ );
+	
     }
 
     template<>
@@ -21,66 +22,192 @@ namespace csl {
 	dictBW_( initAlphabet, compdicRevFile ),
 	k_( k ) {
 
-	for( size_t i = 1; i <= k_; ++i ) {
-	    levDEAs_[i] = new LevDEA( alph_, i );
-	}
+	levDEAFirst_ = new LevDEA( alph_, 1 );
+	levDEASecond_ = new LevDEA( alph_, 1 );
     }
 
     template< MSMatchMode Mode >
     MSMatch< Mode >::~MSMatch() {}
 
-    template<>
-    void MSMatch< FW_BW >::intersectRight( int dicPos, LevDEA::Pos levPos, int depth ) {
+    template< MSMatchMode Mode >
+    void MSMatch< Mode >::intersectSecond( int dicPos, LevDEA::Pos levPos, int depth ) {
 	static int newDicPos;
 	static LevDEA::Pos newLevPos;
 	size_t c;
-	printf(" intersectRight at depth %d: %s\n", depth, word_ );
 
 	for( c = 1; c <= alph_.size(); ++c ) {
-	    if( ( newDicPos = curDict_->walk( dicPos, c ) ) && ( newLevPos = curLevDEARight_->walk( levPos, c ) ).position() != -1 ) {
+	    if( ( newDicPos = curDict_->walk( dicPos, c ) ) && ( newLevPos = levDEASecond_->walk( levPos, c ) ).position() != -1 ) {
 		word_[depth] = alph_.decode( c );
+		word_[depth+1] = 0;
+		printf(" intersectSecond at depth %d: %s\n", depth, word_ );
 
 //  word_[depth+1]=0;std::cout<<"word="<<word<<std::endl;
 
 		// print w if node is final in dic and lev;
-		if( curDict_->isFinal( newDicPos ) && curLevDEARight_->isFinal( newLevPos ) ) {
+		if( curDict_->isFinal( newDicPos ) && ( levDEASecond_->getDistance( newLevPos ) >= minDistSecond_ ) ) {
 		    word_[depth+1] = 0;
-		    static uchar wordRev[Global::lengthOfWord] = "HALLO";
+		    static uchar wordRev[Global::lengthOfWord];
 		    // push word and annotated value into the output list
 		    if( reverse_ ) for( int i = depth, iRev = 0; i >=0; --i, ++iRev ) wordRev[iRev] = word_[i];
 
 //		    if( ! output_->push( ( (reverse_)? wordRev : word_ ), dictFW_.getFirstAnn( newDicPos ) ) ) {// if result buffer full
-		    if( ! output_->push( word_, 0 ) ) {// if result buffer full
-			printf("Treffer: %s\n", ( (reverse_)? wordRev : word_ ) );
+		    // printf("Treffer: %s\n", ( (reverse_)? wordRev : word_ ) );
+		    if( ! output_->push( ( (reverse_)? wordRev : word_ ), 0 ) ) {// if result buffer full
 			throw exceptions::bufferOverflow( "MSMatch: ResultSet overflow for pattern: " + std::string( ( char* )pattern_ ) );
 		    }
 		}
-		intersectRight( newDicPos, newLevPos, depth + 1 );
+		intersectSecond( newDicPos, newLevPos, depth + 1 );
 	    }
 	}
     }
 
     template<>
-    void MSMatch< FW_BW >::intersectLeft( int dicPos, LevDEA::Pos levPos, int depth ) {
+    void MSMatch< FW_BW >::intersectFirst( int dicPos, LevDEA::Pos levPos, int depth ) {
 	static int newDicPos;
 	static LevDEA::Pos newLevPos;
 	size_t c;
-	printf(" intersectLeft at depth %d: %s\n", depth, word_ );
 
 	for( c = 1; c <= alph_.size(); ++c ) {
-	    if( ( newDicPos = curDict_->walk( dicPos, c ) ) && ( newLevPos = curLevDEALeft_->walk( levPos, c ) ).position() != -1 ) {
+	    if( ( newDicPos = curDict_->walk( dicPos, c ) ) && ( newLevPos = levDEAFirst_->walk( levPos, c ) ).position() != -1 ) {
 		word_[depth] = alph_.decode( c );
+		word_[depth+1] = 0;
+		printf(" intersectFirst at depth %d: %s\n", depth, word_ );
 
 //  word_[depth+1]=0;std::cout<<"word="<<word<<std::endl;
 
-		// print w if node is final in dic and lev;
-		if( curDict_->isFinal( newDicPos ) && ( curLevDEARight_->getDist( newLevPos ) > minDistLeft_ ) ) {
-		    intersectRight( newDicPos, LevDEA::Pos( 0, 0 ), depth + 1 );
+		// if positions are final in dic and lev, proceed to right half of the pattern, starting
+		// with the same state of the dict and the start state of the LevDEA
+		if( levDEAFirst_->getDistance( newLevPos ) >= minDistFirst_ ) {
+		    intersectSecond( newDicPos, LevDEA::Pos( 0, 0 ), depth + 1 );
 		}
-		intersectLeft( newDicPos, newLevPos, depth + 1 );
+		intersectFirst( newDicPos, newLevPos, depth + 1 );
 	    }
 	}
     }
+
+    template<>
+    void MSMatch< FW_BW >::queryCases_1() {
+	uint_t pos = 0;
+
+     	// 0 | 0,1 errors
+ 	reverse_ = false;
+ 	curDict_ = &dictFW_;
+ 	if( ( pos = curDict_->walkStr( curDict_->getRoot(), patLeft_ ) ) ) {
+ 	    strcpy( (char*)word_, (char*)patLeft_ );
+	    minDistSecond_ = 0;
+	    levDEASecond_->setDistance( 1 );
+ 	    levDEASecond_->loadPattern( patRight_ );
+ 	    intersectSecond( pos, LevDEA::Pos( 0, 0 ), strlen( (char*)patLeft_ ) );
+ 	}
+
+     	// 1 | 0 errors
+ 	reverse_ = true;
+ 	curDict_ = &dictBW_;
+ 	if( ( pos = curDict_->walkStr( curDict_->getRoot(), patRightRev_ ) ) ) {
+ 	    strcpy( (char*)word_, (char*)patRightRev_ );
+	    minDistSecond_ = 1;
+	    levDEASecond_->setDistance( 1 );
+ 	    levDEASecond_->loadPattern( patLeftRev_ );
+ 	    intersectSecond( pos, LevDEA::Pos( 0, 0 ), strlen( (char*)patRightRev_ ) );
+ 	}
+    }
+
+    template<>
+    void MSMatch< FW_BW >::queryCases_2() {
+	uint_t pos = 0;
+	
+	// 0 | 0,1,2 errors
+	printf("0 | 0,1,2 errors\n");
+ 	reverse_ = false;
+ 	curDict_ = &dictFW_;
+	// load pattern outside the if-statement: we need it anyways in the next case
+	levDEASecond_->loadPattern( patRight_ );
+ 	if( ( pos = curDict_->walkStr( curDict_->getRoot(), patLeft_ ) ) ) {
+ 	    strcpy( (char*)word_, (char*)patLeft_ );
+	    minDistSecond_ = 0;
+	    levDEASecond_->setDistance( 2 );
+ 	    intersectSecond( pos, LevDEA::Pos( 0, 0 ), strlen( (char*)patLeft_ ) );
+ 	}
+
+ 	// 1 | 0,1 errors
+	printf("1 | 0,1 errors\n");
+ 	reverse_ = false;
+ 	curDict_ = &dictFW_;
+	minDistFirst_ = 1;
+	levDEAFirst_->setDistance( 1 );
+	levDEAFirst_->loadPattern( patLeft_ );
+	// pattern for levDEASecond is still valid from last case
+	minDistSecond_ = 0;
+	levDEASecond_->setDistance( 1 );
+	intersectFirst( curDict_->getRoot(), LevDEA::Pos( 0, 0 ), 0 );
+
+	// 2 | 0 errors
+	printf("2 | 0 errors\n");
+ 	reverse_ = true;
+ 	curDict_ = &dictBW_;
+ 	if( ( pos = curDict_->walkStr( curDict_->getRoot(), patRightRev_ ) ) ) {
+ 	    strcpy( (char*)word_, (char*)patRightRev_ );
+	    minDistSecond_ = 2;
+	    levDEASecond_->setDistance( 2 );
+ 	    levDEASecond_->loadPattern( patLeftRev_ );
+ 	    intersectSecond( pos, LevDEA::Pos( 0, 0 ), strlen( (char*)patRightRev_ ) );
+ 	}
+    }
+
+    template<>
+    void MSMatch< FW_BW >::queryCases_3() {
+  	uint_t pos = 0;
+
+     	// 0 | 0,1,2,3 errors
+ 	reverse_ = false;
+ 	curDict_ = &dictFW_;
+	// load pattern outside the if-statement: we need it anyways in the next case
+	levDEASecond_->loadPattern( patRight_ );
+ 	if( ( pos = curDict_->walkStr( curDict_->getRoot(), patLeft_ ) ) ) {
+ 	    strcpy( (char*)word_, (char*)patLeft_ );
+	    minDistSecond_ = 0;
+	    levDEASecond_->setDistance( 3 );
+ 	    intersectSecond( pos, LevDEA::Pos( 0, 0 ), strlen( (char*)patLeft_ ) );
+ 	}
+
+ 	// 1 | 0,1,2 errors
+ 	reverse_ = false;
+ 	curDict_ = &dictFW_;
+	levDEAFirst_->setDistance( 1 );
+	levDEAFirst_->loadPattern( patLeft_ );
+	minDistFirst_ = 1;
+	levDEASecond_->setDistance( 2 );
+	// pattern for levDEASecond is still valid from last case
+	minDistSecond_ = 0;
+	intersectFirst( curDict_->getRoot(), LevDEA::Pos( 0, 0 ), 0 );
+
+	// 2,3 | 0 errors
+	printf("2,3 | 0 errors\n");
+	reverse_ = true;
+	curDict_ = &dictBW_;
+	// load pattern outside the if-statement: we need it anyways in the next case
+	levDEASecond_->loadPattern( patLeftRev_ );
+	if ( ( pos = curDict_->walkStr( curDict_->getRoot(), patRightRev_ ) ) ) {
+	    strcpy( (char*)word_, (char*)patRightRev_ );
+	    levDEASecond_->setDistance( 3 );
+	    minDistSecond_ = 2;
+	    
+	    intersectSecond( pos, LevDEA::Pos( 0, 0 ), strlen( (char*)patRightRev_ ) );
+	}
+
+	// 2 | 1 errors
+	printf("2 | 1 errors\n");
+ 	reverse_ = true;
+ 	curDict_ = &dictBW_;
+	levDEAFirst_->setDistance( 1 );
+	levDEAFirst_->loadPattern( patRightRev_ );
+	minDistFirst_ = 1;
+	levDEASecond_->setDistance( 2 );
+	// pattern for levDEASecond is still valid from last case
+	minDistSecond_ = 2;
+	intersectFirst( curDict_->getRoot(), LevDEA::Pos( 0, 0 ), 0 );
+    }
+
 
     template<>
     int MSMatch< FW_BW >::query( const uchar* pattern, ResultSet_if& output ) {
@@ -102,66 +229,16 @@ namespace csl {
 	for( int i = cRight - 1, iRev = 0; i >=0; --i, ++iRev ) patRightRev_[iRev] = patRight_[i];
 	patLeftRev_[cLeft] = patRightRev_[cRight] = 0;
 
-	printf("pattern=%s\npatLeft=%s\npatRight=%s\npatLeftRev=%s\npatRightRev=%s\n", pattern_, patLeft_, patRight_, patLeftRev_, patRightRev_ );
-
-//  	// 0 | 0,1,2,3 errors
-//  	reverse_ = false;
-//  	curDict_ = &dictFW_;
-//  	uint_t pos;
-//  	if( ( pos = curDict_->walkStr( curDict_->getRoot(), patLeft_ ) ) ) {
-//  	    strcpy( (char*)word_, (char*)patLeft_ );
-// 	    minDistRight_ = -1;
-// 	    curLevDEARight_ = levDEAs_[3];
-//  	    curLevDEARight_->loadPattern( patRight_ );
-//  	    intersectRight( pos, LevDEA::Pos( 0, 0 ), strlen( (char*)patLeft_ ) );
-//  	}
-
- 	// 1 | 0,1,2 errors
- 	reverse_ = false;
- 	curDict_ = &dictFW_;
-	curLevDEALeft_ = levDEAs_[1];
-	curLevDEALeft_->loadPattern( patLeft_ );
-	minDistLeft_ = 1;
-	curLevDEARight_ = levDEAs_[2];
-	curLevDEARight_->loadPattern( patRight_ );
-	minDistLeft_ = -1;
-	intersectLeft( curDict_->getRoot(), LevDEA::Pos( 0, 0 ), 0 );
-
-	
-
-// 	// 2,3 | 0 errors
-// 	rev = TRUE;
-// 	dict = &rdict;
-// 	if ( ( i = find_word( dict->initial, pr2 ) ) ) {
-// 	    chv = &chv3;
-// 	    lvt = &lvt3;
-// 	    calc_charvec( pr1, chv );
-// 	    strcpy( s, pr2 );
-// 	    distance2 = 1;
-// 	    find_intersection3( i, 0, 0, strlen( pr2 ) );
-// 	}
-// //for (c1=0; c1<nres; c1++) printf("%s, ",res[c1]); printf("\n");
-
-// 	// 2 | 1 errors
-// 	chv = &chv2;
-// 	lvt = &lvt2;
-// 	s[0] = 0;
-// 	calc_charvec( pr2, chv_ );
-// 	calc_charvec( pr1, chv );
-// 	distance2 = 1;
-// 	distance1 = 0;
-// 	find_intersection1( dict->initial, 0, 0, 0 );
-// //for (c1=0; c1<nres; c1++) printf("%s, ",res[c1]); printf("\n");
-
-// 	n_all_res += nres;
-// 	s[0] = 0;
-// 	k1 = 0;
-
-
+	// printf("pattern=%s\npatLeft=%s\npatRight=%s\npatLeftRev=%s\npatRightRev=%s\n", pattern_, patLeft_, patRight_, patLeftRev_, patRightRev_ );
+	if( k_ == 1 ) queryCases_1();
+	else if( k_ == 2 ) queryCases_2();
+	else if( k_ == 3 ) queryCases_3();
+	else throw exceptions::invalidLevDistance();
 
 	return 0;
     }
 
+    
 
     template<>
     void MSMatch< STANDARD >::intersect( int dicPos, LevDEA::Pos levPos, int depth ) {
@@ -196,13 +273,12 @@ namespace csl {
 	output_ = &output;
 	strcpy( (char*)pattern_, (char*)pattern );
 
-	curLevDEA_ = levDEAs_[k_];
-	curLevDEA_->loadPattern( pattern );
-
-// memset(stack,0,MAX_STACKSIZE * sizeof(int)); // should not be necessary
+	curDict_ = &dictFW_;
+	levDEASecond_->setDistance( k_ );
+	levDEASecond_->loadPattern( pattern );
 
 	memset( word_, 0, Global::lengthOfWord * sizeof( uchar ) ); // prepare memory for output word
-	intersect( dictFW_.getRoot(), LevDEA::Pos( 0, 0 ), 0 );
+	intersectSecond( dictFW_.getRoot(), LevDEA::Pos( 0, 0 ), 0 );
 
 
 	return 0;

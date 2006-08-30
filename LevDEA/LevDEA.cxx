@@ -17,10 +17,10 @@ namespace csl {
     int** LevDEA::fins = new int*[4];
     int* LevDEA::coresetss = new int[4];
 
-    LevDEA::LevDEA( const Alphabet& init_alph, int init_k ) : alph( init_alph ), k( init_k ) {
+    LevDEA::LevDEA( const Alphabet& init_alph, int init_k ) : alph( init_alph ), k_( 0 ) {
 	pattern_ = ( uchar* ) malloc( Global::lengthOfWord * sizeof( uchar ) );
 	charvec = ( bits64* ) malloc( alph.size() * sizeof( bits64 ) );
-	initDistance();
+	setDistance( init_k );
     }
 
     LevDEA::~LevDEA() {
@@ -46,46 +46,38 @@ namespace csl {
 
 
 
-    void LevDEA::initDistance() {
-	// How ugly!!!
-	// How ugly!!!
-	char * table_file = "./LevDEA/lev0data";
-	if( k == 0 ) {
-	    table_file = "./LevDEA/lev0data";
-	} else if( k == 1 ) {
-	    table_file = "./LevDEA/lev1data";
-	} else if( k == 2 ) {
-	    table_file = "./LevDEA/lev2data";
-	} else if( k == 3 ) {
-	    table_file = "./LevDEA/lev3data";
-	}
+    void LevDEA::setDistance( int initK ) {
+	k_ = initK;
+
+	std::ostringstream ss; ss<<k_; // push k_ into a stream to get it as string
+	std::string table_file = "./LevDEA/lev" + ss.str() + "data";
 
 	/*
 	  In case of k==1, z2k1 would be 111  (==7)
 	  z2k2 would be 1111 (==15)
 	*/
 	z2k1 = 1ll;
-	z2k1 <<= 2*k + 1;
+	z2k1 <<=  2 * k_ + 1;
 	z2k1--; // a sequence of 2k+1 1-values
 	z2k2 = 1ll;
-	z2k2 <<= 2*k + 2;
+	z2k2 <<= 2 * k_ + 2;
 	z2k2--; // a sequence of 2k+2 1-values
 
-	if( ( tabsLoaded & ( 1 << k ) ) == 0 ) { // have the tables for k already been loaded???
-	    FILE * table_handle = fopen( table_file, "r" );
+	if( ( tabsLoaded & ( 1 << k_ ) ) == 0 ) { // have the tables for k already been loaded???
+	    FILE * table_handle = fopen( table_file.c_str(), "r" );
 
 	    if( !table_handle ) {
 		std::cerr << "Could not read " << table_file << std::endl;
 		exit( 1 );
 	    }
-	    fscanf( table_handle, "%d\n", &k );
-	    fscanf( table_handle, "%d\n", &( coresetss[k] ) );
-	    coresets = coresetss[k];
+	    fscanf( table_handle, "%d\n", &k_ );
+	    fscanf( table_handle, "%d\n", &( coresetss[k_] ) );
+	    coresets = coresetss[k_];
 
-	    tabs[k] = new table_cell[z2k2*coresets];
-	    fins[k] = ( int* )malloc( ( 2 * k + 1 ) * coresets * sizeof( int ) );
-	    tab = tabs[k];
-	    fin = fins[k];
+	    tabs[k_] = new table_cell[z2k2*coresets];
+	    fins[k_] = ( int* )malloc( ( 2 * k_ + 1 ) * coresets * sizeof( int ) );
+	    tab = tabs[k_];
+	    fin = fins[k_];
 
 	    int row, col;
 	    char c;
@@ -97,19 +89,19 @@ namespace csl {
 		fscanf( table_handle, "%c", &c );
 	    }
 
-	    for ( row = 0; row < 2*k + 1; row++ ) {
+	    for ( row = 0; row < 2*k_ + 1; row++ ) {
 		for ( col = 0; col < coresets; ++col ) {
 		    fscanf( table_handle, "%d,", &fin[coresets*row+col] );
 		}
 		fscanf( table_handle, "%c", &c );
 	    }
 	    fclose( table_handle );
-	    tabsLoaded = tabsLoaded | ( 1 << k );
+	    tabsLoaded = tabsLoaded | ( 1 << k_ );
 	} else {
 	    // tables were loaded some time before. simply assign the pointers.
-	    tab = tabs[k];
-	    fin = fins[k];
-	    coresets = coresetss[k];
+	    tab = tabs[k_];
+	    fin = fins[k_];
+	    coresets = coresetss[k_];
 	}
     }
 
@@ -131,9 +123,9 @@ namespace csl {
     int LevDEA::calc_k_charvec( const bits64& chv, int i ) const {
 	bits64 r;
 	// after the next line, the bits i,i+1,i+2 of chv are the lowest bits of r. All other bits of r are 0
-	r = ( chv >> ( 64 - ( 2 * k + 1 + i ) ) ) & z2k1;
-	if ( patLength - i < 2 * k + 1 ) // the last few chars of the word
-	    r = ( ( r >> ( 2 * k + 1 - ( patLength - i ) ) ) | ( zff << ( ( patLength - i ) + 1 ) ) ) & z2k2;
+	r = ( chv >> ( 64 - ( 2 * k_ + 1 + i ) ) ) & z2k1;
+	if ( patLength - i < 2 * k_ + 1 ) // the last few chars of the word
+	    r = ( ( r >> ( 2 * k_ + 1 - ( patLength - i ) ) ) | ( zff << ( ( patLength - i ) + 1 ) ) ) & z2k2;
 	return ( int ) r;
     }
 

@@ -27,11 +27,13 @@ namespace csl {
 	const Alphabet& alph_;
 	Dictionary dictFW_;
 	Dictionary dictBW_;
-	LevDEA* levDEAs_[3];
+
+	LevDEA* levDEAFirst_;
+	LevDEA* levDEASecond_;
 
 	LevDEA* curLevDEA_; ///< used for the STANDARD algorithm
-	LevDEA* curLevDEALeft_; ///< used for the FW_BW algorithm
-	LevDEA* curLevDEARight_; ///< used for the FW_BW algorithm
+	LevDEA* curLevDEAFirst_; ///< used for the FW_BW algorithm
+	LevDEA* curLevDEASecond_; ///< used for the FW_BW algorithm
 	Dictionary* curDict_;
 	bool reverse_;
 
@@ -45,15 +47,19 @@ namespace csl {
 	uchar patLeftRev_[Global::lengthOfWord];
 	uchar patRightRev_[Global::lengthOfWord];
 
-	int minDistLeft_;
-	int minDistRight_;
+	int minDistFirst_;
+	int minDistSecond_;
 
 	uchar word_[Global::lengthOfWord]; ///< the word that is currently constructed
 	ResultSet_if* output_; ///< the currently used output container
 
 	void intersect( int dicPos, LevDEA::Pos levPos, int depth );
-	void intersectLeft( int dicPos, LevDEA::Pos levPos, int depth );
-	void intersectRight( int dicPos, LevDEA::Pos levPos, int depth );
+	void intersectFirst( int dicPos, LevDEA::Pos levPos, int depth );
+	void intersectSecond( int dicPos, LevDEA::Pos levPos, int depth );
+
+	void queryCases_1();
+	void queryCases_2();
+	void queryCases_3();
 
     public:
 	MSMatch( const Alphabet& init_alphabet, size_t k, char* compdicFile, char* compdicRevFile = 0 );

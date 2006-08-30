@@ -116,6 +116,13 @@ namespace csl {
 	    bufferOverflow() {}
 	    bufferOverflow( const std::string msg ) : cslException( msg ) {}
 	};
+
+	class invalidLevDistance : public cslException {
+	public:
+	    invalidLevDistance() {}
+	    invalidLevDistance( const std::string msg ) : cslException( msg ) {}
+	};
+
     };
 
 

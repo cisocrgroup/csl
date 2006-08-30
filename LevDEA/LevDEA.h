@@ -3,6 +3,7 @@
 
 #include <fstream>
 #include <iostream>
+#include <sstream>
 #include <stdio.h>
 
 #include "../Alphabet/Alphabet.h"
@@ -49,7 +50,7 @@ namespace csl {
 	/// fin holds the information about final states
 	int *fin;
 	/// k is the max levenshtein-distance
-	int k;
+	int k_;
 	/// coresets is the number of distinct configurations of a triangular region (depends on k)
 	int coresets;
     
@@ -100,12 +101,12 @@ namespace csl {
 
 	inline bool isFinal(const Pos& p) const {
 	    //      |  triangle has reached right bound |    |       fin_table gives dist >-1                           |
-	    return ((patLength - p.pattern_pos() < 2*k+1) && (fin_table(2*k-(patLength-p.pattern_pos()),p.position())!=-1));    
+	    return ((patLength - p.pattern_pos() < 2 * k_ + 1 ) && (fin_table(2*k_-(patLength-p.pattern_pos()),p.position())!=-1));    
 	}
 
-	inline int getDist(const Pos& p) const {
-	    if(patLength - p.pattern_pos() >= 2*k+1) return -1; 
-	    return fin_table(2*k-(patLength-p.pattern_pos()),p.position());    
+	inline int getDistance(const Pos& p) const {
+	    if( patLength - p.pattern_pos() >= 2 * k_ + 1 ) return -1; 
+	    return fin_table( 2 * k_ - (patLength-p.pattern_pos()), p.position() );
 	}
 
 	
@@ -114,7 +115,7 @@ namespace csl {
 	    return pattern_;
 	}
 
-	void initDistance();
+	void setDistance( int k );
 	void loadPattern(const uchar* p);
     
 	// used for debug only
