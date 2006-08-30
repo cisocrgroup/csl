@@ -9,16 +9,15 @@
 namespace csl {
 
     /**
-     * @author Uli Reffle
-     * @date 2006
-     *
-     * 
      * The class Alphabet implements a mapping of ascii-characters to a smaller system 
      * appropriate for the alphabet size that is really needed. 
      * As input it takes as input a file of the form:
      * ---------------file----------------
      * abcdefghijklmnopqrstuvwxyzäöü
      * -----------------------------------
+     *
+     * @author Uli Reffle
+     * @date 2006
      */
     class Alphabet {
     private:

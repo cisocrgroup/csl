@@ -10,6 +10,15 @@
 
 namespace csl {
     
+    /**
+     * PermDic is a dictionary storing all possible permutations of multi-word entries.
+     * Reading works just as with its super class, MinDic.
+     * The construction algorithm computes all permutations of all entries of the given
+     * source file and stores them into a MinDic. 
+     *
+     * @author Ulrich Reffle
+     * @date 2006
+     */
     class PermDic : public MinDic {
     private:
 	const Alphabet& alph_; // only to pass it on to Entry

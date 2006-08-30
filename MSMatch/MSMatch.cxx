@@ -11,10 +11,7 @@ namespace csl {
 	dictFW_( initAlphabet, compdicFile ),
 	dictBW_( initAlphabet ), // only as dummy
 	k_( k ) {
-
-	for( size_t i = 1; i <= k_; ++i ) {
-	    levDEAs_[i] = new LevDEA( alph_, i );
-	}
+	levDEAs_[k_] = new LevDEA( alph_, k_ );
     }
 
     template<>
@@ -33,46 +30,104 @@ namespace csl {
     MSMatch< Mode >::~MSMatch() {}
 
     template<>
+    void MSMatch< FW_BW >::intersectRight( int dicPos, LevDEA::Pos levPos, int depth ) {
+	static int newDicPos;
+	static LevDEA::Pos newLevPos;
+	size_t c;
+	printf(" intersectRight at depth %d: %s\n", depth, word_ );
+
+	for( c = 1; c <= alph_.size(); ++c ) {
+	    if( ( newDicPos = curDict_->walk( dicPos, c ) ) && ( newLevPos = curLevDEARight_->walk( levPos, c ) ).position() != -1 ) {
+		word_[depth] = alph_.decode( c );
+
+//  word_[depth+1]=0;std::cout<<"word="<<word<<std::endl;
+
+		// print w if node is final in dic and lev;
+		if( curDict_->isFinal( newDicPos ) && curLevDEARight_->isFinal( newLevPos ) ) {
+		    word_[depth+1] = 0;
+		    static uchar wordRev[Global::lengthOfWord] = "HALLO";
+		    // push word and annotated value into the output list
+		    if( reverse_ ) for( int i = depth, iRev = 0; i >=0; --i, ++iRev ) wordRev[iRev] = word_[i];
+
+//		    if( ! output_->push( ( (reverse_)? wordRev : word_ ), dictFW_.getFirstAnn( newDicPos ) ) ) {// if result buffer full
+		    if( ! output_->push( word_, 0 ) ) {// if result buffer full
+			printf("Treffer: %s\n", ( (reverse_)? wordRev : word_ ) );
+			throw exceptions::bufferOverflow( "MSMatch: ResultSet overflow for pattern: " + std::string( ( char* )pattern_ ) );
+		    }
+		}
+		intersectRight( newDicPos, newLevPos, depth + 1 );
+	    }
+	}
+    }
+
+    template<>
+    void MSMatch< FW_BW >::intersectLeft( int dicPos, LevDEA::Pos levPos, int depth ) {
+	static int newDicPos;
+	static LevDEA::Pos newLevPos;
+	size_t c;
+	printf(" intersectLeft at depth %d: %s\n", depth, word_ );
+
+	for( c = 1; c <= alph_.size(); ++c ) {
+	    if( ( newDicPos = curDict_->walk( dicPos, c ) ) && ( newLevPos = curLevDEALeft_->walk( levPos, c ) ).position() != -1 ) {
+		word_[depth] = alph_.decode( c );
+
+//  word_[depth+1]=0;std::cout<<"word="<<word<<std::endl;
+
+		// print w if node is final in dic and lev;
+		if( curDict_->isFinal( newDicPos ) && ( curLevDEARight_->getDist( newLevPos ) > minDistLeft_ ) ) {
+		    intersectRight( newDicPos, LevDEA::Pos( 0, 0 ), depth + 1 );
+		}
+		intersectLeft( newDicPos, newLevPos, depth + 1 );
+	    }
+	}
+    }
+
+    template<>
     int MSMatch< FW_BW >::query( const uchar* pattern, ResultSet_if& output ) {
-	strcpy( pattern_, pattern );
+	output_ = &output;
+	strcpy( (char*)pattern_, (const char*)pattern );
 	
 	// split pattern into 2 halves
-	size_t patLength = strlen(s); 
+	size_t patLength = strlen( (char*)pattern_ );
 	size_t patCenter = (size_t) patLength / 2;
-	for ( size_t i = 0, size_t cLeft=0, size_t cRight=0; i < patLength; ++i ) {
+	size_t cLeft = 0, cRight = 0;	
+	for ( size_t i = 0; i < patLength; ++i ) {
 	    if( i < patCenter ) patLeft_[cLeft++] = pattern_[i];
 	    else patRight_[cRight++] = pattern_[i];
 	}
 	patLeft_[cLeft] = patRight_[cRight] = 0;
 
 	// reverse patterns
-	for( size_t i = cLeft - 1, size_t iRev = 0; i >=0; --i, ++iRev ) patLeftRev_[iRev] = patLeft_[i];
-	for( size_t i = cRight - 1, size_t iRev = 0; i >=0; --i, ++iRev ) patLeftRev_[iRev] = patLeft_[i];
+	for( int i = cLeft - 1, iRev = 0; i >=0; --i, ++iRev ) patLeftRev_[iRev] = patLeft_[i];
+	for( int i = cRight - 1, iRev = 0; i >=0; --i, ++iRev ) patRightRev_[iRev] = patRight_[i];
+	patLeftRev_[cLeft] = patRightRev_[cRight] = 0;
 
-	// 0 | 0,1,2,3 errors
-	rev_ = false;
-	curDict_ = &dictFW_;
-	int pos;
-	if( ( pos = curDict_->walkString( curDict->getRoot(), patLeft_ ) ) ) {
-	    chv = &chv3;
-	    lvt = &lvt3;
-	    distance2 = -1;
-	    calc_charvec( p2, chv );
-	    strcpy( s, p1 );
-	    find_intersection3( i, 0, 0, strlen( p1 ) );
-	}
-//for (c1=0; c1<nres; c1++) printf("%s, ",res[c1]); printf("\n");
+	printf("pattern=%s\npatLeft=%s\npatRight=%s\npatLeftRev=%s\npatRightRev=%s\n", pattern_, patLeft_, patRight_, patLeftRev_, patRightRev_ );
 
-// 	// 1 | 0,1,2 errors
-// 	chv = &chv2;
-// 	lvt = &lvt2;
-// 	s[0] = 0;
-// 	calc_charvec( p1, chv_ );
-// 	calc_charvec( p2, chv );
-// 	distance1 = 0;
-// 	distance2 = -1;
-// 	find_intersection1( dict->initial, 0, 0, 0 );
-//for (c1=0; c1<nres; c1++) printf("%s, ",res[c1]); printf("\n");
+//  	// 0 | 0,1,2,3 errors
+//  	reverse_ = false;
+//  	curDict_ = &dictFW_;
+//  	uint_t pos;
+//  	if( ( pos = curDict_->walkStr( curDict_->getRoot(), patLeft_ ) ) ) {
+//  	    strcpy( (char*)word_, (char*)patLeft_ );
+// 	    minDistRight_ = -1;
+// 	    curLevDEARight_ = levDEAs_[3];
+//  	    curLevDEARight_->loadPattern( patRight_ );
+//  	    intersectRight( pos, LevDEA::Pos( 0, 0 ), strlen( (char*)patLeft_ ) );
+//  	}
+
+ 	// 1 | 0,1,2 errors
+ 	reverse_ = false;
+ 	curDict_ = &dictFW_;
+	curLevDEALeft_ = levDEAs_[1];
+	curLevDEALeft_->loadPattern( patLeft_ );
+	minDistLeft_ = 1;
+	curLevDEARight_ = levDEAs_[2];
+	curLevDEARight_->loadPattern( patRight_ );
+	minDistLeft_ = -1;
+	intersectLeft( curDict_->getRoot(), LevDEA::Pos( 0, 0 ), 0 );
+
+	
 
 // 	// 2,3 | 0 errors
 // 	rev = TRUE;
@@ -107,50 +162,53 @@ namespace csl {
 	return 0;
     }
 
+
+    template<>
+    void MSMatch< STANDARD >::intersect( int dicPos, LevDEA::Pos levPos, int depth ) {
+	static int newDicPos;
+	static LevDEA::Pos newLevPos;
+	size_t c;
+	for( c = 1; c <= alph_.size(); ++c ) {
+	    if( ( newDicPos = dictFW_.walk( dicPos, c ) ) && ( newLevPos = curLevDEA_->walk( levPos, c ) ).position() != -1 ) {
+		word_[depth] = alph_.decode( c );
+
+//  word[depth+1]=0;std::cout<<"word="<<word<<std::endl;
+
+		// print w if node is final in dic and lev;
+		if( dictFW_.isFinal( newDicPos ) && curLevDEA_->isFinal( newLevPos ) ) {
+		    word_[depth+1] = 0;
+		    
+		    // push word and annotated value into the output list
+		    if( ! output_->push( word_, dictFW_.getFirstAnn( newDicPos ) ) ) {// if result buffer full
+			throw exceptions::bufferOverflow( "MSMatch: ResultSet overflow for pattern: " + std::string( ( char* )pattern_ ) );
+		    }
+		    
+		}
+
+		intersect( newDicPos, newLevPos, depth + 1 );
+	    }
+	    
+	}
+    }
+
     template<>
     int MSMatch< STANDARD >::query( const uchar* pattern, ResultSet_if& output ) {
 	output_ = &output;
-	pattern_ = pattern;
+	strcpy( (char*)pattern_, (char*)pattern );
 
 	curLevDEA_ = levDEAs_[k_];
 	curLevDEA_->loadPattern( pattern );
 
 // memset(stack,0,MAX_STACKSIZE * sizeof(int)); // should not be necessary
 
-	memset( word, 0, Global::lengthOfWord * sizeof( uchar ) ); // prepare memory for output word
-	query_rec( dic_.getRoot(), LevDEA::Pos( 0, 0 ), 0 );
+	memset( word_, 0, Global::lengthOfWord * sizeof( uchar ) ); // prepare memory for output word
+	intersect( dictFW_.getRoot(), LevDEA::Pos( 0, 0 ), 0 );
 
 
 	return 0;
     }
 
-    template< MSMatchMode Mode >
-    void MSMatch< Mode >::query_rec( int dicPos, LevDEA::Pos levPos, int depth ) {
-	static int newDicPos;
-	static LevDEA::Pos newLevPos;
-	size_t c;
-	for( c = 1; c <= alph_.size(); ++c ) {
-	    if( ( newDicPos = dic_.walk( dicPos, c ) ) && ( newLevPos = curLevDEA_->walk( levPos, c ) ).position() != -1 ) {
-		word[depth] = alph_.decode( c );
-
-//  word[depth+1]=0;std::cout<<"word="<<word<<std::endl;
-
-		// print w if node is final in dic and lev;
-		if( dic_.isFinal( newDicPos ) && curLevDEA_->isFinal( newLevPos ) ) {
-		    word[depth+1] = 0;
-
-		    // push word and annotated value into the output list
-		    if( ! output_->push( word, dic_.getFirstAnn( newDicPos ) ) ) {// if result buffer full
-			throw exceptions::bufferOverflow( "MSMatch: ResultSet overflow for pattern: " + std::string( ( char* )pattern_ ) );
-          }
-
-        }
-
-        query_rec( newDicPos, newLevPos, depth + 1 );
-      }
-
-    }
-  }
+    
 
 
 

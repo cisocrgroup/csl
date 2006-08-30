@@ -29,33 +29,42 @@ namespace csl {
 	Dictionary dictBW_;
 	LevDEA* levDEAs_[3];
 
-	LevDEA* curLevDEA_;
+	LevDEA* curLevDEA_; ///< used for the STANDARD algorithm
+	LevDEA* curLevDEALeft_; ///< used for the FW_BW algorithm
+	LevDEA* curLevDEARight_; ///< used for the FW_BW algorithm
 	Dictionary* curDict_;
-	bool rev_;
+	bool reverse_;
 
 	size_t k_;
 
 	static const size_t MAX_STACKSIZE = Global::lengthOfWord + 50;
 
-	const uchar pattern_[Global::lengthOfWord]; ///< the currently used pattern
-	const uchar patLeft_[Global::lengthOfWord];
-	const uchar patRight_[Global::lengthOfWord];
-	const uchar patLeftRev_[Global::lengthOfWord];
-	const uchar patRightRev_[Global::lengthOfWord];
+	uchar pattern_[Global::lengthOfWord]; ///< the currently used pattern
+	uchar patLeft_[Global::lengthOfWord];
+	uchar patRight_[Global::lengthOfWord];
+	uchar patLeftRev_[Global::lengthOfWord];
+	uchar patRightRev_[Global::lengthOfWord];
 
-	uchar word[Global::lengthOfWord]; ///< the word that is currently constructed
+	int minDistLeft_;
+	int minDistRight_;
+
+	uchar word_[Global::lengthOfWord]; ///< the word that is currently constructed
 	ResultSet_if* output_; ///< the currently used output container
 
-	void query_rec(int dicPos, LevDEA::Pos levPos, int depth);
+	void intersect( int dicPos, LevDEA::Pos levPos, int depth );
+	void intersectLeft( int dicPos, LevDEA::Pos levPos, int depth );
+	void intersectRight( int dicPos, LevDEA::Pos levPos, int depth );
 
     public:
-	MSMatch(const Alphabet& init_alphabet, size_t k, char* compdicFile, char* compdicRevFile = 0 );
+	MSMatch( const Alphabet& init_alphabet, size_t k, char* compdicFile, char* compdicRevFile = 0 );
 	~MSMatch();
-	int query(const uchar* pattern, ResultSet_if& output);
-	inline size_t maxResults() const {return MAX_RESULTS;}
+	int query( const uchar* pattern, ResultSet_if& output );
+	inline size_t maxResults() const {
+	    return MAX_RESULTS;
+	}
 
-	static const size_t MAX_RESULTS = 1000; 
-    };
+	static const size_t MAX_RESULTS = 1000;
+  };
 
 } // eon
 

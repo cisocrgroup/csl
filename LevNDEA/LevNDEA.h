@@ -7,6 +7,21 @@
 
 namespace csl {
 
+    /**
+     * LevNDEA is to represent a nondeterministic automaton computing levenshtein distances.
+     *
+     * The design of the automaton is the well-known one described e.g. in ???
+     *
+     * +---+---+---+---+---+---+---+
+     * | / | / | / | / | / | / | / |
+     * +---+---+---+---+---+---+---+
+     * | / | / | / | / | / | / | / |
+     * +---+---+---+---+---+---+---+
+     *   p   a   t   t   e   r   n
+     *
+     * @author Ulrich Reffle
+     * @date 2006
+     */
     class LevNDEA {
     private:
 	Alphabet& alph;
