@@ -138,7 +138,7 @@ for(1..$nr_of_queries) {
 	for(@tokens) {
 	    $_ = addErrors($_,$errors);
 	}
-	$entry = join($tokensDelimiter, @tokens).$tokensDelimiter;
+	$entry = join($tokensDelimiter, @tokens);
 
     }
 

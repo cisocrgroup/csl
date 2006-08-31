@@ -3,6 +3,7 @@
 
 #include "../LevFilter/LevFilter.h"
 #include "../Trie/Trie.h"
+#include "../MinDic/MinDic.h"
 #include "../Alphabet/Alphabet.h"
 #include "../LevDEA/LevDEA.h"
 #include "../Global.h"
@@ -23,7 +24,7 @@ namespace csl {
     template< MSMatchMode Mode = STANDARD >
     class MSMatch : public LevFilter {
     private:
-	typedef Trie Dictionary;
+	typedef MinDic Dictionary;
 	const Alphabet& alph_;
 	Dictionary dictFW_;
 	Dictionary dictBW_;

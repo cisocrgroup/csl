@@ -21,7 +21,7 @@ namespace csl {
     typedef unsigned long long bits64;
 
     typedef enum { 
-	/// just 4 bytes per transition (not implemented)
+	/// just 4 bytes per transition (currently not implemented)
 	SLIM, 
 
 	/// 8 bytes per transition, multiple values can be stored inside states
@@ -54,7 +54,7 @@ namespace csl {
 	static const uchar keyValueDelimiter = '#';
 	static const uchar valuesDelimiter = ',';
 
-	static const int LevMaxNrOfResults = 5000;
+	static const int LevMaxNrOfResults = 15000;
 
 	class Perm {
 	public:
@@ -86,7 +86,6 @@ namespace csl {
 	    }
 
 	    cslException( const std::string& msg ) : msg_( msg ) {
-		
 	    }
 
 	    virtual ~cslException() throw() {}
@@ -111,16 +110,16 @@ namespace csl {
 	    badFileHandle( const std::string msg ) : cslException( msg ) {}
 	};
 
-	class bufferOverflow : public cslException {
-	public:
-	    bufferOverflow() {}
-	    bufferOverflow( const std::string msg ) : cslException( msg ) {}
-	};
-
 	class invalidLevDistance : public cslException {
 	public:
 	    invalidLevDistance() {}
 	    invalidLevDistance( const std::string msg ) : cslException( msg ) {}
+	};
+
+	class bufferOverflow : public cslException {
+	public:
+	    bufferOverflow() {}
+	    bufferOverflow( const std::string msg ) : cslException( msg ) {}
 	};
 
     };

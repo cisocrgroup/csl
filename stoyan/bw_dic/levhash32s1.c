@@ -391,7 +391,7 @@ printf("************************************************************************
 	    for (i=strlen(p1)-1, c1=0; i>=0; i--, c1++) pr1[c1]=p1[i]; pr1[c1]=0;
 	    for (i=strlen(p2)-1, c2=0; i>=0; i--, c2++) pr2[c2]=p2[i]; pr2[c2]=0;
 
-//printf("s='%s', p1='%s', p2='%s', pr1='%s', pr2='%s'\n",s,p1,p2,pr1,pr2);			
+//printf("s='%s', p1='%s', p2='%s', pr1='%s', pr2='%s'\n",s,p1,p2,pr1,pr2); // print split patterns
 
 	    nres=0;
 

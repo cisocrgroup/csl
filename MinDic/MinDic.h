@@ -9,20 +9,19 @@ namespace csl {
 
 
 /**
-   class MinDic performs the construction and usage of minimal acyclic 
-   finite state automata for large finite dictionaries. 
-   It follows an algorithm described in 
-   Jan Daciuk et. al., Incremental Construction of Minimal Acyclic
-   Finite-State Automata, 2000.
- 
-   Most ideas for the implementation are 'stolen' from a C-program written
-   by Stoyan Mihov.
- 
-   \author Uli Reffle, <uli@reffle.de>
-   \date Apr 2006
- 
- 
-*/
+ * class MinDic performs the construction and usage of minimal acyclic 
+ * finite state automata for large finite dictionaries. 
+ * It follows an algorithm described in 
+ * Jan Daciuk et. al., Incremental Construction of Minimal Acyclic
+ * Finite-State Automata, 2000.
+ *
+ * Many ideas for the implementation are adapted from a C-program written
+ * by Stoyan Mihov.
+ * 
+ * @author Ulrich Reffle, <uli@reffle.de>
+ * @date Apr 2006
+ *
+ */
     class MinDic : public TransTable< TOKDIC > {
     public:
 	typedef TransTable< TOKDIC > TransTable_t;
@@ -30,10 +29,10 @@ namespace csl {
 	MinDic( const Alphabet& alph, char* binFile = NULL );
 
 	/**
-	   The funtion that actually executes the computation of the trie.
-	   @param txtFile The dictionary (including annotations) in txt format
-	   @param compFile The name of the output binary
-	*/
+	 * The funtion that actually executes the computation of the trie.
+	 * @param txtFile The dictionary (including annotations) in txt format
+	 * @param compFile The name of the output binary
+	 */
 	void compileDic( char* txtFile, char* compFile );
 
 
@@ -41,10 +40,10 @@ namespace csl {
 	void finishConstruction();
 
 	/**
-	   processes one input line: separates the key from the annotations (if present)
-	   and performs the insertion into the trie
-	   \arg a cstring pointing to the current line
-	*/
+	 * processes one input line: separates the key from the annotations (if present)
+	 * and performs the insertion into the trie
+	 * @arg a cstring pointing to the current line
+	 */
 	void addToken( const uchar* key );
 
 	/// extracts the trie to stdout

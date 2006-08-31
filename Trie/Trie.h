@@ -31,7 +31,7 @@ namespace csl {
 
 	/// extracts the trie to stdout
 //	void printDic(StateId initState,uchar* prefix = (uchar*)"") const;
-	void printDic(int initState) const;
+	void printDic( int initState = 0 ) const;
 
 	/// set the flag annotateByteOffset_
 	inline void setByteAnnotation(bool b = true) {

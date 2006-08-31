@@ -102,7 +102,6 @@ namespace csl {
 	sizeOfUsedCells_ = nrOfCells_;
 
 	std::cerr << "Ok" << std::endl;
-	std::cerr << "nrOfCells_=" << nrOfCells_ << std::endl;
 	return true;
     }
 

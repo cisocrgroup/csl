@@ -95,8 +95,11 @@ namespace csl {
 
 
 	~LevDEA();
-    
-	Pos walk(const Pos& p,int c) const;
+	
+	inline LevDEA::Pos LevDEA::walk( const Pos& p, int c ) const {
+	    table_cell & cell = table( calc_k_charvec( charvec[c], p.pattern_pos() ), p.position() );
+	    return Pos( cell.target, p.pattern_pos() + cell.move_pattern );
+	}
 
 
 	inline bool isFinal(const Pos& p) const {

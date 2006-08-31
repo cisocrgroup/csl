@@ -14,6 +14,6 @@ int main(int argc, char** argv) {
     Trie t( alph );
     t.setByteAnnotation( true );
     t.compileDic( argv[2], argv[3] );
-//    t.printCells();
+    t.printDic();
 
 }

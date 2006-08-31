@@ -40,6 +40,8 @@ namespace csl {
 	 */
 	inline size_t find(const uchar* key ) const;
 	
+	inline void reset();
+
 	inline uint_t getTableSize() const;
 
 	inline size_t getLengthOfKeyStrings() const;
@@ -78,6 +80,7 @@ namespace csl {
 	 * This is just a reference to the buffer handed over from the client
 	 */
 	uchar*& keyBuffer_;
+
 	/**
 	 * size of keyBuffer_
 	 */
@@ -100,7 +103,7 @@ namespace csl {
     };
     
     Hash::Hash( size_t estimatedNrOfKeys, uchar*& keyBuffer, size_t& sizeOfKeyBuffer ) : 
-	table_( estimatedNrOfKeys * 10, 0 ),
+	table_( estimatedNrOfKeys * 15, 0 ),
 	nrOfKeys_( 0 ),
 	keyBuffer_( keyBuffer ),
 	sizeOfKeyBuffer_( sizeOfKeyBuffer ),
@@ -115,6 +118,15 @@ namespace csl {
 	}
     }
     
+    size_t Hash::find( const uchar* key ) const {
+	uint_t slot = getHashCode( key );
+	while( table_.at( slot ) != 0 &&  // hash-slot non-empty
+	       strcmp( (char*)key, (char*)getStringAt( table_.at( slot ) ) ) ) { // no match
+	    slot = ( slot + HASHC2 ) % getTableSize();
+	}
+	return table_.at( slot );
+    }
+
     size_t Hash::findOrInsert( const uchar* key ) {
 	uint_t slot = getHashCode( key );
 	while( table_.at( slot ) != 0 &&  // hash-slot non-empty
@@ -125,7 +137,7 @@ namespace csl {
 	if( table_.at( slot ) == 0 ) { // key wasn't found
 	    size_t lengthOfKey = strlen( (char*)key );
 	    // resize keyBuffer_ if necessary
-	    while( (lengthOfKeyStrings_ + lengthOfKey) > sizeOfKeyBuffer_ ) {
+	    while( ( lengthOfKeyStrings_ + lengthOfKey) > sizeOfKeyBuffer_ ) {
 		reallocKeyBuffer( (int) (sizeOfKeyBuffer_ * 1.5) );
 	    }
 	    strncpy( (char*)(keyBuffer_ + lengthOfKeyStrings_), (char*)key, lengthOfKey );
@@ -140,12 +152,18 @@ namespace csl {
 	return table_.at( slot );
     }
     
-    const uchar* Hash::getStringAt( size_t offset ) const {
+    inline const uchar* Hash::getStringAt( size_t offset ) const {
 	return ( keyBuffer_ + offset );
     }
 
-    uchar* Hash::getStringAt( size_t offset ) {
+    inline uchar* Hash::getStringAt( size_t offset ) {
 	return ( keyBuffer_ + offset );
+    }
+
+    inline void Hash::reset() {
+	lengthOfKeyStrings_ = 0;
+	nrOfKeys_ = 0;
+	memset( &table_[0], 0, table_.size() * sizeof(uint_t) );
     }
 
     uint_t Hash::getTableSize() const {

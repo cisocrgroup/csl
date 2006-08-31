@@ -34,7 +34,7 @@ namespace csl {
 	virtual ~ResultSet_if() {
 	}
 
-	virtual bool push(const uchar* str, int annotation) = 0;
+	virtual void push(const uchar* str, int annotation) = 0;
 	virtual void reset() = 0;
     };
 

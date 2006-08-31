@@ -33,13 +33,13 @@ namespace csl {
     void MSMatch< Mode >::intersectSecond( int dicPos, LevDEA::Pos levPos, int depth ) {
 	static int newDicPos;
 	static LevDEA::Pos newLevPos;
-	size_t c;
 
-	for( c = 1; c <= alph_.size(); ++c ) {
-	    if( ( newDicPos = curDict_->walk( dicPos, c ) ) && ( newLevPos = levDEASecond_->walk( levPos, c ) ).position() != -1 ) {
-		word_[depth] = alph_.decode( c );
+	const uchar* c = curDict_->getSusoString( dicPos );
+	for( ; *c; ++c ) {
+	    if( ( newDicPos = curDict_->walk( dicPos, *c ) ) && ( newLevPos = levDEASecond_->walk( levPos, *c ) ).position() != -1 ) {
+		word_[depth] = alph_.decode( *c );
 		word_[depth+1] = 0;
-		printf(" intersectSecond at depth %d: %s\n", depth, word_ );
+		// printf(" intersectSecond at depth %d: %s\n", depth, word_ );
 
 //  word_[depth+1]=0;std::cout<<"word="<<word<<std::endl;
 
@@ -48,13 +48,13 @@ namespace csl {
 		    word_[depth+1] = 0;
 		    static uchar wordRev[Global::lengthOfWord];
 		    // push word and annotated value into the output list
-		    if( reverse_ ) for( int i = depth, iRev = 0; i >=0; --i, ++iRev ) wordRev[iRev] = word_[i];
-
-//		    if( ! output_->push( ( (reverse_)? wordRev : word_ ), dictFW_.getFirstAnn( newDicPos ) ) ) {// if result buffer full
-		    // printf("Treffer: %s\n", ( (reverse_)? wordRev : word_ ) );
-		    if( ! output_->push( ( (reverse_)? wordRev : word_ ), 0 ) ) {// if result buffer full
-			throw exceptions::bufferOverflow( "MSMatch: ResultSet overflow for pattern: " + std::string( ( char* )pattern_ ) );
+		    if( reverse_ ) {
+			for( int i = depth, iRev = 0; i >=0; --i, ++iRev ) wordRev[iRev] = word_[i];
+			wordRev[depth+1] = 0;
 		    }
+		    
+		    
+		    output_->push( ( (reverse_)? wordRev : word_ ), 0 );
 		}
 		intersectSecond( newDicPos, newLevPos, depth + 1 );
 	    }
@@ -65,15 +65,16 @@ namespace csl {
     void MSMatch< FW_BW >::intersectFirst( int dicPos, LevDEA::Pos levPos, int depth ) {
 	static int newDicPos;
 	static LevDEA::Pos newLevPos;
-	size_t c;
 
-	for( c = 1; c <= alph_.size(); ++c ) {
-	    if( ( newDicPos = curDict_->walk( dicPos, c ) ) && ( newLevPos = levDEAFirst_->walk( levPos, c ) ).position() != -1 ) {
-		word_[depth] = alph_.decode( c );
+	const uchar* c = curDict_->getSusoString( dicPos );
+
+	for( ; *c; ++c ) {
+	    if( ( newDicPos = curDict_->walk( dicPos, *c ) ) && ( newLevPos = levDEAFirst_->walk( levPos, *c ) ).position() != -1 ) {
+		word_[depth] = alph_.decode( *c );
 		word_[depth+1] = 0;
-		printf(" intersectFirst at depth %d: %s\n", depth, word_ );
+		// printf(" intersectFirst at depth %d: %s\n", depth, word_ );
 
-//  word_[depth+1]=0;std::cout<<"word="<<word<<std::endl;
+		//  word_[depth+1]=0;std::cout<<"word="<<word<<std::endl;
 
 		// if positions are final in dic and lev, proceed to right half of the pattern, starting
 		// with the same state of the dict and the start state of the LevDEA
@@ -117,7 +118,6 @@ namespace csl {
 	uint_t pos = 0;
 	
 	// 0 | 0,1,2 errors
-	printf("0 | 0,1,2 errors\n");
  	reverse_ = false;
  	curDict_ = &dictFW_;
 	// load pattern outside the if-statement: we need it anyways in the next case
@@ -130,7 +130,6 @@ namespace csl {
  	}
 
  	// 1 | 0,1 errors
-	printf("1 | 0,1 errors\n");
  	reverse_ = false;
  	curDict_ = &dictFW_;
 	minDistFirst_ = 1;
@@ -142,7 +141,6 @@ namespace csl {
 	intersectFirst( curDict_->getRoot(), LevDEA::Pos( 0, 0 ), 0 );
 
 	// 2 | 0 errors
-	printf("2 | 0 errors\n");
  	reverse_ = true;
  	curDict_ = &dictBW_;
  	if( ( pos = curDict_->walkStr( curDict_->getRoot(), patRightRev_ ) ) ) {
@@ -182,7 +180,6 @@ namespace csl {
 	intersectFirst( curDict_->getRoot(), LevDEA::Pos( 0, 0 ), 0 );
 
 	// 2,3 | 0 errors
-	printf("2,3 | 0 errors\n");
 	reverse_ = true;
 	curDict_ = &dictBW_;
 	// load pattern outside the if-statement: we need it anyways in the next case
@@ -196,7 +193,6 @@ namespace csl {
 	}
 
 	// 2 | 1 errors
-	printf("2 | 1 errors\n");
  	reverse_ = true;
  	curDict_ = &dictBW_;
 	levDEAFirst_->setDistance( 1 );
@@ -234,7 +230,6 @@ namespace csl {
 	else if( k_ == 2 ) queryCases_2();
 	else if( k_ == 3 ) queryCases_3();
 	else throw exceptions::invalidLevDistance();
-
 	return 0;
     }
 
@@ -256,10 +251,7 @@ namespace csl {
 		    word_[depth+1] = 0;
 		    
 		    // push word and annotated value into the output list
-		    if( ! output_->push( word_, dictFW_.getFirstAnn( newDicPos ) ) ) {// if result buffer full
-			throw exceptions::bufferOverflow( "MSMatch: ResultSet overflow for pattern: " + std::string( ( char* )pattern_ ) );
-		    }
-		    
+		    output_->push( word_, dictFW_.getFirstAnn( newDicPos ) );
 		}
 
 		intersect( newDicPos, newLevPos, depth + 1 );
