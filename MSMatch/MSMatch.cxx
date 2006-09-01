@@ -21,7 +21,6 @@ namespace csl {
 	dictFW_( initAlphabet, compdicFile ),
 	dictBW_( initAlphabet, compdicRevFile ),
 	k_( k ) {
-
 	levDEAFirst_ = new LevDEA( alph_, 1 );
 	levDEASecond_ = new LevDEA( alph_, 1 );
     }
