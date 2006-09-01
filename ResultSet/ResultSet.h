@@ -4,9 +4,10 @@
 #include<cassert>
 #include<iostream>
 #include<vector>
+#include<algorithm>
+#include "../Alphabet/Alphabet.h"
 #include "../Global.h"
 #include "../LevFilter/LevFilter.h"
-#include "../Hash/Hash.h"
 
 namespace csl {
 
@@ -17,9 +18,8 @@ namespace csl {
      */
     class ResultSet : public LevFilter::ResultSet_if {
     public:
-	ResultSet() : stringBuffer_( 0 ),
-		      stringBufferSize_( 0 ),
-		      hash_( Global::LevMaxNrOfResults, stringBuffer_, stringBufferSize_ ) {
+	ResultSet( const Alphabet& alph ) : 
+	    alph_( alph ) {
 	    reset();
 	}
 
@@ -36,14 +36,12 @@ namespace csl {
 	 * add another item to the ResultSet
 	 */
 	void push( const uchar* str, int annotation ) {
-	    if( hash_.find( str ) ) return;
 	    if ( size_ > ( Global::LevMaxNrOfResults - 2 ) ) {
 		throw exceptions::bufferOverflow( "ResultSet: ResultSet overflow." );
 	    }
 	    else {
 		list_[size_].set( str, annotation );
 		++size_;
-		hash_.findOrInsert( str );
 	    }
 	}
 
@@ -60,6 +58,9 @@ namespace csl {
 	    uchar str_[Global::lengthOfWord];
 	    int annotation_;
 	public:
+	    bool operator==( const Item& other ) const {
+		return !( strcmp( (char*)getStr(), (char*)other.getStr() ) );
+	    }
 	    void set( const uchar* str, int ann ) {
 		strcpy( ( char* )str_, ( char* )str );
 		annotation_ = ann;
@@ -72,31 +73,6 @@ namespace csl {
 	    }
 	}; // class Item
 
-	class Iterator {
-	private:
-	    const Item *cur_;
-	public:
-
-	    Iterator( const Item *init ) : cur_( init ) {}
-
-	    const Item& operator*() const {
-		return *cur_;
-	    }
-
-	    Iterator operator++() {
-		++cur_;
-		return *this;
-	    }
-
-	    bool operator==( const Iterator& i2 ) const {
-		return ( cur_ == i2.cur_ );
-	    }
-
-	    bool operator!=( const Iterator& i2 ) const {
-		return ( cur_ != i2.cur_ );
-	    }
-
-	}; // class Iterator
 
 	const Item& operator[]( int i ) const {
 	    assert( i < size_ );
@@ -104,22 +80,25 @@ namespace csl {
 	}
 
 
-	Iterator begin() const {
-	    return Iterator( list_ );
+	/**
+	 * @attention the strcmp is the standard one, not the one that depends on the Alphabet-object
+	 */
+	static bool cmp( const Item& a, const Item& b ) {
+	    return strcmp( (char*)a.getStr(), (char*)b.getStr() ) < 0; 
 	}
 
-	Iterator end() const {
-	    return Iterator( list_ + size_ );
+	void sort() {
+	    std::sort( list_, list_ + size_, cmp );
+	}
+
+	void unique() {
+	    size_ = std::unique( list_, list_ + size_ ) - list_;
 	}
 
     private:
+	const Alphabet& alph_;
 	int size_;
 	Item list_[Global::LevMaxNrOfResults];
-
-	uchar* stringBuffer_;
-	size_t stringBufferSize_;
-	Hash hash_;
-	
   };
 
   /// provide a nice print for a ResultSet::Item

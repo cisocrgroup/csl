@@ -19,8 +19,9 @@ int main( int argc, char** argv ) {
 	MSMatch< STANDARD > stdMatcher( alph, atoi( argv[2] ), argv[3] );
 	MSMatch< FW_BW > matcher( alph, atoi( argv[2] ), argv[3], argv[4] );
 
-	ResultSet stdList;
-	ResultSet list;
+	ResultSet stdList( alph );
+	ResultSet list( alph );
+
 
 	char query[200]; // = "and,artificiall,distributed,inteligence,machiene";
 
@@ -36,8 +37,11 @@ int main( int argc, char** argv ) {
 	    stdList.reset(); // forget candidates that might be stored from earlier use
 //	    stdMatcher.query( ( uchar* )query, stdList );
 
-//	    std::cout<<list.getSize()<<" hits."<<std::endl;
 	    // print all hits
+	    std::cout<<list.getSize()<<" hits."<<std::endl;
+ 	    list.sort();
+ 	    list.unique();
+	    std::cout<<list.getSize()<<" hits."<<std::endl;
 // 	    int i;
 // 	    for ( i = 0;i < list.getSize();++i ) {
 // 		std::cout << list[i].getStr() << std::endl;
