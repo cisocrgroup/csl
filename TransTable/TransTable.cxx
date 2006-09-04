@@ -26,12 +26,23 @@ namespace csl {
 	// if( susoStrings_ ) free( susoStrings_ );
     }
 
-    /**
-     * @remarks 
-     *   There is some code-duplication here, so remember
-     *   to make all changes also in the general template 
-     *   for this method
-     */
+    template< CellType CellTypeValue >
+    inline int TransTable< CellTypeValue >::walk( int state, uchar c ) const {
+	assert( cells_[state].isOfType( Cell_t::STATE ) );
+	return ( cells_[state + c].getKey() == c ) ? cells_[state + c].getValue() : 0;
+    }
+
+    template<>
+    inline int TransTable< TOKDIC >::walkPerfHash( uint_t state, uchar c, size_t& perfHashValue ) const {
+	assert( cells_[state].isOfType( Cell_t::STATE ) );
+	if( cells_[state + c].getKey() == c ) {
+	    perfHashValue += cells_[state + c].getAddByte();
+	    return cells_[state + c].getValue();
+	}
+	return 0;
+    }
+
+
     template< CellType CellTypeValue >
     void TransTable< CellTypeValue >::initConstruction() {
 	nrOfCells_ = 0;

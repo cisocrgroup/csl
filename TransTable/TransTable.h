@@ -119,23 +119,29 @@ namespace csl {
 	}
 
 	/**
-	   the most important function: perform one step inside the graph
-	   @param state the state to start from
-	   @param c the character to walk with (c already being coded according to custom alphabet)
-	*/
-	inline int walk( int state, uchar c ) const {
-	    assert( cells_[state].isOfType( Cell_t::STATE ) );
-	    return ( cells_[state + c].getKey() == c ) ? cells_[state + c].getValue() : 0;
-	}
+	 * perform one step inside the automaton
+	 * @param state the state to start from
+	 * @param c the character to walk with (c already being coded according to custom alphabet)
+	 */
+	inline int walk( int state, uchar c ) const;
+
+	/**
+	 * perform one step inside the automaton and keep track of the perfect hashing value
+	 * Implemented for TOKDIC only
+	 * @param state the state to start from
+	 * @param c the character to walk with (c already being coded according to custom alphabet)
+	 * @param perfHashValue the perfHash value of the current traansition is ADDED to this variable
+	 */
+	inline int walkPerfHash( uint_t state, uchar c, size_t& perfHashValue ) const;
 
 
 	/**
-	   This method allows to change the target of a transition of a state which
-	   is already compiled. This transition has to have been present beforehands, only 
-	   its target value is changed (see assertion).
-	   The method is necessary for TransTable to store an Aho-Corasick-Automaton: The error links
-	   can only be processed for a complete trie.(see class csl::AhoCorasick)
-	*/
+	 * This method allows to change the target of a transition of a state which
+	 * is already compiled. This transition has to have been present beforehands, only 
+	 * its target value is changed (see assertion).
+	 * The method is necessary for TransTable to store an Aho-Corasick-Automaton: The error links
+	 * can only be processed for a complete trie.(see class csl::AhoCorasick)
+	 */
 	inline void changeTransitionTarget( int state, int c, int newValue ) {
 	    assert( cells_[state + c].getKey() == c );
 	    cells_[state + c].setValue( newValue );

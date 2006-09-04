@@ -35,7 +35,9 @@ namespace csl {
 
 	const uchar* c = curDict_->getSusoString( dicPos );
 	for( ; *c; ++c ) {
-	    if( ( newDicPos = curDict_->walk( dicPos, *c ) ) && ( newLevPos = levDEASecond_->walk( levPos, *c ) ).position() != -1 ) {
+	    if( ( newLevPos = levDEASecond_->walk( levPos, *c ) ).position() != -1 ) {
+		newDicPos = curDict_->walk( dicPos, *c );
+		assert( newDicPos ); // the transition always exists
 		word_[depth] = alph_.decode( *c );
 		word_[depth+1] = 0;
 		// printf(" intersectSecond at depth %d: %s\n", depth, word_ );
@@ -51,7 +53,13 @@ namespace csl {
 			for( int i = depth, iRev = 0; i >=0; --i, ++iRev ) wordRev[iRev] = word_[i];
 			wordRev[depth+1] = 0;
 		    }
-		    output_->push( ( (reverse_)? wordRev : word_ ), 0 );
+		    // follow the word through the automaton once more to get the perfect hashing value
+		    static size_t perfHashValue; static uint_t dicPos2;
+		    perfHashValue = 0; dicPos2 = dictFW_.getRoot();
+		    for( uchar* c = ( (reverse_)? wordRev : word_); *c; ++c ) {
+			dicPos2 = dictFW_.walkPerfHash( dicPos2, alph_.code( *c ), perfHashValue );
+		    }
+		    output_->push( ( (reverse_)? wordRev : word_ ), perfHashValue );
 		}
 		intersectSecond( newDicPos, newLevPos, depth + 1 );
 	    }
@@ -66,7 +74,9 @@ namespace csl {
 	const uchar* c = curDict_->getSusoString( dicPos );
 
 	for( ; *c; ++c ) {
-	    if( ( newDicPos = curDict_->walk( dicPos, *c ) ) && ( newLevPos = levDEAFirst_->walk( levPos, *c ) ).position() != -1 ) {
+	    if( ( newLevPos = levDEAFirst_->walk( levPos, *c ) ).position() != -1 ) {
+		newDicPos = curDict_->walk( dicPos, *c );
+		assert( newDicPos ); // the transition always exists
 		word_[depth] = alph_.decode( *c );
 		word_[depth+1] = 0;
 		// printf(" intersectFirst at depth %d: %s\n", depth, word_ );

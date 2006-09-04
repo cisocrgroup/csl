@@ -25,7 +25,7 @@ int main( int argc, char** argv ) {
 
 	char query[200]; // = "and,artificiall,distributed,inteligence,machiene";
 
-	while ( 
+	while( 
 //	    std::cout<<"$ "<<std::flush && 
 	    std::cin >> query ) {
 
@@ -39,18 +39,18 @@ int main( int argc, char** argv ) {
 
 	    // print all hits
 	    std::cout<<list.getSize()<<" hits."<<std::endl;
-  	    list.sortUnique();
-	    std::cout<<list.getSize()<<" hits."<<std::endl;
+   	    list.sortUnique();
+ 	    std::cout<<list.getSize()<<" hits."<<std::endl;
 // 	    int i;
-// 	    for ( i = 0;i < list.getSize();++i ) {
-// 		std::cout << list[i].getStr() << std::endl;
-// 		if ( 0 && strcmp( ( char* )list[i].getStr(), ( char* )stdList[i].getStr() ) ) {
+// 	    for( i = 0;i < list.getSize();++i ) {
+// 		std::cout << list[i].getStr() <<","<<list[i].getAnn()<< std::endl;
+// 		if( 0 && strcmp( ( char* )list[i].getStr(), ( char* )stdList[i].getStr() ) ) {
 // 		    printf( "Trouble  here!!\n" );
 // 		}
 // 	    }
 	}
-
-    } catch ( exceptions::cslException exc ) {
+    }
+    catch( exceptions::cslException exc ) {
 	std::cerr << exc.what() << std::endl;
     }
 

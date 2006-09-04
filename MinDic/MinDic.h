@@ -49,7 +49,6 @@ namespace csl {
 	/// extracts the trie to stdout
 	void printDic( int initState ) const;
 
-
 	inline int walkStr( int state, const uchar* str ) const {
 	    while( *str && state ) {
 		state = walk( state, alph_.code( *str ) );
@@ -57,7 +56,7 @@ namespace csl {
 	    }
 	    return state;
 	}
-
+	
 	void printDic() const;
 	
     private:

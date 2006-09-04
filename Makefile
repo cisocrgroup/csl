@@ -4,9 +4,9 @@ OBJS = ./objs
 LIB = ./lib
 ######## COMPILER AND FLAGS ###################
 #GCC = g++ -O3 -Wall -fpermissive # use this for optimal speed results
-#GCC = g++ -O3 -Wall # use this for optimal speed results
+GCC = g++ -O3 -Wall # use this for optimal speed results
 #GCC = g++ -Wall --no-inline
-GCC = g++ -ggdb -Wall # use this if you want to use the gdb debugger
+#GCC = g++ -ggdb -Wall # use this if you want to use the gdb debugger
 
 AR = ar cru
 RANLIB = ranlib
