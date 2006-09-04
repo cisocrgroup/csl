@@ -14,12 +14,12 @@ namespace csl {
 	susoStrings_ = 0;
 	ftHash_ = 0;
 
-	if( binFile ) { // binary file was given
+	if ( binFile ) { // binary file was given
 	    nrOfCells_ = -1;
 	    loadBinary( binFile );
 	}
     }
-    
+
     template< CellType CellTypeValue >
     TransTable< CellTypeValue >::~TransTable() {
 	// if( cells_ ) free( cells_ );
@@ -46,7 +46,7 @@ namespace csl {
 	header_->offsetSusoStrings_ = 0;
 	susoStrings_ = 0;
 
-	if( CellTypeValue == TOKDIC ) {
+	if ( CellTypeValue == TOKDIC ) {
 	    lengthOfSusoStrings_ = 0;
 	    ftHash_ = new Hash( 10000, susoStrings_, lengthOfSusoStrings_ );
 	}
@@ -55,8 +55,8 @@ namespace csl {
     template< CellType CellTypeValue >
     void TransTable< CellTypeValue >::finishConstruction() {
 	header_->nrOfCells_ = nrOfCells_;
-	
-	if( CellTypeValue == TOKDIC ) { // not very nice
+
+	if ( CellTypeValue == TOKDIC ) { // not very nice
 	    header_->offsetSusoStrings_ = header_->offsetCells_ + ( sizeOfUsedCells_ * sizeof( Cell_t ) );
 	    lengthOfSusoStrings_ = ftHash_->getLengthOfKeyStrings();
 	    delete( ftHash_ );
@@ -64,7 +64,7 @@ namespace csl {
 	    // delete( header_ ); // this is a problem. Don't delete it at all for the moment
 	}
     }
-    
+
     template< CellType CellTypeValue >
     bool TransTable< CellTypeValue >::loadBinary( const char* binFile ) {
 	FILE * fi;
@@ -73,35 +73,35 @@ namespace csl {
 	std::cerr << "TransTable: Reading " << binFile << " ... " << std::flush;
 	stat( binFile, &f_stat );
 	fi = fopen( binFile, "rb" );
-	if( !fi ) {
-	    throw exceptions::badFileHandle( "Couldn't open file '" + 
-					     std::string(binFile) + 
+	if ( !fi ) {
+	    throw exceptions::badFileHandle( "Couldn't open file '" +
+					     std::string( binFile ) +
 					     "' for reading." );
 	}
 
-	uchar* file_ = (uchar*) malloc( f_stat.st_size );
+	uchar* file_ = ( uchar* ) malloc( f_stat.st_size );
 	fread( file_, 1, f_stat.st_size, fi );
 	fclose( fi );
-// 	for( size_t i=0; i < (size_t)f_stat.st_size; ++i ) {
-// 	    printf("%d: %d\n",i,file_[i]);
-// 	}
+//  for( size_t i=0; i < (size_t)f_stat.st_size; ++i ) {
+//      printf("%d: %d\n",i,file_[i]);
+//  }
 
-	Header* header = (Header*) file_;
-	if( ( header->magicNumber_ != magicNumber_ ) ) {
+	Header* header = ( Header* ) file_;
+	if ( ( header->magicNumber_ != magicNumber_ ) ) {
 	    throw exceptions::badDictFile( "Magic number comparison failed.\n" );
 	}
-	
-	if( header->cType_ != CellTypeValue ) {
-	    std::cerr<<header->cType_<<"<->"<<CellTypeValue<<std::endl;
+
+	if ( header->cType_ != CellTypeValue ) {
+	    std::cerr << header->cType_ << "<->" << CellTypeValue << std::endl;
 	    throw exceptions::badDictFile( "csl::TransTable - File is incompatible to dictionary type.\n" );
 	}
-	cells_ = (Cell_t*) ( file_ + header->offsetCells_ );
-	susoStrings_ = (uchar*) ( file_ + header->offsetSusoStrings_ );
+	cells_ = ( Cell_t* ) ( file_ + header->offsetCells_ );
+	susoStrings_ = ( uchar* ) ( file_ + header->offsetSusoStrings_ );
 
 	nrOfCells_ = header->nrOfCells_;
 	sizeOfUsedCells_ = nrOfCells_;
 
-	std::cerr << "Ok" << std::endl;
+	std::cerr << "Ok: cells is " << header->offsetCells_ << std::endl;
 	return true;
     }
 
@@ -135,25 +135,25 @@ namespace csl {
 
 	// mark stateCell and insert the first annotation
 	cells_[slot].setType( Cell_t::STATE );
-	if( nrOfAnnotations > 0 ) {
+	if ( nrOfAnnotations > 0 ) {
 	    cells_[slot].setType( Cell_t::HAS_ANN );
 	    cells_[slot].setValue( state.getAnnotation( 0 ) );
 	}
 
 	// set finalState
-	if( state.isFinal() ) {
+	if ( state.isFinal() ) {
 	    cells_[slot].setFinal( true );
 	}
 
 	// insert further annotations
-	for( i = 1; i < nrOfAnnotations ;++i ) {
+	for ( i = 1; i < nrOfAnnotations ;++i ) {
 	    cells_[slot - i].setType( Cell_t::IS_ANN );
 	    cells_[slot - i].setValue( state.getAnnotation( i ) );
 	}
 
 	// insert all transitions
-	for( i = 1; i <= alphSize_ ; ++i ) {
-	    if( state.getTransTarget( i ) ) {
+	for ( i = 1; i <= alphSize_ ; ++i ) {
+	    if ( state.getTransTarget( i ) ) {
 		cells_[slot + i].setTrans( i, state.getTransTarget( i ) );
 	    }
 	}
@@ -161,19 +161,8 @@ namespace csl {
 	// update nrOfUsedCells
 	sizeOfUsedCells_ = std::max( sizeOfUsedCells_, ( slot + alphSize_ + 2 ) );
 
-	// the following lines are to prevent firstFreeCell_ to get stuck in a lower area, where none of the
-	// new states can never fit.
-	// This hack was necessary for the building of the AhoCorasick-Trie: there, firstFreeCell_ always got
-	// stuck in low regions of the compressed table.
-	// The value of maximum difference (currently set to 500) works well for AhoCorasick, but does not trigger
-	// any skips for a standard Trie.
-	if( ( slot - firstFreeCell_ ) > 500 ) {
-	    std::cerr << "ffc hack: " << firstFreeCell_ << std::endl;
-	    firstFreeCell_ = slot - 500; // a slot which is really empty is searched right below
-	}
-
 	//update firstFreeCell
-	for( ;! ( cells_[firstFreeCell_].isEmpty() );++firstFreeCell_ );
+	for ( ;! ( cells_[firstFreeCell_].isEmpty() );++firstFreeCell_ );
 
 
 	return slot;
@@ -197,35 +186,22 @@ namespace csl {
 	cells_[slot].setValue( state.getAnnotation() );
 
 	// set finalState
-	if( state.isFinal() ) {
+	if ( state.isFinal() ) {
 	    cells_[slot].setFinal( true );
 	}
 
 	// insert all transitions
-	for( size_t i = 1; i <= alphSize_ ; ++i ) {
-	    if( state.getTransTarget( i ) ) {
+	for ( size_t i = 1; i <= alphSize_ ; ++i ) {
+	    if ( state.getTransTarget( i ) ) {
 		cells_[slot + i].setTrans( i, state.getTransTarget( i ), state.getTransPhValue( i ) );
 	    }
 	}
 
 	// update lastUsedCell
-	sizeOfUsedCells_ = std::max( sizeOfUsedCells_,( slot + alphSize_ + 2 ) );
-
-	// the following lines are to prevent firstFreeCell_ to get stuck in a lower area, where none of the
-	// new states can ever fit.
-	// This hack was necessary for the building of the AhoCorasick-Trie: there, firstFreeCell_ always got
-	// stuck in low regions of the compressed table.
-	// The value of maximum difference (currently set to 500) works well for AhoCorasick, but does not trigger
-	// any skips for a standard Trie.
-	// By the way, AhoCorasick was thrown out of this library in the meantime. But maybe the hack can be useful
-	// in some other situation.
-	if( ( slot - firstFreeCell_ ) > 500 ) {
-	    //std::cerr<<"ffc hack: "<<firstFreeCell_<<std::endl;
-	    firstFreeCell_ = slot - 500; // a slot which is really empty is searched right below
-	}
+	sizeOfUsedCells_ = std::max( sizeOfUsedCells_, ( slot + alphSize_ + 2 ) );
 
 	//update firstFreeCell
-	for( ; ! ( cells_[firstFreeCell_].isEmpty() ); ++firstFreeCell_ );
+	for ( ; ! ( cells_[firstFreeCell_].isEmpty() ); ++firstFreeCell_ );
 
 
 	return slot;
@@ -234,7 +210,7 @@ namespace csl {
     template< CellType CellTypeValue  >
     void TransTable< CellTypeValue >::createBinary( char* compFile ) {
 	FILE * fo = fopen( compFile, "wb" );
-	if( !fo ) {
+	if ( !fo ) {
 	    std::cerr << "Couldn't open " << compFile << std::endl;
 	    exit( 1 );
 	}
@@ -249,9 +225,9 @@ namespace csl {
 
 
 
-/**
-   find slot to store state
-*/
+    /**
+       find slot to store state
+    */
     template< CellType CellTypeValue >
     int TransTable< CellTypeValue >::findSlot( const TempState_t& state ) {
 	size_t slot = firstFreeCell_ - 1; // is incremented again at beginning of loop
@@ -260,27 +236,27 @@ namespace csl {
 
 
 	bool mightFit = false;
-	while( !mightFit ) {
+	while ( !mightFit ) {
 	    do {
 		++slot;
 //  printf("Try at %d\n", slot);
-		while( ( slot + nrOfAnnotations + alphSize_ + 1 ) > nrOfCells_ ) { // okay???
+		while ( ( slot + nrOfAnnotations + alphSize_ + 1 ) > nrOfCells_ ) { // okay???
 		    allocCells( nrOfCells_ * 2 );
 		}
-	    } while( ! ( cells_[slot].isEmpty() ) );
+	    } while ( ! ( cells_[slot].isEmpty() ) );
 
 	    mightFit = true;
 
 	    // check if cells for annotations are available;
 	    // increment slot with the loop, so that slot points to the cell that gets type STATE
-	    for( i = 1; ( mightFit && i < nrOfAnnotations ) ;++i ) {
-		if( !cells_[++slot].isEmpty() )
+	    for ( i = 1; ( mightFit && i < nrOfAnnotations ) ;++i ) {
+		if ( !cells_[++slot].isEmpty() )
 		    mightFit = false;
 	    }
 
 	    // check if all required cells for transitions are available
-	    for( i = 1; ( mightFit && i <= alphSize_ ) ; ++i ) {
-		if( state.getTransTarget( i ) && ( !cells_[slot + i].isEmpty() ) ) {
+	    for ( i = 1; ( mightFit && i <= alphSize_ ) ; ++i ) {
+		if ( state.getTransTarget( i ) && ( !cells_[slot + i].isEmpty() ) ) {
 		    mightFit = false;
 		}
 	    }
@@ -294,9 +270,9 @@ namespace csl {
      */
     template< CellType CellTypeValue  >
     bool TransTable< CellTypeValue >::compareStates( const TempState_t& temp, int comp ) const {
-	if( temp.isFinal() != isFinal( comp ) ) return false;
-	for( size_t c = 1; c <= alphSize_; ++c ) {
-	    if( temp.getTransTarget( c ) != walk( comp, c ) ) return false;
+	if ( temp.isFinal() != isFinal( comp ) ) return false;
+	for ( size_t c = 1; c <= alphSize_; ++c ) {
+	    if ( temp.getTransTarget( c ) != walk( comp, c ) ) return false;
 	}
 	return true;
     }
@@ -305,7 +281,7 @@ namespace csl {
     template< CellType CellTypeValue  >
     void TransTable< CellTypeValue >::printCells() const {
 	std::cout << "i\ttype\tkey\tvalue" << std::endl << "--------------" << std::endl;
-	for( int i = 0;i < nrOfCells_;++i ) {
+	for ( int i = 0;i < nrOfCells_;++i ) {
 	    std::cout << i << "\t" << cells_[i].getType() << "\t" << cells_[i].getKey() << "\t" << cells_[i].getValue() << std::endl;
 	}
     }
@@ -314,24 +290,24 @@ namespace csl {
     void TransTable< CellTypeValue >::toDot( const Alphabet* alph ) const {
 	Cell_t * cellArray = TransTable::getCells();
 	std::cout << "Digraph TransTable_out { //DOTCODE" << std::endl << "rankdir=LR; //DOTCODE" << std::endl;
-	for( int i = 1; i < sizeOfUsedCells_; ++i ) {
-	    if( cellArray[i].isOfType( Cell_t::TRANS ) ) {
+	for ( size_t i = 1; i < sizeOfUsedCells_; ++i ) {
+	    if ( cellArray[i].isOfType( Cell_t::TRANS ) ) {
 		int base = i - cellArray[i].getKey();
 		// depending on whether a pointer to an Alphabet-object was given,
 		// print either the coded integer or the decoded character
 		std::cout << base << "->" << cellArray[i].getValue() << "[label=";
-		if( alph ) std::cout << ( char ) alph->decode( cellArray[i].getKey() );
+		if ( alph ) std::cout << ( char ) alph->decode( cellArray[i].getKey() );
 		else std::cout << cellArray[i].getKey();
 		std::cout << "] //DOTCODE" << std::endl;
-	    } else if( cellArray[i].isOfType( Cell_t::STATE ) ) {
+	    } else if ( cellArray[i].isOfType( Cell_t::STATE ) ) {
 		int peripheries = ( cellArray[i].isOfType( Cell_t::FINALSTATE ) ) ? 2 : 1;
 		std::cout << i << "[peripheries=" << peripheries << "] //DOTCODE" << std::endl;
 
-		if( cellArray[i].isOfType( Cell_t::HAS_ANN ) ) {
+		if ( cellArray[i].isOfType( Cell_t::HAS_ANN ) ) {
 		    std::cout << i << "->" << i << "[label=\"[";
 
 		    AnnIterator it( *this, i );
-		    while( it.isValid() ) {
+		    while ( it.isValid() ) {
 			std::cout << *it << ",";
 			++it;
 		    }
@@ -346,27 +322,26 @@ namespace csl {
     template<>
     inline void TransTable< TOKDIC >::toDot( const Alphabet* alph ) const {
 	Cell_t * cellArray = TransTable::getCells();
-    std::cout << "Digraph TransTable_out { //DOTCODE" << std::endl << "rankdir=LR; //DOTCODE" << std::endl;
-    for( size_t i = 1; i < sizeOfUsedCells_; ++i ) {
-        if( cellArray[i].isOfType( Cell_t::TRANS ) ) {
-            int base = i - cellArray[i].getKey();
-            // depending on whether a pointer to an Alphabet-object was given,
-            // print either the coded integer or the decoded character
-            std::cout << base << "->" << cellArray[i].getValue() << "[";
-            if( alph ) std::cout << "label=\"" <<( char ) alph->decode( cellArray[i].getKey() );
-            else std::cout << "label=\"" << cellArray[i].getKey();
-            std::cout << "(" << cellArray[i].getAddByte() << ")\"";
-            std::cout << "] //DOTCODE" << std::endl;
-        } else if( cellArray[i].isOfType ( Cell_t::STATE ) ) {
-            int peripheries = ( cellArray[i].isOfType( Cell_t::FINALSTATE ) ) ? 2 : 1;
-            printf( "%d[label=\"%d\", peripheries=%d] //DOTCODE\n", i, i, peripheries );
-
-            if( cellArray[i].isOfType( Cell_t::HAS_ANN ) ) {}
-        }
+	std::cout << "Digraph TransTable_out { //DOTCODE" << std::endl << "rankdir=LR; //DOTCODE" << std::endl;
+	for ( size_t i = 1; i < sizeOfUsedCells_; ++i ) {
+	    if ( cellArray[i].isOfType( Cell_t::TRANS ) ) {
+		int base = i - cellArray[i].getKey();
+		// depending on whether a pointer to an Alphabet-object was given,
+		// print either the coded integer or the decoded character
+		std::cout << base << "->" << cellArray[i].getValue() << "[";
+		if ( alph ) std::cout << "label=\"" << ( char ) alph->decode( cellArray[i].getKey() );
+		else std::cout << "label=\"" << cellArray[i].getKey();
+		std::cout << "(" << cellArray[i].getAddByte() << ")\"";
+		std::cout << "] //DOTCODE" << std::endl;
+	    } else if ( cellArray[i].isOfType( Cell_t::STATE ) ) {
+		int peripheries = ( cellArray[i].isOfType( Cell_t::FINALSTATE ) ) ? 2 : 1;
+		printf( "%d[label=\"%d\", peripheries=%d] //DOTCODE\n", i, i, peripheries );
+		
+		if ( cellArray[i].isOfType( Cell_t::HAS_ANN ) ) {}
+	    }
+	}
+	std::cout << "} //DOTCODE" << std::endl;
     }
-    std::cout << "} //DOTCODE" << std::endl;
-}
-
 }
 
 #endif

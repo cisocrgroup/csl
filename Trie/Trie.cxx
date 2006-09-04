@@ -50,6 +50,7 @@ namespace csl {
 	    int storedState = storeTempState( tempStates_[i] );
 	    tempStates_[i].reset();
 	    tempStates_[i-1].addTransition( alph_.code( lastKey[i-1] ), storedState );
+	    std::cerr<<"st="<<storedState<<std::endl;
 	}
 
 	setRoot( storeTempState( tempStates_[0] ) ); // store root and write root's id into array[0]
@@ -122,7 +123,7 @@ namespace csl {
 	//////////////////// set final state of key and add all the values
 	tempStates_[lengthOfKey].setFinal( true );
 
-	if( *valueString ) { // if valueString not empty
+	if( 0 && *valueString ) { // if valueString not empty
 	    begin = valueString;
 	    c = begin;
 

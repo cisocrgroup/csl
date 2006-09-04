@@ -12,8 +12,8 @@ int main(int argc, char** argv) {
 
     Alphabet alph( argv[1] );
     Trie t( alph );
-    t.setByteAnnotation( true );
+//    t.setByteAnnotation( true );
     t.compileDic( argv[2], argv[3] );
-    t.printDic();
-
+    t.toDot( &alph );
+    std::cerr<<"Root is "<<t.getRoot()<<std::endl;
 }

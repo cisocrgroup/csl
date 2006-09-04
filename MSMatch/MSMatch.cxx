@@ -6,7 +6,7 @@
 namespace csl {
 
     template<>
-    MSMatch< STANDARD >::MSMatch( const Alphabet& initAlphabet, size_t k, char* compdicFile, char* ) :
+    inline MSMatch< STANDARD >::MSMatch( const Alphabet& initAlphabet, size_t k, char* compdicFile, char* ) :
 	alph_( initAlphabet ),
 	dictFW_( initAlphabet, compdicFile ),
 	dictBW_( initAlphabet ), // only as dummy
@@ -16,7 +16,7 @@ namespace csl {
     }
 
     template<>
-    MSMatch< FW_BW >::MSMatch( const Alphabet& initAlphabet, size_t k, char* compdicFile, char* compdicRevFile ) :
+    inline MSMatch< FW_BW >::MSMatch( const Alphabet& initAlphabet, size_t k, char* compdicFile, char* compdicRevFile ) :
 	alph_( initAlphabet ),
 	dictFW_( initAlphabet, compdicFile ),
 	dictBW_( initAlphabet, compdicRevFile ),
@@ -26,10 +26,10 @@ namespace csl {
     }
 
     template< MSMatchMode Mode >
-    MSMatch< Mode >::~MSMatch() {}
+    inline MSMatch< Mode >::~MSMatch() {}
 
     template< MSMatchMode Mode >
-    void MSMatch< Mode >::intersectSecond( int dicPos, LevDEA::Pos levPos, int depth ) {
+    inline void MSMatch< Mode >::intersectSecond( int dicPos, LevDEA::Pos levPos, int depth ) {
 	static int newDicPos;
 	static LevDEA::Pos newLevPos;
 
@@ -51,8 +51,6 @@ namespace csl {
 			for( int i = depth, iRev = 0; i >=0; --i, ++iRev ) wordRev[iRev] = word_[i];
 			wordRev[depth+1] = 0;
 		    }
-		    
-		    
 		    output_->push( ( (reverse_)? wordRev : word_ ), 0 );
 		}
 		intersectSecond( newDicPos, newLevPos, depth + 1 );
@@ -61,7 +59,7 @@ namespace csl {
     }
 
     template<>
-    void MSMatch< FW_BW >::intersectFirst( int dicPos, LevDEA::Pos levPos, int depth ) {
+    inline void MSMatch< FW_BW >::intersectFirst( int dicPos, LevDEA::Pos levPos, int depth ) {
 	static int newDicPos;
 	static LevDEA::Pos newLevPos;
 
@@ -86,7 +84,7 @@ namespace csl {
     }
 
     template<>
-    void MSMatch< FW_BW >::queryCases_1() {
+    inline void MSMatch< FW_BW >::queryCases_1() {
 	uint_t pos = 0;
 
      	// 0 | 0,1 errors
@@ -113,7 +111,7 @@ namespace csl {
     }
 
     template<>
-    void MSMatch< FW_BW >::queryCases_2() {
+    inline void MSMatch< FW_BW >::queryCases_2() {
 	uint_t pos = 0;
 	
 	// 0 | 0,1,2 errors
@@ -152,7 +150,7 @@ namespace csl {
     }
 
     template<>
-    void MSMatch< FW_BW >::queryCases_3() {
+    inline void MSMatch< FW_BW >::queryCases_3() {
   	uint_t pos = 0;
 
      	// 0 | 0,1,2,3 errors
@@ -205,7 +203,7 @@ namespace csl {
 
 
     template<>
-    int MSMatch< FW_BW >::query( const uchar* pattern, ResultSet_if& output ) {
+    inline int MSMatch< FW_BW >::query( const uchar* pattern, ResultSet_if& output ) {
 	output_ = &output;
 	strcpy( (char*)pattern_, (const char*)pattern );
 	
@@ -235,7 +233,7 @@ namespace csl {
     
 
     template<>
-    void MSMatch< STANDARD >::intersect( int dicPos, LevDEA::Pos levPos, int depth ) {
+    inline void MSMatch< STANDARD >::intersect( int dicPos, LevDEA::Pos levPos, int depth ) {
 	static int newDicPos;
 	static LevDEA::Pos newLevPos;
 	size_t c;
@@ -260,7 +258,7 @@ namespace csl {
     }
 
     template<>
-    int MSMatch< STANDARD >::query( const uchar* pattern, ResultSet_if& output ) {
+    inline int MSMatch< STANDARD >::query( const uchar* pattern, ResultSet_if& output ) {
 	output_ = &output;
 	strcpy( (char*)pattern_, (char*)pattern );
 
@@ -274,12 +272,6 @@ namespace csl {
 
 	return 0;
     }
-
-    
-
-
-
-
 } // eon
 
 #endif

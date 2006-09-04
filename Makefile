@@ -4,9 +4,9 @@ OBJS = ./objs
 LIB = ./lib
 ######## COMPILER AND FLAGS ###################
 #GCC = g++ -O3 -Wall -fpermissive # use this for optimal speed results
-GCC = g++ -O3 -Wall # use this for optimal speed results
+#GCC = g++ -O3 -Wall # use this for optimal speed results
 #GCC = g++ -Wall --no-inline
-#GCC = g++ -ggdb -Wall # use this if you want to use the gdb debugger
+GCC = g++ -ggdb -Wall # use this if you want to use the gdb debugger
 
 AR = ar cru
 RANLIB = ranlib
@@ -87,7 +87,7 @@ $(BIN)/trieToDot: ./Trie/trieToDot.cxx $(OBJS)/Trie.o $(TRANSTABLE_FILES) $(OBJS
 $(BIN)/compileTrie: ./Trie/compileTrie.cxx $(OBJS)/Trie.o $(OBJS)/Alphabet.o $(TRANSTABLE_FILES) $(TRIE_HEADERS) $(ALPHABET_HEADERS)
 	$(GCC) -o $(BIN)/compileTrie ./Trie/compileTrie.cxx $(OBJS)/Trie.o $(OBJS)/Alphabet.o
 
-$(BIN)/compileMD: ./MinDic/compileMD.cxx $(TRANSTABLE_FILES) $(MINDIC_HEADERS) $(OBJS)/Alphabet.o
+$(BIN)/compileMD: ./MinDic/compileMD.cxx $(TRANSTABLE_FILES)  $(OBJS)/MinDic.o $(MINDIC_HEADERS) $(OBJS)/Alphabet.o
 	$(GCC) -o $(BIN)/compileMD ./MinDic/compileMD.cxx $(OBJS)/Alphabet.o $(OBJS)/MinDic.o
 
 $(BIN)/compilePD: ./StructMatch/PermDic/compilePD.cxx $(OBJS)/PermDic.o $(TRANSTABLE_FILES) $(OBJS)/MinDic.o $(OBJS)/Alphabet.o
@@ -96,8 +96,8 @@ $(BIN)/compilePD: ./StructMatch/PermDic/compilePD.cxx $(OBJS)/PermDic.o $(TRANST
 $(BIN)/extractTrie: ./Trie/extractTrie.cxx $(TRANSTABLE_FILES) $(OBJS)/Trie.o $(OBJS)/Alphabet.o
 	$(GCC) -o $(BIN)/extractTrie ./Trie/extractTrie.cxx $(OBJS)/Trie.o $(OBJS)/Alphabet.o
 
-$(BIN)/extractMD: ./MinDic/extractMD.cxx $(TRANSTABLE_FILES) $(MINDIC_HEADERS) $(OBJS)/Alphabet.o
-	$(GCC) -o $(BIN)/extractMD ./MinDic/extractMD.cxx $(OBJS)/Alphabet.o  $(OBJS)/MinDic.o
+$(BIN)/extractMD: ./MinDic/extractMD.cxx $(TRANSTABLE_FILES) $(MINDIC_HEADERS) $(OBJS)/MinDic.o $(OBJS)/Alphabet.o
+	$(GCC) -o $(BIN)/extractMD ./MinDic/extractMD.cxx $(OBJS)/Alphabet.o $(OBJS)/MinDic.o
 
 $(BIN)/bestMatch: ./BestMatch/bestMatch.cxx $(OBJS)/BestMatch.o $(OBJS)/ResultSet.o $(OBJS)/LevNDEA.o $(TRANSTABLE_FILES) $(MINDIC_FILES) $(OBJS)/Alphabet.o
 	$(GCC) -o $(BIN)/bestMatch ./BestMatch/bestMatch.cxx $(OBJS)/BestMatch.o $(OBJS)/ResultSet.o $(OBJS)/LevNDEA.o $(OBJS)/Alphabet.o
@@ -118,8 +118,8 @@ completeMatch_files = ./StructMatch/CompleteMatch/completeMatch.cxx $(OBJS)/Comp
 $(BIN)/completeMatch: $(completeMatch_files) $(TRANSTABLE_FILES)
 	$(GCC) $(completeMatch_files) -o $(BIN)/completeMatch
 
-permuteMatch_files = ./StructMatch/PermuteMatch/permuteMatch.cxx $(OBJS)/PermuteMatch.o $(OBJS)/Alphabet.o $(OBJS)/Trie.o $(OBJS)/MSMatch.o $(OBJS)/LevDEA.o $(OBJS)/ResultSet.o
-$(BIN)/permuteMatch: $(permuteMatch_files) $(TRANSTABLE_FILES)
+permuteMatch_files = ./StructMatch/PermuteMatch/permuteMatch.cxx $(OBJS)/PermuteMatch.o $(OBJS)/Alphabet.o $(OBJS)/Trie.o $(OBJS)/LevDEA.o $(OBJS)/MinDic.o
+$(BIN)/permuteMatch: $(permuteMatch_files) $(TRANSTABLE_FILES)  $(MSMATCH_HEADERS) 
 	$(GCC) $(permuteMatch_files) -o $(BIN)/permuteMatch
 
 

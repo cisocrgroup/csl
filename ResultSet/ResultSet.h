@@ -36,11 +36,12 @@ namespace csl {
 	 * add another item to the ResultSet
 	 */
 	void push( const uchar* str, int annotation ) {
-	    if ( size_ > ( Global::LevMaxNrOfResults - 2 ) ) {
+	    if ( size_ > ( Global::LevMaxNrOfResults - 1 ) ) {
 		throw exceptions::bufferOverflow( "ResultSet: ResultSet overflow." );
 	    }
 	    else {
-		list_[size_].set( str, annotation );
+		listBuffer_[size_].set( str, annotation );
+		list_[size_] = &listBuffer_[size_];
 		++size_;
 	    }
 	}
@@ -76,30 +77,36 @@ namespace csl {
 
 	const Item& operator[]( int i ) const {
 	    assert( i < size_ );
-	    return list_[i];
+	    return *( list_[i] );
 	}
 
 
 	/**
 	 * @attention the strcmp is the standard one, not the one that depends on the Alphabet-object
 	 */
-	static bool cmp( const Item& a, const Item& b ) {
-	    return strcmp( (char*)a.getStr(), (char*)b.getStr() ) < 0; 
+	static bool cmp( const Item* a, const Item* b ) {
+	    return strcmp( (char*)a->getStr(), (char*)b->getStr() ) < 0; 
+	}
+
+	static bool is_equal( const Item* a, const Item* b ) {
+	    return( strcmp( (char*)a->getStr(), (char*)b->getStr() ) == 0 ); 
 	}
 
 	void sort() {
 	    std::sort( list_, list_ + size_, cmp );
 	}
 
-	void unique() {
-	    size_ = std::unique( list_, list_ + size_ ) - list_;
+	void sortUnique() {
+	    sort();
+	    size_ = std::unique( list_, list_ + size_, is_equal ) - list_;
 	}
-
+	
     private:
 	const Alphabet& alph_;
 	int size_;
-	Item list_[Global::LevMaxNrOfResults];
-  };
+	Item* list_[Global::LevMaxNrOfResults];
+	Item listBuffer_[Global::LevMaxNrOfResults];
+    };
 
   /// provide a nice print for a ResultSet::Item
   std::ostream& operator<<( std::ostream& os, const csl::ResultSet::Item& item );

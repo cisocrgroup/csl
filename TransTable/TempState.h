@@ -22,7 +22,7 @@ namespace csl {
     template<>
     class TempState< BASIC > {
     private:
-	uchar* transitions_;
+	uint_t* transitions_;
 	const int alphSize_;
 
 	std::vector< int > annotations_; 
@@ -31,7 +31,7 @@ namespace csl {
     
     public:
 	TempState( int alphSize ) : alphSize_( alphSize ) {
-	    transitions_ = new uchar[alphSize_ + 1];
+	    transitions_ = new uint_t[alphSize_ + 1];
 	    reset();
 	}
     
@@ -39,32 +39,17 @@ namespace csl {
 	    delete(transitions_);
 	}
 
-	/**
-	   @deprecated
-	*/
-	inline int edge(int c) const {
-	    std::cerr<<"edge(int) is deprecated - use getTransTarget(int) instead."<<std::endl;
-	    return getTransTarget(c);
-	}
-
-	inline int getTransTarget(int c) const {
+	inline uint_t getTransTarget(int c) const {
 	    assert(c<(alphSize_ + 1));
 	    return transitions_[c];
 	}
 
 	/**
-	   @deprecated
-	*/
-	inline void addEdge(uchar label, int target) {
-	    std::cerr<<"addEdge(uchar, int) is deprecated - use addTransition(int) instead."<<std::endl;
-	    addTransition(label, target);
-	}
-	/**
 	   add an outgoing transition
 	   @param label
 	   @param target
 	*/
-	inline void addTransition(uchar label, int target) {
+	inline void addTransition(uchar label, uint_t target) {
 	    assert(label<(alphSize_ + 1));
 	    transitions_[label] = target;
 	}
@@ -84,7 +69,7 @@ namespace csl {
 	    return annotations_;
 	}
 
-	inline int getNrOfAnnotations() const {
+	inline size_t getNrOfAnnotations() const {
 	    return annotations_.size();
 	}
 

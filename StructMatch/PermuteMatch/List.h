@@ -118,12 +118,14 @@ class List : public LevFilter::ResultSet_if  { // of class PermuteMatch
 	curCol_ = col;
     }
 
-    bool push(const uchar* str, int value) {
-	if(size_ >= Global::Perm::listSize) {
-	    return false;
+    void push(const uchar* str, int value) {
+	if ( size_ > ( Global::Perm::listSize - 1 ) ) {
+	    throw exceptions::bufferOverflow( "ResultSet: ResultSet overflow." );
 	}
-	at(size_++).set(str, value, curCol_);
-	return true;
+	else {
+	    at(size_).set(str, value, curCol_);
+	    ++size_;
+	}
     }
 
     void reset() {

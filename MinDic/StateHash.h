@@ -1,4 +1,8 @@
 
+/**
+ * Statehash is a hashtable to store states of a MinDic during dictionary construction.
+ * This allows an efficient check if a new state is equivalent to an existing one.
+ */
 class StateHash {
  private:
     TransTable_t& trans_;

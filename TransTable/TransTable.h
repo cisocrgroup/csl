@@ -227,7 +227,6 @@ namespace csl {
 	size_t lengthOfSusoStrings_;
 	Hash* ftHash_;
 
-	// to be set in the constructor. We need a terminating \0 her as 9th byte
 	const bits64 magicNumber_;
 	typedef struct {
 	    bits64 magicNumber_;

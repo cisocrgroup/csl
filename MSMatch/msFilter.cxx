@@ -39,8 +39,7 @@ int main( int argc, char** argv ) {
 
 	    // print all hits
 	    std::cout<<list.getSize()<<" hits."<<std::endl;
- 	    list.sort();
- 	    list.unique();
+  	    list.sortUnique();
 	    std::cout<<list.getSize()<<" hits."<<std::endl;
 // 	    int i;
 // 	    for ( i = 0;i < list.getSize();++i ) {

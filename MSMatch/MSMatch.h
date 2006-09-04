@@ -54,18 +54,18 @@ namespace csl {
 	uchar word_[Global::lengthOfWord]; ///< the word that is currently constructed
 	ResultSet_if* output_; ///< the currently used output container
 
-	void intersect( int dicPos, LevDEA::Pos levPos, int depth );
-	void intersectFirst( int dicPos, LevDEA::Pos levPos, int depth );
-	void intersectSecond( int dicPos, LevDEA::Pos levPos, int depth );
+	inline void intersect( int dicPos, LevDEA::Pos levPos, int depth );
+	inline void intersectFirst( int dicPos, LevDEA::Pos levPos, int depth );
+	inline void intersectSecond( int dicPos, LevDEA::Pos levPos, int depth );
 
-	void queryCases_1();
-	void queryCases_2();
-	void queryCases_3();
+	inline void queryCases_1();
+	inline void queryCases_2();
+	inline void queryCases_3();
 
     public:
-	MSMatch( const Alphabet& init_alphabet, size_t k, char* compdicFile, char* compdicRevFile = 0 );
+	inline MSMatch( const Alphabet& init_alphabet, size_t k, char* compdicFile, char* compdicRevFile = 0 );
 	~MSMatch();
-	int query( const uchar* pattern, ResultSet_if& output );
+	inline int query( const uchar* pattern, ResultSet_if& output );
 	inline size_t maxResults() const {
 	    return MAX_RESULTS;
 	}
