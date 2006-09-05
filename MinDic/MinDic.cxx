@@ -6,31 +6,36 @@
 
 namespace csl {
 
-    MinDic::MinDic( const Alphabet& alph, char* binFile ) : TransTable_t( alph.size(), binFile ),
-							     alph_( alph ) {
+    MinDic::MinDic( const Alphabet& alph ) : TransTable_t( alph.size() ),
+					     alph_( alph ) {
     }
-
+    
 
     void MinDic::initConstruction() {
 	TransTable_t::initConstruction();
 	tempStates_ =( TempState_t* ) malloc( Global::lengthOfStr * sizeof( TempState_t ) ); // allocate memory for all tempStates
 	for( int i = 0; i < Global::lengthOfStr; ++i ) {
-	    new( &( tempStates_[i] ) ) TempState_t( alph_.size() ); // call constructor for all tempStates
+	    new( &( tempStates_[i] ) ) TempState_t( alph_ ); // call constructor for all tempStates
 	}
 
 	hashtable_ = new StateHash( *this );
-	count_ = 0;
-	*lastKey = 0; // reset the string to ""
+
+	sizeOfAnnotationBuffer_ = 100000;
+	annotations_ = new int[sizeOfAnnotationBuffer_];
+	
+	
+	header_.nrOfKeys_ = 0;
+	*lastKey_ = 0; // reset the string to ""
     }
 
     void MinDic::finishConstruction() {
 	// store the very last word
-	int i = strlen( ( char* ) lastKey );
+	int i = strlen( ( char* ) lastKey_ );
 	int storedState = 0;
 	for( ; i >= 0; --i ) {
 	    storedState = replaceOrRegister( tempStates_[i] );
 	    tempStates_[i].reset();
-	    if( i > 0 ) tempStates_[i-1].addTransition( alph_.code( lastKey[i-1] ), storedState, tempStates_[i].getPhValue() );
+	    if( i > 0 ) tempStates_[i-1].addTransition( alph_.code( lastKey_[i-1] ), storedState, tempStates_[i].getPhValue() );
 	}
 
 	setRoot( storedState ); // declare tempStates_[0] to be the root
@@ -59,8 +64,8 @@ namespace csl {
 	while( fileHandle.getline(( char* ) line, Global::lengthOfLongStr ) )  {
 	    addToken( line );
 
-	    if( !( count_ %  10000 ) ) {
-		std::cerr << "\r" << count_ << " tokens processed." << std::flush;
+	    if( !( header_.nrOfKeys_ %  10000 ) ) {
+		std::cerr << "\r" << header_.nrOfKeys_ << " tokens processed." << std::flush;
 	    }
 	}
 
@@ -69,75 +74,102 @@ namespace csl {
 	finishConstruction();
 
 	// dump memory to file
-	createBinary( compFile );
+	FILE* fo = fopen( compFile, "wb" );
+	writeToFile( fo );
+	fclose( fo );
     }
 
 
-    void MinDic::addToken( const uchar* key ) {
+    void MinDic::addToken( const uchar* input ) {
 	static int commonPrefix, i, lengthOfKey;
 	static int storedState;
 
-	lengthOfKey = strlen(( char* ) key );
-	if( lengthOfKey > Global::lengthOfStr ) {
-	    std::cerr << "Error: Automaton: Global::string_length sets the maximum string length for an entry of a trie: " << Global::lengthOfStr << std::endl;
-	}
+//	printf("input: %s\n", input );
+	/////////////////// PARSE THE INPUT STRING
+	uchar *c;
+	c = ( uchar* )strchr( ( char* )input, Global::keyValueDelimiter );
 
+	if( c ) {
+	    *c = 0;
+	    strcpy( (char*)key_, (char*)input );
+	    valueString_ = ( c + 1 );
+	} else { // no values given
+	    strcpy( (char*)key_, (char*)input );
+	    valueString_ = 0;
+	}
+	lengthOfKey = strlen( ( char* )key_ );
+	if( lengthOfKey > Global::lengthOfStr ) {
+	    throw exceptions::bufferOverflow( "Trie.cxx: Global::string_length sets the maximum string length for an entry of a trie. Maximum violated" );
+	}
+	
 	// check alphabetical order
-	if( *key && alph_.strcmp( lastKey, key ) > 0 ) {
+	if( *key_ && alph_.strcmp( lastKey_, key_ ) > 0 ) {
 	    std::cout << "Alphabetical order violated:" << std::endl
-		      << lastKey << std::endl
-		      << key << std::endl;
+		      << lastKey_ << std::endl
+		      << key_ << std::endl;
 	    exit( 1 );
 	}
 
-	///////////////////// store suffix of lastKey
+	///////////////////// store suffix of lastKey_
 	commonPrefix = 0;
-	while( key[commonPrefix] == lastKey[commonPrefix] && key[commonPrefix] ) {
+	while( key_[commonPrefix] == lastKey_[commonPrefix] && key_[commonPrefix] ) {
 	    ++commonPrefix;
 	}
 	// e.g., commonPrefix==2 if first two letters of both words are equal
 
-	i = strlen(( char* ) lastKey );
+	i = strlen(( char* ) lastKey_ );
 	for( ; i > commonPrefix; --i ) {
 	    storedState = replaceOrRegister( tempStates_[i] );
-	    tempStates_[i-1].addTransition( alph_.code( lastKey[i-1] ), storedState, tempStates_[i].getPhValue() );
+	    tempStates_[i-1].addTransition( alph_.code( lastKey_[i-1] ), storedState, tempStates_[i].getPhValue() );
 	    tempStates_[i].reset();
 	}
 
-	//////////////////// set final state of key
+	//////////////////// set final state of key_
 	tempStates_[lengthOfKey].setFinal( true );
+	
+	// store value
+	if( valueString_ ) {
+	    // see that annotation buffer is large enough
+	    if( sizeOfAnnotationBuffer_ < ( header_.nrOfKeys_ + 1 ) ) {
+		sizeOfAnnotationBuffer_ *= 2;
+		annotations_ = (int*)realloc( annotations_, sizeOfAnnotationBuffer_ );
+	    }
+	    annotations_[header_.nrOfKeys_] = atoi( (char*)valueString_ );
+	}
 
-	strcpy(( char* ) lastKey,( char* ) key );
-	++count_;
+	strcpy(( char* ) lastKey_,( char* ) key_ );
+	++(header_.nrOfKeys_);
     }
-
+    
     void MinDic::printDic() const {
 	count_ = 0;
-	printDic_rec( getRoot(), 0 );
+	printDic_rec( getRoot(), 0, 0 );
     }
 
-    void MinDic::printDic_rec( int pos, int depth ) const {
+    void MinDic::printDic_rec( int pos, int depth, size_t perfHashValue ) const {
 	int newPos;
 	static uchar w[Global::lengthOfStr];
-
-	TransIterator trans = getTransIterator( pos );
-	while( trans.isValid() ) {
-	    if(( newPos = walk( pos, *trans ) ) ) {
-		w[depth] = alph_.decode( *trans );
+	size_t newPerfHashValue;
+	
+	const uchar* transitions = getSusoString( pos );
+	while( *transitions ) {
+	    newPerfHashValue = perfHashValue;;
+	    if( ( newPos = walkPerfHash( pos, *transitions, newPerfHashValue ) ) ) {
+		w[depth] = alph_.decode( *transitions );
 
 		if( isFinal( newPos ) ) {
 		    w[depth+1] = 0;
-		    printf( "%s\n",( char* ) w );
+		    printf( "%s#%d\n",( char* ) w, getAnn( newPerfHashValue ) );
 
 		    if( ( ++count_ % 100000 ) == 0 ) fprintf( stderr, "%d\n", count_ );
 		} // if isFinal
-		printDic_rec( newPos, depth + 1 );
+		printDic_rec( newPos, depth + 1, newPerfHashValue );
 
 	    } // if couldWalk
 	    else {
-		throw exceptions::badDictFile( "suso-string seems to be corrupt." ); 
+		throw exceptions::badDictFile( "suso-string seems to be corrupted." ); 
 	    }
-	    ++trans;
+	    ++transitions;
 	} // while
     } // end of method
 

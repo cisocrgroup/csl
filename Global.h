@@ -122,6 +122,12 @@ namespace csl {
 	    bufferOverflow( const std::string msg ) : cslException( msg ) {}
 	};
 
+	class outOfRange : public cslException {
+	public:
+	    outOfRange() {}
+	    outOfRange( const std::string msg ) : cslException( msg ) {}
+	};
+
     };
 
 

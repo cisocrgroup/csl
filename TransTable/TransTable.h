@@ -35,7 +35,7 @@ namespace csl {
 	 * @param binFile a binary file conaining an automaton
 	 *
 	 */
-	inline TransTable( size_t alphSize, char* binFile = NULL );
+	inline TransTable( size_t alphSize );
 
 	/**
 	 * Destructor
@@ -49,11 +49,21 @@ namespace csl {
 	 */
 	inline bool loadBinary( const char* binFile );
 
+	inline void loadFromFile( FILE* fi );
+
 	/**
 	 * Dumps the automaton into a file
 	 * @param binFile filename to dump the automaton into (usually .dic)
 	 */
 	inline void createBinary( char* binFile );
+
+	/**
+	 * 
+	 */
+	void writeToFile( FILE* fo ) const;
+
+	size_t getSizeOnDisk() const;
+
 
 	/**
 	 * Call this method before adding the first state to the automaton
@@ -238,12 +248,13 @@ namespace csl {
 	    bits64 magicNumber_;
 	    CellType cType_;
 	    size_t offsetCells_;
-	    size_t offsetSusoStrings_;
 	    size_t nrOfCells_;
+	    size_t offsetSusoStrings_;
+	    size_t lengthOfSusoStrings_;
 	}
 	Header;
 
-	Header* header_;
+	Header header_;
 
 	/**
 	   The number of states. Note that this value is updated during construction

@@ -7,23 +7,24 @@ namespace csl {
 
 
     template< CellType CellTypeValue >
-    TransTable< CellTypeValue >::TransTable( size_t alphSize, char* binFile ) : magicNumber_( 46388436  ) {
+    TransTable< CellTypeValue >::TransTable( size_t alphSize ) : magicNumber_( 46388436  ) {
 	alphSize_ = alphSize;
 
 	cells_ = 0;
 	susoStrings_ = 0;
 	ftHash_ = 0;
 
-	if ( binFile ) { // binary file was given
-	    nrOfCells_ = -1;
-	    loadBinary( binFile );
-	}
+// 	if ( binFile ) { // binary file was given
+// 	    nrOfCells_ = -1; // WHY THAT???
+// 	    loadBinary( binFile );
+// 	}
     }
 
     template< CellType CellTypeValue >
     TransTable< CellTypeValue >::~TransTable() {
 	// if( cells_ ) free( cells_ );
 	// if( susoStrings_ ) free( susoStrings_ );
+	// header ?
     }
 
     template< CellType CellTypeValue >
@@ -50,39 +51,59 @@ namespace csl {
 	nrOfStates_ = 0;
 	firstFreeCell_ = 1; // cells_[0] is never used
 	sizeOfUsedCells_ = 1; // cells_[0] is never used
-	header_ = new Header();
-	header_->magicNumber_ = magicNumber_; //magicNumber_;
-	header_->cType_ = CellTypeValue;
-	header_->offsetCells_ = sizeof( Header );
-	header_->offsetSusoStrings_ = 0;
+
+	header_.magicNumber_ = magicNumber_;
+	header_.cType_ = CellTypeValue;
+	header_.offsetCells_ = sizeof( Header );
+	header_.offsetSusoStrings_ = 0;
+	header_.lengthOfSusoStrings_ = 0;
 	susoStrings_ = 0;
 
 	if ( CellTypeValue == TOKDIC ) {
-	    lengthOfSusoStrings_ = 0;
-	    ftHash_ = new Hash( 10000, susoStrings_, lengthOfSusoStrings_ );
+	    ftHash_ = new Hash( 10000, susoStrings_, header_.lengthOfSusoStrings_ );
 	}
     }
 
     template< CellType CellTypeValue >
     void TransTable< CellTypeValue >::finishConstruction() {
-	header_->nrOfCells_ = nrOfCells_;
+	header_.nrOfCells_ = sizeOfUsedCells_;
 
 	if ( CellTypeValue == TOKDIC ) { // not very nice
-	    header_->offsetSusoStrings_ = header_->offsetCells_ + ( sizeOfUsedCells_ * sizeof( Cell_t ) );
-	    lengthOfSusoStrings_ = ftHash_->getLengthOfKeyStrings();
+	    header_.offsetSusoStrings_ = header_.offsetCells_ + ( sizeOfUsedCells_ * sizeof( Cell_t ) );
+	    header_.lengthOfSusoStrings_ = ftHash_->getLengthOfKeyStrings();
 	    delete( ftHash_ );
 	    ftHash_ = 0;
-	    // delete( header_ ); // this is a problem. Don't delete it at all for the moment
 	}
     }
 
+    
+    template< CellType CellTypeValue >
+    void TransTable< CellTypeValue >::loadFromFile( FILE* fi ) {
+	fread( &header_, sizeof( Header ), 1, fi );
+
+	if ( ( header_.magicNumber_ != magicNumber_ ) ) {
+	    throw exceptions::badDictFile( "TransTable: Magic number comparison failed.\n" );
+	}
+
+	if ( header_.cType_ != CellTypeValue ) {
+	    std::cerr << header_.cType_ << "<->" << CellTypeValue << std::endl;
+	    throw exceptions::badDictFile( "csl::TransTable - File is incompatible to dictionary type.\n" );
+	}
+
+	cells_ = (Cell_t*) malloc( header_.nrOfCells_ * sizeof( Cell_t ) );
+	fread( cells_, sizeof( Cell_t ), header_.nrOfCells_, fi );
+
+	susoStrings_ = (uchar*) malloc( header_.lengthOfSusoStrings_ * sizeof( uchar ) );
+	fread( susoStrings_, sizeof( uchar ), header_.lengthOfSusoStrings_, fi );
+	
+	sizeOfUsedCells_ = nrOfCells_ = header_.nrOfCells_;
+    }
+    
     template< CellType CellTypeValue >
     bool TransTable< CellTypeValue >::loadBinary( const char* binFile ) {
 	FILE * fi;
-	struct stat f_stat;
 
 	std::cerr << "TransTable: Reading " << binFile << " ... " << std::flush;
-	stat( binFile, &f_stat );
 	fi = fopen( binFile, "rb" );
 	if ( !fi ) {
 	    throw exceptions::badFileHandle( "Couldn't open file '" +
@@ -90,29 +111,9 @@ namespace csl {
 					     "' for reading." );
 	}
 
-	uchar* file_ = ( uchar* ) malloc( f_stat.st_size );
-	fread( file_, 1, f_stat.st_size, fi );
+	loadFromFile( fi );
 	fclose( fi );
-//  for( size_t i=0; i < (size_t)f_stat.st_size; ++i ) {
-//      printf("%d: %d\n",i,file_[i]);
-//  }
 
-	Header* header = ( Header* ) file_;
-	if ( ( header->magicNumber_ != magicNumber_ ) ) {
-	    throw exceptions::badDictFile( "Magic number comparison failed.\n" );
-	}
-
-	if ( header->cType_ != CellTypeValue ) {
-	    std::cerr << header->cType_ << "<->" << CellTypeValue << std::endl;
-	    throw exceptions::badDictFile( "csl::TransTable - File is incompatible to dictionary type.\n" );
-	}
-	cells_ = ( Cell_t* ) ( file_ + header->offsetCells_ );
-	susoStrings_ = ( uchar* ) ( file_ + header->offsetSusoStrings_ );
-
-	nrOfCells_ = header->nrOfCells_;
-	sizeOfUsedCells_ = nrOfCells_;
-
-	std::cerr << "Ok: cells is " << header->offsetCells_ << std::endl;
 	return true;
     }
 
@@ -208,7 +209,7 @@ namespace csl {
 	    }
 	}
 
-	// update lastUsedCell
+	// update sizeOfUsedCells_
 	sizeOfUsedCells_ = std::max( sizeOfUsedCells_, ( slot + alphSize_ + 2 ) );
 
 	//update firstFreeCell
@@ -227,18 +228,36 @@ namespace csl {
 	}
 
 	std::cerr << "Dumping automaton to " << compFile << " ... ";
-	fwrite( header_, sizeof( Header ), 1, fo );
-	fwrite( cells_, sizeof( Cell_t ), sizeOfUsedCells_, fo );
-	fwrite( susoStrings_, sizeof( uchar ), lengthOfSusoStrings_, fo );
+	writeToFile( fo );
 	fclose( fo );
 	std::cerr << "Ok" << std::endl;
     }
 
+    template< CellType CellTypeValue  >
+    void TransTable< CellTypeValue >::writeToFile( FILE* fo ) const {
+	if ( !fo ) {
+	    throw exceptions::badFileHandle( "TransTable: Couldn't write to filehandle " );
+	}
+	std::cerr << "Writing TransTable"<<std::endl;
+	fwrite( &header_, sizeof( Header ), 1, fo );
+	fwrite( cells_, sizeof( Cell_t ), sizeOfUsedCells_, fo );
+	
+	fwrite( susoStrings_, sizeof( uchar ), header_.lengthOfSusoStrings_, fo );
+    }
+
+    template< CellType CellTypeValue  >
+    size_t TransTable< CellTypeValue >::getSizeOnDisk() const {
+	return ( 
+	    sizeof( Header ) +
+	    ( sizeof( Cell_t ) * sizeOfUsedCells_ ) + 
+	    ( sizeof( uchar ) * header_.lengthOfSusoStrings_ )
+	    );
+    }
 
 
     /**
-       find slot to store state
-    */
+     * find slot to store state
+     */
     template< CellType CellTypeValue >
     int TransTable< CellTypeValue >::findSlot( const TempState_t& state ) {
 	size_t slot = firstFreeCell_ - 1; // is incremented again at beginning of loop
@@ -250,7 +269,6 @@ namespace csl {
 	while ( !mightFit ) {
 	    do {
 		++slot;
-//  printf("Try at %d\n", slot);
 		while ( ( slot + nrOfAnnotations + alphSize_ + 1 ) > nrOfCells_ ) { // okay???
 		    allocCells( nrOfCells_ * 2 );
 		}
