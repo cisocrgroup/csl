@@ -208,7 +208,7 @@ namespace csl {
 		cells_[slot + i].setTrans( i, state.getTransTarget( i ), state.getTransPhValue( i ) );
 	    }
 	}
-
+	
 	// update sizeOfUsedCells_
 	sizeOfUsedCells_ = std::max( sizeOfUsedCells_, ( slot + alphSize_ + 2 ) );
 
