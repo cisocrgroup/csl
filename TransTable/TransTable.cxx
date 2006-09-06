@@ -60,7 +60,7 @@ namespace csl {
 	susoStrings_ = 0;
 
 	if ( CellTypeValue == TOKDIC ) {
-	    ftHash_ = new Hash( 10000, susoStrings_, header_.lengthOfSusoStrings_ );
+	    ftHash_ = new Hash( 100000, susoStrings_, header_.lengthOfSusoStrings_ );
 	}
     }
 
@@ -77,6 +77,24 @@ namespace csl {
     }
 
     
+    template< CellType CellTypeValue >
+    bool TransTable< CellTypeValue >::loadFromFile( const char* binFile ) {
+	FILE * fi;
+
+	std::cerr << "TransTable: Reading " << binFile << " ... " << std::flush;
+	fi = fopen( binFile, "rb" );
+	if ( !fi ) {
+	    throw exceptions::badFileHandle( "Couldn't open file '" +
+					     std::string( binFile ) +
+					     "' for reading." );
+	}
+
+	loadFromFile( fi );
+	fclose( fi );
+
+	return true;
+    }
+
     template< CellType CellTypeValue >
     void TransTable< CellTypeValue >::loadFromFile( FILE* fi ) {
 	fread( &header_, sizeof( Header ), 1, fi );
@@ -99,23 +117,6 @@ namespace csl {
 	sizeOfUsedCells_ = nrOfCells_ = header_.nrOfCells_;
     }
     
-    template< CellType CellTypeValue >
-    bool TransTable< CellTypeValue >::loadBinary( const char* binFile ) {
-	FILE * fi;
-
-	std::cerr << "TransTable: Reading " << binFile << " ... " << std::flush;
-	fi = fopen( binFile, "rb" );
-	if ( !fi ) {
-	    throw exceptions::badFileHandle( "Couldn't open file '" +
-					     std::string( binFile ) +
-					     "' for reading." );
-	}
-
-	loadFromFile( fi );
-	fclose( fi );
-
-	return true;
-    }
 
 
     /**

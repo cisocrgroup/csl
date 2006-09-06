@@ -102,7 +102,8 @@ namespace csl {
 	TempState_t *tempStates_;
 	StateHash* hashtable_;
 
-	uchar key_[Global::lengthOfStr];
+//	uchar key_[Global::lengthOfStr];
+	const uchar* key_;
 	uchar lastKey_[Global::lengthOfLongStr];
 	uchar* valueString_;
 

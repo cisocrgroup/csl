@@ -91,10 +91,12 @@ namespace csl {
 
 	if( c ) {
 	    *c = 0;
-	    strcpy( (char*)key_, (char*)input );
+//	    strcpy( (char*)key_, (char*)input );
+	    key_ = input;
 	    valueString_ = ( c + 1 );
 	} else { // no values given
-	    strcpy( (char*)key_, (char*)input );
+	    key_ = input;
+//	    strcpy( (char*)key_, (char*)input );
 	    valueString_ = 0;
 	}
 	lengthOfKey = strlen( ( char* )key_ );

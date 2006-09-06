@@ -98,7 +98,7 @@ namespace csl {
     template<>
     class TempState< TOKDIC > {
     private:
-	typedef std::pair<int, int> Transition;
+	typedef std::pair< uint_t, size_t > Transition;
 	Transition* transitions_;
 	uchar transStr_[Global::maxNrOfChars + 1]; // +1 for a terminating \0
 	const Alphabet& alph_;
@@ -150,20 +150,25 @@ namespace csl {
 	 */
 	inline void addTransition( uchar label, uint_t target, size_t targetPhValue ) {
 	    assert( label < ( alph_.size() + 1 ) );
+	    
+	    if( transitions_[label].first ) throw exceptions::cslException("TempState: Transition multiply defined");
+	    
 	    // assert that new labels are coming in alphabetical order
 	    // that's important for transStr_
-// 	    if( ( sizeOfLabelStr_ > 0 ) && 
-// 		( transStr_[sizeOfLabelStr_-1] >= label ) ) {
-// 		printf("label= %c\n", alph_.decode( label ) );
+	    if( ( sizeOfLabelStr_ > 0 ) && 
+		( transStr_[sizeOfLabelStr_-1] >= label ) ) {
+		printf("label= %c\n", alph_.decode( label ) );
 
-// 		for( uchar* c= transStr_; *c; ++c ) {
-// 		    printf(">%c\n", alph_.decode( *c ) );
-// 		}
-// 		throw exceptions::cslException("weiss nicht");
-// 	    }
+		for( uchar* c= transStr_; *c; ++c ) {
+
+		    printf(">%c\n", alph_.decode( *c ) );
+		}
+		throw exceptions::cslException("TempState: new transition violating alphabetical order");
+		exit(1);
+	    }
+
 
 	    transStr_[sizeOfLabelStr_++] = label;
-
 	    transitions_[label].first = target;
 	    transitions_[label].second = phSum_;
 

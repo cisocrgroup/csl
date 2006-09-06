@@ -6,7 +6,8 @@
 
 namespace csl {
 
-    Trie::Trie( const Alphabet& alph, char* binFile ) : TransTable< BASIC >( alph.size(), binFile ), alph_( alph ) {
+    Trie::Trie( const Alphabet& alph, char* binFile ) : TransTable< BASIC >( alph.size() ), alph_( alph ) {
+	if( binFile ) loadFromFile( binFile );
 	annotateByteOffset_ = false;
     }
 

@@ -13,13 +13,13 @@ namespace csl {
     class PermuteMatch {
     private:
 #include "./List.h"
-	Alphabet alph;
+	const Alphabet& alph_;
 
-	
+
 	// Uncomment only one of the following two lines
 	// A more comfortable way to choose between Bestmatch and Levquery would be appreciated ...
 	//    BestMatch levquery;
-	MSMatch levquery;
+	MSMatch< STANDARD > levquery_;
 
 	Trie db;
 	List list_;
@@ -35,22 +35,22 @@ namespace csl {
 	uchar charResults[Global::Perm::maxNrOfResults][Global::lengthOfStr]; // more or less: DEBUG!
 	int results[Global::Perm::maxNrOfResults];
 
-	void query_rec(int db_pos,int w_pos,int list_pos, bits32 col_bits,int depth);
+	void query_rec( int db_pos, int w_pos, int list_pos, bits32 col_bits, int depth );
 
     public:
-	PermuteMatch(Alphabet alph, char* db_file,char* dic_file,int dlev);
+	PermuteMatch( const Alphabet& alph, int dlev, char* db_file, char* dic_file, char* dic_file );
 
 
 	/// Sets findParts. Read the doc of the variable findParts for some info
-	void setFindParts(bool b) {
+	void setFindParts( bool b ) {
 	    findParts = b;
 	}
 
 	/// Sets minParts. Read the doc of the variable minParts for some info
-	void setMinParts(int m) {
-	    if(!findParts) 
-		std::cerr<<"Warning: OneListQuery: Tried to set minParts without findParts being activated"<<std::endl;
-	    
+	void setMinParts( int m ) {
+	    if ( !findParts )
+		std::cerr << "Warning: OneListQuery: Tried to set minParts without findParts being activated" << std::endl;
+
 	    minParts = m;
 	}
 
@@ -61,7 +61,7 @@ namespace csl {
 	   @param query The query-string
 	   @returns the number of results found
 	*/
-	int query(uchar* query);
+	int query( uchar* query );
 
 	inline const int* getResults() {
 	    return results;
@@ -69,17 +69,17 @@ namespace csl {
 
 	void printCharResults() { //DEBUG!
 	    int i;
-	    for(i=0;i<countCharResults;++i) {
-		std::cout<<"- "<<charResults[i]<<std::endl;
-	    }
+	    for ( i = 0;i < countCharResults;++i ) {
+		std::cout << "- " << charResults[i] << std::endl;
+      }
 
-	}
+    }
 
-	void printList() {
-	    list_.printList();
-	}
+    void printList() {
+      list_.printList();
+    }
 
-    };
+  };
 
 } // eon
 

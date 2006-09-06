@@ -4,9 +4,9 @@ OBJS = ./objs
 LIB = ./lib
 ######## COMPILER AND FLAGS ###################
 #GCC = g++ -O3 -Wall -fpermissive # use this for optimal speed results
-#GCC = g++ -O3 -Wall # use this for optimal speed results
-GCC = g++ -Wall --no-inline
-#GCC = g++ -ggdb -Wall # use this if you want to use the gdb debugger
+GCC = g++ -O3 -Wall # use this for optimal speed results
+#GCC = g++ -Wall --no-inline
+#GCC = g++ -ggdb --no-inline -Wall # use this if you want to use the gdb debugger
 
 AR = ar cru
 RANLIB = ranlib
@@ -110,8 +110,8 @@ getCandscore_files = ./getCandscore/getCandscore.cxx $(OBJS)/MSMatch.o $(OBJS)/R
 $(BIN)/getCandscore: $(getCandscore_files)
 	$(GCC) $(getCandscore_files) -o $(BIN)/getCandscore
 
-permuteMatch_old_files = ./PermuteMatch/permuteMatch.cxx $(OBJS)/PermuteMatch_old.o $(OBJS)/Alphabet.o $(OBJS)/MSMatch.o $(OBJS)/LevDEA.o
-$(BIN)/permuteMatch_old: $(permuteMatch_old_files)
+permuteMatch_old_files = ./PermuteMatch/permuteMatch.cxx $(OBJS)/PermuteMatch_old.o $(OBJS)/Alphabet.o $(OBJS)/LevDEA.o $(OBJS)/MinDic.o $(OBJS)/Trie.o
+$(BIN)/permuteMatch_old: $(permuteMatch_old_files) $(MSMATCH_HEADERS) 
 	$(GCC) $(permuteMatch_old_files) -o $(BIN)/permuteMatch_old
 
 completeMatch_files = ./StructMatch/CompleteMatch/completeMatch.cxx $(OBJS)/CompleteMatch.o $(OBJS)/Alphabet.o $(OBJS)/LevDEA.o

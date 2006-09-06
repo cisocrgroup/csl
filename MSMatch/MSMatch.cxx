@@ -8,9 +8,11 @@ namespace csl {
     template<>
     inline MSMatch< STANDARD >::MSMatch( const Alphabet& initAlphabet, size_t k, char* compdicFile, char* ) :
 	alph_( initAlphabet ),
-	dictFW_( initAlphabet, compdicFile ),
+	dictFW_( initAlphabet ),
 	dictBW_( initAlphabet ), // only as dummy
 	k_( k ) {
+	dictFW_.loadFromFile( compdicFile );
+
 	levDEASecond_ = new LevDEA( alph_, k_ );
 	
     }
@@ -18,9 +20,11 @@ namespace csl {
     template<>
     inline MSMatch< FW_BW >::MSMatch( const Alphabet& initAlphabet, size_t k, char* compdicFile, char* compdicRevFile ) :
 	alph_( initAlphabet ),
-	dictFW_( initAlphabet, compdicFile ),
-	dictBW_( initAlphabet, compdicRevFile ),
+	dictFW_( initAlphabet ),
+	dictBW_( initAlphabet ),
 	k_( k ) {
+	dictFW_.loadFromFile( compdicFile );
+	dictBW_.loadFromFile( compdicRevFile );
 	levDEAFirst_ = new LevDEA( alph_, 1 );
 	levDEASecond_ = new LevDEA( alph_, 1 );
     }
@@ -33,6 +37,24 @@ namespace csl {
 	static int newDicPos;
 	static LevDEA::Pos newLevPos;
 
+	// store w if node is final in dic and lev;
+	if( curDict_->isFinal( dicPos ) && ( levDEASecond_->getDistance( levPos ) >= minDistSecond_ ) ) {
+	    word_[depth] = 0;
+	    static uchar wordRev[Global::lengthOfWord];
+	    // push word and annotated value into the output list
+	    if( reverse_ ) {
+		for( int i = depth - 1, iRev = 0; i >=0; --i, ++iRev ) wordRev[iRev] = word_[i];
+		wordRev[depth] = 0;
+	    }
+	    // follow the word through the automaton once more to get the perfect hashing value
+	    static size_t perfHashValue; static uint_t dicPos2;
+	    perfHashValue = 0; dicPos2 = dictFW_.getRoot();
+	    for( uchar* c = ( (reverse_)? wordRev : word_); *c; ++c ) {
+		dicPos2 = dictFW_.walkPerfHash( dicPos2, alph_.code( *c ), perfHashValue );
+	    }
+	    output_->push( ( (reverse_)? wordRev : word_ ), dictFW_.getAnn( perfHashValue ) );
+	}
+
 	const uchar* c = curDict_->getSusoString( dicPos );
 	for( ; *c; ++c ) {
 	    if( ( newLevPos = levDEASecond_->walk( levPos, *c ) ).position() != -1 ) {
@@ -44,23 +66,6 @@ namespace csl {
 
 //  word_[depth+1]=0;std::cout<<"word="<<word<<std::endl;
 
-		// print w if node is final in dic and lev;
-		if( curDict_->isFinal( newDicPos ) && ( levDEASecond_->getDistance( newLevPos ) >= minDistSecond_ ) ) {
-		    word_[depth+1] = 0;
-		    static uchar wordRev[Global::lengthOfWord];
-		    // push word and annotated value into the output list
-		    if( reverse_ ) {
-			for( int i = depth, iRev = 0; i >=0; --i, ++iRev ) wordRev[iRev] = word_[i];
-			wordRev[depth+1] = 0;
-		    }
-		    // follow the word through the automaton once more to get the perfect hashing value
-		    static size_t perfHashValue; static uint_t dicPos2;
-		    perfHashValue = 0; dicPos2 = dictFW_.getRoot();
-		    for( uchar* c = ( (reverse_)? wordRev : word_); *c; ++c ) {
-			dicPos2 = dictFW_.walkPerfHash( dicPos2, alph_.code( *c ), perfHashValue );
-		    }
-		    output_->push( ( (reverse_)? wordRev : word_ ), perfHashValue );
-		}
 		intersectSecond( newDicPos, newLevPos, depth + 1 );
 	    }
 	}
@@ -70,6 +75,13 @@ namespace csl {
     inline void MSMatch< FW_BW >::intersectFirst( int dicPos, LevDEA::Pos levPos, int depth ) {
 	static int newDicPos;
 	static LevDEA::Pos newLevPos;
+
+	// if positions are final in dic and lev, proceed to right half of the pattern, starting
+	// with the same state of the dict and the start state of the LevDEA
+	if( levDEAFirst_->getDistance( levPos ) >= minDistFirst_ ) {
+	    intersectSecond( dicPos, LevDEA::Pos( 0, 0 ), depth );
+	}
+
 
 	const uchar* c = curDict_->getSusoString( dicPos );
 
@@ -83,11 +95,6 @@ namespace csl {
 
 		//  word_[depth+1]=0;std::cout<<"word="<<word<<std::endl;
 
-		// if positions are final in dic and lev, proceed to right half of the pattern, starting
-		// with the same state of the dict and the start state of the LevDEA
-		if( levDEAFirst_->getDistance( newLevPos ) >= minDistFirst_ ) {
-		    intersectSecond( newDicPos, LevDEA::Pos( 0, 0 ), depth + 1 );
-		}
 		intersectFirst( newDicPos, newLevPos, depth + 1 );
 	    }
 	}
@@ -258,7 +265,13 @@ namespace csl {
 		    word_[depth+1] = 0;
 		    
 		    // push word and annotated value into the output list
-		    output_->push( word_, dictFW_.getFirstAnn( newDicPos ) );
+		    // follow the word through the automaton once more to get the perfect hashing value
+		    static size_t perfHashValue; static uint_t dicPos2;
+		    perfHashValue = 0; dicPos2 = dictFW_.getRoot();
+		    for( uchar* c = word_; *c; ++c ) {
+			dicPos2 = dictFW_.walkPerfHash( dicPos2, alph_.code( *c ), perfHashValue );
+		    }
+		    output_->push( word_, dictFW_.getAnn( perfHashValue ) );
 		}
 
 		intersect( newDicPos, newLevPos, depth + 1 );
@@ -272,12 +285,12 @@ namespace csl {
 	output_ = &output;
 	strcpy( (char*)pattern_, (char*)pattern );
 
-	curDict_ = &dictFW_;
-	levDEASecond_->setDistance( k_ );
-	levDEASecond_->loadPattern( pattern );
+	curLevDEA_ = levDEASecond_;
+	curLevDEA_->setDistance( k_ );
+	curLevDEA_->loadPattern( pattern );
 
 	memset( word_, 0, Global::lengthOfWord * sizeof( uchar ) ); // prepare memory for output word
-	intersectSecond( dictFW_.getRoot(), LevDEA::Pos( 0, 0 ), 0 );
+	intersect( dictFW_.getRoot(), LevDEA::Pos( 0, 0 ), 0 );
 
 
 	return 0;

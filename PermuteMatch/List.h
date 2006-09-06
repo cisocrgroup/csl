@@ -112,12 +112,11 @@ class List : public LevFilter::ResultSet_if  { // of class PermuteMatch
 	curCol_ = 1<<col;
     }
 
-    bool push(const uchar* str, int value) {
+    void push(const uchar* str, int value) {
 	if(size_ >= Global::Perm::listSize) {
-	    return false;
+	    throw exceptions::bufferOverflow( "List: overflow." );
 	}
 	at(size_++).set(str, value, curCol_);
-	return true;
     }
 
     void reset() {

@@ -43,11 +43,11 @@ namespace csl {
 	inline ~TransTable();
 
 	/**
-	 * Loads an automaton from a binary file. (usually .dic)
+	 * Loads an automaton from a binary file. (usually .dic or .trie or similar)
 	 * @param binFile filename of the binary storing the automaton
 	 * @throw exceptions::badFileHandle
 	 */
-	inline bool loadBinary( const char* binFile );
+	inline bool loadFromFile( const char* binFile );
 
 	inline void loadFromFile( FILE* fi );
 

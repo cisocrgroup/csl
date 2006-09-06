@@ -10,7 +10,7 @@ int main( int argc, char** argv ) {
 	MinDic t( alph );
 	t.loadFromFile( argv[2] );
 	t.printDic();
-
+	
 	return 0;
     } catch ( exceptions::cslException ex ) {
 	std::cerr << "Dictionary extraction failed: " << ex.what() << std::endl;

@@ -45,8 +45,6 @@ namespace csl {
     void LevDEA::setDistance( int initK ) {
 	k_ = initK;
 
-	std::ostringstream ss; ss<<k_; // push k_ into a stream to get it as string
-	std::string table_file = "./LevDEA/lev" + ss.str() + "data";
 
 	/*
 	  In case of k==1, z2k1 would be 111  (==7)
@@ -60,6 +58,9 @@ namespace csl {
 	z2k2--; // a sequence of 2k+2 1-values
 
 	if( ( tabsLoaded & ( 1 << k_ ) ) == 0 ) { // have the tables for k already been loaded???
+	    std::ostringstream ss; ss<<k_; // push k_ into a stream to get it as string
+	    std::string table_file = "./LevDEA/lev" + ss.str() + "data";
+
 	    FILE * table_handle = fopen( table_file.c_str(), "r" );
 
 	    if( !table_handle ) {

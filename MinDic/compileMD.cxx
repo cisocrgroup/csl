@@ -13,7 +13,13 @@ int main(int argc, char** argv) {
 
     Alphabet alph(argv[1]);
     MinDic t(alph);
-    t.compileDic(argv[2],argv[3]);
+
+    try {
+	t.compileDic(argv[2],argv[3]);
+    } catch ( exceptions::cslException ex ) {
+	std::cout<<"compileMD failed: "<<ex.what()<<std::endl;
+	return(1);
+    }
 
 //    t.toDot(&alph);
 //    t.printCells();
