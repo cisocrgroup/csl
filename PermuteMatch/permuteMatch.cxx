@@ -1,8 +1,9 @@
 #include "./PermuteMatch.h"
-#include<iostream>
+#include <iostream>
 #include "../Alphabet/Alphabet.h"
 
 using namespace csl;
+
 int main( int argc, char** argv ) {
     if ( argc < 6 ) {
 	std::cerr << "Use like: permuteMatch <alph> <db_file> <comp_dic> <rev_comp_dic> <dlev> <query_file>" << std::endl << std::endl;
@@ -62,7 +63,7 @@ int main( int argc, char** argv ) {
 	printf( "\n---\n" );
 	++count;
 	if ( !( count % 50 ) )
-      fprintf( stderr, "%d queries processed\n", count );
+	    fprintf( stderr, "%d queries processed\n", count );
 
   }
   printf( "\n%d queries processed\n", count );

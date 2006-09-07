@@ -123,7 +123,7 @@ namespace csl {
 	//////////////////// set final state of key and add all the values
 	tempStates_[lengthOfKey].setFinal( true );
 
-	if( 0 && *valueString ) { // if valueString not empty
+	if( *valueString ) { // if valueString not empty
 	    begin = valueString;
 	    c = begin;
 
@@ -140,7 +140,6 @@ namespace csl {
 	} else if( annotateWordCount_ == true ) {
 	    tempStates_[lengthOfKey].addAnnotation( count_ ); // use wordcount as value
 	}
-
 	strcpy( ( char* )lastKey, ( char* )key );
     }
 
@@ -163,26 +162,24 @@ namespace csl {
 		if( isFinal( newPos ) ) {
 		    w[depth+1] = 0;
 		    printf( "%s", ( char* )w );
-
+		    
 		    if( hasAnnotations( newPos ) ) {
 			std::cout << Global::keyValueDelimiter;
-            AnnIterator it( *this, newPos );
-            while( it.isValid() ) {
-              printf( "%d, ", *it );
-              ++it;
-            }
-          }
-          printf( "\n" );
-
-          if( ( ++count_ % 100000 ) == 0 ) fprintf( stderr, "%d\n", count_ );
-        } // if isFinal
-
-        printDic_rec( newPos, depth + 1 );
-      } // if couldWalk
-    } // for
-  } // end of method
-
-
+			AnnIterator it( *this, newPos );
+			while( it.isValid() ) {
+			    printf( "%d, ", *it );
+			    ++it;
+			}
+		    }
+		    printf( "\n" );
+		    
+		    if( ( ++count_ % 100000 ) == 0 ) fprintf( stderr, "%d\n", count_ );
+		} // if isFinal
+		
+		printDic_rec( newPos, depth + 1 );
+	    } // if couldWalk
+	} // for
+    } // Trie::printDic_rec
 
 } //eon
 

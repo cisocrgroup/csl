@@ -20,9 +20,9 @@ namespace csl {
 	/**
 	 * constructor
 	 *
-	 * @param keyBuffer[in/out] a reference to a c-string, where the keys are stored. 
-	 * @param estimatedNrOfKeys[in] an estimation that helps to choose the right size of the hashtable
-	 * @param sizeOfeyBuffer[in/out]
+	 * @param[in/out] keyBuffer a reference to a c-string, where the keys are stored. 
+	 * @param[in] estimatedNrOfKeys an estimation that helps to choose the right size of the hashtable
+	 * @param[in/out] sizeOfeyBuffer
 	 * @todo think about the heuristics concerning the buffer initialization size
 	 */
 	inline Hash( size_t estimatedNrOfKeys, uchar*& keyBuffer, size_t& sizeOfKeyBuffer );
@@ -87,7 +87,7 @@ namespace csl {
 	size_t& sizeOfKeyBuffer_;
 
 	/**
-	 * offset just past the last terminating \0 of keyBuffer_
+	 * offset just past the last terminating \\0 of keyBuffer_
 	 * equals: actual used size of the buffer
 	 */
 	size_t lengthOfKeyStrings_;

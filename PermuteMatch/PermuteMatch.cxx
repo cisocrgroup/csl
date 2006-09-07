@@ -30,9 +30,11 @@ namespace csl {
 	    }
 	    ++query;
 	}
-	list_.sort();
+//	printf("nr:%d\n", list_.getSize() );
+	list_.sortUnique();
+//	printf("nr:%d\n", list_.getSize() );
 	list_.calcStillPossible();
-//    list_.print(); //DEBUG!
+//	list_.printList(); //DEBUG!
 
 	cols_full = ( 1 << nrOfTokens ) - 1; // a sequence of nrOfTokens 1-bits
 
@@ -43,7 +45,7 @@ namespace csl {
     }
 
     void PermuteMatch::query_rec( int db_pos, int w_pos, int list_pos, bits32 col_bits, int depth ) {
-// std::cout<<"rek_query(db_pos="<<db_pos<<",w_pos="<<w_pos<<",col_bits="<<col_bits<<",depth="<<depth<<")"<<std::endl;
+//	std::cout<<"rek_query(db_pos="<<db_pos<<",w_pos="<<w_pos<<",col_bits="<<col_bits<<",depth="<<depth<<")"<<std::endl;
 	static uchar w[Global::lengthOfStr];
 
 	// report hits
@@ -54,7 +56,7 @@ namespace csl {
 	    ++countCharResults;
 
 	    TransTable< BASIC >::AnnIterator it( db, db_pos );
-	    for ( ;it.isValid();++it ) {
+	    for ( ; it.isValid(); ++it ) {
 		if ( countResults >= Global::Perm::maxNrOfResults ) {
 		    std::cerr << "PermuteMatch: Result buffer overflow. The variable Global::Perm::maxNrOfResults restricts the maximum number of results to" << Global::Perm::maxNrOfResults << ". Exiting." << std::endl;
 		    exit( 1 );
@@ -67,8 +69,8 @@ namespace csl {
 		}
 		if ( !seen ) results[countResults++] = *it;
 	    }
-
-	    //    std::cout<<"Found: "<<w<<std::endl; //DEBUG!
+	    
+	    // std::cout<<"Found: "<<w<<std::endl; //DEBUG!
 	}
 	if ( depth == nrOfTokens ) {
 	    return;
@@ -77,30 +79,30 @@ namespace csl {
 	int new_db_pos, endof_w;
 	bits32 newColBits;
 	while ( list_pos < list_.getSize() ) {
-//     std::cout<<std::endl<<"Try '"<<list_.at(list_pos).getStr()<<"' at depth "<<depth<<", col_bits="<<col_bits<<": "<<std::flush;
-
+	    // std::cout<<std::endl<<"Try '"<<list_.at(list_pos).getStr()<<"' at depth "<<depth<<", col_bits="<<col_bits<<": "<<std::flush;
+	    
 	    if ( !findParts && ( list_.at( list_pos ).getStillPossible() | col_bits ) != cols_full ) {// if some bits are set neither in still_possible nor col_bits
 //  std::cout<<"still_poosible violated: "<<std::endl;
 		return;
 	    }
-
+	    
 	    if ( ( ( newColBits = ( col_bits | list_.at( list_pos ).getCol() ) ) != col_bits ) && // col not already blocked
 		 //        (std::cout<<"col still open, "<<std::flush) &&
 		 ( new_db_pos = db.walkStr( db_pos, list_.at( list_pos ).getStr() ) ) &&  // could walk token in db
 		 ( new_db_pos = db.walk( new_db_pos, alph_.code( Global::Perm::tokenDelimiter ) ) ) && // could walk delimiter in db
 		 // (std::cout<<"could traverse in db, OK"<<std::flush) &&
 		 1 ) {
-        strcpy( ( char* )w + w_pos, ( char* )list_.at( list_pos ).getStr() );
-        endof_w = w_pos + strlen( ( char* )list_.at( list_pos ).getStr() );
-        w[endof_w] = Global::Perm::tokenDelimiter;
-        ++endof_w;
-        w[endof_w] = 0;
-        query_rec( new_db_pos, endof_w, list_pos + 1, newColBits, depth + 1 );
-      }
-      ++list_pos;
+		strcpy( ( char* )w + w_pos, ( char* )list_.at( list_pos ).getStr() );
+		endof_w = w_pos + strlen( ( char* )list_.at( list_pos ).getStr() );
+		w[endof_w] = Global::Perm::tokenDelimiter;
+		++endof_w;
+		w[endof_w] = 0;
+		query_rec( new_db_pos, endof_w, list_pos + 1, newColBits, depth + 1 );
+	    }
+	    ++list_pos;
+	}
     }
-  }
-
+    
 } // eon
 
 #endif

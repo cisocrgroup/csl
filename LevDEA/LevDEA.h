@@ -55,6 +55,7 @@ namespace csl {
 	int coresets;
     
 	bits64* charvec;
+	bits64** k_charvecs;
 	void calcCharvec();
 	int calc_k_charvec(const bits64& chv, int i) const;
 

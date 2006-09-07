@@ -47,8 +47,8 @@ namespace csl {
 
 
 	/*
-	  In case of k==1, z2k1 would be 111  (==7)
-	  z2k2 would be 1111 (==15)
+	  In case of k==1, z2k1 would be 111  (==7) ( 2k+1 set bits )
+	  z2k2 would be 1111 (==15)  ( 2k+2 set bits )
 	*/
 	z2k1 = 1ll;
 	z2k1 <<=  2 * k_ + 1;

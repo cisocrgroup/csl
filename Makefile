@@ -58,7 +58,7 @@ $(OBJS)/ResultSet.o: $(RESULTSET_H) ./ResultSet/ResultSet.cxx
 
 ########### PermuteMatch OLD ####################
 PERMUTEMATCH_OLD_H = ./PermuteMatch/PermuteMatch.h ./PermuteMatch/List.h $(GLOBAL_H) $(MSMATCH_HEADERS) $(TRIE_FILES) 
-$(OBJS)/PermuteMatch_old.o: $(PERMUTEMATCH_OLDH) ./PermuteMatch/PermuteMatch.cxx
+$(OBJS)/PermuteMatch_old.o: $(PERMUTEMATCH_OLD_H) ./PermuteMatch/PermuteMatch.cxx
 	$(GCC) -c ./PermuteMatch/PermuteMatch.cxx -o $(OBJS)/PermuteMatch_old.o
 
 
@@ -111,7 +111,7 @@ $(BIN)/getCandscore: $(getCandscore_files)
 	$(GCC) $(getCandscore_files) -o $(BIN)/getCandscore
 
 permuteMatch_old_files = ./PermuteMatch/permuteMatch.cxx $(OBJS)/PermuteMatch_old.o $(OBJS)/Alphabet.o $(OBJS)/LevDEA.o $(OBJS)/MinDic.o $(OBJS)/Trie.o
-$(BIN)/permuteMatch_old: $(permuteMatch_old_files) $(MSMATCH_HEADERS) 
+$(BIN)/permuteMatch_old: $(permuteMatch_old_files) $(MSMATCH_HEADERS) ./PermuteMatch/List.h
 	$(GCC) $(permuteMatch_old_files) -o $(BIN)/permuteMatch_old
 
 completeMatch_files = ./StructMatch/CompleteMatch/completeMatch.cxx $(OBJS)/CompleteMatch.o $(OBJS)/Alphabet.o $(OBJS)/LevDEA.o
