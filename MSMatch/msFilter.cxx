@@ -31,21 +31,26 @@ int main( int argc, char** argv ) {
 	    std::cout << "Query: " << query << std::endl;
 
 	    list.reset(); // forget candidates that might be stored from earlier use
-	    matcher.query( (uchar*)query, list );
+	    try {
+		matcher.query( (uchar*)query, list );
+	    } catch( exceptions::bufferOverflow exc ) {
+		printf( "%s: %d\n",exc.what(), list.getSize() );
+		exit(1);
+	    }
 
 
 	    // print all hits
 //	    std::cout<<list.getSize()<<" hits."<<std::endl;
    	    list.sortUnique();
 //  	    std::cout<<list.getSize()<<" hits."<<std::endl;
-	    int i;
-	    for( i = 0;i < list.getSize();++i ) {
-		std::cout << list[i].getStr() <<","<<list[i].getAnn()<< std::endl;
-	    }
+// 	    int i;
+// 	    for( i = 0;i < list.getSize();++i ) {
+// 		std::cout << list[i].getStr() <<","<<list[i].getAnn()<< std::endl;
+// 	    }
 	}
     }
     catch( exceptions::cslException exc ) {
-	std::cerr << exc.what() << std::endl;
+	std::cerr << "msFilter caught exception: "<<exc.what() << std::endl;
     }
 
 }

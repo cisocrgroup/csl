@@ -54,7 +54,7 @@ namespace csl {
 	static const uchar keyValueDelimiter = '#';
 	static const uchar valuesDelimiter = ',';
 
-	static const int LevMaxNrOfResults = 15000;
+	static const int LevMaxNrOfResults = 25000;
 
 	class Perm {
 	public:

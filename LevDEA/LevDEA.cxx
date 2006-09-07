@@ -17,13 +17,14 @@ namespace csl {
     int** LevDEA::fins = new int*[4];
     int* LevDEA::coresetss = new int[4];
 
-    LevDEA::LevDEA( const Alphabet& init_alph, int init_k ) : alph( init_alph ), k_( 0 ) {
-	pattern_ = ( uchar* ) malloc( Global::lengthOfWord * sizeof( uchar ) );
-	charvec = ( bits64* ) malloc( alph.size() * sizeof( bits64 ) );
+    LevDEA::LevDEA( const Alphabet& alph, int init_k ) : alph_( alph ), k_( 0 ) {
+	charvec_ = ( bits64* ) malloc( alph_.size() * sizeof( bits64 ) );
+	k_charvecs_ = new bits32[alph_.size() * Global::lengthOfWord];
 	setDistance( init_k );
     }
 
     LevDEA::~LevDEA() {
+	delete( charvec_ );
 // delete(tab);
 // delete(fin);
     }
@@ -32,7 +33,7 @@ namespace csl {
 // this is an extended version of walk.
 // I now use a much more compact version as inline function
 // LevDEA::Pos LevDEA::walk(const Pos& p,int c) const {
-//     int bitvec = calc_k_charvec(charvec[c],p.pattern_pos());
+//     int bitvec = calc_k_charvec(charvec_[c],p.pattern_pos());
 //     table_cell& cell = table(bitvec,p.position());
 //     int new_pos = cell.target;
 //     int move_pattern = cell.move_pattern;
@@ -45,6 +46,8 @@ namespace csl {
     void LevDEA::setDistance( int initK ) {
 	k_ = initK;
 
+	// reset stored k_charvecs
+ 	memset( k_charvecs_, 0, ( alph_.size() * Global::lengthOfWord * sizeof( bits32 ) ) );
 
 	/*
 	  In case of k==1, z2k1 would be 111  (==7) ( 2k+1 set bits )
@@ -105,25 +108,31 @@ namespace csl {
     void LevDEA::loadPattern( const uchar* p ) {
 	strcpy( ( char* )pattern_, ( char* )p );
 	patLength = strlen( ( char* )pattern_ );
+
+	// reset stored k_charvecs
+ 	memset( k_charvecs_, 0, ( alph_.size() * Global::lengthOfWord * sizeof( bits32 ) ) );
+
 	calcCharvec();
     }
 
     void LevDEA::calcCharvec() {
 	bits64 c;
 	int i;
-	memset( charvec, 0, alph.size() * sizeof( bits64 ) );
+	memset( charvec_, 0, alph_.size() * sizeof( bits64 ) );
 	for ( c = z10, i = 0; i < patLength; i++, c >>= 1 ) {
-	    charvec[alph.code( pattern_[i] )] |= c;
+	    charvec_[alph_.code( pattern_[i] )] |= c;
 	}
     }
 
-    int LevDEA::calc_k_charvec( const bits64& chv, int i ) const {
+    bits32 LevDEA::calc_k_charvec( uchar c, int i ) const {
 	bits64 r;
 	// after the next line, the bits i,i+1,i+2 of chv are the lowest bits of r. All other bits of r are 0
-	r = ( chv >> ( 64 - ( 2 * k_ + 1 + i ) ) ) & z2k1;
+	r = ( charvec_[c] >> ( 64 - ( 2 * k_ + 1 + i ) ) ) & z2k1;
 	if ( patLength - i < 2 * k_ + 1 ) // the last few chars of the word
 	    r = ( ( r >> ( 2 * k_ + 1 - ( patLength - i ) ) ) | ( zff << ( ( patLength - i ) + 1 ) ) ) & z2k2;
-	return ( int ) r;
+
+ 	
+	return ( k_charvecs_[(c * alph_.size() ) + i] = (bits32) r );
     }
 
     void LevDEA::printTable() const {
@@ -140,10 +149,10 @@ namespace csl {
     void LevDEA::printCharvec() const {
 	uint_t c;
 	std::cout << "-------------" << std::endl;
-	for( c = 1; c <= alph.size(); ++c ) {
-      if( charvec[c] ) {
+	for( c = 1; c <= alph_.size(); ++c ) {
+      if( charvec_[c] ) {
         std::cout << c << std::endl;
-        printBits( charvec[c] );
+        printBits( charvec_[c] );
       }
     }
     std::cout << "-------------" << std::endl;

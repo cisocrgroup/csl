@@ -29,12 +29,12 @@ namespace csl {
     class LevDEA {
     private:
 	/// holds the current pattern
-	uchar* pattern_;
+	uchar pattern_[Global::lengthOfWord];
     
 	/// holds the pattern length
 	int patLength;
 
-	const Alphabet& alph;
+	const Alphabet& alph_;
 
 	/// tab holds the transition table of the automaton 
 	table_cell* tab;
@@ -54,10 +54,18 @@ namespace csl {
 	/// coresets is the number of distinct configurations of a triangular region (depends on k)
 	int coresets;
     
-	bits64* charvec;
-	bits64** k_charvecs;
+	bits64* charvec_;
+	bits32* k_charvecs_;
+
 	void calcCharvec();
-	int calc_k_charvec(const bits64& chv, int i) const;
+
+	bits32 get_k_charvec( uchar c, int i ) const {
+	    bits32 chv_k;
+	    return ( ( chv_k = k_charvecs_[(c * alph_.size() ) + i] )? chv_k : calc_k_charvec( c, i ) );
+	}
+	
+	bits32 calc_k_charvec( uchar c, int i ) const;
+
 
 	// some bitvectors
 	int z2k1;
@@ -98,7 +106,7 @@ namespace csl {
 	~LevDEA();
 	
 	inline LevDEA::Pos LevDEA::walk( const Pos& p, int c ) const {
-	    table_cell & cell = table( calc_k_charvec( charvec[c], p.pattern_pos() ), p.position() );
+	    table_cell & cell = table( get_k_charvec( c, p.pattern_pos() ), p.position() );
 	    return Pos( cell.target, p.pattern_pos() + cell.move_pattern );
 	}
 
