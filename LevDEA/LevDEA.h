@@ -110,7 +110,6 @@ namespace csl {
 	    return Pos( cell.target, p.pattern_pos() + cell.move_pattern );
 	}
 
-
 	inline bool isFinal(const Pos& p) const {
 	    //      |  triangle has reached right bound |    |       fin_table gives dist >-1                           |
 	    return ((patLength - p.pattern_pos() < 2 * k_ + 1 ) && (fin_table(2*k_-(patLength-p.pattern_pos()),p.position())!=-1));    

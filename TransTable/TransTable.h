@@ -268,11 +268,11 @@ namespace csl {
 
 
 	/**
-	   resize the array of cells
-	*/
+	 * resize the array of cells
+	 */
 	inline void allocCells( int newNrOfCells );
 
-    inline int findSlot( const TempState_t& state );
+	inline int findSlot( const TempState_t& state );
 
   };
 

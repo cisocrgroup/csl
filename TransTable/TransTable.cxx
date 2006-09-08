@@ -13,11 +13,6 @@ namespace csl {
 	cells_ = 0;
 	susoStrings_ = 0;
 	ftHash_ = 0;
-
-// 	if ( binFile ) { // binary file was given
-// 	    nrOfCells_ = -1; // WHY THAT???
-// 	    loadBinary( binFile );
-// 	}
     }
 
     template< CellType CellTypeValue >
@@ -132,6 +127,86 @@ namespace csl {
 
 
     template< CellType CellTypeValue >
+    inline int TransTable< CellTypeValue >::findSlot( const TempState_t& state ) {
+    }
+
+
+    /**
+     * find slot to store state
+     */
+    template<>
+    inline int TransTable< BASIC >::findSlot( const TempState_t& state ) {
+	size_t slot = firstFreeCell_ - 1; // is incremented again at beginning of loop
+	size_t i;
+	size_t nrOfAnnotations = state.getNrOfAnnotations();
+
+	bool mightFit = false;
+	while ( !mightFit ) {
+	    do {
+		++slot;
+		while ( ( slot + nrOfAnnotations + alphSize_ + 1 ) > nrOfCells_ ) { // okay???
+		    allocCells( nrOfCells_ * 2 );
+		}
+	    } while ( ! ( cells_[slot].isEmpty() ) );
+
+	    mightFit = true;
+
+	    // check if cells for annotations are available;
+	    // increment slot with the loop, so that slot points to the cell that gets type STATE
+	    for ( i = 1; ( mightFit && i < nrOfAnnotations ) ;++i ) {
+		if ( !cells_[++slot].isEmpty() )
+		    mightFit = false;
+	    }
+
+	    // check if all required cells for transitions are available
+	    for ( i = 1; ( mightFit && i <= alphSize_ ) ; ++i ) {
+		if ( state.getTransTarget( i ) && ( !cells_[slot + i].isEmpty() ) ) {
+		    mightFit = false;
+		}
+	    }
+	}
+	return slot;
+    }
+
+    /**
+     * find slot to store state
+     */
+    template<>
+    inline int TransTable< TOKDIC >::findSlot( const TempState_t& state ) {
+	size_t slot = firstFreeCell_ - 1; // is incremented again at beginning of loop
+	size_t i;
+	size_t nrOfAnnotations = state.getNrOfAnnotations();
+
+	bool mightFit = false;
+	while ( !mightFit ) {
+	    do {
+		++slot;
+		while ( ( slot + nrOfAnnotations + alphSize_ + 1 ) > nrOfCells_ ) { // okay???
+		    allocCells( nrOfCells_ * 2 );
+		}
+	    } while ( ! ( cells_[slot].isEmpty() ) );
+
+	    mightFit = true;
+
+	    // check if cells for annotations are available;
+	    // increment slot with the loop, so that slot points to the cell that gets type STATE
+	    for ( i = 1; ( mightFit && i < nrOfAnnotations ) ;++i ) {
+		if ( !cells_[++slot].isEmpty() )
+		    mightFit = false;
+	    }
+
+	    // check if all required cells for transitions are available
+	    for ( const uchar* c = state.getTransString(); mightFit && *c; ++c ) {
+		assert( state.getTransTarget( *c ) );
+		if ( ! cells_[slot + *c].isEmpty() ) {
+		    mightFit = false;
+		}
+	    }
+	}
+	return slot;
+    }
+
+    template< CellType CellTypeValue >
     int TransTable< CellTypeValue >::storeTempState( TempState_t& state ) {
 	return 0; // dummy
     }
@@ -204,14 +279,21 @@ namespace csl {
 	}
 
 	// insert all transitions
-	for ( size_t i = 1; i <= alphSize_ ; ++i ) {
-	    if ( state.getTransTarget( i ) ) {
-		cells_[slot + i].setTrans( i, state.getTransTarget( i ), state.getTransPhValue( i ) );
-	    }
+	// insert all transitions
+	for ( const uchar* c = state.getTransString(); *c; ++c ) {
+	    assert( state.getTransTarget( *c ) );
+	    cells_[slot + *c].setTrans( *c, state.getTransTarget( *c ), state.getTransPhValue( *c ) );
 	}
 	
 	// update sizeOfUsedCells_
 	sizeOfUsedCells_ = std::max( sizeOfUsedCells_, ( slot + alphSize_ + 2 ) );
+
+	// the following lines are to prevent firstFreeCell_ to get stuck in a lower area, where none of the
+	// new states can never fit.
+	if( ( slot - firstFreeCell_ ) > 2000 ) {
+//	    std::cerr << "ffc hack: " << firstFreeCell_ << std::endl;
+	    firstFreeCell_ = slot - 2000; // a slot which is really empty is searched right below
+	}
 
 	//update firstFreeCell
 	for ( ; ! ( cells_[firstFreeCell_].isEmpty() ); ++firstFreeCell_ );
@@ -256,43 +338,7 @@ namespace csl {
     }
 
 
-    /**
-     * find slot to store state
-     */
-    template< CellType CellTypeValue >
-    int TransTable< CellTypeValue >::findSlot( const TempState_t& state ) {
-	size_t slot = firstFreeCell_ - 1; // is incremented again at beginning of loop
-	size_t i;
-	size_t nrOfAnnotations = state.getNrOfAnnotations();
 
-
-	bool mightFit = false;
-	while ( !mightFit ) {
-	    do {
-		++slot;
-		while ( ( slot + nrOfAnnotations + alphSize_ + 1 ) > nrOfCells_ ) { // okay???
-		    allocCells( nrOfCells_ * 2 );
-		}
-	    } while ( ! ( cells_[slot].isEmpty() ) );
-
-	    mightFit = true;
-
-	    // check if cells for annotations are available;
-	    // increment slot with the loop, so that slot points to the cell that gets type STATE
-	    for ( i = 1; ( mightFit && i < nrOfAnnotations ) ;++i ) {
-		if ( !cells_[++slot].isEmpty() )
-		    mightFit = false;
-	    }
-
-	    // check if all required cells for transitions are available
-	    for ( i = 1; ( mightFit && i <= alphSize_ ) ; ++i ) {
-		if ( state.getTransTarget( i ) && ( !cells_[slot + i].isEmpty() ) ) {
-		    mightFit = false;
-		}
-	    }
-	}
-	return slot;
-    }
 
     /**
      * compare a temporary state to a compressed one.
@@ -311,7 +357,7 @@ namespace csl {
     template< CellType CellTypeValue  >
     void TransTable< CellTypeValue >::printCells() const {
 	std::cout << "i\ttype\tkey\tvalue" << std::endl << "--------------" << std::endl;
-	for ( int i = 0;i < nrOfCells_;++i ) {
+	for ( size_t i = 0; i < nrOfCells_; ++i ) {
 	    std::cout << i << "\t" << cells_[i].getType() << "\t" << cells_[i].getKey() << "\t" << cells_[i].getValue() << std::endl;
 	}
     }
