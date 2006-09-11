@@ -5,11 +5,10 @@
 
 namespace csl {
 
-
     template< CellType CellTypeValue >
     TransTable< CellTypeValue >::TransTable( size_t alphSize ) : magicNumber_( 46388436  ) {
 	alphSize_ = alphSize;
-
+	
 	cells_ = 0;
 	susoStrings_ = 0;
 	ftHash_ = 0;
@@ -37,7 +36,6 @@ namespace csl {
 	}
 	return 0;
     }
-
 
     template< CellType CellTypeValue >
     void TransTable< CellTypeValue >::initConstruction() {
@@ -123,11 +121,6 @@ namespace csl {
 	memset( ( cells_ + nrOfCells_ ), 0, ( newNrOfCells - nrOfCells_ ) * sizeof( Cell_t ) );
 	nrOfCells_ = newNrOfCells;
 // std::cout<<"Resized array cells to "<<newNrOfCells<<" cells."<<std::endl;
-    }
-
-
-    template< CellType CellTypeValue >
-    inline int TransTable< CellTypeValue >::findSlot( const TempState_t& state ) {
     }
 
 
@@ -337,15 +330,22 @@ namespace csl {
 	    );
     }
 
-
-
+    template<>
+    inline bool TransTable< TOKDIC >::compareStates( const TempState_t& temp, int comp ) const {
+	if ( temp.isFinal() != isFinal( comp ) ) return false;
+	for ( const uchar* c = temp.getTransString(); *c; ++c ) {
+	    assert( temp.getTransTarget( *c ) );
+	    if ( temp.getTransTarget( *c ) != walk( comp, *c ) ) return false;
+	}
+	return true;
+    }
 
     /**
      * compare a temporary state to a compressed one.
      * return iff both are equivalent w.r.t their outgoing transitions
      */
     template< CellType CellTypeValue  >
-    bool TransTable< CellTypeValue >::compareStates( const TempState_t& temp, int comp ) const {
+    inline bool TransTable< CellTypeValue >::compareStates( const TempState_t& temp, int comp ) const {
 	if ( temp.isFinal() != isFinal( comp ) ) return false;
 	for ( size_t c = 1; c <= alphSize_; ++c ) {
 	    if ( temp.getTransTarget( c ) != walk( comp, c ) ) return false;

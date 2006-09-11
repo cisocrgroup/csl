@@ -7,13 +7,22 @@
 # Sept 2004
 
 use strict;
+use Getopt::Long;
 use open "IN" => ":bytes",
     "OUT" =>":utf8";
 
+
+my $delimiter = '';
+GetOptions( 'delimiter=s' => \$delimiter,);
+
 my %alph;
 while(<>) {
-	chomp;
-	s/\r\n$/\n/;
+    chomp;
+    if( $delimiter ) {
+	s/$delimiter.*//;
+    }
+
+    s/\r\n$/\n/;
     for(split(//)) {$alph{$_} = 1;}
 }
 

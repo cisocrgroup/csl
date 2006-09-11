@@ -14,12 +14,23 @@ RANLIB = ranlib
 
 GLOBAL_H = ./Global.h
 
+
+all: Trie MinDic Cislex MSMatch
+
+
+
 ALPHABET_HEADERS = ./Alphabet/Alphabet.h $(GLOBAL_H)
 $(OBJS)/Alphabet.o: $(ALPHABET_HEADERS) ./Alphabet/Alphabet.cxx
 	$(GCC) -c ./Alphabet/Alphabet.cxx -o $(OBJS)/Alphabet.o
 
 
+
+
 ########## DAWG AND RELATED ###################
+
+Trie: ./bin/compileTrie ./bin/extractTrie
+MinDic: ./bin/compileMD ./bin/extractMD
+Cislex: ./bin/compileCislex ./bin/lookupCislex
 
 TRANSTABLE_FILES = ./TransTable/TransTable.h ./TransTable/TransTable.cxx ./TransTable/Cell.h ./TransTable/TempState.h $(GLOBAL_H) $(ALPHABET_HEADERS)
 
@@ -33,8 +44,12 @@ MINDIC_HEADERS = ./MinDic/MinDic.h ./MinDic/StateHash.h $(TRANSTABLE_FILES) $(HA
 $(OBJS)/MinDic.o: $(MINDIC_HEADERS) ./MinDic/MinDic.cxx	
 	$(GCC) -c ./MinDic/MinDic.cxx -o $(OBJS)/MinDic.o
 
+CISLEX_HEADERS = ./Cislex/Cislex.h $(MINDIC_HEADERS)
+
 
 ########## LEVFILTER AND RELATED #############
+MSMatch: ./bin/msFilter
+
 LEVFILTER_HEADERS = ./LevFilter/LevFilter.h
 
 LEVDEA_HEADERS = ./LevDEA/LevDEA.h $(GLOBAL_H) $(ALPHABET_HEADERS)
@@ -90,8 +105,14 @@ $(BIN)/compileTrie: ./Trie/compileTrie.cxx $(OBJS)/Trie.o $(OBJS)/Alphabet.o $(T
 $(BIN)/compileMD: ./MinDic/compileMD.cxx $(TRANSTABLE_FILES)  $(OBJS)/MinDic.o $(MINDIC_HEADERS) $(OBJS)/Alphabet.o
 	$(GCC) -o $(BIN)/compileMD ./MinDic/compileMD.cxx $(OBJS)/Alphabet.o $(OBJS)/MinDic.o
 
+$(BIN)/compileCislex: ./Cislex/compileCislex.cxx $(TRANSTABLE_FILES) $(CISLEX_HEADERS) $(OBJS)/MinDic.o  $(OBJS)/Alphabet.o
+	$(GCC) -o $(BIN)/compileCislex ./Cislex/compileCislex.cxx $(OBJS)/Alphabet.o $(OBJS)/MinDic.o
+
 $(BIN)/compilePD: ./StructMatch/PermDic/compilePD.cxx $(OBJS)/PermDic.o $(TRANSTABLE_FILES) $(OBJS)/MinDic.o $(OBJS)/Alphabet.o
 	$(GCC) -o $(BIN)/compilePD StructMatch/PermDic/compilePD.cxx $(OBJS)/MinDic.o $(OBJS)/PermDic.o $(OBJS)/Alphabet.o
+
+$(BIN)/lookupCislex: ./Cislex/lookupCislex.cxx $(TRANSTABLE_FILES) $(CISLEX_HEADERS) $(OBJS)/MinDic.o  $(OBJS)/Alphabet.o
+	$(GCC) -o $(BIN)/lookupCislex ./Cislex/lookupCislex.cxx $(OBJS)/Alphabet.o $(OBJS)/MinDic.o
 
 $(BIN)/extractTrie: ./Trie/extractTrie.cxx $(TRANSTABLE_FILES) $(OBJS)/Trie.o $(OBJS)/Alphabet.o
 	$(GCC) -o $(BIN)/extractTrie ./Trie/extractTrie.cxx $(OBJS)/Trie.o $(OBJS)/Alphabet.o

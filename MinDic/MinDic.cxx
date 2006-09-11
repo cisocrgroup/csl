@@ -51,6 +51,9 @@ namespace csl {
     }
 
     void MinDic::compileDic( char* txtFile, char* compFile ) {
+	uchar* key = 0;
+	uchar* valueString = 0;
+
 	initConstruction();
 
 	std::ifstream fileHandle( txtFile );
@@ -62,11 +65,19 @@ namespace csl {
 	uchar line[Global::lengthOfLongStr];
 
 	while( fileHandle.getline(( char* ) line, Global::lengthOfLongStr ) )  {
-	    addToken( line );
+	    /////////////////// PARSE THE INPUT STRING
+	    uchar *c;
+	    c = ( uchar* )strchr( ( char* )line, Global::keyValueDelimiter );
+	    
+	    if( c ) {
+		*c = 0;
+		valueString = ( c + 1 );
+	    } 
+//	    strcpy( (char*)key_, (char*)input );
+	    key = line;
 
-	    if( !( header_.nrOfKeys_ %  10000 ) ) {
-		std::cerr << "\r" << header_.nrOfKeys_ << " tokens processed." << std::flush;
-	    }
+	    addToken( key, ( ( c )? atoi( (char*)valueString ) : 0 ) );
+
 	}
 
 	fileHandle.close();
@@ -80,25 +91,15 @@ namespace csl {
     }
 
 
-    void MinDic::addToken( const uchar* input ) {
+    void MinDic::addToken( const uchar* key, int value ) {
 	static int commonPrefix, i, lengthOfKey;
 	static int storedState;
 
-//	printf("input: %s\n", input );
-	/////////////////// PARSE THE INPUT STRING
-	uchar *c;
-	c = ( uchar* )strchr( ( char* )input, Global::keyValueDelimiter );
+	key_ = key;
 
-	if( c ) {
-	    *c = 0;
-//	    strcpy( (char*)key_, (char*)input );
-	    key_ = input;
-	    valueString_ = ( c + 1 );
-	} else { // no values given
-	    key_ = input;
-//	    strcpy( (char*)key_, (char*)input );
-	    valueString_ = 0;
-	}
+//	printf("input: %s\n", input );
+
+
 	lengthOfKey = strlen( ( char* )key_ );
 	if( lengthOfKey > Global::lengthOfStr ) {
 	    throw exceptions::bufferOverflow( "Trie.cxx: Global::string_length sets the maximum string length for an entry of a trie. Maximum violated" );
@@ -130,17 +131,21 @@ namespace csl {
 	tempStates_[lengthOfKey].setFinal( true );
 	
 	// store value
-	if( valueString_ ) {
+	if( 1 ) {
 	    // see that annotation buffer is large enough
 	    if( sizeOfAnnotationBuffer_ < ( header_.nrOfKeys_ + 1 ) ) {
 		sizeOfAnnotationBuffer_ *= 2;
 		annotations_ = (int*)realloc( annotations_, sizeOfAnnotationBuffer_ );
 	    }
-	    annotations_[header_.nrOfKeys_] = atoi( (char*)valueString_ );
+	    annotations_[header_.nrOfKeys_] = value;
 	}
 
 	strcpy(( char* ) lastKey_,( char* ) key_ );
 	++(header_.nrOfKeys_);
+
+	if( !( header_.nrOfKeys_ %  10000 ) ) {
+	    std::cerr << "\r" << header_.nrOfKeys_ << " tokens processed." << std::flush;
+	}
     }
     
     void MinDic::printDic() const {

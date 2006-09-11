@@ -37,8 +37,7 @@ namespace csl {
 	*/
 	inline int code( const uchar c, bool check = true ) const {
 	    if( check && code_[c] == 0 && c != 0 ) {
-		std::cerr << "Alphabet: Error: Unknown character '" << c << "'" << std::endl;
-		exit( 1 );
+		throw exceptions::AlphabetError( std::string( "Alphabet: Unknown character " ) + (char)c  );
 	    }
 
 	    return code_[c];
@@ -49,8 +48,7 @@ namespace csl {
 	*/
 	inline uint_t decode( const uint_t c ) const {
 	    if( c > size() ) {
-		std::cerr << "Alphabet: Error: Unknown code: '" << c << "'" << std::endl;
-		exit( 1 );
+		throw exceptions::AlphabetError( "Alphabet: Unknown code: " );
 	    }
 
 	    return decode_[c];

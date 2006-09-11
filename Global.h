@@ -98,6 +98,18 @@ namespace csl {
 	    const std::string msg_;
 	};
 
+	class AlphabetError : public cslException {
+	public:
+	    AlphabetError() {}
+	    AlphabetError( const std::string msg ) : cslException( msg ) {}
+	};
+
+	class badInput : public cslException {
+	public:
+	    badInput() {}
+	    badInput( const std::string msg ) : cslException( msg ) {}
+	};
+
 	class badDictFile : public cslException {
 	public:
 	    badDictFile() {}

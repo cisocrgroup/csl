@@ -9,8 +9,7 @@ int main( int argc, char** argv ) {
 	Alphabet alph( argv[1] );
 	MinDic t( alph );
 	t.loadFromFile( argv[2] );
-//	t.printDic();
-	t.printCells();
+	t.printDic();
 	
 	return 0;
     } catch ( exceptions::cslException ex ) {

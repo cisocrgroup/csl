@@ -3,6 +3,7 @@
 
 #include <fstream>
 #include <vector>
+#include "../Global.h"
 #include "../TransTable/TransTable.h"
 #include "../Alphabet/Alphabet.h"
 
@@ -46,7 +47,7 @@ namespace csl {
 	    fread( annotations_, sizeof( int ), header_.nrOfKeys_, fi );
 	}
 	
-	void writeToFile( FILE* fo ) {
+	void writeToFile( FILE* fo ) const {
 	    // write the header
 	    fwrite( &header_, sizeof( Header ), 1, fo );
 	    // write the TransTable
@@ -72,7 +73,7 @@ namespace csl {
 	 * and performs the insertion into the trie
 	 * @arg a cstring pointing to the current line
 	 */
-	void addToken( const uchar* input );
+	void addToken( const uchar* input, int value );
 
 	/// extracts the trie to stdout
 	void printDic( int initState ) const;
@@ -90,6 +91,17 @@ namespace csl {
 	    return annotations_[n];
 	}
 	
+	inline bool getAnnotation( uchar* key, int* annotation ) const {
+	    uint_t pos = getRoot();
+	    size_t perfHashValue = 0;
+	    while( *key && pos ) {
+		pos = walkPerfHash( pos, alph_.code( *key ), perfHashValue );
+		++key;
+	    }
+	    *annotation = getAnn( perfHashValue );
+	    return( !*key && pos && isFinal( pos ) );
+	}
+	
 	void printDic() const;
 	
     private:
@@ -105,7 +117,6 @@ namespace csl {
 //	uchar key_[Global::lengthOfStr];
 	const uchar* key_;
 	uchar lastKey_[Global::lengthOfLongStr];
-	uchar* valueString_;
 
 	int* annotations_;
 	size_t sizeOfAnnotationBuffer_;

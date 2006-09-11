@@ -29,7 +29,6 @@ namespace csl {
 	 * All alphabet information TransTable needs is the number of possible labels. This number
 	 * is not necessarily equal to size() of the used Alphabet-object. That's why only a size_type
 	 * is passed on rather than an Alphabet-object.
-	 * If TransTable is initialized with a binFile, this file is loaded as automaton. 
 	 *
 	 * @param alphSize the used alphabet size.
 	 * @param binFile a binary file conaining an automaton
@@ -143,7 +142,6 @@ namespace csl {
 	 * @param perfHashValue the perfHash value of the current traansition is ADDED to this variable
 	 */
 	inline int walkPerfHash( uint_t state, uchar c, size_t& perfHashValue ) const;
-
 
 	/**
 	 * This method allows to change the target of a transition of a state which
