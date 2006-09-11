@@ -20,7 +20,7 @@ namespace csl {
     public:
 	inline Cislex( const Alphabet& alph );
 
-	inline const uchar* Cislex::lookup( uchar* key ) const;
+	inline const uchar* lookup( uchar* key ) const;
 
 	inline void loadFromFile( char* dicFile );
 	inline void loadFromFile( FILE* fi );
