@@ -21,7 +21,7 @@ namespace csl {
 	hashtable_ = new StateHash( *this );
 
 	sizeOfAnnotationBuffer_ = 100000;
-	annotations_ = new int[sizeOfAnnotationBuffer_];
+	annotations_ = (int*)malloc( sizeOfAnnotationBuffer_ * sizeof( int ) );
 	
 	
 	header_.nrOfKeys_ = 0;
@@ -133,9 +133,10 @@ namespace csl {
 	// store value
 	if( 1 ) {
 	    // see that annotation buffer is large enough
-	    if( sizeOfAnnotationBuffer_ < ( header_.nrOfKeys_ + 1 ) ) {
-		sizeOfAnnotationBuffer_ *= 2;
-		annotations_ = (int*)realloc( annotations_, sizeOfAnnotationBuffer_ );
+	    if( sizeOfAnnotationBuffer_ <= ( header_.nrOfKeys_ + 1 ) ) {
+ 		sizeOfAnnotationBuffer_ *= 2;
+		annotations_ = (int*)realloc( annotations_, sizeOfAnnotationBuffer_ * sizeof( int ) );
+		if( !annotations_ ) throw( exceptions::cslException( "csl::MinDic: could not re-allocate memory for annotation array." ) );
 	    }
 	    annotations_[header_.nrOfKeys_] = value;
 	}
