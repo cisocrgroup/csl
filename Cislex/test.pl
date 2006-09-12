@@ -8,27 +8,27 @@ use Cislex;
 use IPC::Open2;
 
 my $alphFile = shift;
-my $lexFile = shift;
+my $dicFile = shift;
+my $origFile = shift;
 
 # Create a Cislex object.
 my $lex = new Cislex( alphFile => $alphFile,
-		      lexFile => $lexFile
+		      dicFile => $dicFile
 		      );
 
 if( !$lex ) {
     printf( "Obvioulsly the Cislex constructor has failed.\n");
-    exit;
+    die;
 }
 
-while( my $key = <> ) {
-    chomp $key;
+open(ORIG, $origFile) or die $!;
+while( my $line = <ORIG> ) {
+    chomp $line;
+    my( $key, $value ) = split( /\./, $line );
     my $output = $lex->lookup( $key );
 
-    if( $output ) {
-	print $output, "\n";
-    }
-    else {
-	print "Key not found\n";
+    if( $output ne $value ) {
+	print $line, "\n";
     }
 
 }

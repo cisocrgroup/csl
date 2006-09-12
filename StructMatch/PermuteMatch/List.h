@@ -1,6 +1,6 @@
 class List : public LevFilter::ResultSet_if  { // of class PermuteMatch
 
- public:
+public:
     class Item {
     private:
 	uchar str_[Global::lengthOfWord];
@@ -8,14 +8,29 @@ class List : public LevFilter::ResultSet_if  { // of class PermuteMatch
 	bits32 colBit_;
 	int colInt_;
 	bits32 stillPossible_;
-	
-	
+
+
     public:
-	void set(const uchar* str, int value, int col) {
-	    strcpy((char*)str_, (char*)str);
+	/**
+	 * @todo should the strcmp-value be inverted?
+	 */
+	bool operator < ( const Item& other ) {
+	    int ret = 0;
+	    ret = other.getValue() - getValue();
+	    if( ret == 0 ) {
+		ret = getCol() - other.getCol();
+		if( ret == 0 ) {
+		    ret = strcmp( (char*)getStr(), (char*)other.getStr() );
+		}
+	    }
+	    return ( ret > 0 );
+	}
+
+	void set( const uchar* str, int value, int col ) {
+	    strcpy( ( char* )str_, ( char* )str );
 	    value_ = value;
 	    colInt_ = col;
-	    colBit_ = 1ll<<colInt_;
+	    colBit_ = 1ll << colInt_;
 	}
 	const uchar* getStr() const {
 	    return str_;
@@ -27,18 +42,19 @@ class List : public LevFilter::ResultSet_if  { // of class PermuteMatch
 	bits32 getStillPossible() {
 	    return stillPossible_;
 	}
-	void setStillPossible(bits32 v) {
+	void setStillPossible( bits32 v ) {
 	    stillPossible_ = v;
 	}
 
-	int getCol() {
+	int getCol() const {
 	    return colInt_;
 	}
 
 	bits32 getColBit() {
 	    return colBit_;
 	}
-    }; // end of class Item
+    }
+    ; // class Item
 
 
     int size_;
@@ -47,84 +63,65 @@ class List : public LevFilter::ResultSet_if  { // of class PermuteMatch
 
     void calcStillPossible() {
 	bits32 n = 0;
-	for(int i = getSize()-1; i>=0; --i) {
-	    n |= at(i).getCol();
-	    at(i).setStillPossible(n);
+	for ( int i = getSize() - 1; i >= 0; --i ) {
+	    n |= at( i ).getCol();
+	    at( i ).setStillPossible( n );
 	}
     }
 
 
- public:
+public:
     List() {
 	reset();
     }
 
-    Item& operator[](int i) {
-	assert(i < size_);
+    Item& operator[]( int i ) {
 	return list_[i];
     }
 
-    Item& at(int i) {
-	assert(i < size_);
+    Item& at( int i ) {
+//	assert( i < size_ );
 	return list_[i];
     }
-    const Item& at(int i) const {
-	assert(i < size_);
+    const Item& at( int i ) const {
+//	assert( i < size_ );
 	return list_[i];
     }
 
-    
-    class Iterator {
-    private:
-	const Item *cur_;
-    public:
 
-	Iterator(const Item *init) : cur_(init) {
-	}
-
-	const Item& operator*() const {
-	    return *cur_;
-	}
-
-	Iterator operator++() {
-	    ++cur_;
-	    return *this;
-	}
-
-	bool operator==(const Iterator& i2) const {
-	    return (cur_ == i2.cur_);
-	}
-
-	bool operator!=(const Iterator& i2) const {
-	    return (cur_ != i2.cur_);
-	}
-
-    };
-
-    Iterator begin() const {
-	return Iterator(list_);
+    static bool is_equal( const Item& a, const Item& b ) {
+	return( ( a.getValue() == b.getValue() ) && ( a.getCol() == b.getCol() ) &&  ( strcmp( ( char* )a.getStr(), ( char* )b.getStr() ) == 0 ) );
     }
 
-    Iterator end() const {
-	return Iterator(list_ + size_);
+    static bool cmp( const Item& a, const Item& b ) {
+	return ( ( a.getValue() < b.getValue() ) || // let freq() decide
+		 ( ( a.getValue() == b.getValue() )  // or if freqs are equal
+		   && ( strcmp( ( char* )a.getStr(), ( char* )b.getStr() ) < 0 ) ) ); // let alphab. order decide (standard strcmp function, not the one implemented in Alphabet)
+    }
+
+    void sort() {
+	sort( 0, getSize() - 1 ); // private method
+    }
+
+    void sortUnique() {
+	sort();
+	size_ = std::unique( list_, list_ + size_, is_equal ) - list_;
     }
 
     int getSize() const {
 	return size_;
     }
 
-
-    void setCurCol(int col) {
+    void setCurCol( int col ) {
 	curCol_ = col;
     }
 
-    void push(const uchar* str, int value) {
+    void push( const uchar* str, int value ) {
 	if ( size_ > ( Global::Perm::listSize - 1 ) ) {
 	    throw exceptions::bufferOverflow( "ResultSet: ResultSet overflow." );
-	}
-	else {
-	    at(size_).set(str, value, curCol_);
+	} else {
 	    ++size_;
+	    at( size_ ).set( str, value, curCol_ );
 	}
     }
 
@@ -132,50 +129,44 @@ class List : public LevFilter::ResultSet_if  { // of class PermuteMatch
 	size_ = 0;
     }
 
-    void sort() {
-	sort(0,getSize() - 1); // private method
-    }
 
-
- private:
+private:
     // quicksort: see Cormen, Introduction to algorithms, p.145ff
-    void sort(int left, int right) {
+    void sort( int left, int right ) {
 	int q;
-	if(left<right) {
-	    q = partition(left,right);
-	    sort(left,q-1);
-	    sort(q+1,right);
+	if ( left < right ) {
+	    q = partition( left, right );
+	    sort( left, q - 1 );
+	    sort( q + 1, right );
 	}
     }
 
     // for quicksort
-    int partition(int left,int right) {
-	int i = left -1;
+    int partition( int left, int right ) {
+	int i = left - 1;
 	int j;
-	for(j=left;j<right;++j) {
-	    if((at(j).getValue() < at(right).getValue()) || // let freq() decide
-	       ((at(j).getValue() == at(right).getValue())  // or if freqs are equal
-		&& (strcmp((char*)at(j).getStr(), (char*)at(right).getStr()) < 0))) { // let alphab. order decide (standard strcmp fubnction, not the one implemented in Alphabet)
+	for ( j = left;j < right;++j ) {
+	    if ( at( j ) <  at( right ) ) {
 		++i;
-		swap(i,j);
+		swap( i, j );
 	    }
 	}
-	swap(i+1,right);
-	return (i+1);
+	swap( i + 1, right );
+	return ( i + 1 );
     }
 
-    void swap(int i, int j) {
-	Item tmp = at(i);
-	at(i) = at(j);
-	at(j) = tmp;
+    void swap( int i, int j ) {
+	Item tmp = at( i );
+	at( i ) = at( j );
+	at( j ) = tmp;
     }
 
- public:
-    void printList()  {
-	printf("%20s\t%16s\t%s\t%s\n","str","col","val","sp");
-	for(int i=0;i<getSize();++i) {
-	    printf("%20s\t%16d\t%d\t%d\n",at(i).getStr(),at(i).getColBit(),at(i).getValue(),at(i).getStillPossible());
-	}
+public:
+  void printList()  {
+    printf( "%20s\t%16s\t%s\t%s\n", "str", "col", "val", "sp" );
+    for ( int i = 0;i < getSize();++i ) {
+      printf( "%20s\t%16d\t%d\t%d\n", at( i ).getStr(), at( i ).getColBit(), at( i ).getValue(), at( i ).getStillPossible() );
     }
-    
+  }
+
 };

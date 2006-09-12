@@ -56,7 +56,9 @@ namespace csl {
 	    }
 	    ++c;
 	}
-	list_.sort();
+	printf( "size: %d\n", list_.getSize() );
+	list_.sortUnique();
+	printf( "size: %d\n", list_.getSize() );
 	list_.calcStillPossible();
 
 	list_.printList(); //DEBUG!
@@ -74,7 +76,7 @@ namespace csl {
     void PermuteMatch::query_rec( int dbPos, int w_pos, int listPos, bits32 colBits, int rightmostCand, int depth ) {
 	static uchar w[Global::lengthOfStr];
 
-// std::cout<<"depth="<<depth<<", word="<<w<<std::endl;
+	// std::cout<<"depth="<<depth<<", word="<<w<<std::endl;
 
 	////////// STOP IF ALL QUERY-TOKENS ARE USED //////////////////
 	if ( depth == nrOfTokens_ ) {

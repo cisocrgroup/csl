@@ -67,39 +67,6 @@ public:
 	return *( list_[i] );
     }
 
-//     class Iterator {
-//     private:
-// 	const Item *cur_;
-//     public:
-
-// 	Iterator( const Item *init ) : cur_( init ) {}
-
-// 	const Item& operator*() const {
-// 	    return *cur_;
-// 	}
-
-// 	Iterator operator++() {
-// 	    ++cur_;
-// 	    return *this;
-// 	}
-
-// 	bool operator==( const Iterator& i2 ) const {
-// 	    return ( cur_ == i2.cur_ );
-// 	}
-
-// 	bool operator!=( const Iterator& i2 ) const {
-// 	    return ( cur_ != i2.cur_ );
-// 	}
-
-//     };
-
-//     Iterator begin() const {
-// 	return Iterator( list_ );
-//     }
-
-//     Iterator end() const {
-// 	return Iterator( list_ + size_ );
-//     }
 
     int getSize() const {
 	return size_;
@@ -136,12 +103,12 @@ public:
     
     void sort() {
 	std::sort( list_, list_ + size_, cmp );
-	//sort(0,getSize() - 1); // private method
+	// sort(0,getSize() - 1); // private method
     }
 
     void sortUnique() {
 	sort();
-	std::unique( list_, list_ + size_, is_equal );
+	size_ = std::unique( list_, list_ + size_, is_equal ) - list_;
     }
 
 

@@ -20,8 +20,8 @@ namespace csl {
 
 	std::ifstream fileHandle( txtFile );
 	if( !fileHandle.good() ) {
-	    std::cerr << "Couldn't open dictionary file: " << txtFile << std::endl;
-	    exit( 1 );
+	    throw exceptions::badFileHandle( std::string( "Couldn't open dictionary file: " ) +
+					     std::string( txtFile ) );
 	}
 
 	uchar line[Global::lengthOfLongStr];
@@ -42,7 +42,7 @@ namespace csl {
 	    }
 	    byteOffset_ = int( fileHandle.tellg() );
 	}
-
+	std::cerr << "\r" << count_ << " tokens processed." << std::endl;
 	fileHandle.close();
 
 	// store the very last word

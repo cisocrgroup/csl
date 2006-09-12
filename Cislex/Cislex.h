@@ -54,7 +54,7 @@ namespace csl {
     inline Cislex::Cislex( const Alphabet& alph ) :
 	MinDic( alph ),
 	annStrings_( 0 ),
-	annHash_( 100000, annStrings_, header_.sizeOfAnnStrings_ )
+	annHash_( 300000, annStrings_, header_.sizeOfAnnStrings_ )
     {
     }
 

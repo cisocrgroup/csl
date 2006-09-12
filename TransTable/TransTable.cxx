@@ -84,7 +84,7 @@ namespace csl {
 
 	loadFromFile( fi );
 	fclose( fi );
-
+	std::cerr<< "Ok"<<std::endl;
 	return true;
     }
 

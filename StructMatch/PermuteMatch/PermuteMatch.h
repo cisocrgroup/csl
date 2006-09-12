@@ -1,7 +1,9 @@
 #ifndef CSL_PERMUTEMATCH_H
 #define CSL_PERMUTEMATCH_H CSL_PERMUTEMATCH_H
 
-#include<cstring>
+#include <cstring>
+#include <algorithm>
+
 #include "../../Alphabet/Alphabet.h"
 #include "../../MSMatch/MSMatch.h"
 //#include"../BestMatch/BestMatch.h"
@@ -19,7 +21,7 @@ namespace csl {
 	// Uncomment only one of the following two lines
 	// A more comfortable way to choose between Bestmatch and Levquery would be appreciated ...
 	//    BestMatch levquery;
-	MSMatch< STANDARD > levquery_;
+	MSMatch< FW_BW > levquery_;
 
 	Trie db_;
 	List list_;

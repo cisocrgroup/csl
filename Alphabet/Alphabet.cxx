@@ -17,15 +17,14 @@ namespace csl {
 	// read and process alphabet file
 	FILE* alph_handle = fopen( alphFile, "r" );
 	if ( ! alph_handle ) {
-	    throw exceptions::badFileHandle( "Alphabet: Couldn't open alphabet file: " + std::string( alphFile ) );
+	    throw exceptions::badFileHandle( "csl::Alphabet: Couldn't open alphabet file: " + std::string( alphFile ) );
 	}
 	fgets( ( char* )alphStr, 300, alph_handle );
 	fclose( alph_handle );
 
 	if ( strlen( ( char* )alphStr ) > 256 ) {
-	    throw exceptions::badInput( "Alphabet: More than 256 characters in alphabet string." );
+	    throw exceptions::badInput( "csl::Alphabet: More than 256 characters in alphabet string." );
 	}
-
 
 	// this loop fills the array 'code' and sets 'size_' to the size
 	// of the alphabet as specified in the alphabet file

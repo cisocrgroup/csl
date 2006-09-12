@@ -1,7 +1,7 @@
 #!/usr/bin/perl
 
 use strict;
-use lib "/files/uli/cis/csl/tools";
+use lib "/mounts/Users/student/uli/implement/csl/trunk/tools";
 use Freqhash;
 use Getopt::Long;
 

@@ -28,8 +28,8 @@ namespace csl {
 
     public:
 	/**
-	   The constructor takes as argument a file containing all required characterss.
-	*/
+	 * The constructor takes as argument a file containing all required characterss.
+	 */
 	Alphabet( char* alphFile );
 
 	/**
@@ -37,7 +37,7 @@ namespace csl {
 	*/
 	inline int code( const uchar c, bool check = true ) const {
 	    if( check && code_[c] == 0 && c != 0 ) {
-		throw exceptions::AlphabetError( std::string( "Alphabet: Unknown character " ) + (char)c  );
+		throw exceptions::AlphabetError( std::string( "Alphabet: Unknown character '" ) + (char)c  + '\'' );
 	    }
 
 	    return code_[c];

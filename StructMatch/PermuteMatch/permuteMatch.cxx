@@ -56,7 +56,7 @@ int main( int argc, char** argv ) {
 	printf( ">>  %s\n", query );
 
 	nrOfHits = pm.query( ( uchar* )query );
-// pm.printList(); //DEBUG
+	// pm.printList(); //DEBUG
 
 	if ( groundtruth ) printf( "gt: %s\n", groundtruth );
 

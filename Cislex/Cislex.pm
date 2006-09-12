@@ -10,12 +10,12 @@ sub new {
     my $self = {};
     ( my $class, %$self ) = @_;
 
-    if( !$self->{alphFile} || !$self->{lexFile} ) {
-	print STDERR "Cislex: provide arguments 'alphFile' and 'lexFile' as arguments for the constructor.\n";
+    if( !$self->{alphFile} || !$self->{dicFile} ) {
+	print STDERR "Cislex: provide arguments 'alphFile' and 'dicFile' as arguments for the constructor.\n";
 	return undef;
     }
 
-    my $binary = "~/implement/csl/trunk/bin/lookupCislex $self->{alphFile} $self->{lexFile}";
+    my $binary = "~/implement/csl/trunk/bin/lookupCislex $self->{alphFile} $self->{dicFile}";
 
     open2( $self->{BINARY_OUT}, $self->{BINARY_IN}, $binary ) or die "Perl::Cislex: $!";
 

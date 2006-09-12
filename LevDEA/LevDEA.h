@@ -126,7 +126,12 @@ namespace csl {
 	    return pattern_;
 	}
 
+	/**
+	 *
+	 * @todo do sth about the paths to the levenshtein tables
+	 */
 	void setDistance( int k );
+
 	void loadPattern(const uchar* p);
     
 	// used for debug only

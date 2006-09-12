@@ -62,7 +62,8 @@ namespace csl {
 
 	if( ( tabsLoaded & ( 1 << k_ ) ) == 0 ) { // have the tables for k already been loaded???
 	    std::ostringstream ss; ss<<k_; // push k_ into a stream to get it as string
-	    std::string table_file = "./LevDEA/lev" + ss.str() + "data";
+
+	    std::string table_file = "/mounts/Users/student/uli/implement/csl/trunk/LevDEA/lev" + ss.str() + "data";
 
 	    FILE * table_handle = fopen( table_file.c_str(), "r" );
 
@@ -130,7 +131,6 @@ namespace csl {
 	r = ( charvec_[c] >> ( 64 - ( 2 * k_ + 1 + i ) ) ) & z2k1;
 	if ( patLength - i < 2 * k_ + 1 ) // the last few chars of the word
 	    r = ( ( r >> ( 2 * k_ + 1 - ( patLength - i ) ) ) | ( zff << ( ( patLength - i ) + 1 ) ) ) & z2k2;
-
  	
 	return ( k_charvecs_[(c * alph_.size() ) + i] = (bits32) r );
     }

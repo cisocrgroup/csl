@@ -38,15 +38,16 @@ int main( int argc, char** argv ) {
 		exit(1);
 	    }
 
-
-	    // print all hits
 //	    std::cout<<list.getSize()<<" hits."<<std::endl;
    	    list.sortUnique();
 //  	    std::cout<<list.getSize()<<" hits."<<std::endl;
-// 	    int i;
-// 	    for( i = 0;i < list.getSize();++i ) {
-// 		std::cout << list[i].getStr() <<","<<list[i].getAnn()<< std::endl;
-// 	    }
+
+
+	    // print all hits
+	    int i;
+	    for( i = 0;i < list.getSize();++i ) {
+		std::cout << list[i].getStr() <<","<<list[i].getAnn()<< std::endl;
+	    }
 	}
     }
     catch( exceptions::cslException exc ) {

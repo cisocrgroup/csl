@@ -17,6 +17,9 @@ GLOBAL_H = ./Global.h
 
 all: Trie MinDic Cislex MSMatch
 
+install:
+	cp -v ./bin/* ~/bin/
+
 
 
 ALPHABET_HEADERS = ./Alphabet/Alphabet.h $(GLOBAL_H)
