@@ -41,6 +41,8 @@ namespace csl {
 	FW_BW
     } MSMatchMode;
 
+
+
     class Global {
     public:
 	static const int maxNrOfChars = 256;
@@ -59,7 +61,8 @@ namespace csl {
 	class Perm {
 	public:
 	    static const int tokenDelimiter = ',';
-	    static const int componentDelimiter = '$';
+	    static const int permuteDelimiter = '#';
+	    static const int noPermuteDelimiter = '$';
 	    static const int maxNrOfTokens = 30;
 	    static const int maxNrOfResults = 5000;
 	    static const int listSize = 60000;

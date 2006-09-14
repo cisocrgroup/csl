@@ -50,7 +50,7 @@ namespace csl {
 	TransTable_t::finishConstruction();
     }
 
-    void MinDic::compileDic( char* txtFile, char* compFile ) {
+    void MinDic::compileDic( char* txtFile ) {
 	uchar* key = 0;
 	uchar* valueString = 0;
 
@@ -84,10 +84,6 @@ namespace csl {
 
 	finishConstruction();
 
-	// dump memory to file
-	FILE* fo = fopen( compFile, "wb" );
-	writeToFile( fo );
-	fclose( fo );
     }
 
 

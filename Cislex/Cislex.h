@@ -82,7 +82,7 @@ namespace csl {
 	if ( ( header_.magicNumber_ != magicNumber_ ) ) {
 	    throw exceptions::badDictFile( "TransTable: Magic number comparison failed.\n" );
 	}
-	MinDic::loadFromFile( fi );
+	MinDic::loadFromStream( fi );
 	annStrings_ = (uchar*) malloc( header_.sizeOfAnnStrings_ * sizeof( uchar ) );
 	fread( annStrings_, sizeof( uchar ), header_.sizeOfAnnStrings_, fi );
 	

@@ -15,7 +15,8 @@ int main(int argc, char** argv) {
     MinDic t(alph);
 
     try {
-	t.compileDic(argv[2],argv[3]);
+	t.compileDic( argv[2] );
+	t.writeToFile( argv[3] );
     } catch ( exceptions::cslException ex ) {
 	std::cout<<"compileMD failed: "<<ex.what()<<std::endl;
 	return(1);

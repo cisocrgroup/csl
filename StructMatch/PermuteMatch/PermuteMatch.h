@@ -41,8 +41,9 @@ namespace csl {
 	int countResults;
 	int results[Global::Perm::maxNrOfResults];
 
-	int tokenDelim; ///< alph-coded version of Global::Perm::tokenDelimiter
-	int compDelim; ///< alph-coded version of Global::Perm::componentDelimiter
+	int tokenDelimiter; ///< alph-coded version of Global::Perm::tokenDelimiter
+	int permuteDelimiter; ///< alph-coded version of the delimiter indicating permutations to be allowed
+	int noPermutecompDelimiter; ///< alph-coded version of the delimiter indicating permutations NOT to be allowed
 
 
 	static bool staticBitsCalculated_;
@@ -50,7 +51,7 @@ namespace csl {
 	static bits64 b11[Global::Perm::maxNrOfTokens];
 
 
-	void query_rec( int db_pos, int w_pos, int list_pos, bits32 col_bits, int rmCand, int depth );
+	void findPermute( uint_t db_pos, size_t w_pos, size_t list_pos, bits32 col_bits, size_t rightmostCand, size_t depth );
 
     public:
 	PermuteMatch( Alphabet alph, char* db_file, char* dic_file, char* rev_dic_file, int dlev );

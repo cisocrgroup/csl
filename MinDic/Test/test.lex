@@ -1,0 +1,10 @@
+aachen
+aalen
+absacken
+absacker
+anna
+berta
+fuddeln
+tüdeln
+vertüdeln
+zertüdeln

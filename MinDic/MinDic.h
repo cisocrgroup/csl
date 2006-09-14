@@ -32,11 +32,11 @@ namespace csl {
 
 	void loadFromFile( char* binFile ) {
 	    FILE* fi = fopen( binFile, "rb" );
-	    loadFromFile( fi );
+	    loadFromStream( fi );
 	    fclose( fi );
 	}
 	
-	void loadFromFile( FILE* fi ) {
+	void loadFromStream( FILE* fi ) {
 	    // read the MinDic-Header
 	    fread( &header_, sizeof( Header ), 1, fi );
 
@@ -47,7 +47,13 @@ namespace csl {
 	    fread( annotations_, sizeof( int ), header_.nrOfKeys_, fi );
 	}
 	
-	void writeToFile( FILE* fo ) const {
+	void writeToFile( char* compFile ) const {
+	    FILE* fo = fopen( compFile, "wb" );
+	    writeToStream( fo );
+	    fclose( fo );
+	}
+
+	void writeToStream( FILE* fo ) const {
 	    // write the header
 	    fwrite( &header_, sizeof( Header ), 1, fo );
 	    // write the TransTable
@@ -60,9 +66,8 @@ namespace csl {
 	/**
 	 * The funtion that actually executes the computation of the trie.
 	 * @param txtFile The dictionary (including annotations) in txt format
-	 * @param compFile The name of the output binary
 	 */
-	void compileDic( char* txtFile, char* compFile );
+	void compileDic( char* txtFile );
 
 
 	void initConstruction();
@@ -71,7 +76,7 @@ namespace csl {
 	/**
 	 * processes one input line: separates the key from the annotations (if present)
 	 * and performs the insertion into the trie
-	 * @arg a cstring pointing to the current line
+loadFromFile	 * @arg a cstring pointing to the current line
 	 */
 	void addToken( const uchar* input, int value );
 

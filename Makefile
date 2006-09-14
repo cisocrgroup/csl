@@ -147,6 +147,11 @@ $(BIN)/permuteMatch: $(permuteMatch_files) $(TRANSTABLE_FILES)  $(MSMATCH_HEADER
 	$(GCC) $(permuteMatch_files) -o $(BIN)/permuteMatch
 
 
+############ TESTS ########################
+$(BIN)/testMinDic: ./MinDic/Test/testMinDic.cxx ./MinDic/Test/TestMinDic.h $(TRANSTABLE_FILES)  $(OBJS)/MinDic.o $(MINDIC_HEADERS) $(OBJS)/Alphabet.o
+	$(GCC) -o $(BIN)/testMinDic ./MinDic/Test/testMinDic.cxx $(OBJS)/Alphabet.o $(OBJS)/MinDic.o
+
+
 ########### DIV ###########################
 clean:
 	rm -v $(OBJS)/* $(BIN)/*

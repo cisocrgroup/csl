@@ -8,13 +8,13 @@ use Getopt::Long;
 $| = 1;
 
 
-my $perm;
+my $compPerm;
 my $help;
 my $sortFile;
 
 GetOptions(
 	   'help' => \$help,
-	   'perm=s' =>\$perm,
+	   'compPerm=s' =>\$compPerm,
 	   'sortFile=s' =>\$sortFile,
 	   );
 
@@ -55,34 +55,48 @@ else {
     $cmp = sub {return $a cmp $b};
 }
 
-my $partsDelimiter = '$';
+my $permDelimiter = '#';
+my $permDelimRex = '\\'.$permDelimiter;
+
+my $noPermDelimiter = '$';
+my $noPermDelimRex = '\\'.$noPermDelimiter;
+
 my $tokensDelimiter = ',';
-my $partsDelimRex = '\\'.$partsDelimiter;
 my $tokensDelimRex = '\\'.$tokensDelimiter;
-my $allDelimRex = "(?:$partsDelimRex|$tokensDelimRex?)";
 
-
-
-
+my $compDelimRex = "(?:$permDelimRex|$noPermDelimRex)";
+my $allDelimRex = "(?:$compDelimRex|$tokensDelimRex)";
 
 my @lines;
 my $lineCount = 0;
 
-while(my $line=<>) {
+while( my $line=<> ) {
     ++$lineCount; # lineCount is 1 for 1st line (not 0) !!!
-    unless($lineCount % 10000) {print STDERR "\r$lineCount lines processed.";}
-    $line=~s/\r\n$/\n/;
-    chomp $line;
+    unless( $lineCount % 10000 ) { print STDERR "\r$lineCount lines processed."; }
+    $line=~s/\r?\n$/\n/; # remove DOS-carriage return and newline
 
-    if($perm eq 'tokens') {
-	my @parts= split(/$partsDelimRex/,$line);
-	for(my $i=0;$i<@parts; ++$i) {
-	    my @toks = sort $cmp split(/,/,$parts[$i]);
-	    $parts[$i] = join($tokensDelimiter,@toks);
+
+    my @parts = ();
+    while( $line =~ m/($compDelimRex)(.+?)(?=$compDelimRex|$)/g ) {
+	if( $1 eq $permDelimiter ) {
+	    my @tokens = split( /$tokensDelimRex/, $2 );
+	    @tokens = sort @tokens;
+	    push( @parts, $1.join( $tokensDelimiter, @tokens ) );
 	}
-	push(@lines,[(join($partsDelimiter,@parts)."\$"),$lineCount]);
+	else {
+	    push( @parts, $1.$2 );
+	}
     }
+    push( @lines, [ join( '', @parts ), $lineCount] );
 
+#     if($perm eq 'tokens') {
+# 	my @parts= split(/$partsDelimRex/,$line);
+# 	for(my $i=0;$i<@parts; ++$i) {
+# 	    my @toks = sort $cmp split(/,/,$parts[$i]);
+# 	    $parts[$i] = join($tokensDelimiter,@toks);
+# 	}
+# 	push(@lines,[(join($partsDelimiter,@parts)."\$"),$lineCount]);
+#     }
 }
 
 print STDERR "Start sort.\n";
