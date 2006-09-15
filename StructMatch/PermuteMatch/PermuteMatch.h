@@ -27,10 +27,10 @@ namespace csl {
 	List list_;
 
 	uchar query_[Global::lengthOfStr];
-	int nrOfTokens_;
+	size_t nrOfTokens_;
 
 	bool findParts_; ///< if TRUE, report final states in db even if not all tokens of the query are processed. Default is set FALSE in the constructor
-	int minParts_; ///< Restricts the findParts-function to find only matches consisting of at least minParts tokens of the query
+	size_t minParts_; ///< Restricts the findParts-function to find only matches consisting of at least minParts tokens of the query
 
 	/// a bit-vector with the nrOfTokens_ lower bits set to 1, others to 0
 	bits32 cols_full;
@@ -41,9 +41,9 @@ namespace csl {
 	int countResults;
 	int results[Global::Perm::maxNrOfResults];
 
-	int tokenDelimiter; ///< alph-coded version of Global::Perm::tokenDelimiter
-	int permuteDelimiter; ///< alph-coded version of the delimiter indicating permutations to be allowed
-	int noPermutecompDelimiter; ///< alph-coded version of the delimiter indicating permutations NOT to be allowed
+	int tokenDelimiter_; ///< alph-coded version of Global::Perm::tokenDelimiter
+	int permuteDelimiter_; ///< alph-coded version of the delimiter indicating permutations to be allowed
+	int noPermuteDelimiter_; ///< alph-coded version of the delimiter indicating permutations NOT to be allowed
 
 
 	static bool staticBitsCalculated_;

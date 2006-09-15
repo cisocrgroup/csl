@@ -91,11 +91,12 @@ loadFromFile	 * @arg a cstring pointing to the current line
 	    return state;
 	}
 
-	inline int getAnn( size_t n ) const {
-	    if( n >= header_.nrOfKeys_ ) throw exceptions::outOfRange( "MinDic: out-of-range request for annotation-array." );
-	    return annotations_[n];
-	}
 	
+	/**
+	 * This method from TransTable is blocked for MinDic, not implemented here!
+	 */
+	int getFirstAnn( uint_t state );
+
 	inline bool getAnnotation( uchar* key, int* annotation ) const {
 	    uint_t pos = getRoot();
 	    size_t perfHashValue = 0;
@@ -103,11 +104,19 @@ loadFromFile	 * @arg a cstring pointing to the current line
 		pos = walkPerfHash( pos, alph_.code( *key ), perfHashValue );
 		++key;
 	    }
-	    *annotation = getAnn( perfHashValue );
+	    *annotation = annotationsAt( perfHashValue );
 	    return( !*key && pos && isFinal( pos ) );
 	}
 	
+	inline int getAnnotation( size_t perfHashValue ) const {
+	    return annotationsAt( perfHashValue );
+	}
+	
 	void printDic() const;
+
+	size_t getNrOfKeys() const {
+	    return header_.nrOfKeys_;
+	}
 	
     private:
 #include "./StateHash.h"
@@ -125,6 +134,11 @@ loadFromFile	 * @arg a cstring pointing to the current line
 
 	int* annotations_;
 	size_t sizeOfAnnotationBuffer_;
+
+	inline int annotationsAt( size_t n ) const {
+	    if( n >= header_.nrOfKeys_ ) throw exceptions::outOfRange( "MinDic: out-of-range request for annotation-array." );
+	    return annotations_[n];
+	}
 
 	inline int replaceOrRegister( TempState_t& state ) {
 	    int storedState = 0;

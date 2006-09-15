@@ -3,7 +3,9 @@
 
 
 int main() {
-    TestMinDic testMD;
+    csl::TestMinDic testMD;
+
     testMD.run();
 
+    return 0;
 }

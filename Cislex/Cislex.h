@@ -26,7 +26,7 @@ namespace csl {
 	inline void loadFromFile( FILE* fi );
 
 	inline void writeToFile( char* dicFile ) const;
-	inline void writeToFile( FILE* fo ) const;
+	inline void writeToStream( FILE* fo ) const;
 
 	inline void initConstruction();
 	inline void finishConstruction();
@@ -95,13 +95,13 @@ namespace csl {
 					     std::string( dicFile ) +
 					     "' for writing." );
 	}
-	writeToFile( fo );
+	writeToStream( fo );
 	fclose( fo );
     }
     
-    inline void Cislex::writeToFile( FILE* fo ) const {
+    inline void Cislex::writeToStream( FILE* fo ) const {
 	fwrite( &header_, sizeof( Header ), 1, fo );
-	MinDic::writeToFile( fo );
+	MinDic::writeToStream( fo );
 	fwrite( annStrings_, sizeof( uchar ), header_.sizeOfAnnStrings_, fo );
     }
 

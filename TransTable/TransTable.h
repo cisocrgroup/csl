@@ -111,7 +111,7 @@ namespace csl {
 	    return cells_[state].isOfType( Cell_t::HAS_ANN );
 	}
 
-	inline int getFirstAnn( int state ) const {
+	inline int getFirstAnn( uint_t state ) const {
 //     assert(hasAnnotations(state));
 	    return cells_[state].getValue();
 	}

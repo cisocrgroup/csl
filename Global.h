@@ -1,9 +1,10 @@
 #ifndef CSL_GLOBAL_H
 #define CSL_GLOBAL_H CSL_GLOBAL_H
 
-#include<cstring>
-#include<string>
-#include<exception>
+#include <cassert>
+#include <cstring>
+#include <string>
+#include <exception>
 #define debug(s) (std::cout<<"DEBUG: "<<s<<std::endl)
 
 /**
@@ -61,7 +62,7 @@ namespace csl {
 	class Perm {
 	public:
 	    static const int tokenDelimiter = ',';
-	    static const int permuteDelimiter = '#';
+	    static const int permuteDelimiter = '%';
 	    static const int noPermuteDelimiter = '$';
 	    static const int maxNrOfTokens = 30;
 	    static const int maxNrOfResults = 5000;

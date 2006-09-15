@@ -6,7 +6,7 @@ public:
 	uchar str_[Global::lengthOfWord];
 	int value_;
 	bits32 colBit_;
-	int colInt_;
+	size_t colNr_;
 	bits32 stillPossible_;
 
 
@@ -29,8 +29,8 @@ public:
 	void set( const uchar* str, int value, int col ) {
 	    strcpy( ( char* )str_, ( char* )str );
 	    value_ = value;
-	    colInt_ = col;
-	    colBit_ = 1ll << colInt_;
+	    colNr_ = col;
+	    colBit_ = 1ll << colNr_;
 	}
 	const uchar* getStr() const {
 	    return str_;
@@ -46,30 +46,31 @@ public:
 	    stillPossible_ = v;
 	}
 
-	int getCol() const {
-	    return colInt_;
+	size_t getCol() const {
+	    return colNr_;
 	}
 
 	bits32 getColBit() {
 	    return colBit_;
 	}
-    }
-    ; // class Item
+    }; // class Item
 
 
-    int size_;
+    size_t size_;
     Item list_[Global::Perm::listSize];
     int curCol_; ///< used during filling the list
 
     void calcStillPossible() {
 	bits32 n = 0;
-	for ( int i = getSize() - 1; i >= 0; --i ) {
+	if( getSize() == 0 ) return;
+	size_t i = getSize();
+	while( i > 0 ) {
+	    --i;
 	    n |= at( i ).getCol();
 	    at( i ).setStillPossible( n );
 	}
     }
-
-
+    
 public:
     List() {
 	reset();
@@ -108,7 +109,7 @@ public:
 	size_ = std::unique( list_, list_ + size_, is_equal ) - list_;
     }
 
-    int getSize() const {
+    size_t getSize() const {
 	return size_;
     }
 
@@ -163,10 +164,10 @@ private:
 
 public:
   void printList()  {
-    printf( "%20s\t%16s\t%s\t%s\n", "str", "col", "val", "sp" );
-    for ( int i = 0;i < getSize();++i ) {
-      printf( "%20s\t%16d\t%d\t%d\n", at( i ).getStr(), at( i ).getColBit(), at( i ).getValue(), at( i ).getStillPossible() );
-    }
+      printf( "%20s\t%16s\t%s\t%s\n", "str", "col", "val", "sp" );
+      for ( size_t i = 0; i < getSize(); ++i ) {
+	  printf( "%20s\t%16d\t%d\t%d\n", at( i ).getStr(), at( i ).getColBit(), at( i ).getValue(), at( i ).getStillPossible() );
+      }
   }
 
 };

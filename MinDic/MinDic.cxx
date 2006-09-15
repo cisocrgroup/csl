@@ -163,7 +163,7 @@ namespace csl {
 
 		if( isFinal( newPos ) ) {
 		    w[depth+1] = 0;
-		    printf( "%s#%d\n",( char* ) w, getAnn( newPerfHashValue ) );
+		    printf( "%s#%d\n",( char* ) w, getAnnotation( newPerfHashValue ) );
 
 		    if( ( ++count_ % 100000 ) == 0 ) fprintf( stderr, "%d\n", count_ );
 		} // if isFinal

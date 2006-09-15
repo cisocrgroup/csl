@@ -16,6 +16,7 @@ int main( int argc, char** argv ) {
 	exit( 1 );
     }
 
+    try {
     char* query_file = new char[200];
     query_file = argv[6];
     FILE* queries_handle = fopen( query_file, "r" );
@@ -73,6 +74,10 @@ int main( int argc, char** argv ) {
   }
   printf( "\n%d queries processed\n", count );
   fclose( queries_handle );
+
+    } catch( exceptions::cslException ex ) {
+	std::cout<<"permuteMatch: "<<ex.what()<<std::endl;
+    }
 
   return 0;
 }

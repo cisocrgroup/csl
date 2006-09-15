@@ -52,7 +52,7 @@ namespace csl {
 	    for( uchar* c = ( (reverse_)? wordRev : word_); *c; ++c ) {
 		dicPos2 = dictFW_.walkPerfHash( dicPos2, alph_.code( *c ), perfHashValue );
 	    }
-	    output_->push( ( (reverse_)? wordRev : word_ ), dictFW_.getAnn( perfHashValue ) );
+	    output_->push( ( (reverse_)? wordRev : word_ ), dictFW_.getAnnotation( perfHashValue ) );
 	}
 
 	const uchar* c = curDict_->getSusoString( dicPos );
@@ -271,7 +271,7 @@ namespace csl {
 		    for( uchar* c = word_; *c; ++c ) {
 			dicPos2 = dictFW_.walkPerfHash( dicPos2, alph_.code( *c ), perfHashValue );
 		    }
-		    output_->push( word_, dictFW_.getAnn( perfHashValue ) );
+		    output_->push( word_, dictFW_.getAnnotation( perfHashValue ) );
 		}
 
 		intersect( newDicPos, newLevPos, depth + 1 );
