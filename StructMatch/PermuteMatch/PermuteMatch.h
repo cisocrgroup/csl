@@ -35,6 +35,7 @@ namespace csl {
 	/// a bit-vector with the nrOfTokens_ lower bits set to 1, others to 0
 	bits32 cols_full;
 
+	uchar w_[Global::lengthOfStr];
 	int countCharResults; // more or less: DEBUG!
 	uchar charResults[Global::Perm::maxNrOfResults][Global::lengthOfStr]; // more or less: DEBUG!
 
@@ -51,7 +52,8 @@ namespace csl {
 	static bits64 b11[Global::Perm::maxNrOfTokens];
 
 
-	void findPermute( uint_t db_pos, size_t w_pos, size_t list_pos, bits32 col_bits, size_t rightmostCand, size_t depth );
+	void findPermute( uint_t db_pos, size_t w_pos, size_t list_pos, bits32 col_bits, int rightmostCand, size_t depth );
+	void findSequence( uint_t db_pos, size_t w_pos, size_t list_pos, bits32 col_bits, int rightmostCand, size_t depth );
 
     public:
 	PermuteMatch( Alphabet alph, char* db_file, char* dic_file, char* rev_dic_file, int dlev );

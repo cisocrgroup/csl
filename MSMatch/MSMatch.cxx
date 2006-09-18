@@ -52,6 +52,7 @@ namespace csl {
 	    for( uchar* c = ( (reverse_)? wordRev : word_); *c; ++c ) {
 		dicPos2 = dictFW_.walkPerfHash( dicPos2, alph_.code( *c ), perfHashValue );
 	    }
+	    printf( "Treffer: %s\n", (reverse_)? wordRev : word_ );
 	    output_->push( ( (reverse_)? wordRev : word_ ), dictFW_.getAnnotation( perfHashValue ) );
 	}
 

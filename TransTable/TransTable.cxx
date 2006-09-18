@@ -371,10 +371,10 @@ namespace csl {
 		int base = i - cellArray[i].getKey();
 		// depending on whether a pointer to an Alphabet-object was given,
 		// print either the coded integer or the decoded character
-		std::cout << base << "->" << cellArray[i].getValue() << "[label=";
+		std::cout << base << "->" << cellArray[i].getValue() << "[label=\"";
 		if ( alph ) std::cout << ( char ) alph->decode( cellArray[i].getKey() );
 		else std::cout << cellArray[i].getKey();
-		std::cout << "] //DOTCODE" << std::endl;
+		std::cout << "\"] //DOTCODE" << std::endl;
 	    } else if ( cellArray[i].isOfType( Cell_t::STATE ) ) {
 		int peripheries = ( cellArray[i].isOfType( Cell_t::FINALSTATE ) ) ? 2 : 1;
 		std::cout << i << "[peripheries=" << peripheries << "] //DOTCODE" << std::endl;

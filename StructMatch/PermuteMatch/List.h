@@ -106,7 +106,8 @@ public:
 
     void sortUnique() {
 	sort();
-	size_ = std::unique( list_, list_ + size_, is_equal ) - list_;
+	size_ = std::unique( list_, list_ + size_, is_equal ) - list_ ;
+	printf("size:%d\n", size_ );
     }
 
     size_t getSize() const {
@@ -121,8 +122,8 @@ public:
 	if ( size_ > ( Global::Perm::listSize - 1 ) ) {
 	    throw exceptions::bufferOverflow( "ResultSet: ResultSet overflow." );
 	} else {
-	    ++size_;
 	    at( size_ ).set( str, value, curCol_ );
+	    ++size_;
 	}
     }
 

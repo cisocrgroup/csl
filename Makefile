@@ -4,9 +4,9 @@ OBJS = ./objs
 LIB = ./lib
 ######## COMPILER AND FLAGS ###################
 #GCC = g++ -O3 -Wall -fpermissive # use this for optimal speed results
-GCC = g++ -O3 -Wall # use this for optimal speed results
+#GCC = g++ -O3 -Wall # use this for optimal speed results
 #GCC = g++ -Wall --no-inline
-#GCC = g++ -ggdb --no-inline -Wall # use this if you want to use the gdb debugger
+GCC = g++ -ggdb --no-inline -Wall # use this if you want to use the gdb debugger
 
 AR = ar cru
 RANLIB = ranlib
@@ -119,6 +119,9 @@ $(BIN)/lookupCislex: ./Cislex/lookupCislex.cxx $(TRANSTABLE_FILES) $(CISLEX_HEAD
 
 $(BIN)/extractTrie: ./Trie/extractTrie.cxx $(TRANSTABLE_FILES) $(OBJS)/Trie.o $(OBJS)/Alphabet.o
 	$(GCC) -o $(BIN)/extractTrie ./Trie/extractTrie.cxx $(OBJS)/Trie.o $(OBJS)/Alphabet.o
+
+$(BIN)/trie2dot: ./Trie/trie2dot.cxx $(TRANSTABLE_FILES) $(OBJS)/Trie.o $(OBJS)/Alphabet.o
+	$(GCC) -o $(BIN)/trie2dot ./Trie/trie2dot.cxx $(OBJS)/Trie.o $(OBJS)/Alphabet.o
 
 $(BIN)/extractMD: ./MinDic/extractMD.cxx $(TRANSTABLE_FILES) $(MINDIC_HEADERS) $(OBJS)/MinDic.o $(OBJS)/Alphabet.o
 	$(GCC) -o $(BIN)/extractMD ./MinDic/extractMD.cxx $(OBJS)/Alphabet.o $(OBJS)/MinDic.o
