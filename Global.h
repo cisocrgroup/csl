@@ -64,9 +64,9 @@ namespace csl {
 	    static const int tokenDelimiter = ',';
 	    static const int permuteDelimiter = '%';
 	    static const int noPermuteDelimiter = '$';
-	    static const int maxNrOfTokens = 30;
+	    static const size_t maxNrOfTokens = 30;
 	    static const int maxNrOfResults = 5000;
-	    static const int listSize = 60000;
+	    static const size_t maxCandsPerToken = 500;
 	};
 
 

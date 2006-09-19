@@ -52,6 +52,14 @@ namespace csl {
 	static bits64 b11[Global::Perm::maxNrOfTokens];
 
 
+	void checkNewComponent( uint_t dbPos, // pos in the db-automaton
+				size_t w_pos, // end-position of the answer string ( char-wise depth )
+				size_t listPos, // pos in the candidate list
+				bits32 colBits, // bitvector indicating which query tokens are already used 
+				int rightmostCand, // the rightmost query token that is already used
+				size_t countTokens // nr of complete tokens included in the current answer
+	    );
+
 	void findPermute( uint_t db_pos, size_t w_pos, size_t list_pos, bits32 col_bits, int rightmostCand, size_t depth );
 	void findSequence( uint_t db_pos, size_t w_pos, size_t list_pos, bits32 col_bits, int rightmostCand, size_t depth );
 
