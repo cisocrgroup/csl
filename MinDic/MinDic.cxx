@@ -63,13 +63,13 @@ namespace csl {
 					     "' for reading." );
 	}
 	uchar line[Global::lengthOfLongStr];
-	line[Global::lengthOfLongStr - 1] = 0;
+	// set the last byte to 0. So we can recognize when an overlong string was read by getline() below.
+	line[Global::lengthOfLongStr - 1] = 0; 
 
-	while( fileHandle.getline(( char* ) line, Global::lengthOfLongStr ) )  {
-// 	    if( line[Global::lengthOfLongStr] != 0 ) {
-// 		throw exceptions::badInput( "MinDic: length of input line exceeds maximium" );
-// 	    }
-	    
+	while ( fileHandle.getline(( char* ) line, Global::lengthOfLongStr ) )  {
+ 	    if ( line[Global::lengthOfLongStr-1] != 0 ) {
+		throw exceptions::badInput( "MinDic: Global::string_length sets the maximum string length for an entry of a trie. Maximum violated" );
+	    }
 	    /////////////////// PARSE THE INPUT STRING
 	    uchar *c;
 	    c = ( uchar* )strchr( ( char* )line, Global::keyValueDelimiter );
@@ -102,8 +102,8 @@ namespace csl {
 
 
 	lengthOfKey = strlen( ( char* )key_ );
-	if( lengthOfKey > Global::lengthOfStr ) {
-	    throw exceptions::bufferOverflow( "Trie.cxx: Global::string_length sets the maximum string length for an entry of a trie. Maximum violated" );
+	if( lengthOfKey > Global::lengthOfStr - 1 ) {
+	    throw exceptions::badInput( "MinDic: Global::string_length sets the maximum string length for an entry of a trie. Maximum violated" );
 	}
 	
 	// check alphabetical order
