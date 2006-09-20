@@ -65,6 +65,10 @@ namespace csl {
 	uchar line[Global::lengthOfLongStr];
 
 	while( fileHandle.getline(( char* ) line, Global::lengthOfLongStr ) )  {
+	    if( line[Global::lengthOfLongStr] != 0 ) {
+		throw exceptions::badInput( "MinDic: length of input line exceeds maximium" );
+	    }
+	    
 	    /////////////////// PARSE THE INPUT STRING
 	    uchar *c;
 	    c = ( uchar* )strchr( ( char* )line, Global::keyValueDelimiter );
