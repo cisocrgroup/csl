@@ -11,6 +11,8 @@
 using namespace csl;
 
 int main( int argc, char** argv ) {
+    printf( "Test\n" );
+
     if ( argc != 7 ) {
 	std::cerr << "Use like: permuteMatch <alph> <db_file> <dic_file> <rev_dic_file> <dlev> <query_file> " << std::endl << std::endl;
 	exit( 1 );
@@ -24,7 +26,7 @@ int main( int argc, char** argv ) {
 	std::cerr << "Could not open query-file." << std::endl;
 	exit( 1 );
     }
-
+    
     int count = 0;
     int nrOfHits;
 
@@ -34,7 +36,7 @@ int main( int argc, char** argv ) {
     PermuteMatch pm( alph, argv[2], argv[3], argv[4], atoi( argv[5] ) );
     pm.setFindParts( true );
 
-    uchar* line = new uchar[2000];  // CAUTION!!!!
+     uchar* line = new uchar[2000];  // CAUTION!!!!
     uchar* query;
     uchar* groundtruth = NULL;
     char* sep;

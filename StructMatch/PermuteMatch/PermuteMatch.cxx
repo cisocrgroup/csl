@@ -112,6 +112,7 @@ namespace csl {
 	////// TRY TO WALK THE PART-DELIMITERS ///////////////////////
 	uint_t walkedPermDelim, walkedNoPermDelim;
 	bits32 newColBits = 0;
+	size_t new_w_pos;
 	walkedPermDelim = db_.walk( dbPos, permuteDelimiter_ );
 	walkedNoPermDelim = db_.walk( dbPos, noPermuteDelimiter_ );
 	if ( ( walkedPermDelim || walkedNoPermDelim ) &&
@@ -123,7 +124,8 @@ namespace csl {
 		// block all query-tokens up to rightmostCand for further use
 		newColBits |= b11[rightmostCand];
 	    }
-	    newRightmostCand = std::max( (int)list_.at( listPos ).getCol(), rightmostCand );
+
+	    // newRightmostCand = std::max( (int)list_.at( listPos ).getCol(), rightmostCand );
 	    
 	    if( walkedPermDelim ) {
 		new_w_pos = w_pos;
@@ -132,14 +134,14 @@ namespace csl {
 		w_[new_w_pos] = 0;
 		std::cout<<"->permuteDelimiter - pos="<<walkedPermDelim<<", w="<<w_<<std::endl;
 
-		findPermute( walkedPermDelim, new_w_pos, 0, newColBits, newRightmostCand, countTokens );
+		findPermute( walkedPermDelim, new_w_pos, 0, newColBits, rightmostCand, countTokens );
 	    }
 	    if( walkedNoPermDelim ) {
 		new_w_pos = w_pos;
 		w_[new_w_pos] = Global::Perm::noPermuteDelimiter;
 		++new_w_pos;
 		w_[new_w_pos] = 0;
-		findPermute( walkedNoPermDelim, new_w_pos, 0, newColBits, newRightmostCand, countTokens );
+		findPermute( walkedNoPermDelim, new_w_pos, 0, newColBits, rightmostCand, countTokens );
 	    }
 	} // could walk compDelim
 
@@ -198,30 +200,30 @@ namespace csl {
 
 	///////// TRY TO WALK TOKENS ///////////////////////////
 	uint_t newDbPos, walkedTokenDelim;
-	while ( listPos < list_.getSize() ) {
-	    printf("Try with: %s from dbPos %d\n",(char*)list_.at(listPos).getStr(), dbPos );
+	while ( listPos < list_.getSize_merged() ) {
+	    printf("Try with: %s from dbPos %d\n",(char*)list_.at_merged(listPos).getStr(), dbPos );
 
 	    if ( !findParts_ ) { // findParts deactivated
 		// if some bits left of the rightmost 1-bit are set neither in still_possible nor colBits
-		if ( ( ( list_.at( listPos ).getStillPossible() | colBits ) & b11[rightmostCand] ) != b11[rightmostCand] ) {
-		    std::cout << "still_possible violated: SP=" << list_.at( listPos ).getStillPossible() << ",colBits=" << colBits << ", b11=" << b11[rightmostCand] << std::endl;
+		if ( ( ( list_.at_merged( listPos ).getStillPossible() | colBits ) & b11[rightmostCand] ) != b11[rightmostCand] ) {
+		    std::cout << "still_possible violated: SP=" << list_.at_merged( listPos ).getStillPossible() << ",colBits=" << colBits << ", b11=" << b11[rightmostCand] << std::endl;
 		    return;
 		}
 	    }
 
-	    if ( ( ( newColBits = ( colBits | list_.at( listPos ).getColBit() ) ) != colBits ) && // col not already blocked
-		 ( newDbPos = db_.walkStr( dbPos, list_.at( listPos ).getStr() ) )
-		 //  && printf("%d - %d\n",colBits,list_.at(listPos).getColBit())
+	    if ( ( ( newColBits = ( colBits | list_.at_merged( listPos ).getColBit() ) ) != colBits ) && // col not already blocked
+		 ( newDbPos = db_.walkStr( dbPos, list_.at_merged( listPos ).getStr() ) )
+		 //  && printf("%d - %d\n",colBits,list_.at_merged(listPos).getColBit())
 		) { // could walk token in db
 		// could walk token-delimiter in db
 		if ( ( walkedTokenDelim = db_.walk( newDbPos, tokenDelimiter_ ) ) ) {
-//      std::cout<<"could traverse in db complete token: "<<list_.at(listPos).getStr()<<std::endl;
-		    strcpy( ( char* )w_ + w_pos, ( char* )list_.at( listPos ).getStr() );
-		    new_w_pos = w_pos + strlen( ( char* )list_.at( listPos ).getStr() );
+//      std::cout<<"could traverse in db complete token: "<<list_.at_merged(listPos).getStr()<<std::endl;
+		    strcpy( ( char* )w_ + w_pos, ( char* )list_.at_merged( listPos ).getStr() );
+		    new_w_pos = w_pos + strlen( ( char* )list_.at_merged( listPos ).getStr() );
 		    w_[new_w_pos++] = Global::Perm::tokenDelimiter;
 		    w_[new_w_pos] = 0;
 
-		    newRightmostCand = std::max( (int)list_.at( listPos ).getCol(), rightmostCand );
+		    newRightmostCand = std::max( (int)list_.at_merged( listPos ).getCol(), rightmostCand );
 		    
 		    findPermute( walkedTokenDelim, new_w_pos, listPos + 1, newColBits, newRightmostCand, countTokens + 1 );
 		}

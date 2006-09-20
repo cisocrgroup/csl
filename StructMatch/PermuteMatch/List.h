@@ -94,7 +94,7 @@ public:
 
     void sortUnique( size_t token ) {
 	std::sort( lists_sep_[token], lists_sep_[token] + size_sep_[token], cmp );
-	size_sep_[token]= std::unique( lists_sep_[token], lists_sep_[token] + size_sep_[token] ) - lists_sep_[token] ;
+	size_sep_[token]= std::unique( lists_sep_[token], lists_sep_[token] + size_sep_[token], is_equal ) - lists_sep_[token] ;
     }
 
     size_t getSize_merged() const {

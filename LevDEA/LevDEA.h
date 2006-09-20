@@ -105,7 +105,7 @@ namespace csl {
 
 	~LevDEA();
 	
-	inline LevDEA::Pos LevDEA::walk( const Pos& p, int c ) const {
+	inline Pos walk( const Pos& p, int c ) const {
 	    table_cell & cell = table( get_k_charvec( c, p.pattern_pos() ), p.position() );
 	    return Pos( cell.target, p.pattern_pos() + cell.move_pattern );
 	}
