@@ -66,8 +66,8 @@ namespace csl {
 	cols_full = ( 1 << nrOfTokens_ ) - 1; // a sequence of nrOfTokens_ 1-bits
 
 
-	//          db_pos        w_pos list_pos  colBits   rmCand   rek_depth
-	findPermute( db_.getRoot(), 0      , 0        , 0        , 0       , 0 );
+	//              db_pos        w_pos list_pos  colBits   rmCand   rek_depth
+	findPermute( db_.getRoot(), 0      , 0        , 0        , -1       , 0 );
 
 	return countResults;
     }
@@ -75,11 +75,11 @@ namespace csl {
 
     void PermuteMatch::checkNewComponent( uint_t dbPos, // pos in the db-automaton
 					  size_t w_pos, // end-position of the answer string ( char-wise depth )
-					  size_t listPos, // pos in the candidate list
 					  bits32 colBits, // bitvector indicating which query tokens are already used 
 					  int rightmostCand, // the rightmost query token that is already used
 					  size_t countTokens // nr of complete tokens included in the current answer
 	) {
+	std::cout<<"Enter checkNewComponent: countTokens="<<countTokens<<", word="<<w_<<" -  dbPos="<<dbPos<<std::endl;
 
 	/////////// REPORT MATCHES ////////////////////
 	if ( db_.isFinal( dbPos ) && // new dbPos must be a final state AND
@@ -117,10 +117,8 @@ namespace csl {
 	walkedNoPermDelim = db_.walk( dbPos, noPermuteDelimiter_ );
 	if ( ( walkedPermDelim || walkedNoPermDelim ) &&
 	     ( findParts_ || ( colBits == b11[countTokens] ) ) ) {  // if not findParts, used exactly a prefix of the query string
-// 	    strcpy( ( char* )w_ + w_pos, ( char* )list_.at( listPos ).getStr() );
-// 	    new_w_pos = w_pos + strlen( ( char* )list_.at( listPos ).getStr() );
 	    
-	    if ( findParts_ && ( rightmostCand > 0 ) ) {
+	    if ( findParts_ && ( rightmostCand >= 0 ) ) {
 		// block all query-tokens up to rightmostCand for further use
 		newColBits |= b11[rightmostCand];
 	    }
@@ -133,15 +131,16 @@ namespace csl {
 		++new_w_pos;
 		w_[new_w_pos] = 0;
 		std::cout<<"->permuteDelimiter - pos="<<walkedPermDelim<<", w="<<w_<<std::endl;
-
 		findPermute( walkedPermDelim, new_w_pos, 0, newColBits, rightmostCand, countTokens );
 	    }
+
 	    if( walkedNoPermDelim ) {
 		new_w_pos = w_pos;
 		w_[new_w_pos] = Global::Perm::noPermuteDelimiter;
 		++new_w_pos;
 		w_[new_w_pos] = 0;
-		findPermute( walkedNoPermDelim, new_w_pos, 0, newColBits, rightmostCand, countTokens );
+		std::cout<<"->noPermuteDelimiter - pos="<<walkedPermDelim<<", w="<<w_<<std::endl;
+		findSequence( walkedNoPermDelim, new_w_pos, newColBits, rightmostCand, countTokens );
 	    }
 	} // could walk compDelim
 
@@ -149,16 +148,33 @@ namespace csl {
 
     void PermuteMatch::findSequence( uint_t dbPos, // pos in the db-automaton
 				     size_t w_pos, // end-position of the answer string ( char-wise depth )
-				     size_t listPos, // pos in the candidate list
 				     bits32 colBits, // bitvector indicating which query tokens are already used 
 				     int rightmostCand, // the rightmost query token that is already used
 				     size_t countTokens // nr of complete tokens included in the current answer
 	) {
-	std::cout<<"Enter findSequence: countTokens="<<countTokens<<", word="<<w_<<", dbPos="<<dbPos<<std::endl;
+	std::cout<<"Enter findSequence: countTokens="<<countTokens<<", word="<<w_<<" - dbPos="<<dbPos<<std::endl;
+	printf("rightmostCand=%d, colBits=%d\n", rightmostCand, colBits );
 	
-	checkNewComponent( dbPos, w_pos, listPos, colBits, rightmostCand, countTokens );
+	checkNewComponent( dbPos, w_pos, colBits, rightmostCand, countTokens );
 	
 	
+	bool couldWalk = false;
+	uint_t newDbPos = 0;
+	bits32 newColBits = 0;
+	size_t new_w_pos = 0;
+	for( size_t queryToken = rightmostCand + 1; queryToken < nrOfTokens_; ++queryToken ) {
+	    for( size_t cand = 0; cand < list_.getSize_sep( queryToken ); ++cand ) {
+		if( ( newDbPos = db_.walkStr( dbPos, list_.at_sep( queryToken, cand ).getStr() ) ) ) {
+		    couldWalk = true;
+		    new_w_pos = w_pos;
+		    if( ( newDbPos = db_.walk( newDbPos, tokenDelimiter_ ) ) ) {
+			for( const uchar* c = list_.at_sep( queryToken, cand ).getStr(); *c; ( w_[new_w_pos] = *c ), ++new_w_pos, ++c );
+			w_[new_w_pos] = Global::Perm::tokenDelimiter; ++new_w_pos; w_[new_w_pos] = 0;
+			findSequence( newDbPos, new_w_pos, newColBits, rightmostCand + 1, countTokens + 1 );
+		    }
+		}
+	    }
+	}
 	
 	
     }
@@ -183,10 +199,10 @@ namespace csl {
 
 	std::cout<<"Enter findPermute: countTokens="<<countTokens<<", word="<<w_<<", dbPos="<<dbPos<<std::endl;
 
-	checkNewComponent( dbPos, w_pos, listPos, colBits, rightmostCand, countTokens );
+	checkNewComponent( dbPos, w_pos, colBits, rightmostCand, countTokens );
 	
 	////////// STOP IF ALL QUERY-TOKENS ARE USED //////////////////
-	if ( countTokens == nrOfTokens_ ) {
+	if ( colBits == b11[nrOfTokens_ - 1] ) {
 	    return;
 	}
 
@@ -201,7 +217,7 @@ namespace csl {
 	///////// TRY TO WALK TOKENS ///////////////////////////
 	uint_t newDbPos, walkedTokenDelim;
 	while ( listPos < list_.getSize_merged() ) {
-	    printf("Try with: %s from dbPos %d\n",(char*)list_.at_merged(listPos).getStr(), dbPos );
+	    // printf("Try with: %s from dbPos %d\n",(char*)list_.at_merged(listPos).getStr(), dbPos );
 
 	    if ( !findParts_ ) { // findParts deactivated
 		// if some bits left of the rightmost 1-bit are set neither in still_possible nor colBits

@@ -10,10 +10,10 @@ public:
 	bool operator < ( const Item& other ) {
 	    int ret = 0;
 	    ret = other.getValue() - getValue();
-	    if( ret == 0 ) {
+	    if ( ret == 0 ) {
 		ret = getCol() - other.getCol();
-		if( ret == 0 ) {
-		    ret = strcmp( (char*)getStr(), (char*)other.getStr() );
+		if ( ret == 0 ) {
+		    ret = strcmp( ( char* )getStr(), ( char* )other.getStr() );
 		}
 	    }
 	    return ( ret > 0 );
@@ -53,7 +53,8 @@ public:
 	bits32 colBit_;
 	size_t colNr_;
 	bits32 stillPossible_;
-    }; // class Item
+    }
+    ; // class Item
 
     List() {
 	reset();
@@ -89,12 +90,13 @@ public:
     }
 
     void sort() {
+	if( getSize_merged() == 0 ) return;
 	sort( 0, getSize_merged() - 1 ); // private method
     }
 
     void sortUnique( size_t token ) {
 	std::sort( lists_sep_[token], lists_sep_[token] + size_sep_[token], cmp );
-	size_sep_[token]= std::unique( lists_sep_[token], lists_sep_[token] + size_sep_[token], is_equal ) - lists_sep_[token] ;
+	size_sep_[token] = std::unique( lists_sep_[token], lists_sep_[token] + size_sep_[token], is_equal ) - lists_sep_[token] ;
     }
 
     size_t getSize_merged() const {
@@ -112,26 +114,25 @@ public:
     void push( const uchar* str, int value ) {
 	if ( size_sep_[curCol_] > ( Global::Perm::maxCandsPerToken - 1 ) ) {
 	    throw exceptions::bufferOverflow( "ResultSet: ResultSet overflow." );
-	} 
-	else {
-	    at_sep( curCol_, size_sep_[curCol_] ).set( str, value, curCol_ );
+	} else {
 	    ++( size_sep_[curCol_] );
-	    
-	    list_merged_[size_merged_] = &( at_sep( curCol_, size_merged_ ) );
+	    at_sep( curCol_, size_sep_[curCol_] - 1 ).set( str, value, curCol_ );
+
+	    list_merged_[size_merged_] = &( at_sep( curCol_, size_sep_[curCol_] - 1 ) );
 	    ++size_merged_;
 	}
     }
 
     void reset() {
 	size_merged_ = 0;
-	for( size_t i; i < Global::Perm::maxNrOfTokens; size_sep_[i] = 0, ++i );
+	for ( size_t i = 0; i < Global::Perm::maxNrOfTokens; size_sep_[i] = 0, ++i );
     }
 
     void calcStillPossible() {
 	bits32 n = 0;
-	if( getSize_merged() == 0 ) return;
+	if ( getSize_merged() == 0 ) return;
 	size_t i = getSize_merged();
-	while( i > 0 ) {
+	while ( i > 0 ) {
 	    --i;
 	    n |= at_merged( i ).getCol();
 	    at_merged( i ).setStillPossible( n );
@@ -149,7 +150,7 @@ private: // of List
 
 
     // quicksort: see Cormen, Introduction to algorithms, p.145ff
-    void sort( size_t left, size_t right ) {
+    void sort( int left, int right ) {
 	size_t q;
 	if ( left < right ) {
 	    q = partition( left, right );
@@ -159,31 +160,31 @@ private: // of List
     }
 
     // for quicksort
-    int partition( size_t left, size_t right ) {
-	size_t i = left - 1;
-	size_t j;
+    int partition( int left, int right ) {
+	int i = left;
+	int j;
 	for ( j = left; j < right; ++j ) {
-	    if ( at_merged(j) <  at_merged(right) ) {
-		++i;
+	    if ( at_merged( j ) <  at_merged( right ) ) {
 		swap( i, j );
+		++i;
 	    }
 	}
-	swap( i + 1, right );
-	return ( i + 1 );
+	swap( i, right );
+	return ( i );
     }
 
-    void swap( size_t i, size_t j ) {
-	Item tmp = at_merged(i);
-	at_merged(i) = at_merged( j );
-	at_merged(j) = tmp;
+    void swap( int i, int j ) {
+	Item tmp = at_merged( i );
+	at_merged( i ) = at_merged( j );
+	at_merged( j ) = tmp;
     }
 
 public:
-  void printList()  {
-      printf( "%20s\t%16s\t%s\t%s\n", "str", "col", "val", "sp" );
-      for ( size_t i = 0; i < getSize_merged(); ++i ) {
-	  printf( "%20s\t%16d\t%d\t%d\n", at_merged( i ).getStr(), at_merged( i ).getColBit(), at_merged( i ).getValue(), at_merged( i ).getStillPossible() );
-      }
+    void printList()  {
+	printf( "%20s\t%16s\t%s\t%s\n", "str", "col", "val", "sp" );
+	for ( size_t i = 0; i < getSize_merged(); ++i ) {
+      printf( "%20s\t%16d\t%d\t%d\n", at_merged( i ).getStr(), at_merged( i ).getColBit(), at_merged( i ).getValue(), at_merged( i ).getStillPossible() );
+    }
   }
 
 };
