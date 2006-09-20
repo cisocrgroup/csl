@@ -63,6 +63,7 @@ namespace csl {
 					     "' for reading." );
 	}
 	uchar line[Global::lengthOfLongStr];
+	line[Global::lengthOfLongStr - 1] = 0;
 
 	while( fileHandle.getline(( char* ) line, Global::lengthOfLongStr ) )  {
 	    if( line[Global::lengthOfLongStr] != 0 ) {
