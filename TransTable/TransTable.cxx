@@ -137,7 +137,7 @@ namespace csl {
 	while ( !mightFit ) {
 	    do {
 		++slot;
-		while ( ( slot + nrOfAnnotations + alphSize_ + 1 ) > nrOfCells_ ) { // okay???
+		while ( ( slot + nrOfAnnotations + alphSize_ ) > nrOfCells_ ) { // okay???
 		    allocCells( nrOfCells_ * 2 );
 		}
 	    } while ( ! ( cells_[slot].isEmpty() ) );
@@ -174,7 +174,7 @@ namespace csl {
 	while ( !mightFit ) {
 	    do {
 		++slot;
-		while ( ( slot + nrOfAnnotations + alphSize_ + 1 ) > nrOfCells_ ) { // okay???
+		while ( ( slot + nrOfAnnotations + alphSize_ ) > nrOfCells_ ) { // okay???
 		    allocCells( nrOfCells_ * 2 );
 		}
 	    } while ( ! ( cells_[slot].isEmpty() ) );

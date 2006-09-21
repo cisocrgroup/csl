@@ -52,7 +52,6 @@ namespace csl {
 	    for( uchar* c = ( (reverse_)? wordRev : word_); *c; ++c ) {
 		dicPos2 = dictFW_.walkPerfHash( dicPos2, alph_.code( *c ), perfHashValue );
 	    }
-	    printf( "Treffer: %s\n", ( (reverse_)? wordRev : word_ ));
 	    output_->push( ( (reverse_)? wordRev : word_ ), dictFW_.getAnnotation( perfHashValue ) );
 	}
 
@@ -117,14 +116,14 @@ namespace csl {
  	}
 
      	// 1 | 0 errors
- 	reverse_ = true;
+  	reverse_ = true;
  	curDict_ = &dictBW_;
  	if( ( pos = curDict_->walkStr( curDict_->getRoot(), patRightRev_ ) ) ) {
  	    strcpy( (char*)word_, (char*)patRightRev_ );
 	    minDistSecond_ = 1;
 	    levDEASecond_->setDistance( 1 );
  	    levDEASecond_->loadPattern( patLeftRev_ );
- 	    intersectSecond( pos, LevDEA::Pos( 0, 0 ), strlen( (char*)patRightRev_ ) );
+	    intersectSecond( pos, LevDEA::Pos( 0, 0 ), strlen( (char*)patRightRev_ ) );
  	}
     }
 

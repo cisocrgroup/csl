@@ -59,8 +59,7 @@ namespace csl {
 	    }
 	    ++c;
 	}
-	list_.sort();
-	list_.calcStillPossible();
+	list_.mergeList();
 	list_.printList(); //DEBUG!
 
 	cols_full = ( 1 << nrOfTokens_ ) - 1; // a sequence of nrOfTokens_ 1-bits
@@ -157,13 +156,13 @@ namespace csl {
 	
 	checkNewComponent( dbPos, w_pos, colBits, rightmostCand, countTokens );
 	
-	
 	bool couldWalk = false;
 	uint_t newDbPos = 0;
 	bits32 newColBits = 0;
 	size_t new_w_pos = 0;
 	for( size_t queryToken = rightmostCand + 1; queryToken < nrOfTokens_; ++queryToken ) {
 	    for( size_t cand = 0; cand < list_.getSize_sep( queryToken ); ++cand ) {
+		printf( "Try '%s' from token %d\n", list_.at_sep( queryToken, cand ).getStr(), queryToken );
 		if( ( newDbPos = db_.walkStr( dbPos, list_.at_sep( queryToken, cand ).getStr() ) ) ) {
 		    couldWalk = true;
 		    new_w_pos = w_pos;

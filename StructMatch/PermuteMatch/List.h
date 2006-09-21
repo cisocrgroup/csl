@@ -107,25 +107,35 @@ public:
 	return size_sep_[token];
     }
 
-    void setCurCol( int col ) {
+    void setCurCol( size_t col ) {
 	curCol_ = col;
+	nrOfCols_ = std::max( nrOfCols_, ( curCol_ + 1 ) );
     }
-
+    
     void push( const uchar* str, int value ) {
 	if ( size_sep_[curCol_] > ( Global::Perm::maxCandsPerToken - 1 ) ) {
 	    throw exceptions::bufferOverflow( "ResultSet: ResultSet overflow." );
 	} else {
 	    ++( size_sep_[curCol_] );
 	    at_sep( curCol_, size_sep_[curCol_] - 1 ).set( str, value, curCol_ );
-
-	    list_merged_[size_merged_] = &( at_sep( curCol_, size_sep_[curCol_] - 1 ) );
-	    ++size_merged_;
 	}
+    }
+
+    void mergeList() {
+	for( size_t col = 0; col < nrOfCols_; ++col ) {
+	    for( size_t cand = 0; cand < getSize_sep( col ); ++cand ) {
+		list_merged_[size_merged_] = &( at_sep( col, cand ) );
+		++size_merged_;
+	    }
+	}
+	sort();
+	calcStillPossible();
     }
 
     void reset() {
 	size_merged_ = 0;
 	for ( size_t i = 0; i < Global::Perm::maxNrOfTokens; size_sep_[i] = 0, ++i );
+	nrOfCols_ = 0;
     }
 
     void calcStillPossible() {
@@ -146,7 +156,8 @@ private: // of List
     Item* list_merged_[Global::Perm::maxNrOfTokens * Global::Perm::maxCandsPerToken];
     size_t size_merged_;
 
-    int curCol_; ///< used during filling the list
+    size_t curCol_; ///< used during filling the list
+    size_t nrOfCols_;
 
 
     // quicksort: see Cormen, Introduction to algorithms, p.145ff
@@ -183,8 +194,9 @@ public:
     void printList()  {
 	printf( "%20s\t%16s\t%s\t%s\n", "str", "col", "val", "sp" );
 	for ( size_t i = 0; i < getSize_merged(); ++i ) {
-      printf( "%20s\t%16d\t%d\t%d\n", at_merged( i ).getStr(), at_merged( i ).getColBit(), at_merged( i ).getValue(), at_merged( i ).getStillPossible() );
+	    printf( "%20s\t%16d\t%d\t%d\n", at_merged( i ).getStr(), at_merged( i ).getColBit(), at_merged( i ).getValue(), at_merged( i ).getStillPossible() );
+	}
     }
-  }
+    
 
 };
