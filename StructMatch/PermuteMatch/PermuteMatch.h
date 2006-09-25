@@ -4,11 +4,10 @@
 #include <cstring>
 #include <algorithm>
 
-#include "../../Alphabet/Alphabet.h"
-#include "../../MSMatch/MSMatch.h"
-//#include"../BestMatch/BestMatch.h"
-#include "../../Trie/Trie.h"
 #include"../../Global.h"
+#include "../../MSMatch/MSMatch.h"
+#include "../../Alphabet/Alphabet.h"
+#include "../../Trie/Trie.h"
 
 namespace csl {
 
@@ -40,18 +39,15 @@ namespace csl {
 	int countCharResults; // more or less: DEBUG!
 	uchar charResults[Global::Perm::maxNrOfResults][Global::lengthOfStr]; // more or less: DEBUG!
 
-	int countResults;
+	size_t countResults;
 	int results[Global::Perm::maxNrOfResults];
 
 	int tokenDelimiter_; ///< alph-coded version of Global::Perm::tokenDelimiter
 	int permuteDelimiter_; ///< alph-coded version of the delimiter indicating permutations to be allowed
 	int noPermuteDelimiter_; ///< alph-coded version of the delimiter indicating permutations NOT to be allowed
 
-
-	static bool staticBitsCalculated_;
 	/// b11[i] is a bitstring with the i lower bits set to 1, the others to 0
-	static bits64 b11[Global::Perm::maxNrOfTokens];
-
+	bits64 b11[Global::Perm::maxNrOfTokens];
 
 	void checkNewComponent( uint_t dbPos, // pos in the db-automaton
 				size_t w_pos, // end-position of the answer string ( char-wise depth )
@@ -59,7 +55,6 @@ namespace csl {
 				int rightmostCand, // the rightmost query token that is already used
 				size_t countTokens // nr of complete tokens included in the current answer
 	    );
-
 	void findPermute( uint_t db_pos, size_t w_pos, size_t list_pos, bits32 col_bits, int rightmostCand, size_t depth );
 	void findSequence( uint_t db_pos, size_t w_pos, bits32 col_bits, int rightmostCand, size_t countTokens );
 
@@ -70,7 +65,7 @@ namespace csl {
 	void setFindParts( bool b ) {
 	    findParts_ = b;
 	}
-
+	
 	/// Sets minParts. Read the doc of the variable minParts for some info
 	void setMinParts( int m ) {
 	    if ( !findParts_ ) {

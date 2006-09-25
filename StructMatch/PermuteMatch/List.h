@@ -88,7 +88,7 @@ public:
 		 ( ( a.getValue() == b.getValue() )  // or if freqs are equal
 		   && ( strcmp( ( char* )a.getStr(), ( char* )b.getStr() ) < 0 ) ) ); // let alphab. order decide (standard strcmp function, not the one implemented in Alphabet)
     }
-
+    
     void sort() {
 	if( getSize_merged() == 0 ) return;
 	sort( 0, getSize_merged() - 1 ); // private method
@@ -197,6 +197,4 @@ public:
 	    printf( "%20s\t%16d\t%d\t%d\n", at_merged( i ).getStr(), at_merged( i ).getColBit(), at_merged( i ).getValue(), at_merged( i ).getStillPossible() );
 	}
     }
-    
-
 };

@@ -5,10 +5,7 @@
 
 namespace csl {
 
-    bool PermuteMatch::staticBitsCalculated_ = false;
-    bits64 PermuteMatch::b11[Global::Perm::maxNrOfTokens];
-
-
+    
     PermuteMatch::PermuteMatch( Alphabet alph_file, char* db_file, char* dic_file, char* rev_dic_file, int dlev ) : 
 	alph_( alph_file ),
 	levquery_( alph_, dlev, dic_file, rev_dic_file ),
@@ -20,14 +17,11 @@ namespace csl {
 	permuteDelimiter_ = alph_.code( Global::Perm::permuteDelimiter );
 	noPermuteDelimiter_ = alph_.code( Global::Perm::noPermuteDelimiter );
 
-	// calculate the static bitstrings, if not already done
-	if ( !staticBitsCalculated_ ) {
-	    bits64 bits = 1;
-	    for ( size_t i = 0; i < Global::Perm::maxNrOfTokens; ++i ) {
-		b11[i] = bits;
-		bits = ( bits << 1 ) | 1;
-	    }
-	    staticBitsCalculated_ = true;
+	// calculate the bitstrings
+	bits64 bits = 1;
+	for ( size_t i = 0; i < Global::Perm::maxNrOfTokens; ++i ) {
+	    b11[i] = bits;
+	    bits = ( bits << 1 ) | 1;
 	}
     }
 
@@ -64,7 +58,6 @@ namespace csl {
 
 	cols_full = ( 1 << nrOfTokens_ ) - 1; // a sequence of nrOfTokens_ 1-bits
 
-
 	//              db_pos        w_pos list_pos  colBits   rmCand   rek_depth
 	findPermute( db_.getRoot(), 0      , 0        , 0        , -1       , 0 );
 
@@ -95,10 +88,8 @@ namespace csl {
 		}
 		
 		// dublicates can occur in list of matches, so check for them
-		static int i;
-		static bool seen;
-		seen = false;
-		for ( i = 0; i < countResults; ++i ) {
+		bool seen = false;
+		for ( size_t i = 0; i < countResults; ++i ) {
 		    if ( results[i] == *it ) seen = true;
 		}
 		if ( !seen ) results[countResults++] = *it;

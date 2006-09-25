@@ -65,7 +65,7 @@ namespace csl {
 	    static const int permuteDelimiter = '%';
 	    static const int noPermuteDelimiter = '$';
 	    static const size_t maxNrOfTokens = 30;
-	    static const int maxNrOfResults = 5000;
+	    static const size_t maxNrOfResults = 5000;
 	    static const size_t maxCandsPerToken = 500;
 	};
 
@@ -145,8 +145,6 @@ namespace csl {
 	};
 
     };
-
-
 
 } // eon
 

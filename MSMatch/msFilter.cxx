@@ -2,7 +2,6 @@
 #include "../ResultSet/ResultSet.h"
 #include "../Alphabet/Alphabet.h"
 #include "../Global.h"
-
 using namespace csl;
 
 uchar w[200];

@@ -1,5 +1,5 @@
-#ifndef LEVDEA_H
-#define LEVDEA_H LEVDEA_H
+#ifndef CSL_LEVDEA_H
+#define CSL_LEVDEA_H CSL_LEVDEA_H
 
 #include <fstream>
 #include <iostream>
@@ -71,10 +71,10 @@ namespace csl {
 	int z2k1;
 	int z2k2;
 
-	static bits32 tabsLoaded;
-	static table_cell** tabs;
-	static int** fins;
-	static int* coresetss;
+	bits32 tabsLoaded;
+	table_cell* tabs[4];
+	int* fins[4];
+	int coresetss[4];
 
 	static const bits64 zff = 0xffffffffffffffffll; // that's 64 '1's
 	static const bits64 z10 = 1ll << 63; // that's a '1' followed by 63 '0's

@@ -148,7 +148,7 @@ completeMatch_files = ./StructMatch/CompleteMatch/completeMatch.cxx $(OBJS)/Comp
 $(BIN)/completeMatch: $(completeMatch_files) $(TRANSTABLE_FILES)
 	$(GCC) $(completeMatch_files) -o $(BIN)/completeMatch
 
-permuteMatch_files = ./StructMatch/PermuteMatch/permuteMatch.cxx $(OBJS)/PermuteMatch.o $(OBJS)/Alphabet.o $(OBJS)/Trie.o $(OBJS)/LevDEA.o $(OBJS)/MinDic.o
+permuteMatch_files = ./StructMatch/PermuteMatch/permuteMatch.cxx $(OBJS)/LevDEA.o $(OBJS)/PermuteMatch.o $(OBJS)/Alphabet.o $(OBJS)/Trie.o $(OBJS)/MinDic.o
 $(BIN)/permuteMatch: $(permuteMatch_files) $(TRANSTABLE_FILES)  $(MSMATCH_HEADERS) 
 	$(GCC) $(permuteMatch_files) -o $(BIN)/permuteMatch
 

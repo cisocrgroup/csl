@@ -1,5 +1,5 @@
-#ifndef CSL_MINDIC
-#define CSL_MINDIC CSL_MINDIC
+#ifndef CSL_MINDIC_H
+#define CSL_MINDIC_H CSL_MINDIC_H
 
 #include <fstream>
 #include <vector>

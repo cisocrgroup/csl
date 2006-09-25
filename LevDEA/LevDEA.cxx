@@ -3,7 +3,6 @@
 
 #include "./LevDEA.h"
 
-
 namespace csl {
 
     /*
@@ -12,14 +11,14 @@ namespace csl {
       and leave the other instances with pointers to noone's land!!!
       This only works as long as all instances die at the same time
     */
-    bits32 LevDEA::tabsLoaded = 0;
-    table_cell** LevDEA::tabs = new table_cell*[4];
-    int** LevDEA::fins = new int*[4];
-    int* LevDEA::coresetss = new int[4];
 
+    
     LevDEA::LevDEA( const Alphabet& alph, int init_k ) : alph_( alph ), k_( 0 ) {
 	charvec_ = ( bits64* ) malloc( alph_.size() * sizeof( bits64 ) );
 	k_charvecs_ = new bits32[alph_.size() * Global::lengthOfWord];
+
+	tabsLoaded = 0;
+
 	setDistance( init_k );
     }
 
@@ -28,19 +27,6 @@ namespace csl {
 // delete(tab);
 // delete(fin);
     }
-
-
-// this is an extended version of walk.
-// I now use a much more compact version as inline function
-// LevDEA::Pos LevDEA::walk(const Pos& p,int c) const {
-//     int bitvec = calc_k_charvec(charvec_[c],p.pattern_pos());
-//     table_cell& cell = table(bitvec,p.position());
-//     int new_pos = cell.target;
-//     int move_pattern = cell.move_pattern;
-//     return Pos(new_pos, p.pattern_pos()+move_pattern);
-// }
-
-
 
 
     void LevDEA::setDistance( int initK ) {
@@ -63,7 +49,8 @@ namespace csl {
 	if( ( tabsLoaded & ( 1 << k_ ) ) == 0 ) { // have the tables for k already been loaded???
 	    std::ostringstream ss; ss<<k_; // push k_ into a stream to get it as string
 
-	    std::string table_file = "/mounts/Users/student/uli/implement/csl/trunk/LevDEA/lev" + ss.str() + "data";
+//	    std::string table_file = "/mounts/Users/student/uli/implement/csl/trunk/LevDEA/lev" + ss.str() + "data";
+	    std::string table_file = "/files/uli/cis/csl/trunk/LevDEA/lev" + ss.str() + "data";
 
 	    FILE * table_handle = fopen( table_file.c_str(), "r" );
 

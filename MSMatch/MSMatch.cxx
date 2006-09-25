@@ -1,7 +1,7 @@
 #ifndef CSL_MSMATCH_CXX
 #define CSL_MSMATCH_CXX CSL_MSMATCH_CXX
 
-#include "./MSMatch.h"
+// #include "./MSMatch.h"
 
 namespace csl {
 
@@ -28,7 +28,7 @@ namespace csl {
 	levDEAFirst_ = new LevDEA( alph_, 1 );
 	levDEASecond_ = new LevDEA( alph_, 1 );
     }
-
+    
     template< MSMatchMode Mode >
     inline MSMatch< Mode >::~MSMatch() {}
 

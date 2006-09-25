@@ -2,7 +2,6 @@
 #define CSL_MSMATCH_H CSL_MSMATCH_H
 
 #include "../LevFilter/LevFilter.h"
-#include "../Trie/Trie.h"
 #include "../MinDic/MinDic.h"
 #include "../Alphabet/Alphabet.h"
 #include "../LevDEA/LevDEA.h"
