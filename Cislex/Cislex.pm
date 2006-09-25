@@ -15,11 +15,7 @@ sub new {
 	return undef;
     }
 
-<<<<<<< .mine
     my $binary = "~/MA/Zerl_web/lex/csl/trunk/bin/lookupCislex $self->{alphFile} $self->{lexFile}";
-=======
-    my $binary = "~/implement/csl/trunk/bin/lookupCislex $self->{alphFile} $self->{dicFile}";
->>>>>>> .r97
 
     open2( $self->{BINARY_OUT}, $self->{BINARY_IN}, $binary ) or die "Perl::Cislex: $!";
 
