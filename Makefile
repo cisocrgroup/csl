@@ -32,7 +32,7 @@ $(OBJS)/Alphabet.o: $(ALPHABET_HEADERS) ./Alphabet/Alphabet.cxx
 ########## DAWG AND RELATED ###################
 
 Trie: ./bin/compileTrie ./bin/extractTrie
-MinDic: ./bin/compileMD ./bin/extractMD
+MinDic: ./bin/compileMD ./bin/extractMD ./bin/lookupMD
 Cislex: ./bin/compileCislex ./bin/lookupCislex
 
 TRANSTABLE_FILES = ./TransTable/TransTable.h ./TransTable/TransTable.cxx ./TransTable/Cell.h ./TransTable/TempState.h $(GLOBAL_H) $(ALPHABET_HEADERS)
@@ -125,6 +125,9 @@ $(BIN)/trie2dot: ./Trie/trie2dot.cxx $(TRANSTABLE_FILES) $(OBJS)/Trie.o $(OBJS)/
 
 $(BIN)/extractMD: ./MinDic/extractMD.cxx $(TRANSTABLE_FILES) $(MINDIC_HEADERS) $(OBJS)/MinDic.o $(OBJS)/Alphabet.o
 	$(GCC) -o $(BIN)/extractMD ./MinDic/extractMD.cxx $(OBJS)/Alphabet.o $(OBJS)/MinDic.o
+
+$(BIN)/lookupMD: ./MinDic/lookupMD.cxx $(TRANSTABLE_FILES) $(MINDIC_HEADERS) $(OBJS)/MinDic.o $(OBJS)/Alphabet.o
+	$(GCC) -o $(BIN)/lookupMD ./MinDic/lookupMD.cxx $(OBJS)/Alphabet.o $(OBJS)/MinDic.o
 
 $(BIN)/bestMatch: ./BestMatch/bestMatch.cxx $(OBJS)/BestMatch.o $(OBJS)/ResultSet.o $(OBJS)/LevNDEA.o $(TRANSTABLE_FILES) $(MINDIC_FILES) $(OBJS)/Alphabet.o
 	$(GCC) -o $(BIN)/bestMatch ./BestMatch/bestMatch.cxx $(OBJS)/BestMatch.o $(OBJS)/ResultSet.o $(OBJS)/LevNDEA.o $(OBJS)/Alphabet.o
