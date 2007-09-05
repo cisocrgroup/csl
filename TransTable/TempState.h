@@ -15,129 +15,116 @@ namespace csl {
        @date 2005
     */
 
-    template< CellType CellTypeValue >
     class TempState {
-	// dummy. Use specializations only
-    };
-
-    template<>
-    class TempState< BASIC > {
     private:
-	uint_t* transitions_;
-	const int alphSize_;
-
-	std::vector< int > annotations_;
-
-	bool isFinal_;
-
-    public:
-	TempState( int alphSize ) : alphSize_( alphSize ) {
-	    transitions_ = new uint_t[alphSize_ + 1];
-	    reset();
-	}
-
-	~TempState() {
-	    delete( transitions_ );
-	}
-
-	inline uint_t getTransTarget( int c ) const {
-	    assert( c < ( alphSize_ + 1 ) );
-	    return transitions_[c];
-	}
-
 	/**
-	   add an outgoing transition
-	   @param label
-	   @param target
-	*/
-	inline void addTransition( uchar label, uint_t target ) {
-	    assert( label < ( alphSize_ + 1 ) );
-	    transitions_[label] = target;
-	}
+	 * Represents one transitions of the TempState
+	 */
+	class Transition {
+	public:
+	    Transition( wchar_t label, uint_t target, size_t phNumber) {
+		label_ = label;
+		target_ = target;
+		phNumber_ = phNumber;
+	    }
+	    wchar_t getLabel() const { return label_; }
+	    uint_t getTarget() const { return target_; }
+	    size_t getPhNumber() const { return phNumber_; }
 
-	/**
-	   reset the state for re-use
-	*/
-	inline void reset() {
-	    memset( transitions_, 0, ( alphSize_ + 1 )*sizeof( int ) );
-	    annotations_.clear();
-	    isFinal_ = false;
-	}
+	    // we need this method whenever the state is marked as final
+	    void incPhNumber() { ++phNumber_; }
+	private:
+	    wchar_t label_;
+	    uint_t target_;
+	    size_t phNumber_;
+	}; // class Transition
 
-	inline void addAnnotation( int newAnn ) {
-	    annotations_.push_back( newAnn );
-	}
+	std::vector<Transition> transitions_;
 
-	inline const std::vector<int>& getAnnotations() const {
-	    return annotations_;
-	}
+	std::vector<wchar_t> susoString_;
 
-	inline size_t getNrOfAnnotations() const {
-	    return annotations_.size();
-	}
-
-	inline int getAnnotation( int n ) const {
-	    return annotations_.at( n );
-	}
-
-	/**
-	   mark the state as final/ not final
-	*/
-	void setFinal( bool b ) {
-	    isFinal_ = b;
-	}
-
-	bool isFinal() const {
-	    return isFinal_;
-	}
-
-    };
-
-
-
-    template<>
-    class TempState< TOKDIC > {
-    private:
-	typedef std::pair< uint_t, size_t > Transition;
-	Transition* transitions_;
-	uchar transStr_[Global::maxNrOfChars + 1]; // +1 for a terminating \0
-	const Alphabet& alph_;
-
-	int phValue_;
 	int phSum_;
 
-	int sizeOfLabelStr_;
-
 	bool isFinal_;
-	int annotation_;
 
+	std::vector<int> annotations_;
+
+	class Iterator {
+	public:
+	    Iterator( TempState& myTempState ) : myTempState_( myTempState ),
+						       index_( 0 ) {
+	    }
+ 
+	    bool isValid() const {
+		return ( index_ < ( myTempState_.transitions_.size() ) );
+	    }
+	    Transition& operator*() {
+		return myTempState_.transitions_.at( index_ );
+	    }
+
+	    Transition* operator->() {
+		return &( myTempState_.transitions_.at( index_ ) );
+	    }
+
+	    Transition& operator++() {
+		++index_;
+		return myTempState_.transitions_.at( index_ );
+	    }
+	    
+
+	private:
+	    TempState& myTempState_;
+	    size_t index_;
+	}; // class Iterator
+
+	Iterator getIterator() {
+	    return Iterator( *this );
+	}
 
     public:
-	TempState( const Alphabet& alph ) : alph_( alph ),
-				phValue_( 0 ),
-				phSum_( 0 ),
-				sizeOfLabelStr_( 0 ),
-				isFinal_( false ),
-				annotation_( 0 ) {
-	    transitions_ = new Transition[alph_.size() + 1];
-	    memset( transitions_, 0, alph_.size() + 1 * sizeof( Transition ) );
+
+	class ConstIterator {
+	public:
+	    ConstIterator( const TempState& myTempState ) : myTempState_( myTempState ),
+						       index_( 0 ) {
+	    }
+ 
+	    bool isValid() const {
+		return ( ( index_ ) < ( myTempState_.transitions_.size() ) );
+	    }
+	    const Transition& operator*() {
+		return myTempState_.transitions_[index_];
+	    }
+
+	    const Transition* operator->() {
+		return &( myTempState_.transitions_[index_] );
+	    }
+
+	    const Transition& operator++() {
+		++index_;
+		return myTempState_.transitions_[index_];
+	    }
+
+	private:
+	    const TempState& myTempState_;
+	    size_t index_;
+	}; // class ConstIterator
+
+	ConstIterator getConstIterator() const {
+	    return ConstIterator( *this );
+	}
+
+
+	TempState() : phSum_( 0 ),
+		      isFinal_( false )
+	    {
+
 	    reset();
 	}
 
 	~TempState() {
-	    delete[]( transitions_ );
 	}
 	
-	inline int getTransTarget( uint_t c ) const {
-	    assert( c < ( alph_.size() + 1 ) );
-	    return transitions_[c].first;
-	}
-
-	inline int getTransPhValue( uint_t c ) const {
-	    assert( c < ( alph_.size() + 1 ) );
-	    return transitions_[c].second + ( isFinal() ? 1 : 0 );
-	}
-
 	inline int getPhValue() const {
 	    return phSum_ + ( isFinal() ? 1 : 0 );
 	}
@@ -148,73 +135,70 @@ namespace csl {
 	 * @param label
 	 * @param target
 	 */
-	inline void addTransition( uchar label, uint_t target, size_t targetPhValue ) {
-	    assert( label < ( alph_.size() + 1 ) );
-	    
-	    if( transitions_[label].first ) throw exceptions::cslException("TempState: Transition multiply defined");
-	    
+	inline void addTransition( wchar_t label, uint_t target, size_t targetPhNumber ) {
 	    // assert that new labels are coming in alphabetical order
 	    // that's important for transStr_
-	    if( ( sizeOfLabelStr_ > 0 ) && 
-		( transStr_[sizeOfLabelStr_-1] >= label ) ) {
-		printf("label= %c\n", alph_.decode( label ) );
+	    if( ( transitions_.size() > 0 ) &&
+		( transitions_.at( transitions_.size() - 1 ).getLabel() >= label ) ) {
 
-		for( uchar* c= transStr_; *c; ++c ) {
-
-		    printf(">%c\n", alph_.decode( *c ) );
-		}
 		throw exceptions::cslException("TempState: new transition violating alphabetical order");
-		exit(1);
 	    }
+	    
+	    transitions_.push_back( Transition( label, target, getPhValue() ) );
+	    susoString_.at( susoString_.size() - 1 ) = label;
+	    susoString_.push_back( 0 );
 
-
-	    transStr_[sizeOfLabelStr_++] = label;
-	    transitions_[label].first = target;
-	    transitions_[label].second = phSum_;
-
-	    phSum_ += targetPhValue;
+	    phSum_ += targetPhNumber;
 	}
 
 	/**
 	   reset the state for re-use
 	*/
 	inline void reset() {
-	    memset( transitions_, 0, ( alph_.size() + 1 )*sizeof( Transition ) );
-	    memset( transStr_, 0, ( Global::maxNrOfChars + 1 ) * sizeof( uchar ) );
-	    sizeOfLabelStr_ = 0;
-	    annotation_ = 0;
+	    transitions_.clear();
+
+	    susoString_.clear();
+	    susoString_.push_back( 0 );
+	    
+	    annotations_.clear();
 	    isFinal_ = false;
 	    phSum_ = 0;
 	}
 
 	inline void addAnnotation( int newAnn ) {
-	    annotation_ = newAnn;
+	    annotations_.push_back( newAnn );
 	}
 
 	inline int getNrOfAnnotations() const {
-	    return 0; // CAUTiON HERE!
-    }
+	    return annotations_.size();
+	}
 
-    inline int getAnnotation() const {
-      return annotation_;
-    }
+	inline int getAnnotation( size_t index ) const {
+	    return annotations_.at( index );
+	}
 
-    inline const uchar* getTransString() const {
-      return transStr_;
-    }
+	inline const wchar_t* getSusoString() {
+	    susoString_.push_back( 0 );  // make susoString_ a \0-terminated string
+	    return &( susoString_.at( 0 ) );
+	}
 
-    /**
-       mark the state as final/ not final
-    */
-    void setFinal( bool b ) {
-      isFinal_ = b;
-    }
+	/**
+	   mark the state as final/ not final
+	*/
+	void setFinal( bool b ) {
+	    if( ! isFinal_ ) {
+		for( Iterator it = getIterator(); it.isValid(); ++it ) {
+		    (*it).incPhNumber();
+		}
+	    }
+	    isFinal_ = b;
+	}
 
-    bool isFinal() const {
-      return isFinal_;
-    }
+	bool isFinal() const {
+	    return isFinal_;
+	}
 
-  };
+    };
 
 } //eon
 

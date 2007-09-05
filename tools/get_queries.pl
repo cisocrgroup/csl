@@ -5,10 +5,13 @@ use Getopt::Long;
 
 #####CONFIG###########
 # These are default values - most of them can be overwritten by command-line flags
-my $partsDelimiter = '$'; ## Caution: there are hard-wired , and $ as delimiters around line 100
+my $permDelimiter = '%';
+
+my $noPermDelimiter = '$';
 my $tokensDelimiter = ',';
 
-my @permute = (); # 0 / 1
+
+my $permuteParts = 0; # 0 / 1
 my $groundtruth = 0; # 0 / 1
 
 my $symbol_error_rate = 0;   # 0 <= $symbol_error_rate <= 1
@@ -16,20 +19,25 @@ my $errors = 0;
 my $glob = 0;
 #####################
 
+my $permDelimRex = '\\'.$permDelimiter;
+my $noPermDelimRex = '\\'.$noPermDelimiter;
+my $compDelimRex = "(?:$permDelimRex|$noPermDelimRex)";
+my $tokensDelimRex = '\\'.$tokensDelimiter;
+my $allDelimRex = "(?:$compDelimRex|$tokensDelimRex)";
+
 my $help;
 GetOptions(
 	   'help' => \$help,
 	   'error_rate=f' => \$symbol_error_rate,
 	   'errors=i' => \$errors,
 	   'glob=i' => \$glob,
-	   'permute=s' => \@permute,
+	   'permuteParts' => \$permuteParts,
 	   'groundtruth!' => \$groundtruth,
-	   'tokensDelimiter=s' => \$tokensDelimiter,
-	   'partsDelimiter=s' => \$partsDelimiter,
 	   );
 
 if(@ARGV<3 or $help) {
     print STDERR <<TXT;
+
 Use like: ./get_queries.pl <alph_file> <text_db_file> <nr_of_queries>
 
 Flags:
@@ -39,12 +47,12 @@ Flags:
 --errors N         specify number of errors for each line (N>=0, default 0)
 --glob N           transform one area of N characters into a single '_'
 
---permute Str      Str may be 'tokens' or 'parts' to permute either the tokens 
-                   inside parts or the parts among each other. 
-		    Default: no permutations
-
+--permuteParts     Set this option to allow permutation of complete parts 
+                   among each other
 --groundtruth      print pairs "groundtruth<SPACE>query";
 --nogroundtruth    do not add the groundtruth (default)
+
+Uli Reffle, 2006
 
 TXT
     exit(1);
@@ -54,28 +62,17 @@ my $alph_file = $ARGV[0];
 my $db_file = $ARGV[1];
 my $nr_of_queries = $ARGV[2];
 
-my $partsDelimRex = '\\'.$partsDelimiter;
-my $tokensDelimRex = '\\'.$tokensDelimiter;
-my $allDelimRex = "($partsDelimRex|$tokensDelimRex)";
 
 
 open(ALPH,"<$alph_file") or die $!;
-my @alph;
-my @alph_in = split(//,<ALPH>);
-
-#remove delimiter from alphabet
-for my $c (@alph_in) {
-    if(($c ne $tokensDelimiter) && ($c ne $partsDelimiter)) {
-	push(@alph,$c);
-    }
-}
-
+my $alphLine = <ALPH>;
 close(ALPH);
+$alphLine =~ s/$allDelimRex//g; # remove delimiter symbols from alphabet
+my @alph = split( //, $alphLine );
 
 open(DB,"<$db_file") or die $!;
 my @db = <DB>;
 close(DB);
-
 
 for(1..$nr_of_queries) {
     my $rand_index = int(rand($#db +1));
@@ -102,48 +99,45 @@ for(1..$nr_of_queries) {
 	
     }
 
+    # PERMUTATIONS
+    my @parts = ();
 
-    for my $permuteMode (@permute) {
-	if($permuteMode eq 'tokens') { #permute some tokens inside parts
-	    my @parts = split(/$partsDelimRex/,$entry); #split into parts
-	    $entry = '';
-	    my $temp;
-	    my $i1, my $i2;
-	    my @newParts;
-	    my $newPart;
-	    for my $part(@parts) {
-		my @tokens = split(/$tokensDelimRex/,$part); #split into tokens
-		while(@tokens) {
-		    # take a random elt out of @tokens, add it to $entry
-		    $entry .= splice(@tokens,int(rand(@tokens)),1).$tokensDelimiter;
-		}
-		substr($entry,-1,1,$partsDelimiter);
-	    }
+    while( $entry =~ m/($compDelimRex)(.+?)(?=$compDelimRex|$ )/gx ) {
+	my $delim = $1;
+	my $part = $2;
+	$part =~ s/,$//; # remove trailing delimiter
+	my @tokens = split( /$tokensDelimRex/, $part );
+	
+	if( $delim eq $permDelimiter ) {
+	    @tokens = sort { reverse($a) cmp reverse($b )} @tokens;
+	    push( @parts, join( $tokensDelimiter, @tokens ).',' );
 	}
-
-	if($permuteMode eq 'parts') { #permute some parts
-	    my @parts = split(/$partsDelimRex/,$entry); #split into parts
-	    $entry = '';
-	    while(@parts) {
-		# take a random elt out of @parts, add it to $entry
-		$entry .= splice(@parts,int(rand(@parts)),1).$partsDelimiter;
-	    }
+	else {
+	    push( @parts, $part.',' );
 	}
     }
 
+    if( $permuteParts ) {
+	$entry = '';
+	while(@parts) {
+	    # take a random elt out of @parts, add it to $entry
+	    $entry .= splice(@parts,int(rand(@parts)),1);
+	}
+    }
+    else {
+	$entry = join( '', @parts ).$tokensDelimiter;
+    }
 
     # do this at the end so you can throw away the different delimiters
     if($errors > 0) { # create symbol errors by number (not so terribly correct, caus deletions wrack the seen-array ... :-/)
-	my @tokens=split(/\,|\$/,$entry);
+	my @tokens=split(/$allDelimRex+/,$entry);
 	for(@tokens) {
 	    $_ = addErrors($_,$errors);
 	}
-	$entry = join($tokensDelimiter, @tokens);
-
+	$entry = join($tokensDelimiter, @tokens).$tokensDelimiter;
     }
 
-
-    $entry =~ s/$partsDelimRex/$tokensDelimiter/g; # Finally remove all structure from the query
+    $entry =~ s/$compDelimRex/$tokensDelimiter/g; # Finally remove all structure from the query
 
     if($groundtruth) {
 	print STDOUT "$db[$rand_index]\t$entry\n";

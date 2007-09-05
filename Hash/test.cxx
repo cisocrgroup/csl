@@ -5,12 +5,17 @@
 using namespace csl;
 
 void smokeTest() {
-    uchar* strings = (uchar*)malloc( 3 );
-    Hash h( 5, strings, 3 );
+    wchar_t* strings = NULL;
+    size_t lengthOfStrings = 0;
+    Hash h( 5, strings, lengthOfStrings );
 
-    h.findOrInsert((uchar*)"Uli");
-    h.findOrInsert((uchar*)"Anna");
-    h.findOrInsert((uchar*)"Uli");
+    h.findOrInsert( L"Uli"  );
+    h.findOrInsert( L"Anna" );
+    h.findOrInsert( L"Uli" );
+
+    std::cout<<"Uli: "<<h.find( L"Uli" )<<std::endl;
+    std::cout<<"Ulli: "<<h.find( L"Ulli" )<<std::endl;
+
 }
 
 

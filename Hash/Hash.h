@@ -4,6 +4,8 @@
 #include<vector>
 
 #include "../Global.h"
+#include <cwchar>
+
 namespace csl {
 
     /**
@@ -15,8 +17,10 @@ namespace csl {
      *
      * @author Uli Reffle, <uli@reffle.de>
      */
+    template< class charType_t__ >
     class Hash {
     public:
+	typedef charType_t__ charType_t;
 	/**
 	 * constructor
 	 *
@@ -25,20 +29,20 @@ namespace csl {
 	 * @param[in/out] sizeOfeyBuffer
 	 * @todo think about the heuristics concerning the buffer initialization size
 	 */
-	inline Hash( size_t estimatedNrOfKeys, uchar*& keyBuffer, size_t& sizeOfKeyBuffer );
+	inline Hash( size_t estimatedNrOfKeys, charType_t*& keyBuffer, size_t& lengthOfKeyBuffer );
 	
 	/**
 	 * insert a key into the hash table
 	 * @param key
 	 */
-	inline size_t findOrInsert( const uchar* key );
+	inline size_t findOrInsert( const charType_t* key );
 	
 	/**
 	 * look up a key in the hash table
 	 * @param key
 	 * @return a value >0 iff the key was found, 0 otherwise
 	 */
-	inline size_t find(const uchar* key ) const;
+	inline size_t find(const charType_t* key ) const;
 	
 	inline void reset();
 
@@ -49,7 +53,7 @@ namespace csl {
 	/**
 	 * @return a const reference to the hashtable
 	 */
-	inline const std::vector< size_t >& getTable() const;
+	inline const std::vector< uint_t >& getTable() const;
 
 	/**
 	 * computes a hashcode for a given string.
@@ -57,13 +61,18 @@ namespace csl {
 	 * is necessary.
 	 * @return the hashcode for str
 	 */
-	inline uint_t getHashCode( const uchar* key ) const;
+	inline uint_t getHashCode( const charType_t* key ) const;
 
-	inline const uchar* getStringAt( size_t offset ) const;
+	inline const charType_t* getStringAt( size_t offset ) const;
 
-	inline uchar* getStringAt( size_t offset );
+	inline charType_t* getStringAt( size_t offset );
 
 	inline void reallocKeyBuffer( size_t size );
+
+
+	inline int strcmpTemplate( const charType_t* w1, const charType_t* w2 ) const;
+	inline charType_t* strncpyTemplate( charType_t* w1, const charType_t* w2, size_t n ) const;
+	inline size_t strlenTemplate( const charType_t* w ) const;
 
 	/**
 	 * the data structure holding the actual table
@@ -79,16 +88,16 @@ namespace csl {
 	 * the buffer holding all the keys
 	 * This is just a reference to the buffer handed over from the client
 	 */
-	uchar*& keyBuffer_;
+	charType_t*& keyBuffer_;
 
 	/**
 	 * size of keyBuffer_
 	 */
-	size_t& sizeOfKeyBuffer_;
+	size_t& lengthOfKeyBuffer_;
 
 	/**
 	 * offset just past the last terminating \\0 of keyBuffer_
-	 * equals: actual used size of the buffer
+	 * actual used size of the buffer is: lengthOfKeyStrings_ * sizeof(char16)
 	 */
 	size_t lengthOfKeyStrings_;
 
@@ -102,15 +111,16 @@ namespace csl {
 	/*@}*/
     };
     
-    Hash::Hash( size_t estimatedNrOfKeys, uchar*& keyBuffer, size_t& sizeOfKeyBuffer ) : 
-	table_( estimatedNrOfKeys * 15, 0 ),
+    template< class charType_t >
+    inline Hash< charType_t >::Hash( size_t estimatedNrOfKeys, charType_t*& keyBuffer, size_t& lengthOfKeyBuffer ) : 
+	table_( estimatedNrOfKeys * 20, 0 ),
 	nrOfKeys_( 0 ),
 	keyBuffer_( keyBuffer ),
-	sizeOfKeyBuffer_( sizeOfKeyBuffer ),
+	lengthOfKeyBuffer_( lengthOfKeyBuffer ),
 	lengthOfKeyStrings_( 1 )
     {
 	if( keyBuffer_ == 0 ) {
-	    if( sizeOfKeyBuffer_ != 0 ) {
+	    if( lengthOfKeyBuffer_ != 0 ) {
 		printf( "Hash-Constructor: non-compatible buffer / size\n" );
 		exit(1);
 	    }
@@ -118,85 +128,136 @@ namespace csl {
 	}
     }
     
-    size_t Hash::find( const uchar* key ) const {
+    template< class charType_t >
+    inline size_t Hash< charType_t >::find( const charType_t* key ) const {
 	uint_t slot = getHashCode( key );
 	while( table_.at( slot ) != 0 &&  // hash-slot non-empty
-	       strcmp( (char*)key, (char*)getStringAt( table_.at( slot ) ) ) ) { // no match
+	       strcmpTemplate( key, getStringAt( table_.at( slot ) ) ) ) { // no match
 	    slot = ( slot + HASHC2 ) % getTableSize();
 	}
 	return table_.at( slot );
     }
 
-    size_t Hash::findOrInsert( const uchar* key ) {
+    template< class charType_t >
+    inline size_t Hash< charType_t >::findOrInsert( const charType_t* key ) {
 	uint_t slot = getHashCode( key );
 	while( table_.at( slot ) != 0 &&  // hash-slot non-empty
-	       strcmp( (char*)key, (char*)getStringAt( table_.at( slot ) ) ) ) { // no match
+	       strcmpTemplate( key, getStringAt( table_.at( slot ) ) ) ) { // no match
 	    slot = ( slot + HASHC2 ) % getTableSize();
 	}
 
 	if( table_.at( slot ) == 0 ) { // key wasn't found
-	    size_t lengthOfKey = strlen( (char*)key );
+	    size_t lengthOfKey = strlenTemplate( key );
 	    // resize keyBuffer_ if necessary
-	    while( ( lengthOfKeyStrings_ + lengthOfKey) > sizeOfKeyBuffer_ ) {
-		reallocKeyBuffer( (int) (sizeOfKeyBuffer_ * 1.5) );
+	    while( ( lengthOfKeyStrings_ + lengthOfKey ) > lengthOfKeyBuffer_ ) {
+		reallocKeyBuffer( (int) ( lengthOfKeyBuffer_ * 1.5 ) );
 	    }
-	    strncpy( (char*)(keyBuffer_ + lengthOfKeyStrings_), (char*)key, lengthOfKey );
+	    strncpyTemplate( ( keyBuffer_ + lengthOfKeyStrings_ ), key, lengthOfKey );
 	    table_.at( slot ) = lengthOfKeyStrings_;
 	    lengthOfKeyStrings_ += lengthOfKey + 1;
-//	    printf( "Create: %s at slot %d, buf_offset %d\n", key, slot, table_.at( slot ) );
+//	    printf( "Create: %ls at slot %d, buf_offset %d\n", key, slot, table_.at( slot ) );
 	}
 	else {
-	    // printf( "Found: %s at slot %d, buf_offset %d\n", key, slot, table_.at( slot ) );
+//	    printf( "Found: %ls at slot %d, buf_offset %d\n", key, slot, table_.at( slot ) );
 	}
-
 	return table_.at( slot );
     }
-    
-    inline const uchar* Hash::getStringAt( size_t offset ) const {
+
+    template< class charType_t >
+    inline const charType_t* Hash< charType_t >::getStringAt( size_t offset ) const {
 	return ( keyBuffer_ + offset );
     }
 
-    inline uchar* Hash::getStringAt( size_t offset ) {
+    template< class charType_t >
+    inline charType_t* Hash< charType_t >::getStringAt( size_t offset ) {
 	return ( keyBuffer_ + offset );
     }
 
-    inline void Hash::reset() {
+    template< class charType_t >
+    inline void Hash< charType_t >::reset() {
 	lengthOfKeyStrings_ = 0;
 	nrOfKeys_ = 0;
 	memset( &table_[0], 0, table_.size() * sizeof(uint_t) );
     }
 
-    uint_t Hash::getTableSize() const {
+    template< class charType_t >
+    inline uint_t Hash< charType_t >::getTableSize() const {
 	return table_.size();
     }
 
-    size_t Hash::getLengthOfKeyStrings() const {
+    template< class charType_t >
+    inline size_t Hash< charType_t >::getLengthOfKeyStrings() const {
 	return lengthOfKeyStrings_;
     }
 
-    uint_t Hash::getHashCode( const uchar* str ) const {
+    /**
+     * @todo FIND A GOOD NUMBER FOR THE HASHING !!!
+     */
+    template<>
+    inline uint_t Hash< uchar >::getHashCode( const charType_t* str ) const {
 	uint_t h = 0;
-	while(*str) {
-	    h = h * 256 + *str;
+	while( *str ) {
+	    h = h * 257 + *str; // MIND THIS NUMBER
 	    ++str;
 	}
 	return ( h % getTableSize() );
     }
 
-    const std::vector<uint_t>& Hash::getTable() const {
+    template<>
+    inline uint_t Hash< wchar_t >::getHashCode( const charType_t* str ) const {
+	uint_t h = 0;
+	while( *str ) {
+	    h = h * 65537 + *str; // MIND THIS NUMBER
+	    ++str;
+	}
+	return ( h % getTableSize() );
+    }
+
+    template< class charType_t >
+    inline const std::vector< uint_t >& Hash< charType_t >::getTable() const {
 	return table_;
     }
 
-    inline void Hash::reallocKeyBuffer( size_t newSize ) {
-	keyBuffer_ = (uchar*) realloc( keyBuffer_, newSize );
-	sizeOfKeyBuffer_ = newSize;
+    template< class charType_t >
+    inline void Hash< charType_t >::reallocKeyBuffer( size_t newSize ) {
+	keyBuffer_ = (charType_t*) realloc( keyBuffer_, newSize * sizeof(charType_t) );
+	lengthOfKeyBuffer_ = newSize;
 	if( keyBuffer_ == 0 ) {
-	    std::cerr<<"Hash realloc: Out of memory. Couldn't resize to "<<newSize<<" bytes\n"<<std::endl;
+	    std::cerr<<"Hash realloc: Out of memory. Couldn't resize to "<<newSize<<" wide characters\n"<<std::endl;
 	    exit( 1 );
 	}
     }
 
+    template<>
+    inline int Hash<wchar_t>::strcmpTemplate( const charType_t* w1, const charType_t* w2 ) const {
+	return wcscmp( w1, w2 );
+    }
 
-}
+    template<>
+    inline wchar_t* Hash<wchar_t>::strncpyTemplate( charType_t* w1, const charType_t* w2, size_t n ) const {
+	return wcsncpy( w1, w2, n );
+    }
+
+    template<>
+    inline size_t Hash<wchar_t>::strlenTemplate( const charType_t* w ) const {
+	return wcslen( w );
+    }
+
+    template<>
+    inline int Hash< uchar >::strcmpTemplate( const charType_t* w1, const charType_t* w2 ) const {
+	return strcmp( (char*)w1, (char*)w2 );
+    }
+
+    template<>
+    inline uchar* Hash< uchar >::strncpyTemplate( charType_t* w1, const charType_t* w2, size_t n ) const {
+	return (uchar*)strncpy( (char*)w1, (const char*)w2, n );
+    }
+
+    template<>
+    inline size_t Hash< uchar >::strlenTemplate( const charType_t* w ) const {
+	return strlen( (char*)w );
+    }
+
+} // namespace csl
 
 #endif

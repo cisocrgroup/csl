@@ -4,9 +4,11 @@ OBJS = ./objs
 LIB = ./lib
 ######## COMPILER AND FLAGS ###################
 #GCC = g++ -O3 -Wall -fpermissive # use this for optimal speed results
-#GCC = g++ -O3 -Wall # use this for optimal speed results
+
+#GCC = g++ -O3 -Wall # use this for optimized speed but with assertions being checked
+GCC = g++ -O3 -DNDEBUG -Wall # use this for optimal speed results
 #GCC = g++ -Wall --no-inline
-GCC = g++ -ggdb --no-inline -Wall # use this if you want to use the gdb debugger
+#GCC = g++ -ggdb --no-inline -Wall # use this if you want to use the gdb debugger
 
 AR = ar cru
 RANLIB = ranlib
@@ -15,7 +17,7 @@ RANLIB = ranlib
 GLOBAL_H = ./Global.h
 
 
-all: Trie MinDic Cislex MSMatch
+all: Trie MinDic MinDicString MSMatch Perm
 
 install:
 	cp -v ./bin/* ~/bin/
@@ -33,21 +35,25 @@ $(OBJS)/Alphabet.o: $(ALPHABET_HEADERS) ./Alphabet/Alphabet.cxx
 
 Trie: ./bin/compileTrie ./bin/extractTrie
 MinDic: ./bin/compileMD ./bin/extractMD ./bin/lookupMD
-Cislex: ./bin/compileCislex ./bin/lookupCislex
+MinDicString: ./bin/compileMDString ./bin/extractMDS ./bin/lookupMDString
+Perm: ./bin/permuteMatch ./bin/partPermuteMatch
 
-TRANSTABLE_FILES = ./TransTable/TransTable.h ./TransTable/TransTable.cxx ./TransTable/Cell.h ./TransTable/TempState.h $(GLOBAL_H) $(ALPHABET_HEADERS)
+TRANSTABLE_HEADERS = ./TransTable/TransTable.h ./TransTable/TransTable.cxx ./TransTable/Cell.h ./TransTable/TempState.h $(GLOBAL_H) $(ALPHABET_HEADERS)
+
+RESULTSET_H = ./ResultSet/ResultSet.h
 
 HASH_FILES = ./Hash/Hash.h
 
-TRIE_HEADERS = ./Trie/Trie.h $(ALPHABET_HEADERS) $(TRANSTABLE_FILES)
+TRIE_HEADERS = ./Trie/Trie.h $(ALPHABET_HEADERS) $(TRANSTABLE_HEADERS)
 $(OBJS)/Trie.o: $(TRIE_HEADERS) ./Trie/Trie.cxx
 	$(GCC) -c ./Trie/Trie.cxx -o $(OBJS)/Trie.o
 
-MINDIC_HEADERS = ./MinDic/MinDic.h ./MinDic/StateHash.h $(TRANSTABLE_FILES) $(HASH_FILES)
-$(OBJS)/MinDic.o: $(MINDIC_HEADERS) ./MinDic/MinDic.cxx	
-	$(GCC) -c ./MinDic/MinDic.cxx -o $(OBJS)/MinDic.o
+MINDIC_HEADERS = ./MinDic/MinDic.h ./MinDic/MinDic.tcc ./MinDic/StateHash.h ./MinDic/StateHash.tcc $(TRANSTABLE_HEADERS) $(HASH_FILES)
 
-CISLEX_HEADERS = ./Cislex/Cislex.h $(MINDIC_HEADERS)
+MINDICSTRING_HEADERS = ./MinDicString/MinDicString.h $(MINDIC_HEADERS) ./Hash/Hash.h
+ERRDIC_HEADERS =  ./ErrDic/ErrDic.h ./ErrDic/ErrDic.tcc $(MINDIC_HEADERS) ./Hash/Hash.h
+
+FBDic_HEADERS = ./FBDic/FBDic.h ./FBDic/FBDic.tcc $(MINDIC_HEADERS)
 
 
 ########## LEVFILTER AND RELATED #############
@@ -59,9 +65,9 @@ LEVDEA_HEADERS = ./LevDEA/LevDEA.h $(GLOBAL_H) $(ALPHABET_HEADERS)
 $(OBJS)/LevDEA.o: $(LEVDEA_HEADERS) ./LevDEA/LevDEA.cxx
 	$(GCC) -c ./LevDEA/LevDEA.cxx -o $(OBJS)/LevDEA.o
 
-MSMATCH_HEADERS = ./MSMatch/MSMatch.h ./MSMatch/MSMatch.cxx $(LEVFILTER_HEADERS) $(TRIE_HEADERS) $(GLOBAL_H) $(LEVDEA_HEADERS)
+MSMATCH_HEADERS = ./MSMatch/MSMatch.h ./MSMatch/MSMatch.tcc $(LEVFILTER_HEADERS) $(GLOBAL_H) $(LEVDEA_HEADERS) $(FBDIC_HEADERS)
 
-LEVNDEA_HEADERS = ./LevNDEA/LevNDEA.h $(GLOBAL_H) $(ALPHABET_HEADERS)
+LEVNDEA_HEADERS = ./LevNDEA/LevNDEA.h ./LevNDEA/SuggestIter.h $(GLOBAL_H) $(ALPHABET_HEADERS)
 $(OBJS)/LevNDEA.o: $(LEVNDEA_HEADERS) ./LevNDEA/LevNDEA.cxx
 	$(GCC) -c ./LevNDEA/LevNDEA.cxx -o $(OBJS)/LevNDEA.o
 
@@ -69,9 +75,10 @@ BESTMATCH_H = ./BestMatch/BestMatch.h $(LEVFILTER_HEADERS) $(GLOBAL_H) $(LEVNDEA
 $(OBJS)/BestMatch.o: $(BESTMATCH_H) ./BestMatch/BestMatch.cxx
 	$(GCC) -c ./BestMatch/BestMatch.cxx -o $(OBJS)/BestMatch.o
 
-RESULTSET_H = ./ResultSet/ResultSet.h $(LEVFILTER_H) $(GLOBAL_H) 
-$(OBJS)/ResultSet.o: $(RESULTSET_H) ./ResultSet/ResultSet.cxx
-	$(GCC) -c ./ResultSet/ResultSet.cxx -o $(OBJS)/ResultSet.o
+CANDEXTRACTOR_JNI_HEADERS = ./CandExtractor_jni/CandExtractor.h $(MSMATCH_HEADERS) $(RESULTSET_H)
+CANDEXTRACTOR_JNI_OBJS =  ./objs/LevDEA.o ./objs/MinDic.o  ./objs/Alphabet.o
+$(LIB)/libJNICandExtractor.so: $(CANDEXTRACTOR_JNI_HEADERS) $(CANDEXTRACTOR_JNI_OBJS)
+	$(GCC) -o $(LIB)/libJNICandExtractor.so -shared -fpic ./CandExtractor_jni/CandExtractor.cxx $(CANDEXTRACTOR_JNI_OBJS)
 
 
 ########### PermuteMatch OLD ####################
@@ -80,87 +87,113 @@ $(OBJS)/PermuteMatch_old.o: $(PERMUTEMATCH_OLD_H) ./PermuteMatch/PermuteMatch.cx
 	$(GCC) -c ./PermuteMatch/PermuteMatch.cxx -o $(OBJS)/PermuteMatch_old.o
 
 
-########### StructMatch #####################
-COMPLETEMATCH_H = ./StructMatch/CompleteMatch/CompleteMatch.h ./StructMatch/CompleteMatch/List.h $(GLOBAL_H) $(MSMATCH_H) $(TRIE_FILES) 
-$(OBJS)/CompleteMatch.o: $(PERMUTEMATCH_H) ./StructMatch/CompleteMatch/CompleteMatch.cxx
-	$(GCC) -c ./StructMatch/CompleteMatch/CompleteMatch.cxx -o $(OBJS)/CompleteMatch.o
-
-PERMUTEMATCH_H = ./StructMatch/PermuteMatch/PermuteMatch.h ./StructMatch/PermuteMatch/List.h $(GLOBAL_H) $(MSMATCH_HEADERS) $(TRIE_FILES) 
-$(OBJS)/PermuteMatch.o: $(PERMUTEMATCH_H) ./StructMatch/PermuteMatch/PermuteMatch.cxx
-	$(GCC) -c ./StructMatch/PermuteMatch/PermuteMatch.cxx -o $(OBJS)/PermuteMatch.o
-
-PERMDIC_H = ./StructMatch/PermDic/PermDic.h ./StructMatch/PermDic/Entry.h
-$(OBJS)/PermDic.o: $(PERMDIC_H) ./StructMatch/PermDic/PermDic.cxx
-	$(GCC) -c ./StructMatch/PermDic/PermDic.cxx -o $(OBJS)/PermDic.o
-
-
 ########### BINARIES ########################
 
-$(BIN)/stats: ./TransTable/stats.cxx $(TRANSTABLE_FILES) $(OBJS)/Alphabet.o
+$(BIN)/stats: ./TransTable/stats.cxx $(TRANSTABLE_HEADERS) $(OBJS)/Alphabet.o
 	$(GCC) -o $(BIN)/stats ./TransTable/stats.cxx $(OBJS)/Alphabet.o
 
-$(BIN)/trieToDot: ./Trie/trieToDot.cxx $(OBJS)/Trie.o $(TRANSTABLE_FILES) $(OBJS)/Alphabet.o
+$(BIN)/trieToDot: ./Trie/trieToDot.cxx $(OBJS)/Trie.o $(TRANSTABLE_HEADERS) $(OBJS)/Alphabet.o
 	$(GCC) -o $(BIN)/trieToDot ./Trie/trieToDot.cxx $(OBJS)/Trie.o $(OBJS)/Alphabet.o
 
-$(BIN)/compileTrie: ./Trie/compileTrie.cxx $(OBJS)/Trie.o $(OBJS)/Alphabet.o $(TRANSTABLE_FILES) $(TRIE_HEADERS) $(ALPHABET_HEADERS)
+$(BIN)/compileTrie: ./Trie/compileTrie.cxx $(OBJS)/Trie.o $(OBJS)/Alphabet.o $(TRANSTABLE_HEADERS) $(TRIE_HEADERS) $(ALPHABET_HEADERS)
 	$(GCC) -o $(BIN)/compileTrie ./Trie/compileTrie.cxx $(OBJS)/Trie.o $(OBJS)/Alphabet.o
 
-$(BIN)/compileMD: ./MinDic/compileMD.cxx $(TRANSTABLE_FILES)  $(OBJS)/MinDic.o $(MINDIC_HEADERS) $(OBJS)/Alphabet.o
-	$(GCC) -o $(BIN)/compileMD ./MinDic/compileMD.cxx $(OBJS)/Alphabet.o $(OBJS)/MinDic.o
+$(BIN)/compileMD: ./MinDic/compileMD.cxx $(TRANSTABLE_HEADERS)  $(MINDIC_HEADERS) $(OBJS)/Alphabet.o
+	$(GCC) -o $(BIN)/compileMD ./MinDic/compileMD.cxx $(OBJS)/Alphabet.o
 
-$(BIN)/compileCislex: ./Cislex/compileCislex.cxx $(TRANSTABLE_FILES) $(CISLEX_HEADERS) $(OBJS)/MinDic.o  $(OBJS)/Alphabet.o
-	$(GCC) -o $(BIN)/compileCislex ./Cislex/compileCislex.cxx $(OBJS)/Alphabet.o $(OBJS)/MinDic.o
+$(BIN)/compileMDString: ./MinDicString/compileMDString.cxx $(TRANSTABLE_HEADERS) $(MINDICSTRING_HEADERS)  $(OBJS)/Alphabet.o
+	$(GCC) -o $(BIN)/compileMDString ./MinDicString/compileMDString.cxx $(OBJS)/Alphabet.o
 
-$(BIN)/compilePD: ./StructMatch/PermDic/compilePD.cxx $(OBJS)/PermDic.o $(TRANSTABLE_FILES) $(OBJS)/MinDic.o $(OBJS)/Alphabet.o
-	$(GCC) -o $(BIN)/compilePD StructMatch/PermDic/compilePD.cxx $(OBJS)/MinDic.o $(OBJS)/PermDic.o $(OBJS)/Alphabet.o
+$(BIN)/compileFBDic: ./FBDic/compileFBDic.cxx $(FBDic_HEADERS)  $(OBJS)/Alphabet.o
+	$(GCC) -o $(BIN)/compileFBDic ./FBDic/compileFBDic.cxx $(OBJS)/Alphabet.o
 
-$(BIN)/lookupCislex: ./Cislex/lookupCislex.cxx $(TRANSTABLE_FILES) $(CISLEX_HEADERS) $(OBJS)/MinDic.o  $(OBJS)/Alphabet.o
-	$(GCC) -o $(BIN)/lookupCislex ./Cislex/lookupCislex.cxx $(OBJS)/Alphabet.o $(OBJS)/MinDic.o
+$(BIN)/lookupMDString: ./MinDicString/lookupMDString.cxx $(TRANSTABLE_HEADERS) $(MINDICSTRING_HEADERS) $(OBJS)/Alphabet.o
+	$(GCC) -o $(BIN)/lookupMDString ./MinDicString/lookupMDString.cxx $(OBJS)/Alphabet.o
 
-$(BIN)/extractTrie: ./Trie/extractTrie.cxx $(TRANSTABLE_FILES) $(OBJS)/Trie.o $(OBJS)/Alphabet.o
+$(BIN)/compileED: ./ErrDic/compileED.cxx $(ERRDIC_HEADERS)  $(OBJS)/Alphabet.o
+	$(GCC) -o $(BIN)/compileED ./ErrDic/compileED.cxx $(OBJS)/Alphabet.o
+
+$(BIN)/lookupED: ./ErrDic/lookupED.cxx $(ERRDIC_HEADERS)  $(OBJS)/Alphabet.o
+	$(GCC) -o $(BIN)/lookupED ./ErrDic/lookupED.cxx $(OBJS)/Alphabet.o
+
+$(BIN)/extractED: ./ErrDic/extractED.cxx $(TRANSTABLE_HEADERS) $(MINDIC_HEADERS) $(OBJS)/Alphabet.o
+	$(GCC) -o $(BIN)/extractED ./ErrDic/extractED.cxx $(OBJS)/Alphabet.o
+
+$(BIN)/searchText: ./SearchText/searchText.cxx ./SearchText/SearchText.h  $(TRANSTABLE_HEADERS) $(MINDICSTRING_HEADERS)  $(OBJS)/Alphabet.o
+	$(GCC) -o $(BIN)/searchText ./SearchText/searchText.cxx $(OBJS)/Alphabet.o
+
+$(BIN)/extractTrie: ./Trie/extractTrie.cxx $(TRANSTABLE_HEADERS) $(OBJS)/Trie.o $(OBJS)/Alphabet.o
 	$(GCC) -o $(BIN)/extractTrie ./Trie/extractTrie.cxx $(OBJS)/Trie.o $(OBJS)/Alphabet.o
 
-$(BIN)/trie2dot: ./Trie/trie2dot.cxx $(TRANSTABLE_FILES) $(OBJS)/Trie.o $(OBJS)/Alphabet.o
+$(BIN)/trie2dot: ./Trie/trie2dot.cxx $(TRANSTABLE_HEADERS) $(OBJS)/Trie.o $(OBJS)/Alphabet.o
 	$(GCC) -o $(BIN)/trie2dot ./Trie/trie2dot.cxx $(OBJS)/Trie.o $(OBJS)/Alphabet.o
 
-$(BIN)/extractMD: ./MinDic/extractMD.cxx $(TRANSTABLE_FILES) $(MINDIC_HEADERS) $(OBJS)/MinDic.o $(OBJS)/Alphabet.o
-	$(GCC) -o $(BIN)/extractMD ./MinDic/extractMD.cxx $(OBJS)/Alphabet.o $(OBJS)/MinDic.o
+$(BIN)/extractMDS: ./MinDicString/extractMDS.cxx $(TRANSTABLE_HEADERS) $(MINDIC_HEADERS) ./MinDicString/MinDicString.h $(OBJS)/Alphabet.o
+	$(GCC) -o $(BIN)/extractMDS ./MinDicString/extractMDS.cxx $(OBJS)/Alphabet.o
 
-$(BIN)/lookupMD: ./MinDic/lookupMD.cxx $(TRANSTABLE_FILES) $(MINDIC_HEADERS) $(OBJS)/MinDic.o $(OBJS)/Alphabet.o
-	$(GCC) -o $(BIN)/lookupMD ./MinDic/lookupMD.cxx $(OBJS)/Alphabet.o $(OBJS)/MinDic.o
+$(BIN)/extractMD: ./MinDic/extractMD.cxx $(TRANSTABLE_HEADERS) $(MINDIC_HEADERS) $(OBJS)/Alphabet.o
+	$(GCC) -o $(BIN)/extractMD ./MinDic/extractMD.cxx $(OBJS)/Alphabet.o
 
-$(BIN)/bestMatch: ./BestMatch/bestMatch.cxx $(OBJS)/BestMatch.o $(OBJS)/ResultSet.o $(OBJS)/LevNDEA.o $(TRANSTABLE_FILES) $(MINDIC_FILES) $(OBJS)/Alphabet.o
-	$(GCC) -o $(BIN)/bestMatch ./BestMatch/bestMatch.cxx $(OBJS)/BestMatch.o $(OBJS)/ResultSet.o $(OBJS)/LevNDEA.o $(OBJS)/Alphabet.o
+$(BIN)/lookupMD: ./MinDic/lookupMD.cxx $(TRANSTABLE_HEADERS) $(MINDIC_HEADERS) $(OBJS)/Alphabet.o
+	$(GCC) -o $(BIN)/lookupMD ./MinDic/lookupMD.cxx $(OBJS)/Alphabet.o
+
+$(BIN)/bestMatch: ./BestMatch/bestMatch.cxx $(OBJS)/BestMatch.o $(OBJS)/LevNDEA.o $(TRANSTABLE_HEADERS) $(MINDIC_HEADERS) $(OBJS)/Alphabet.o
+	$(GCC) -o $(BIN)/bestMatch ./BestMatch/bestMatch.cxx $(OBJS)/BestMatch.o $(OBJS)/LevNDEA.o $(OBJS)/Alphabet.o
+
+$(BIN)/bmFilter: ./BestMatch/bmFilter.cxx $(OBJS)/BestMatch.o $(OBJS)/LevNDEA.o $(TRANSTABLE_HEADERS) $(MINDIC_HEADERS) $(RESULTSET_H) $(OBJS)/Alphabet.o  
+	$(GCC) -o $(BIN)/bmFilter ./BestMatch/bmFilter.cxx $(OBJS)/BestMatch.o $(OBJS)/LevNDEA.o $(OBJS)/Alphabet.o
 
 
-$(BIN)/msFilter: ./MSMatch/msFilter.cxx $(MSMATCH_HEADERS) $(OBJS)/ResultSet.o $(OBJS)/LevDEA.o $(TRANSTABLE_FILES) $(OBJS)/Trie.o $(OBJS)/MinDic.o $(OBJS)/Alphabet.o
-	$(GCC) -o $(BIN)/msFilter ./MSMatch/msFilter.cxx $(OBJS)/ResultSet.o $(OBJS)/LevDEA.o $(OBJS)/Trie.o $(OBJS)/MinDic.o  $(OBJS)/Alphabet.o
+$(BIN)/msFilter: ./MSMatch/msFilter.cxx $(MSMATCH_HEADERS) $(RESULTSET_H) $(OBJS)/LevDEA.o $(MINDIC_HEADERS) $(OBJS)/Alphabet.o
+	$(GCC) -o $(BIN)/msFilter ./MSMatch/msFilter.cxx $(OBJS)/LevDEA.o  $(OBJS)/Alphabet.o
 
-getCandscore_files = ./getCandscore/getCandscore.cxx $(OBJS)/MSMatch.o $(OBJS)/ResultSet.o $(OBJS)/LevDEA.o $(TRANSTABLE_FILES) $(OBJS)/Trie.o $(OBJS)/Alphabet.o
-$(BIN)/getCandscore: $(getCandscore_files)
+getCandscore_files = ./getCandscore/getCandscore.cxx $(OBJS)/LevDEA.o $(OBJS)/Alphabet.o
+$(BIN)/getCandscore: $(getCandscore_files) $(MSMATCH_HEADERS) $(TRANSTABLE_HEADERS) 
 	$(GCC) $(getCandscore_files) -o $(BIN)/getCandscore
 
-permuteMatch_old_files = ./PermuteMatch/permuteMatch.cxx $(OBJS)/PermuteMatch_old.o $(OBJS)/Alphabet.o $(OBJS)/LevDEA.o $(OBJS)/MinDic.o $(OBJS)/Trie.o
+permuteMatch_old_files = ./PermuteMatch/permuteMatch.cxx $(OBJS)/PermuteMatch_old.o $(OBJS)/Alphabet.o $(OBJS)/LevDEA.o $(MINDIC_HEADERS) $(OBJS)/Trie.o
 $(BIN)/permuteMatch_old: $(permuteMatch_old_files) $(MSMATCH_HEADERS) ./PermuteMatch/List.h
 	$(GCC) $(permuteMatch_old_files) -o $(BIN)/permuteMatch_old
 
-completeMatch_files = ./StructMatch/CompleteMatch/completeMatch.cxx $(OBJS)/CompleteMatch.o $(OBJS)/Alphabet.o $(OBJS)/LevDEA.o
-$(BIN)/completeMatch: $(completeMatch_files) $(TRANSTABLE_FILES)
+completeMatch_files = ./StructMatch/CompleteMatch/completeMatch.cxx $(OBJS)/CompleteMatch.o $(OBJS)/Alphabet.o $(OBJS)/LevDEA.o $(OBJS)/Trie.o
+$(BIN)/completeMatch: $(completeMatch_files) $(TRANSTABLE_HEADERS)
 	$(GCC) $(completeMatch_files) -o $(BIN)/completeMatch
 
-permuteMatch_files = ./StructMatch/PermuteMatch/permuteMatch.cxx $(OBJS)/LevDEA.o $(OBJS)/PermuteMatch.o $(OBJS)/Alphabet.o $(OBJS)/Trie.o $(OBJS)/MinDic.o
-$(BIN)/permuteMatch: $(permuteMatch_files) $(TRANSTABLE_FILES)  $(MSMATCH_HEADERS) 
+
+permuteMatch_files = ./StructMatch/PermuteMatch/permuteMatch.cxx $(OBJS)/LevDEA.o $(OBJS)/PermuteMatch.o $(OBJS)/Alphabet.o $(OBJS)/Trie.o
+$(BIN)/permuteMatch: $(permuteMatch_files) $(TRANSTABLE_HEADERS)  $(MSMATCH_HEADERS) 
 	$(GCC) $(permuteMatch_files) -o $(BIN)/permuteMatch
+
+partPermuteMatch_files = ./StructMatch/PartPermuteMatch/partPermuteMatch.cxx $(OBJS)/LevDEA.o $(OBJS)/PartPermuteMatch.o $(OBJS)/Alphabet.o $(OBJS)/Trie.o
+$(BIN)/partPermuteMatch: $(partPermuteMatch_files) $(TRANSTABLE_HEADERS)  $(MSMATCH_HEADERS) 
+	$(GCC) $(partPermuteMatch_files) -o $(BIN)/partPermuteMatch
 
 
 ############ TESTS ########################
-$(BIN)/testMinDic: ./MinDic/Test/testMinDic.cxx ./MinDic/Test/TestMinDic.h $(TRANSTABLE_FILES)  $(OBJS)/MinDic.o $(MINDIC_HEADERS) $(OBJS)/Alphabet.o
-	$(GCC) -o $(BIN)/testMinDic ./MinDic/Test/testMinDic.cxx $(OBJS)/Alphabet.o $(OBJS)/MinDic.o
+$(BIN)/testMinDic: ./MinDic/Test/testMinDic.cxx ./MinDic/Test/TestMinDic.h $(TRANSTABLE_HEADERS) $(MINDIC_HEADERS) $(OBJS)/Alphabet.o
+	$(GCC) -o $(BIN)/testMinDic ./MinDic/Test/testMinDic.cxx $(OBJS)/Alphabet.o
+
+$(BIN)/testSearchText: ./SearchText/Test/testSearchText.cxx ./SearchText/SearchText.h ./SearchText/Test/TestSearchText.h  $(TRANSTABLE_HEADERS) $(MINDICSTRING_HEADERS) $(OBJS)/Alphabet.o
+	$(GCC) -o $(BIN)/testSearchText ./SearchText/Test/testSearchText.cxx $(OBJS)/Alphabet.o
+
+
+testPermuteMatch_files = ./StructMatch/PermuteMatch/Test/testPermuteMatch.cxx $(OBJS)/LevDEA.o $(OBJS)/PermuteMatch.o $(OBJS)/Alphabet.o $(OBJS)/Trie.o $(MINDIC_HEADERS)
+$(BIN)/testPermuteMatch: $(testPermuteMatch_files) $(TRANSTABLE_HEADERS) $(MSMATCH_HEADERS) ./StructMatch/PermuteMatch/Test/TestPermuteMatch.h
+	$(GCC) $(testPermuteMatch_files) -o $(BIN)/testPermuteMatch
+
+testPartPermuteMatch_files = ./StructMatch/PartPermuteMatch/Test/testPartPermuteMatch.cxx ./StructMatch/PartPermuteMatch/Test/TestPartPermuteMatch.h $(OBJS)/LevDEA.o $(OBJS)/PartPermuteMatch.o $(OBJS)/Alphabet.o $(OBJS)/Trie.o
+$(BIN)/testPartPermuteMatch: $(testPartPermuteMatch_files) $(TRANSTABLE_HEADERS) $(MSMATCH_HEADERS) ./StructMatch/PartPermuteMatch/Test/TestPartPermuteMatch.h
+	$(GCC) $(testPartPermuteMatch_files) -o $(BIN)/testPartPermuteMatch
+
+
+
+######### libs ##########################
+$(LIB)/MSMatch.a: $(OBJS)/Alphabet.o $(OBJS)/LevDEA.o
+	$(AR) $(LIB)/MSMatch.a $(OBJS)/Alphabet.o $(OBJS)/LevDEA.o
+	$(RANLIB) $(LIB)/MSMatch.a
+
 
 
 ########### DIV ###########################
 clean:
-	rm -v $(OBJS)/* $(BIN)/*
-########## DIRECTORIES #######################
-BIN = ./bin
-OBJS = ./objs
+	rm -fv $(OBJS)/* $(BIN)/* $(LIB)/*

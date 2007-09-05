@@ -1,56 +1,61 @@
 #include "./MSMatch.h"
 #include "../ResultSet/ResultSet.h"
-#include "../Alphabet/Alphabet.h"
 #include "../Global.h"
 using namespace csl;
 
-uchar w[200];
 
 int main( int argc, char** argv ) {
-    if ( argc < 5 ) {
-	std::cerr << "Use like: msFilter <alph> <dlev> <comp_dic> <rev_comp_dic>" << std::endl;
+    setlocale(LC_CTYPE, "de_DE.UTF-8");  /*Setzt das Default Encoding für das Programm */
+
+    if ( argc != 3 ) {
+	std::cerr << "Use like: msFilter <dlev> <fb_dic>" << std::endl;
 	exit( 1 );
     }
 
-    Alphabet alph( argv[1] );
-
     try {
-	MSMatch< FW_BW > matcher( alph, atoi( argv[2] ), argv[3], argv[4] );
-//	MSMatch< STANDARD > matcher( alph, atoi( argv[2] ), argv[3], argv[4] );
+	MSMatch< FW_BW > matcher( atoi( argv[1] ), argv[2] );
+//	MSMatch< STANDARD > matcher( atoi( argv[1] ), argv[2] );
 
-	ResultSet list( alph );
+	ResultSet list;
 
 
-	char query[200]; // = "and,artificiall,distributed,inteligence,machiene";
+	uchar bytesIn[Global::lengthOfLongStr]; // = "and,artificiall,distributed,inteligence,machiene";
+	wchar_t query[Global::lengthOfLongStr];
 
-	while( 
-//	    std::cout<<"$ "<<std::flush && 
-	    std::cin >> query ) {
+	// set the last byte to 0. So we can recognize when an overlong string was read by getline().
+	bytesIn[Global::lengthOfLongStr - 1] = 0; 
 
-	    std::cout << "Query: " << query << std::endl;
+	while( std::cin.getline( ( char* ) bytesIn, Global::lengthOfLongStr ) ) {
+ 	    if ( bytesIn[Global::lengthOfLongStr-1] != 0 ) {
+		throw exceptions::badInput( "csl::msFilter: Maximum length of input line violated (set by Global::lengthOfLongStr)" );
+	    }
+	    mbstowcs( query, (char*)bytesIn, Global::lengthOfLongStr );
+
+	    printf( "Query: %ls\n", query );
 
 	    list.reset(); // forget candidates that might be stored from earlier use
+
 	    try {
-		matcher.query( (uchar*)query, list );
+		matcher.query( query, list );
 	    } catch( exceptions::bufferOverflow exc ) {
-		printf( "%s: %d\n",exc.what(), list.getSize() );
-		exit(1);
+		fprintf( stderr, "%s: %d\n",exc.what(), list.getSize() );
 	    }
 
-//	    std::cout<<list.getSize()<<" hits."<<std::endl;
-   	    list.sortUnique();
-//  	    std::cout<<list.getSize()<<" hits."<<std::endl;
+// 	    std::cout<<list.getSize()<<" hits."<<std::endl;
+//    	    list.sortUnique();
+//   	    std::cout<<list.getSize()<<" hits."<<std::endl;
 
 
+	    printf( "See: %ls: %d hits\n", query, list.getSize() );
 	    // print all hits
-	    int i;
+	    size_t i;
 	    for( i = 0;i < list.getSize();++i ) {
-		std::cout << list[i].getStr() <<","<<list[i].getAnn()<< std::endl;
+		printf( "%ls,%d,%d\n", list[i].getStr(), list[i].getLevDistance(), list[i].getAnn() );
 	    }
 	}
     }
     catch( exceptions::cslException exc ) {
-	std::cerr << "msFilter caught exception: "<<exc.what() << std::endl;
+	std::cerr << "msFilter caught exception: "<< exc.what() << std::endl;
     }
 
 }

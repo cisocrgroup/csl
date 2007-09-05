@@ -4,70 +4,76 @@
 #define CSL_ALPHABET_H CSL_ALPHABET_H
 
 
+#include<vector>
+
 #include "../Global.h"
 
 namespace csl {
 
     /**
-     * The class Alphabet implements a mapping of ascii-characters to a smaller system 
-     * appropriate for the alphabet size that is really needed. 
-     * As input it takes as input a file of the form:
-     * ---------------file----------------
-     * abcdefghijklmnopqrstuvwxyzäöü
-     * -----------------------------------
      *
      * @author Uli Reffle
-     * @date 2006
+     * @date 2007
      */
     class Alphabet {
     private:
-	size_t size_;
-	uchar code_[256];
-	// 257, as counting chars starts with 1
-	uchar decode_[257];
+	std::vector<wchar_t> allChars_;
 
+	const bits64 magicNumber_;
+
+	class Header {
+	public:
+	    bits64 magicNumber_;
+	    bits64 size_;
+	};
+
+	Header header_;
+
+	std::vector<bool> hasChar_;
+	
     public:
+
+
+	Alphabet();
+
+	typedef std::vector<wchar_t>::const_iterator ConstCharIterator;
+	const ConstCharIterator begin() const {
+	    return allChars_.begin();
+	}
+	
+	ConstCharIterator end() const {
+	    return allChars_.end();
+	}
+
+
 	/**
-	 * The constructor takes as argument a file containing all required characterss.
+	 * Adds a new char to the Alphabet
 	 */
-	Alphabet( char* alphFile );
+	void addChar( wchar_t c );
+
+	bool hasChar( wchar_t c ) const;
+
+	void initConstruction();
+
+	void finishConstruction();
 
 	/**
-	   Function ascii-Wert --> Custom-Wert
-	*/
-	inline int code( const uchar c, bool check = true ) const {
-	    if( check && code_[c] == 0 && c != 0 ) {
-		throw exceptions::AlphabetError( std::string( "Alphabet: Unknown character '" ) + (char)c  + '\'' );
-	    }
-
-	    return code_[c];
-	}
+	 * Loads a dumped Alphabet from the given stream
+	 */
+	void loadFromStream( FILE* fi );
+	
+	/**
+	 * Dumps the Alphabet in its current state to the given stream
+	 */
+	void writeToStream( FILE* fo ) const;
 
 	/**
-	   Function Custom-Wert --> ascii-Wert
-	*/
-	inline uint_t decode( const uint_t c ) const {
-	    if( c > size() ) {
-		throw exceptions::AlphabetError( "Alphabet: Unknown code: " );
-	    }
-
-	    return decode_[c];
-	}
-
-	/**
-	   Returns the alphabet size
-	*/
+	 * Returns the alphabet size
+	 */
 	inline size_t size() const {
-	    return size_;
+	    return allChars_.size();
 	}
-
-	/**
-	   provides a string compare according to the alphabet order
-    */
-    int strcmp( const uchar* s1, const uchar* s2 ) const;
-
-
-  };
+    };
 
 } // end of namespace csl
 #endif

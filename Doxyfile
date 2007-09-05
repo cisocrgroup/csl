@@ -471,7 +471,7 @@ RECURSIVE              = YES
 # excluded from the INPUT source files. This way you can easily exclude a 
 # subdirectory from a directory tree whose root is specified with the INPUT tag.
 
-EXCLUDE                = 
+EXCLUDE                = ./LevDEA/LevDEA.cxx ./LevDEA/lev0data.cxx ./LevDEA/lev1data.cxx ./LevDEA/lev2data.cxx ./LevDEA/lev3data.cxx
 
 # The EXCLUDE_SYMLINKS tag can be used select whether or not files or 
 # directories that are symbolic links (a Unix filesystem feature) are excluded 

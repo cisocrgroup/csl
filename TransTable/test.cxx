@@ -2,23 +2,18 @@
 #include "TransTable.cxx"
 
 int main() {
-    typedef csl::TransTable< csl::BASIC > TransTable_t;
-    TransTable_t t(10);
+    typedef csl::TransTable< csl::TOKDIC > TransTable_t;
+    TransTable_t t;
 
-    TransTable_t::State_t state(10);
+    csl::TempState state;
 
-    state.addEdge(2,5);
-    state.addAnnotation(25);
-    state.addAnnotation(42);
-    state.addAnnotation(43);
-    t.storeState(state);
+    state.addTransition( 2, 5, 0 );
+    t.storeTempState( state );
 
     state.reset();
-    state.addEdge(2,7);
-    state.addAnnotation(60);
-    state.addAnnotation(61);
-    state.setFinal(true);
-    t.storeState(state);
+    state.addTransition( 2, 7, 0 );
+    state.setFinal( true );
+    t.storeTempState( state );
 
 
 

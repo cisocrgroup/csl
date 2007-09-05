@@ -2,8 +2,9 @@
 #define LEVNDEA_H LEVNDEA_H
 
 #include<iostream>
+#include<vector>
+#include<algorithm>
 #include "../Global.h"
-#include "../Alphabet/Alphabet.h"
 
 namespace csl {
 
@@ -24,78 +25,78 @@ namespace csl {
      */
     class LevNDEA {
     private:
-	Alphabet& alph;
-
-
 	// we need stacksize = word_length+1: one for reading each character, one for the start configuration
 	static const int stacksize = Global::lengthOfWord+1;
 
 	bits64 floors[stacksize][Global::lengthOfWord];
 
-	uchar pattern[Global::lengthOfWord];
-	int patLength;
+	wchar_t pattern_[Global::lengthOfWord];
+	size_t patLength_;
 
-	uchar allChars[Global::lengthOfWord]; ///< holds all characters appearing in the pattern
+	wchar_t allChars[Global::lengthOfWord]; ///< holds all characters appearing in the pattern
   
-	bits64* charvecs;
+	std::vector< unsigned long long > charvecs_;
+	
+	size_t maxFloorIndex_;
 
-	int maxFloorIndex;
-
-	static const bits64 firstBit = 1ll << 63; // that's a '1' followed by 63 '0's
-	bits64 lastBit; // the lowest needed bit
-	bits64 allBits; // all needed bits
+	static const bits64 firstBit_ = 1ll << 63; // that's a '1' followed by 63 '0's
+	bits64 lastBit_; // the lowest needed bit
+	bits64 allBits_; // all needed bits
 
 
 
 	////////PRIVATE METHODS
 
 
+	void cleanCharvecs();
 	void calcCharvec();
     
 
     public:
-	LevNDEA(Alphabet& alph);
+	LevNDEA();
 	~LevNDEA();
 
 #include "SuggestIter.h"  
 
-	void loadPattern(const uchar* p, int maxDist = -1);
-	bool walk(uchar c, int stackIndex);
+	void loadPattern( const wchar_t* p, size_t maxDist = (size_t)-1 );
+	bool walk( wchar_t c, size_t stackIndex );
 
 	inline int isFinal(int stackIndex) const {
-	    int curFloor = 0;
-	    while((curFloor <= maxFloorIndex) && !(floors[stackIndex][curFloor] & lastBit)) {
+	    size_t curFloor = 0;
+	    while( ( curFloor <= maxFloorIndex_ ) && !( floors[stackIndex][curFloor] & lastBit_ ) ) {
 		++curFloor;
 	    }
-	    return (curFloor <= maxFloorIndex)? curFloor : -1;
+	    return (curFloor <= maxFloorIndex_)? curFloor : -1;
 	}
 
-
-	inline void setMaxDist(int d) {
-	    maxFloorIndex = d;
+	inline void setMaxDist( size_t d ) {
+	    maxFloorIndex_ = d;
+	}
+	
+	inline size_t getMaxDist() const {
+	    return maxFloorIndex_;
 	}
 
-	inline int getMaxDist() const {
-	    return maxFloorIndex;
-	}
-
-	inline const bits64& getFloor(int stackIndex, int floor) const {
+	inline const bits64& getFloor( int stackIndex, int floor ) const {
 	    return floors[stackIndex][floor];
 	}
 
-	inline const uchar* getAllChars() const {
+	/**
+	 * returns a c-string of all chars appearing in the pattern in alphabetical order
+	 */
+	inline const wchar_t* getAllChars() const {
 	    return allChars;
 	}
-    
-	inline const bits64& charvec(int c) const {
-	    return charvecs[c];
+	
+	inline const bits64& charvec( wchar_t c ) const {
+	    return charvecs_[c];
 	}
-
 
 	void printFloor(int stackIndex, int floor);
 	void printFloors(int stackIndex);
-	void printBits(bits64);
     };
+
+
 
 } //eon
 #endif

@@ -19,7 +19,7 @@ exit;
 }
 
 
-if($ARGV[0] eq "--freq") {
+if( $ARGV[0] eq "--freq" ) {
     shift;
     $mode = "freq";
 }
@@ -28,8 +28,9 @@ my %lex;
 while(<>) {
     chomp;
 #    s/\r\n$/\n/;
-    s/\#.*$//;
-    for(split(/\$|,/)) {$lex{$_}++;} # specify all special chars here!!!
+    s/\#.*$//; # delete annotations
+    s/^(?:\$|\%|,)//; # delete leading delimiters
+    for( split(/[\$\%,]+/ ) ) { $lex{$_}++; } # specify all special chars here!!!
 }
 
 if($mode eq "freq") {

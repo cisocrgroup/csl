@@ -20,26 +20,26 @@ namespace csl {
 
     template< CellType CellTypeValue = BASIC >
     class TransTable {
+    private:
+	/**
+	 * CellIndex should be 8 bytes whehever 
+	 * StateId_t is 8 bytes
+	 */
+	typedef StateId_t CellIndex;
     public:
-	typedef Cell< CellTypeValue > Cell_t;
-	typedef TempState< CellTypeValue > TempState_t;
+	typedef Cell< CellTypeValue, StateId_t > Cell_t;
 
 	/**
-	 * Constructor
-	 * All alphabet information TransTable needs is the number of possible labels. This number
-	 * is not necessarily equal to size() of the used Alphabet-object. That's why only a size_type
-	 * is passed on rather than an Alphabet-object.
-	 *
-	 * @param alphSize the used alphabet size.
-	 * @param binFile a binary file conaining an automaton
 	 *
 	 */
-	inline TransTable( size_t alphSize );
+	inline TransTable();
 
 	/**
 	 * Destructor
 	 */
 	inline ~TransTable();
+
+	const Alphabet& getAlphabet() const;
 
 	/**
 	 * Loads an automaton from a binary file. (usually .dic or .trie or similar)
@@ -48,7 +48,7 @@ namespace csl {
 	 */
 	inline bool loadFromFile( const char* binFile );
 
-	inline void loadFromFile( FILE* fi );
+	inline void loadFromStream( FILE* fi );
 
 	/**
 	 * Dumps the automaton into a file
@@ -59,9 +59,7 @@ namespace csl {
 	/**
 	 * 
 	 */
-	void writeToFile( FILE* fo ) const;
-
-	size_t getSizeOnDisk() const;
+	void writeToStream( FILE* fo ) const;
 
 
 	/**
@@ -78,17 +76,17 @@ namespace csl {
 	 * @param newTempState
 	 * inserts a new state into the table, returns the state id.
 	 */
-	inline int storeTempState( TempState_t& state );
+	inline StateId_t storeTempState( TempState& state );
 
 	/**
 	 * declare a root (or start state) of the automaton.
 	 */
-	inline void setRoot( int rootId ) {
+	inline void setRoot( StateId_t rootId ) {
 	    cells_[0].setValue( rootId );
 	}
 
 	/// returns the root
-	inline int getRoot() const {
+	inline StateId_t getRoot() const {
 	    return cells_[0].getValue();
 	}
 
@@ -96,22 +94,22 @@ namespace csl {
 	 * returns true iff state is marked as final
 	 * @param state id of a state
 	 */
-	inline bool isFinal( int state ) const {
+	inline bool isFinal( StateId_t state ) const {
 	    assert( cells_[state].isOfType( Cell_t::STATE ) );
 	    return cells_[state].isOfType( Cell_t::FINALSTATE );
 	}
 
-	inline void setFinal( int state, bool b = true ) {
+	inline void setFinal( StateId_t state, bool b = true ) {
 	    // assertion that state is really a state happens in Cell's setFinal()
 	    cells_[state].setFinal( true );
 	}
 
-	inline bool hasAnnotations( int state ) const {
+	inline bool hasAnnotations( StateId_t state ) const {
 	    assert( cells_[state].isOfType( Cell_t::STATE ) );
 	    return cells_[state].isOfType( Cell_t::HAS_ANN );
 	}
 
-	inline int getFirstAnn( uint_t state ) const {
+	inline int getFirstAnn( StateId_t state ) const {
 //     assert(hasAnnotations(state));
 	    return cells_[state].getValue();
 	}
@@ -119,20 +117,28 @@ namespace csl {
 	/**
 	 * @return the string containing labels of all existing outgoing transitions from state
 	 */
-	inline const uchar* getSusoString( int state ) const {
+	inline const wchar_t* getSusoString( StateId_t state ) const {
 	    return ( susoStrings_ + getFirstAnn( state ) );
 	}
 
-	inline int getNrOfCells() const {
-	    return nrOfCells_;
-	}
 
 	/**
 	 * perform one step inside the automaton
 	 * @param state the state to start from
 	 * @param c the character to walk with (c already being coded according to custom alphabet)
 	 */
-	inline int walk( int state, uchar c ) const;
+	inline uint_t walk( StateId_t state, char16 c ) const;
+
+	/**
+	 * 
+	 */
+	inline uint_t walkStr( StateId_t state, const wchar_t* str ) const {
+	    while( *str && state ) {
+		state = walk( state, *str );
+		++str;
+	    }
+	    return state;
+	}
 
 	/**
 	 * perform one step inside the automaton and keep track of the perfect hashing value
@@ -141,27 +147,20 @@ namespace csl {
 	 * @param c the character to walk with (c already being coded according to custom alphabet)
 	 * @param perfHashValue the perfHash value of the current traansition is ADDED to this variable
 	 */
-	inline int walkPerfHash( uint_t state, uchar c, size_t& perfHashValue ) const;
+	inline StateId_t walkPerfHash( StateId_t state, char16 c, size_t& perfHashValue ) const;
 
-	/**
-	 * This method allows to change the target of a transition of a state which
-	 * is already compiled. This transition has to have been present beforehands, only 
-	 * its target value is changed (see assertion).
-	 * The method is necessary for TransTable to store an Aho-Corasick-Automaton: The error links
-	 * can only be processed for a complete trie.(see class csl::AhoCorasick)
-	 */
-	inline void changeTransitionTarget( int state, int c, int newValue ) {
-	    assert( cells_[state + c].getKey() == c );
-	    cells_[state + c].setValue( newValue );
-	}
+	inline StateId_t walkStrPerfHash( StateId_t state, const wchar_t* str, size_t& perfHashValue ) const;
+
+	inline bool getTokID( const wchar_t* key, size_t* tokID ) const;
+
 
 	class AnnIterator {
 	private:
 	    const int state_; ///< stores the state-cell
-	    int cell_; ///< iterates through the annotation cells
+	    CellIndex cell_; ///< iterates through the annotation cells
 	    Cell_t* cells_; ///< pointer to the sparse table
 	public:
-	    AnnIterator( const TransTable& tt, int state ) : state_( state ) {
+	    AnnIterator( const TransTable& tt, StateId_t state ) : state_( state ) {
 		cells_ = tt.getCells();
 		assert( cells_[state_].isOfType( Cell_t::STATE ) );
 		cell_ = state_;
@@ -185,7 +184,7 @@ namespace csl {
 
 	class TransIterator {
 	public:
-	    TransIterator( const uchar* susoString ) {
+	    TransIterator( const wchar_t* susoString ) {
 		pos_ = susoString;
 	    }
 	    uchar operator *() const {
@@ -200,15 +199,15 @@ namespace csl {
 		return ( *pos_ != 0 );
 	    }
 
-	    const uchar* getPointer() const {
+	    const wchar_t* getPointer() const {
 		return pos_;
 	    }
 
 	private:
-	    const uchar* pos_;
+	    const wchar_t* pos_;
 	};
 
-	TransIterator getTransIterator( uint_t state_id ) const {
+	TransIterator getTransIterator( StateId_t state_id ) const {
 	    return TransIterator( getSusoString( state_id ) );
 	}
 
@@ -221,36 +220,99 @@ namespace csl {
 	    return nrOfCells_;
 	}
 
-	inline int getAlphSize() const {
-	    return alphSize_;
+	Alphabet& getAlphabet() {
+	    return alph_;
 	}
 
-	inline bool compareStates( const TempState_t& temp, int comp ) const;
+	const Alphabet& getConstAlphabet() const {
+	    return alph_;
+	}
+	
+	inline bool compareStates( const TempState& temp, StateId_t comp ) const;
 
+	inline size_t count( StateId_t pos ) const;
 	inline void printCells() const;
-	inline void toDot( const Alphabet* alph = NULL ) const;
+	inline void toDot() const;
+	inline void doAnalysis() const;
 
 
+    protected:
+	inline size_t getNrOfCells() const {
+	    return nrOfCells_;
+	}
+
+	inline size_t getSizeOfUsedCells() const {
+	    return sizeOfUsedCells_;
+	}
+
+	inline size_t getNrOfStates() const {
+	    return nrOfStates_;
+	}
 
     private:
-	size_t alphSize_;
+	/**
+	 * This number specifies the maximum size of the area that is considered when
+	 * looking for a slot. Free cells 
+	 */
+	static const size_t searchWindow = 1000;
+
+	Alphabet alph_;
+	
 	Cell_t* cells_;
 	size_t nrOfCells_;
 
-	uchar* susoStrings_;
-	size_t lengthOfSusoStrings_;
-	Hash* ftHash_;
+	wchar_t* susoStrings_;
 
-	const bits64 magicNumber_;
-	typedef struct {
+	// this is the number of characters in susoStrings_ (not the size in bytes!)
+	size_t lengthOfSusoStrings_;
+	Hash<wchar_t>* susoHash_;
+
+	static const bits64 magicNumber_ = 46388436;
+
+	/**
+	 * This class represents the header information for a TransTable. An object of this kind
+	 * is dumped to/ read from the stream with fread/fwrite. The policy is to have all that
+	 * information in separate variables in TransTable and to copy the values to and from the header
+	 * just for dumping and loading
+	 */
+	class Header {
+	public:
+	    Header() :
+		magicNumber_( 0 ),
+		cType_( 0 ),
+		nrOfCells_( 0 ),
+		lengthOfSusoStrings_( 0 ) {
+	    }
+
+	    bits64 getMagicNumber() const {
+		return magicNumber_;
+	    }
+
+	    int getCType() const {
+		return cType_;
+	    }
+
+	    size_t getNrOfCells() const {
+		return nrOfCells_;
+	    }
+	    size_t getLengthOfSusoStrings() const {
+		return lengthOfSusoStrings_;
+	    }
+
+	    void set( const TransTable< CellTypeValue >& transTable ) {
+		magicNumber_ = transTable.magicNumber_;
+		cType_ = CellTypeValue;
+		nrOfCells_ = transTable.nrOfCells_;
+		lengthOfSusoStrings_ = transTable.lengthOfSusoStrings_;
+	    }
+	    
+
+	private:
 	    bits64 magicNumber_;
-	    CellType cType_;
-	    size_t offsetCells_;
-	    size_t nrOfCells_;
-	    size_t offsetSusoStrings_;
-	    size_t lengthOfSusoStrings_;
-	}
-	Header;
+	    bits64 cType_;
+	    bits64 nrOfCells_;
+	    bits64 lengthOfSusoStrings_;
+	};
 
 	Header header_;
 
@@ -268,9 +330,10 @@ namespace csl {
 	/**
 	 * resize the array of cells
 	 */
-	inline void allocCells( int newNrOfCells );
+	inline void allocCells( size_t newNrOfCells );
 
-	inline int findSlot( const TempState_t& state );
+	inline StateId_t findSlot( const TempState& state );
+
 
   };
 

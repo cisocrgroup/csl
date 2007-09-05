@@ -1,6 +1,7 @@
 #!/usr/bin/perl
 
 use strict;
+use encoding 'utf8';
 
 my @lines;
 

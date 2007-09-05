@@ -24,6 +24,7 @@ while(<>) {
 
     s/\r\n$/\n/;
     for(split(//)) {$alph{$_} = 1;}
+    print STDERR "$. lines processed\n" if( $. % 200000 == 0 );
 }
 
 

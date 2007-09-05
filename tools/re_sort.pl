@@ -8,54 +8,66 @@ use Getopt::Long;
 $| = 1;
 
 
-my $compPerm;
+my $permParts;
 my $help;
 my $sortFile;
-
+my $compile = 0;
 GetOptions(
 	   'help' => \$help,
-	   'compPerm=s' =>\$compPerm,
+	   'PermParts' =>\$permParts,
 	   'sortFile=s' =>\$sortFile,
 	   );
 
 if($help) {
     shift;
     print <<TEXT;
-##########
+
 re_sort.pl
-##########
+
 
 Reads a multi-token .lex file and resorts the items. Finally it brings the list into alphabetical order.
 To resort in alphabetical order:
 re_sort.pl source.lex > new.lex
 
-To resort according to a certain score defined in score.txt:
-re_sort.pl -f score.txt source.lex > new.lex
-
+OPTIONS
+--sortFile=<filename>
+To re-sort according to a certain score defined in score.txt:
 score.txt is expected to look like:
 <token1>#<score1>
 <token2>#<score2>
 
+--permParts
+To cover permutation among parts, the parts have to be in sorted order. Invoke the sorting with this flag.
+
+--help
+prints this message and exits
+
 TEXT
 
-    exit;
+    exit( 1 );
     
 }
 
 my $freqlist_file;
 my $freqhash;
-my $cmp;
+my $tok_cmp;
 
 
-if($sortFile) {
-$freqhash = new Freqhash($sortFile);
-$cmp = \&frqcmp;
+if( $sortFile ) {
+    $freqhash = new Freqhash( $sortFile );
+    $tok_cmp = 	
+	sub {
+	    return frqcmp( $a, $b );
+	};
 }
 else {
-    $cmp = sub {return $a cmp $b};
+    $tok_cmp = 
+	sub {
+	    return $a cmp $b;
+	};
 }
 
-my $permDelimiter = '#';
+my $permDelimiter = '%';
 my $permDelimRex = '\\'.$permDelimiter;
 
 my $noPermDelimiter = '$';
@@ -77,26 +89,25 @@ while( my $line=<> ) {
 
 
     my @parts = ();
-    while( $line =~ m/($compDelimRex)(.+?)(?=$compDelimRex|$)/g ) {
-	if( $1 eq $permDelimiter ) {
-	    my @tokens = split( /$tokensDelimRex/, $2 );
-	    @tokens = sort @tokens;
-	    push( @parts, $1.join( $tokensDelimiter, @tokens ) );
+    while( $line =~ m/($compDelimRex)(.+?)(?=$compDelimRex|$ )/gx ) {
+	my $delim = $1;
+	my $part = $2;
+	$part =~ s/,$//;
+	my @tokens = split( /$tokensDelimRex/, $part );
+	
+	if( $delim eq $permDelimiter ) {
+	    @tokens = sort $tok_cmp @tokens;
+	    push( @parts, $delim.join( $tokensDelimiter, @tokens ).',' );
 	}
 	else {
-	    push( @parts, $1.$2 );
+	    push( @parts, $delim.$part.',' );
 	}
     }
-    push( @lines, [ join( '', @parts ), $lineCount] );
 
-#     if($perm eq 'tokens') {
-# 	my @parts= split(/$partsDelimRex/,$line);
-# 	for(my $i=0;$i<@parts; ++$i) {
-# 	    my @toks = sort $cmp split(/,/,$parts[$i]);
-# 	    $parts[$i] = join($tokensDelimiter,@toks);
-# 	}
-# 	push(@lines,[(join($partsDelimiter,@parts)."\$"),$lineCount]);
-#     }
+    if( $permParts ) {
+	@parts = sort partSort @parts;
+    }
+    push( @lines, [ join( '', @parts ), $lineCount] );
 }
 
 print STDERR "Start sort.\n";
@@ -120,10 +131,25 @@ print $lastLine,"#",$values,"\n";
 
 
 sub frqcmp {
+    my( $a, $b ) = @_;
     my $x;
-    if($x =($freqhash->lookup($a) <=> $freqhash->lookup($b))) {
+    if( $x =( $freqhash->lookup( $a ) <=> $freqhash->lookup( $b ) ) ) {
 	return $x;
 #	return -$x;
+    }
+    else {
+	return ("$a" cmp "$b");
+    }
+}
+
+
+sub partSort {
+    $a =~ m/^$compDelimRex(.+?)$tokensDelimRex/;
+    my $aa = $1;
+    $b =~ m/^$compDelimRex(.+?)$tokensDelimRex/;
+    my $bb = $1;
+    if( my $x = &$tok_cmp( $aa, $bb ) ) {
+	return $x;
     }
     else {
 	return ($a cmp $b);

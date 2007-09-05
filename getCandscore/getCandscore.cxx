@@ -3,74 +3,94 @@
 #include "../ResultSet/ResultSet.h"
 #include "../Alphabet/Alphabet.h"
 #include<iostream>
-
+#include<vector>
 using namespace csl;
 
-struct Pair {
+class Pair {
+public:
+    Pair( uchar* w, int f, int c ) {
+	strncpy( (char*)word, (char*)w, Global::lengthOfWord );
+	if( word[Global::lengthOfWord-1] != 0 ) {
+	    throw exceptions::badInput("Input word too long");
+	}
+	freq = f;
+	candscore = c;
+    }
     uchar word[Global::lengthOfWord]; // perhaps lengthOfWord would be enough ...
     int freq;
     int candscore;
 };
 
 int main(int argc, char** args) {
+    if(argc!=5) {
+	std::cerr<<"Use like: ./bin/getCandscore alph.azb tokens.alph.dic tokens.rev.dic tokens.freq.lex"<<std::endl;
+	exit(1);
+    }
+
     Alphabet alph(args[1]);
-    MSMatch ms(alph,args[2],1);
-    ResultSet rset;
+    MSMatch< FW_BW > ms( alph, 1, args[2], args[3] );
+    ResultSet rset( alph );
 
-    if(argc!=4) {
-	std::cerr<<"Use like: ./bin/getCandscore alph.azb tokens.alph.dic tokens.freq.lex"<<std::endl;
-	exit(1);
-    }
+//     int tableSize = 200000;
+//     Pair* table = (Pair*)malloc( tableSize * sizeof(Pair) );
+//     memset(table,0,tableSize * sizeof(Pair));
 
-    int tableSize = 200000;
-    Pair* table = (Pair*)malloc(tableSize * sizeof(Pair));
-    memset(table,0,tableSize * sizeof(Pair));
+    std::vector<Pair> table;
 
-    int count = 0;
-    int nrOfWords;
+    size_t nrOfWords;
 
-    std::ifstream fileHandle(args[3]);
-    if(!fileHandle.good()) {
-	std::cerr<<"Couldn't open database file: "<<args[3]<<std::endl;
-	exit(1);
-    }
 
     uchar line[Global::lengthOfLongStr];
     uchar *word, *freqStr;
 
     // read file
     std::cerr<<"Read file ... "<<std::flush;
-    while(fileHandle.getline((char*)line,Global::lengthOfLongStr))  {
-	if(count >= tableSize) {
-	    table = (Pair*)realloc(table,tableSize * 2 *sizeof(Pair));
-	    memset(table+tableSize, 0, tableSize * sizeof(Pair));
-	    tableSize *= 2;
+    FILE* FREQLIST = fopen( args[4], "r" );
+    if( ! FREQLIST ) {
+	std::cerr<<"Couldn't open freq file: "<<args[3]<<std::endl;
+	exit(1);
+    }
+    while( 
+	fgets( (char*)line, Global::lengthOfLongStr, FREQLIST ) ) {
+	if( line[Global::lengthOfStr - 1] != 0 ) {
+	    throw exceptions::badInput( "getCandscore: query string too long." );
 	}
+	line[strlen( ( char* )line )-1] = 0; // delete newline
+
 	word = line;
-	freqStr = (uchar*)strchr((char*)line,(char)Global::keyValueDelimiter);
+	freqStr = (uchar*)strchr( (char*)line, (char)Global::keyValueDelimiter );
 	*freqStr = 0;
 	++freqStr;
-	strcpy((char*)table[count].word, (char*)word);
-	table[count].freq = atoi((char*)freqStr);
-	table[count].candscore = 0;
-	++count;
+	// printf( "Token is '%s', value is '%s'\n", word, freqStr ); // DEBUG
+	table.push_back( Pair( word, atoi((char*)freqStr ), 0 ) );
     }
-    nrOfWords = count;
-    std::cerr<<"ok, read "<<nrOfWords<<"lines."<<std::endl;
+    nrOfWords = table.size();
+    fclose( FREQLIST );
+    std::cerr<<"ok, read "<<nrOfWords<<" lines."<<std::endl;
 
-    for(int count=0; count<nrOfWords; ++count) {
-	rset.reset();
-	ms.query(table[count].word,rset);
-	for(int i=0;i<rset.getSize();++i) {
-	    table[rset[i].getAnn()].candscore += table[count].freq;
+    for( size_t count=0; count < nrOfWords; ++count) {
+	try {
+	    rset.reset();
+	
+ 	    ms.query( table.at(count).word, rset );
+	    
+	    for(int i=0;i<rset.getSize();++i) {
+		table.at( rset[i].getAnn() ).candscore += table.at( count ).freq;
+	    }
+	    if(count%10000 == 0) std::cerr<<"\rProcessed "<<count<<" words."<<std::flush;
 	}
-	if(count%1000 == 0) std::cerr<<"\rProcessed "<<count<<" words."<<std::flush;
+	catch( exceptions::cslException ex ) {
+	    std::cerr<<"getCandscore: Caught exception: skipped candidate production for one token"<<std::endl;
+	} 
     }
 
-    for(int count=0; count<nrOfWords; ++count) {
-	printf("%s#%d\n",table[count].word,table[count].candscore);
+    // print the dictionary with the computed annotations to stdout
+    fprintf(stderr, "nrOfWords=%d\n", nrOfWords );
+    for( size_t count=0; count<nrOfWords; ++count ) {
+//	fprintf(stderr, "count=%d\n", count );
+	printf( "%s#%d\n", table[count].word, table[count].candscore );
     }
 
     std::cerr<<"done"<<std::endl;
-    return(0);
+    return( 0 );
 }

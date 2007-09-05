@@ -1,10 +1,10 @@
 #ifndef CSL_GLOBAL_H
 #define CSL_GLOBAL_H CSL_GLOBAL_H
 
-#include <cassert>
-#include <cstring>
-#include <string>
-#include <exception>
+#include<cassert>
+#include<cstring>
+#include<string>
+#include<exception>
 #define debug(s) (std::cout<<"DEBUG: "<<s<<std::endl)
 
 /**
@@ -13,13 +13,19 @@
    - rename typedefs to "fasel_t"
 */
 namespace csl {
+    typedef short char16;
+    typedef unsigned wchar_t char32;
+
     typedef unsigned char uchar;
 
     typedef unsigned int uint_t;
+
     typedef unsigned int bits32;
 
     typedef unsigned long long ulong_t;
     typedef unsigned long long bits64;
+
+    typedef unsigned int StateId_t;
 
     typedef enum { 
 	/// just 4 bytes per transition (currently not implemented)
@@ -46,32 +52,34 @@ namespace csl {
 
     class Global {
     public:
-	static const int maxNrOfChars = 256;
+	static const size_t maxNrOfChars = 65536;
 
-	static const int lengthOfWord = 64;
-	static const int lengthOfStr = 3000;
-	static const int lengthOfLongStr = 5000;
+	// those lengths are the maximum size of bytes from the input stream
+	static const size_t lengthOfWord = 64;
+	static const size_t lengthOfStr = 3000;
+	static const size_t lengthOfLongStr = 5000;
 
 	static const int LevDEA_maxDistance = 3;
 
-	static const uchar keyValueDelimiter = '#';
+	static const wchar_t keyValueDelimiter = '#';
 	static const uchar valuesDelimiter = ',';
 
-	static const int LevMaxNrOfResults = 25000;
+	// For more results, the program should not break but do a (maybe not so efficient) realloc
+	static const int LevMaxNrOfResults = 200;
 
 	class Perm {
 	public:
 	    static const int tokenDelimiter = ',';
 	    static const int permuteDelimiter = '%';
 	    static const int noPermuteDelimiter = '$';
-	    static const size_t maxNrOfTokens = 30;
-	    static const size_t maxNrOfResults = 5000;
-	    static const size_t maxCandsPerToken = 500;
+	    static const size_t maxNrOfTokens = 32;
+	    static const size_t maxCandsPerToken = 200;
+	    static const size_t maxNrOfResults = 100;
 	};
 
 
-	static const void reverse(const uchar* str, uchar* newStr) {
-	    int len = std::strlen((char*)str);
+	static const void reverse(const wchar_t* str, wchar_t* newStr) {
+	    int len = wcslen( str );
 	    int i = 0;
 	    while(i < len) {
 		newStr[len-1-i] = str[i];
@@ -80,6 +88,20 @@ namespace csl {
 	    newStr[len] = 0;
 	}
 
+	static const void printBits( bits64 n ) {
+	    int i;
+	    for ( i = 63;i >= 0;--i ) {
+		if ( ( i % 10 ) == 0 ) printf( "%d", i / 10 );
+		else if ( ( i % 10 ) == 5 ) printf( "|" );
+		else printf( " " );
+	    }
+	    printf( "\n" );
+	    for ( i = 63;i >= 0;--i ) {
+		printf( "%u", ( unsigned int )( 1 & ( n >> i ) ) );
+	    }
+	    printf( "\n" );
+	}
+	
     };
 
     namespace exceptions {
@@ -125,13 +147,13 @@ namespace csl {
 	    badFileHandle() {}
 	    badFileHandle( const std::string msg ) : cslException( msg ) {}
 	};
-
+	
 	class invalidLevDistance : public cslException {
 	public:
 	    invalidLevDistance() {}
 	    invalidLevDistance( const std::string msg ) : cslException( msg ) {}
 	};
-
+	
 	class bufferOverflow : public cslException {
 	public:
 	    bufferOverflow() {}
@@ -145,6 +167,8 @@ namespace csl {
 	};
 
     };
+
+
 
 } // eon
 

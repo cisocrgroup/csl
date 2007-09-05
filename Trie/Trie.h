@@ -2,7 +2,7 @@
 #define CSL_TRIE_H CSL_TRIE_H
 
 #include<fstream>
-#include<stdexcept>
+#include<vector>
 
 #include "../Global.h"
 #include "../TransTable/TransTable.h"
@@ -13,24 +13,23 @@ namespace csl {
     class Trie : public TransTable< BASIC > {
     public:
 	typedef TransTable< BASIC > TransTable_t;
-	Trie(const Alphabet& alph, char* binFile = NULL);
+	Trie( char* binFile = NULL );
 
 	/**
-	   The funtion that actually executes the computation of the trie.
-	   @param txtFile The dictionary (including annotations) in txt format
-	   @param compFile The name of the output binary
-	*/
+	 * The funtion that actually executes the computation of the trie.
+	 * @param txtFile The dictionary (including annotations) in txt format
+	 * @param compFile The name of the output binary
+	 */
 	void compileDic(char* txtFile, char* compFile);
 
 	/**
 	 * processes one input line: separates the key from the annotations (if present)
 	 * and performs the insertion into the trie
 	 * @param itemString a cstring pointing to the current line
-	*/
-	void addToken(uchar* itemString);
+	 */
+	void addToken(wchar_t* itemString);
 
 	/// extracts the trie to stdout
-//	void printDic(StateId initState,uchar* prefix = (uchar*)"") const;
 	void printDic( int initState = 0 ) const;
 
 	/// set the flag annotateByteOffset_
@@ -43,16 +42,16 @@ namespace csl {
 	    annotateWordCount_ = b;
 	}
 
-	inline int walkStr(int state, const uchar* str) const {
+	inline int walkStr(int state, const wchar_t* str) const {
 	    while(*str && state) {
-		state = TransTable< BASIC >::walk(state, alph_.code(*str));
+		state = TransTable< BASIC >::walk(state, *str );
 		++str;
 	    }
 	    return state;
 	}
 
+
     private:
-	const Alphabet& alph_;
 
 	/// used to store the byte offset for the currently processed item
 	int byteOffset_;
@@ -62,13 +61,15 @@ namespace csl {
 
 	mutable int count_; // is used for counting during construction or printing
 
-	// Those vars are uses mostly in addToken()
-	TempState_t *tempStates_;
-	uchar* key;
-	uchar lastKey[Global::lengthOfLongStr];
-	uchar *valueString;
+	// Those vars are used mostly in addToken()
+	std::vector<TempState>* tempStates_;
+	wchar_t* key;
+	wchar_t lastKey[Global::lengthOfLongStr];
+	wchar_t* valueString;
 
 	void printDic_rec(int pos, int depth) const;
+
+	void dotShot() const;
 
     };
 

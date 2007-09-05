@@ -12,49 +12,56 @@
 #include "../Global.h"
 namespace csl {
 
-    template< CellType C >
+    template< CellType C, class StateId_t = size_t >
     class Cell {
 	// dummy class
 	// we have only specialisations
     };
 
-    template<>
-    class Cell< BASIC > { // of class TransTable
+
+    /**
+     * This specialisation is not at all maintained at the moment !!!
+     */
+    template< class StateId_t >
+    class Cell< BASIC, StateId_t > { // of class TransTable
     public:
 
 	/* type is bit-coded: 
-	   1 = 00001: transition
-	   2 = 00010: state
-	   4 = 00100: state that has annotation attached
-	   8 = 01000: cell that stores annotation
+	    1 = 00001: transition
+	    2 = 00010: state
+	    4 = 00100: state that has annotation attached
+	    8 = 01000: cell that stores annotation
 	   16 = 10000: is a final state
 	*/
 	typedef short CellType;
 	enum {TRANS=1,STATE=2,IS_ANN=4,HAS_ANN=8,FINALSTATE=16};
 
-	Cell() {
-	    type_ = 0;
-	    key_ = 0;
-	    value_ = 0;
+	Cell() :
+	    type_( 0 ),
+	    key_( 0 ),
+	    value_( 0 ) {
 	}
+
 	void setKey(int key) {
 	    assert( key_ == 0 );
+	    assert( key < 65536 );
 	    key_ = key;
 	}
-	int getKey() const {
+	wchar_t getKey() const {
 	    return key_;
 	}
 
 
-	void setValue( int value ) {
+	void setValue( StateId_t value ) {
 //	assert(value_ == 0); // can not be asserted when changeTransitionTarget() is used
 	    value_ = value;
 	}
-	int getValue() const {
+
+	StateId_t getValue() const {
 	    return value_;
 	}
 
-	void setTrans( int key, int value ) {
+	void setTrans( int key, StateId_t value ) {
 	    assert(value_ == 0);
 	    setKey(key);
 	    setValue(value);
@@ -96,8 +103,9 @@ namespace csl {
     };
 
 
-    template<>
-    class Cell< TOKDIC > { // of class TransTable
+
+    template< class StateId_t >
+    class Cell< TOKDIC, StateId_t > { // of class TransTable
     public:
 
 	/* type is bit-coded: 
@@ -117,11 +125,12 @@ namespace csl {
 	    // do nothing else
 	}
 
-	void setKey(int key) {
+	void setKey(wchar_t key) {
 	    assert(key_ == 0);
+	    assert( key < 65536 );
 	    key_ = key;
 	}
-	int getKey() const {
+	wchar_t getKey() const {
 	    return key_;
 	}
 
@@ -129,7 +138,7 @@ namespace csl {
 //	assert(value_ == 0); // can not be asserted when changeTransitionTarget() is used
 	    value_ = value;
 	}
-	int getValue() const {
+	StateId_t getValue() const {
 	    return value_;
 	}
 
@@ -180,7 +189,7 @@ namespace csl {
 	short type_;
 	short key_;
 
-	int value_;
+	StateId_t value_;
 	int addByte_;
     };
 

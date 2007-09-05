@@ -5,7 +5,6 @@
 #include<iostream>
 #include<vector>
 #include<algorithm>
-#include "../Alphabet/Alphabet.h"
 #include "../Global.h"
 #include "../LevFilter/LevFilter.h"
 
@@ -16,11 +15,12 @@ namespace csl {
      * @author Uli Reffle
      * @date 2006
      */
-    class ResultSet : public LevFilter::ResultSet_if {
+    class ResultSet : public LevFilter::CandidateReceiver {
     public:
-	ResultSet( const Alphabet& alph ) : 
-	    alph_( alph ) {
+	ResultSet() {
 	    reset();
+	    listBuffer_.reserve( Global::LevMaxNrOfResults );
+	    list_.reserve( Global::LevMaxNrOfResults );
 	}
 
 	/**
@@ -28,89 +28,115 @@ namespace csl {
 	 *
 	 * @return the current size of the ResultSet
 	 */
-	int getSize() const {
-	    return size_;
+	size_t getSize() const {
+	    return list_.size();
 	}
 
 	/**
 	 * add another item to the ResultSet
 	 */
-	void push( const uchar* str, int annotation ) {
-	    if ( size_ > ( Global::LevMaxNrOfResults - 1 ) ) {
-		throw exceptions::bufferOverflow( "ResultSet: ResultSet overflow." );
+	void receive( const wchar_t* str, int levDistance, int annotation ) {
+	    // printf( "receive: %ls\n", str );
+	    if( listBuffer_.capacity() == listBuffer_.size() ) {
+		listBuffer_.reserve( (size_t)( listBuffer_.capacity() * 2 ) );
+		list_.reserve( (size_t)( list_.capacity() * 2 ) );
+		list_.clear();
+		for( std::vector< Item >::iterator it = listBuffer_.begin(); it != listBuffer_.end(); ++it ) {
+		    list_.push_back( &( *it ) );
+		}
+		fprintf( stderr, "ResultSet realloc: capacity is now %d\n", listBuffer_.capacity() );
 	    }
-	    else {
-		listBuffer_[size_].set( str, annotation );
-		list_[size_] = &listBuffer_[size_];
-		++size_;
-	    }
+	    listBuffer_.push_back( Item( str, levDistance, annotation ) );
+	    list_.push_back( &( listBuffer_[listBuffer_.size() - 1] ) );
 	}
-
+	
 	/**
 	 * delete all items from the list
 	 */
 	void reset() {
-	    size_ = 0;
-	    
+	    // printf( "ResultSet::reset\n" );
+	    listBuffer_.clear();
+	    list_.clear();
 	}
 
 	class Item {
 	private:
-	    uchar str_[Global::lengthOfWord];
+	    wchar_t str_[Global::lengthOfWord];
+	    size_t levDistance_;
 	    int annotation_;
 	public:
+
+	    Item( const wchar_t* str, size_t levDistance, int ann ) :
+		levDistance_( levDistance ),
+		annotation_( ann )
+		{
+		    wcsncpy( str_, str, Global::lengthOfWord );
+		}
+
+	    /**
+	     * copy constructor
+	     */
+	    Item( const Item& other ) :
+		levDistance_( other.levDistance_ ),
+		annotation_( other.annotation_ )
+		{
+		    wcsncpy( str_, other.str_, Global::lengthOfWord );
+		}
+
+	    /**
+	     * Compares ONLY the string component
+	     */
 	    bool operator==( const Item& other ) const {
-		return !( strcmp( (char*)getStr(), (char*)other.getStr() ) );
+		return !( wcscmp( getStr(), other.getStr() ) );
 	    }
-	    void set( const uchar* str, int ann ) {
-		strcpy( ( char* )str_, ( char* )str );
+
+	    void set( const wchar_t* str, size_t levDistance, int ann ) {
+		wcscpy( str_, str );
+		levDistance_ = levDistance;
 		annotation_ = ann;
 	    }
-	    const uchar* getStr() const {
+	    const wchar_t* getStr() const {
 		return str_;
 	    }
 	    int getAnn() const {
 		return annotation_;
 	    }
+	    int getLevDistance() const {
+		return levDistance_;
+	    }
 	}; // class Item
 
 
 	const Item& operator[]( int i ) const {
-	    assert( i < size_ );
-	    return *( list_[i] );
+	    assert( list_.at( i ) );
+	    return *list_[i];
 	}
 
 
 	/**
-	 * @attention the strcmp is the standard one, not the one that depends on the Alphabet-object
+	 * 
 	 */
 	static bool cmp( const Item* a, const Item* b ) {
-	    return strcmp( (char*)a->getStr(), (char*)b->getStr() ) < 0; 
+	    return wcscmp( a->getStr(), b->getStr() ) < 0;
 	}
 
 	static bool is_equal( const Item* a, const Item* b ) {
-	    return( strcmp( (char*)a->getStr(), (char*)b->getStr() ) == 0 ); 
+	    return( wcscmp( a->getStr(), b->getStr() ) == 0 );
 	}
 
 	void sort() {
-	    std::sort( list_, list_ + size_, cmp );
+	    std::sort( list_.begin(), list_.end(), cmp );
 	}
 
 	void sortUnique() {
 	    sort();
-	    size_ = std::unique( list_, list_ + size_, is_equal ) - list_;
+	    std::unique( list_.begin(), list_.end(), is_equal );
 	}
 	
     private:
-	const Alphabet& alph_;
-	int size_;
-	Item* list_[Global::LevMaxNrOfResults];
-	Item listBuffer_[Global::LevMaxNrOfResults];
-    };
-
-  /// provide a nice print for a ResultSet::Item
-  std::ostream& operator<<( std::ostream& os, const csl::ResultSet::Item& item );
-
+	std::vector< Item* > list_;
+	std::vector< Item > listBuffer_;
+    }; // class ResultSet
 
 } // eon
 

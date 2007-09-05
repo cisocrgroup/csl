@@ -7,62 +7,67 @@
 
 namespace csl {
 
-    Alphabet::Alphabet( char* alphFile ) {
-
-	memset( code_, 0, 256 );
-	memset( decode_, 0, 257 );
-
-	uchar* alphStr = new uchar[300];
-
-	// read and process alphabet file
-	FILE* alph_handle = fopen( alphFile, "r" );
-	if ( ! alph_handle ) {
-	    throw exceptions::badFileHandle( "csl::Alphabet: Couldn't open alphabet file: " + std::string( alphFile ) );
-	}
-	fgets( ( char* )alphStr, 300, alph_handle );
-	fclose( alph_handle );
-
-	if ( strlen( ( char* )alphStr ) > 256 ) {
-	    throw exceptions::badInput( "csl::Alphabet: More than 256 characters in alphabet string." );
-	}
-
-	// this loop fills the array 'code' and sets 'size_' to the size
-	// of the alphabet as specified in the alphabet file
-	size_ = 0;
-
-	uchar* c = alphStr;
-	while ( *c ) {
-	    ++size_;
-	    code_[*c] = size_;
-	    decode_[size_] = *c;
-	    ++c;
-	}
-
+    Alphabet::Alphabet() :
+	magicNumber_( 42 ),
+	hasChar_( Global::maxNrOfChars, false )
+    {
+	
     }
 
-
-
-    int Alphabet::strcmp( const uchar* a, const uchar* b ) const {
-	int z;
-	while ( ( z = ( code( *a ) - code( *b ) ) ) == 0 && *a ) {
-
-	    if ( code( *a ) == 0 && !( *a == 10 ) ) { //if unknown char, not newline
-		std::cerr << "Alphabet: Invalid character '" << *a << "'(" << ( int )*a << ")" << std::endl;
-		exit( 1 );
-	    }
-	    if ( code( *b ) == 0 && !( *b == 10 ) ) { //if unknown char, not newline
-		std::cerr << "Alphabet: Invalid character '" << *b << "'(" << ( int )*b << ")" << std::endl;
-        exit( 1 );
-      }
-
-      ++a;
-      ++b;
+    /**
+     * @todo trouble with signed/unsigned
+     */
+    void Alphabet::addChar( wchar_t c ) {
+	if( (unsigned wchar_t)c >= Global::maxNrOfChars ) {
+	    throw exceptions::outOfRange( "Alphabet::addChar: add requested for out-of-range codepoint." );
+	}
+	// printf( "csl::Alphabet::addChar: Add char %lc\n", c ); // DEBUG
+	if( ! hasChar_[c] ) {
+	    hasChar_[c] = true;
+	    allChars_.push_back( c );
+	}
     }
-    if ( !( *a ) ) return 0;
-    else return z / abs( z );
 
-  }
+    bool Alphabet::hasChar( wchar_t c ) const {
+	if( (unsigned wchar_t)c >= Global::maxNrOfChars )
+	    throw exceptions::outOfRange( "Alphabet::hasChar: lookup requested for out-of-range codepoint." );
+	return hasChar_[ c ];
+    }
 
+    void Alphabet::initConstruction() {
+	header_.magicNumber_ = magicNumber_;
+    }
+
+    void Alphabet::finishConstruction() {
+	std::sort( allChars_.begin(), allChars_.end() );
+	header_.size_ = allChars_.size();
+    }
+
+    void Alphabet::loadFromStream( FILE* fi ) {
+	if ( !fi )
+	    throw exceptions::badFileHandle( "csl::Alphabet:loadFromStream: Couldn't read from filehandle." );
+
+	fread( &header_, sizeof( Header ), 1, fi );
+	
+	if ( ( header_.magicNumber_ != magicNumber_ ) )
+	    throw exceptions::badDictFile( "csl::Alphabet::loadFromStream: Magic number comparison failed.\n" );
+
+	allChars_.reserve( header_.size_ );
+	wchar_t c;
+	for( size_t i = 0; i < header_.size_; ++i ) {
+	    fread( &c, sizeof( wchar_t), 1, fi );
+	    addChar( c );
+	    hasChar_.at( c ) = true;
+	}
+    }
+
+    void Alphabet::writeToStream( FILE* fo ) const {
+	if ( !fo ) {
+	    throw exceptions::badFileHandle( "csl::Alphabet::writeToStream: Couldn't write to filehandle." );
+	}
+	fwrite( &header_, sizeof( header_ ), 1, fo );
+	fwrite( &allChars_[0], sizeof( wchar_t), allChars_.size(), fo );
+    }
 } // end of namespace csl
 
 #endif

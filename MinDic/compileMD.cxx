@@ -3,26 +3,25 @@
 
 using namespace csl;
 
-#include "./MinDic.h"
-
 int main(int argc, char** argv) {
-    if(argc != 4) {
-	std::cerr<<"Use like: "<<argv[0]<<" <alph> <txtDic> <binDic>"<<std::endl;
+    setlocale(LC_CTYPE, "de_DE.UTF-8");  /*Setzt das Default Encoding für das Programm */
+    
+    if( argc != 3 ) {
+	std::cerr<<"Use like: "<<argv[0]<<"<txtDic> <binDic>"<<std::endl;
 	exit(1);
     }
 
-    Alphabet alph(argv[1]);
-    MinDic t(alph);
+    MinDic< int > t;
 
     try {
-	t.compileDic( argv[2] );
-	t.writeToFile( argv[3] );
+	t.compileDic( argv[1] );
+	t.writeToFile( argv[2] );
     } catch ( exceptions::cslException ex ) {
 	std::cout<<"compileMD failed: "<<ex.what()<<std::endl;
 	return(1);
     }
 
-//    t.toDot(&alph);
+//    t.toDot();
 //    t.printCells();
 //    t.printDic();
 

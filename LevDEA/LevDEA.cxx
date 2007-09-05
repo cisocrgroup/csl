@@ -1,39 +1,33 @@
 #ifndef LEVDEA_CXX
 #define LEVDEA_CXX LEVDEA_CXX
 
+
 #include "./LevDEA.h"
 
 namespace csl {
 
-    /*
-      This practice of sharing the tables here is very very dangerous!
-      The first instance whose destructor is called will delete the tables
-      and leave the other instances with pointers to noone's land!!!
-      This only works as long as all instances die at the same time
-    */
 
+#include "lev0data.cxx"
+#include "lev1data.cxx"
+#include "lev2data.cxx"
+#include "lev3data.cxx"
     
-    LevDEA::LevDEA( const Alphabet& alph, int init_k ) : alph_( alph ), k_( 0 ) {
-	charvec_ = ( bits64* ) malloc( alph_.size() * sizeof( bits64 ) );
-	k_charvecs_ = new bits32[alph_.size() * Global::lengthOfWord];
-
-	tabsLoaded = 0;
-
+    LevDEA::LevDEA( int init_k ) : k_( 0 ),
+				   charvecs_( Global::maxNrOfChars, 0 )
+    {
+	*pattern_ = 0; // set pattern to empty word
+	tabsLoaded_ = 0;
 	setDistance( init_k );
     }
-
+    
     LevDEA::~LevDEA() {
-	delete( charvec_ );
-// delete(tab);
-// delete(fin);
+	delete( tab );
+	delete( fin );
     }
 
 
     void LevDEA::setDistance( int initK ) {
 	k_ = initK;
-
-	// reset stored k_charvecs
- 	memset( k_charvecs_, 0, ( alph_.size() * Global::lengthOfWord * sizeof( bits32 ) ) );
 
 	/*
 	  In case of k==1, z2k1 would be 111  (==7) ( 2k+1 set bits )
@@ -46,20 +40,17 @@ namespace csl {
 	z2k2 <<= 2 * k_ + 2;
 	z2k2--; // a sequence of 2k+2 1-values
 
-	if( ( tabsLoaded & ( 1 << k_ ) ) == 0 ) { // have the tables for k already been loaded???
-	    std::ostringstream ss; ss<<k_; // push k_ into a stream to get it as string
+	if( ( tabsLoaded_ & ( 1 << k_ ) ) == 0 ) { // have the tables for k already been loaded???
 
-//	    std::string table_file = "/mounts/Users/student/uli/implement/csl/trunk/LevDEA/lev" + ss.str() + "data";
-	    std::string table_file = "/files/uli/cis/csl/trunk/LevDEA/lev" + ss.str() + "data";
+	    const int* arrPos;
+	    if( initK == 0 ) arrPos = lev0data;
+	    else if( initK == 1 ) arrPos = lev1data;
+	    else if( initK == 2 ) arrPos = lev2data;
+	    else if( initK == 3 ) arrPos = lev3data;
+	    else throw exceptions::invalidLevDistance( "LevDEA: This distance is not supported. Supported distances are 0, 1, 2, 3" );
 
-	    FILE * table_handle = fopen( table_file.c_str(), "r" );
-
-	    if( !table_handle ) {
-		std::cerr << "Could not read " << table_file << std::endl;
-		exit( 1 );
-	    }
-	    fscanf( table_handle, "%d\n", &k_ );
-	    fscanf( table_handle, "%d\n", &( coresetss[k_] ) );
+	    k_= *arrPos; ++arrPos;;
+	    coresetss[k_] = *arrPos; ++arrPos;
 	    coresets = coresetss[k_];
 
 	    tabs[k_] = new table_cell[z2k2*coresets];
@@ -67,25 +58,23 @@ namespace csl {
 	    tab = tabs[k_];
 	    fin = fins[k_];
 
-	    int row, col;
-	    char c;
+	    size_t row, col;
 
-	    for ( row = 0; row < z2k2; row++ ) {
-		for ( col = 0; col < coresets; ++col ) {
-		    fscanf( table_handle, "%d,%d,", &( table( row, col ).target ), &( table( row, col ).move_pattern ) );
+	    for( row = 0; row < z2k2; row++ ) {
+		for( col = 0; col < coresets; ++col ) {
+		    table( row, col ).target =  *arrPos; ++arrPos;
+		    table( row, col ).move_pattern =  *arrPos; ++arrPos;
 		}
-		fscanf( table_handle, "%c", &c );
 	    }
 
-	    for ( row = 0; row < 2*k_ + 1; row++ ) {
-		for ( col = 0; col < coresets; ++col ) {
-		    fscanf( table_handle, "%d,", &fin[coresets*row+col] );
+	    for( row = 0; row < 2*k_ + 1; row++ ) {
+		for( col = 0; col < coresets; ++col ) {
+		    fin[coresets*row+col] =  *arrPos; ++arrPos;
 		}
-		fscanf( table_handle, "%c", &c );
 	    }
-	    fclose( table_handle );
-	    tabsLoaded = tabsLoaded | ( 1 << k_ );
-	} else {
+	    tabsLoaded_ = tabsLoaded_ | ( 1 << k_ );
+	}
+	else {
 	    // tables were loaded some time before. simply assign the pointers.
 	    tab = tabs[k_];
 	    fin = fins[k_];
@@ -93,37 +82,41 @@ namespace csl {
 	}
     }
 
-    void LevDEA::loadPattern( const uchar* p ) {
-	strcpy( ( char* )pattern_, ( char* )p );
-	patLength = strlen( ( char* )pattern_ );
-
-	// reset stored k_charvecs
- 	memset( k_charvecs_, 0, ( alph_.size() * Global::lengthOfWord * sizeof( bits32 ) ) );
-
+    void LevDEA::loadPattern( const wchar_t* p ) {
+	cleanCharvecs(); // do this while the old pattern is still loaded!
+	patLength_ = wcslen( p );
+	if( patLength_ > Global::lengthOfWord ) {
+	    throw exceptions::badInput( "csl::LevDEA::loadPattern: Maximum Pattern length (as specified by Global::lengthOfWord) violated." );
+	}
+	wcscpy( pattern_, p );
 	calcCharvec();
     }
 
-    void LevDEA::calcCharvec() {
-	bits64 c;
-	int i;
-	memset( charvec_, 0, alph_.size() * sizeof( bits64 ) );
-	for ( c = z10, i = 0; i < patLength; i++, c >>= 1 ) {
-	    charvec_[alph_.code( pattern_[i] )] |= c;
+    void LevDEA::cleanCharvecs() {
+	for( const wchar_t* pat = pattern_; *pat; ++pat ) {
+	    charvecs_.at( *pat ) = 0;
 	}
     }
-
-    bits32 LevDEA::calc_k_charvec( uchar c, int i ) const {
+    
+    void LevDEA::calcCharvec() {
+	bits64 c;
+	const wchar_t* pat;
+	for ( c = z10, pat= pattern_; *pat; ++pat, c >>= 1 ) {
+	    charvecs_[*pat] |= c;
+	}
+    }
+    
+    bits32 LevDEA::calc_k_charvec( wchar_t c, size_t i ) const {
 	bits64 r;
 	// after the next line, the bits i,i+1,i+2 of chv are the lowest bits of r. All other bits of r are 0
-	r = ( charvec_[c] >> ( 64 - ( 2 * k_ + 1 + i ) ) ) & z2k1;
-	if ( patLength - i < 2 * k_ + 1 ) // the last few chars of the word
-	    r = ( ( r >> ( 2 * k_ + 1 - ( patLength - i ) ) ) | ( zff << ( ( patLength - i ) + 1 ) ) ) & z2k2;
- 	
-	return ( k_charvecs_[(c * alph_.size() ) + i] = (bits32) r );
+	r = ( charvecs_[c] >> ( 64 - ( 2 * k_ + 1 + i ) ) ) & z2k1;
+	if ( patLength_ - i < 2 * k_ + 1 ) // the last few chars of the word
+	    r = ( ( r >> ( 2 * k_ + 1 - ( patLength_ - i ) ) ) | ( zff << ( ( patLength_ - i ) + 1 ) ) ) & z2k2;
+	return ( (bits32) r );
     }
 
     void LevDEA::printTable() const {
-	int row, col;
+	size_t row, col;
 	for ( row = 0; row < z2k2; row++ ) {
 	    printf( "%d\t", row );
 	    for ( col = 0; col < coresets; ++col ) {
@@ -134,31 +127,28 @@ namespace csl {
     }
 
     void LevDEA::printCharvec() const {
-	uint_t c;
 	std::cout << "-------------" << std::endl;
-	for( c = 1; c <= alph_.size(); ++c ) {
-      if( charvec_[c] ) {
-        std::cout << c << std::endl;
-        printBits( charvec_[c] );
-      }
+	for( const wchar_t* c = pattern_; *c; ++c ) {
+	    printf( "%lc\n", *c );
+	    printBits( charvecs_[*c] );
+	}
+	std::cout << "-------------" << std::endl;
     }
-    std::cout << "-------------" << std::endl;
-  }
+    
+    void LevDEA::printBits( const bits64& n ) const {
+	int i;
+	for( i = 63;i >= 0;--i ) {
+	    if( ( i % 10 ) == 0 ) printf( "%d", i / 10 );
+	    else if( ( i % 10 ) == 5 ) printf( "|" );
+	    else printf( " " );
+	}
+	printf( "\n" );
+	for( i = 63;i >= 0;--i ) {
+	    printf( "%i", ( int )( 1 & ( n >> i ) ) );
+	}
+	printf( "\n" );
 
-  void LevDEA::printBits( const bits64& n ) const {
-    int i;
-    for( i = 63;i >= 0;--i ) {
-      if( ( i % 10 ) == 0 ) printf( "%d", i / 10 );
-      else if( ( i % 10 ) == 5 ) printf( "|" );
-      else printf( " " );
     }
-    printf( "\n" );
-    for( i = 63;i >= 0;--i ) {
-      printf( "%i", ( int )( 1 & ( n >> i ) ) );
-    }
-    printf( "\n" );
-
-  }
 
 } // eon
 #endif
