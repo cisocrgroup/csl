@@ -31,6 +31,14 @@ namespace csl {
 		errors_ = errors;
 	    }
 
+	    const StateId_t& getState() const {
+		return state_;
+	    }
+
+	    size_t getErrors() const {
+		return errors_;
+	    }
+
 	    wchar_t getNextChar() const {
 		return *nextChar_;
 	    }
@@ -45,65 +53,73 @@ namespace csl {
 	    size_t errors_;
 	};
 
-	class Stack {
-	public:
-	    Stack() :
-		data_( 1 ),
-		curDepth_( 0 ) {
-	    }
 
-	    void addContinuation( StateId_t state, const wchar_t* susoStr, size_t errors ) {
-		data_.at( getCurDepth() + 1 ).push_back( Position( state, susoStr, errors ) );
-	    }
+	void addContinuation( StateId_t state, const wchar_t* susoStr, size_t errors ) {
+	    data_.at( getCurDepth() + 1 ).push_back( Position( state, susoStr, errors ) );
+	}
+	
+	void newBranch( StateId_t state, const wchar_t* susoStr, size_t errors ) {
+	    data_.at( getCurDepth() ).push_back( Position( state, susoStr, errors ) );
+	}
+	
 
-	    void newBranch( StateId_t state, const wchar_t* susoStr, size_t errors ) {
-		data_.at( getCurDepth() ).push_back( Position( state, susoStr, errors ) );
-	    }
-
-	    std::vector< Position>::iterator getMinPosition
-
-	    void forward() {
-		if( data_.size() <= getCurDepth() + 1 ) data_.resize( data_.size() + 1 );
-		++curDepth_;
-	    }
+	void forward() {
+	    if( data_.size() <= getCurDepth() + 1 ) data_.resize( data_.size() + 1 );
+	    ++curDepth_;
+	}
 	    
-	    void back() {
-		data_.at( getCurDepth() ).clear();
-		--curDepth_;
-	    }
+	void back() {
+	    data_.at( getCurDepth() ).clear();
+	    --curDepth_;
+	}
 	    
-	    
-	private:
-	    std::vector< std::vector< Position > > data_;
-	    std::vector< wchar_t > labels_;
-	    size_t curDepth_;
-	    size_t getCurDepth() const {
-		return curDepth_;
-	    }
-	};
+	std::vector< std::vector< Position > > data_;
+	std::wstring word_;
+	size_t curDepth_;
+	size_t getCurDepth() const {
+	    return curDepth_;
+	}
+
+	MinDic< int > dic_;
 
     public:
 	PatternApplier( char* minDicFile ) :
-	    dic_( minDicFile ) {
+	    dic_( minDicFile ),
+	    data_( 1 ) {
 
 	    StateId_t st = dic_.getRoot();
 	    const wchar_t* suso = dic_.getSusoString( st );
 
-	    stack_.newBranch( st, suso, 0 );
-	    
+	    newBranch( st, suso, 0 );
 	}
 
 	void getNext() {
-	    std::vector< Position>::iterator it = std::min_element( data_.at( getCurDepth() ).begin(), data_.at( getCurDepth() ).end() );
+	    bool foundFinal = false;
+	    wchar_t label = 0;
+	    do {
+		std::sort( data_.at( getCurDepth() ).begin(), data_.at( getCurDepth() ).end() );
+		std::vector< Position >::iterator it = data_.at( getCurDepth() ).begin();
+		label = it->getNextChar();
+		while( it->getNextChar() == label ) {
+		    StateId_t nextState = dic_.walk( it->getState(), label );
+		    if( nextState ) {
+			addContinuation( nextState, dic_.getSusoString( nextState ), it->getErrors() );
+			word_.at( getCurDepth() ) = label;
+			it->increaseNextChar();
+		    }
+		}
+	    } while( data_.at( getCurDepth() + 1 ).size() == 0 && label != 0 );
+
+	    if( label == 0 ) {
+		data_.at( getCurDepth() ).clear();
+		
+	    }
 	}
-
-    public:
-	MinDic< int > dic_;
+ 
 
 
-    private:
-	Stack stack_;
-    };
+
+    }; // class PatternApplier
 
 
 

@@ -183,8 +183,8 @@ namespace csl {
 	}
 
 	/**
-	   mark the state as final/ not final
-	*/
+	 * mark the state as final/ not final
+	 */
 	void setFinal( bool b ) {
 	    if( ! isFinal_ ) {
 		for( Iterator it = getIterator(); it.isValid(); ++it ) {
@@ -194,6 +194,10 @@ namespace csl {
 	    isFinal_ = b;
 	}
 
+	/**
+	 * returns true iff state is marked as final
+	 * @returns true iff state is marked as final
+	 */
 	bool isFinal() const {
 	    return isFinal_;
 	}

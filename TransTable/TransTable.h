@@ -73,8 +73,10 @@ namespace csl {
 	inline void finishConstruction();
 
 	/**
-	 * @param newTempState
 	 * inserts a new state into the table, returns the state id.
+
+	 * @param state a TempState-object
+	 * @returns the state id
 	 */
 	inline StateId_t storeTempState( TempState& state );
 
@@ -125,7 +127,8 @@ namespace csl {
 	/**
 	 * perform one step inside the automaton
 	 * @param state the state to start from
-	 * @param c the character to walk with (c already being coded according to custom alphabet)
+	 * @param c the character to walk with
+	 * @returns the state id reached by the transition. 0, if the transition does not exist
 	 */
 	inline uint_t walk( StateId_t state, char16 c ) const;
 
