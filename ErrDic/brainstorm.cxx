@@ -9,28 +9,77 @@ namespace csl {
     private:
 	class Position {
 	    public:
-	    Position( StateId_t pos, const wchar_t* nextChar, size_t errors ) :
-		pos_( pos ),
+	    Position() :
+		state_( 0 ),
+		nextChar_( 0 ),
+		errors_( 0 ) {
+	    }
+		
+	    Position( StateId_t state, const wchar_t* nextChar, size_t errors ) :
+		state_( state ),
 		nextChar_( nextChar ),
 		errors_( errors ) {
 	    }
 
-	    StateId_t pos_;
-	    const wchar_t* curChar_;
+	    bool operator<( const Position& other ) const {
+		return this->getNextChar() < other.getNextChar();
+	    }
+
+	    void set(  StateId_t state, const wchar_t* curChar, size_t errors ) {
+		state_ = state;
+		nextChar_ = curChar;
+		errors_ = errors;
+	    }
+
+	    wchar_t getNextChar() const {
+		return *nextChar_;
+	    }
+
+	    bool increaseNextChar() {
+		if( *nextChar_ == 0 ) return false;
+		++nextChar_;
+	    }
+	    
+	    StateId_t state_;
+	    const wchar_t* nextChar_;
 	    size_t errors_;
 	};
 
 	class Stack {
 	public:
-	    Stack() {
+	    Stack() :
+		data_( 1 ),
+		curDepth_( 0 ) {
 	    }
-	    void addPosition( Position pos );
-	    
 
+	    void addContinuation( StateId_t state, const wchar_t* susoStr, size_t errors ) {
+		data_.at( getCurDepth() + 1 ).push_back( Position( state, susoStr, errors ) );
+	    }
+
+	    void newBranch( StateId_t state, const wchar_t* susoStr, size_t errors ) {
+		data_.at( getCurDepth() ).push_back( Position( state, susoStr, errors ) );
+	    }
+
+	    std::vector< Position>::iterator getMinPosition
+
+	    void forward() {
+		if( data_.size() <= getCurDepth() + 1 ) data_.resize( data_.size() + 1 );
+		++curDepth_;
+	    }
+	    
+	    void back() {
+		data_.at( getCurDepth() ).clear();
+		--curDepth_;
+	    }
+	    
+	    
 	private:
-	    size_t depth_;
-	    
-
+	    std::vector< std::vector< Position > > data_;
+	    std::vector< wchar_t > labels_;
+	    size_t curDepth_;
+	    size_t getCurDepth() const {
+		return curDepth_;
+	    }
 	};
 
     public:
@@ -40,11 +89,12 @@ namespace csl {
 	    StateId_t st = dic_.getRoot();
 	    const wchar_t* suso = dic_.getSusoString( st );
 
-	    stack_.push_back( std::vector< StackItem >( StackItem( st, suso ) ) );
+	    stack_.newBranch( st, suso, 0 );
+	    
 	}
 
 	void getNext() {
-	    
+	    std::vector< Position>::iterator it = std::min_element( data_.at( getCurDepth() ).begin(), data_.at( getCurDepth() ).end() );
 	}
 
     public:
@@ -52,8 +102,7 @@ namespace csl {
 
 
     private:
-	std::vector< std::vector< StackItem > > stack_;
-
+	Stack stack_;
     };
 
 
