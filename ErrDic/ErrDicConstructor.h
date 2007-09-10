@@ -2,6 +2,7 @@
 
 #include<vector>
 #include<stack>
+#include<set>
 
 
 #include "../Global.h"
@@ -11,57 +12,51 @@ namespace csl {
 
     class PatternApplier {
     private:
+	/**
+	 * This class represents a position in the dictionary automaton. One or more of those objects 
+	 * form one stack item for the unified traversal of different branches of the automaton.
+	 */
 	class Position {
 	    public:
-	    Position() :
-		state_( 0 ),
-		nextChar_( 0 ),
-		hasError_( false ) {
-	    }
+	    inline Position();
 		
-	    Position( StateId_t state, const wchar_t* nextChar, bool hasError, Position* backPtr ) :
-		state_( state ),
-		nextChar_( nextChar ),
-		hasError_( hasError ),
-		backPtr_( backPtr ) {
-	    }
+	    inline Position( StateId_t state, const wchar_t* nextChar, bool hasError, Position* backPtr );
 
-	    bool operator<( const Position& other ) const {
-		return this->getNextChar() < other.getNextChar();
-	    }
+	    inline bool operator<( const Position& other ) const;
 
-	    void set(  StateId_t state, const wchar_t* curChar, bool hasError ) {
-		state_ = state;
-		nextChar_ = curChar;
-		hasError_ = hasError;
-	    }
+	    inline void set(  StateId_t state, const wchar_t* curChar, bool hasError );
 
-	    const StateId_t& getState() const {
-		return state_;
-	    }
+	    inline const StateId_t& getState() const;
 
-	    size_t hasError() const {
-		return hasError_;
-	    }
+	    inline size_t hasError() const;
 
-	    wchar_t getNextChar() const {
-		return *nextChar_;
-	    }
+	    inline wchar_t getNextChar() const;
 
-	    bool increaseNextChar() {
-		if( *nextChar_ == 0 ) return false;
-		++nextChar_;
-	    }
+	    inline bool increaseNextChar();
 	    
-	    const Position* getBackPtr() const {
-		return backPtr_;
-	    }
+	    inline const Position* getBackPtr() const;
 
+	private:
 	    StateId_t state_;
 	    const wchar_t* nextChar_;
 	    bool hasError_;
 	    Position* backPtr_;
 	}; // class Position
+
+
+	/**
+	 * Objects of this class are used to keep track of when the error patten can be applied.
+	 */
+	class PatternTracer {
+
+	};
+
+	class Stack {
+	public:
+	    
+	private:
+
+	};
 
 
     public:
@@ -92,13 +87,16 @@ namespace csl {
 	    bool foundFinal = false;
 	    bool stackNotEmpty = true;
 	    wchar_t label = 0;
+
+	    bool foundContinuation = false;
+	    bool patternApplicable = false;
 	    do { // this loop terminates at a final state
 		// std::cerr<<"Enter final loop"<<std::endl;
 		do { // this loop terminates if one continuation was found or if the stackItem is done
 		    // std::cerr<<"Enter conti loop"<<std::endl;
 
-		    bool foundContinuation = false;
-		    bool patternApplicable = false;
+		    foundContinuation = false;
+		    patternApplicable = false;
 		    std::sort( data_.at( getCurDepth() ).begin(), data_.at( getCurDepth() ).end() );
 		    std::vector< Position >::iterator it = data_.at( getCurDepth() ).begin();
 		    label = it->getNextChar();
@@ -109,6 +107,7 @@ namespace csl {
 			StateId_t nextState = dic_.walk( it->getState(), label );
 			if( nextState ) {
 			    addContinuation( nextState, dic_.getSusoString( nextState ), it->hasError(), &( *it ) );
+
 			    if( ! foundContinuation ) { // if continuation wasn't registered before
 				foundContinuation = true;
 				word_.resize( getCurDepth() + 1 );
@@ -123,6 +122,7 @@ namespace csl {
 
 				std::wcout<<word_<<std::endl;
 			    } // register continuation for first time
+			    
 			    
 			    if( patternApplicable && ! it->hasError() ) {
 				// go back patternTo_.size()-1 steps to Position where patternTo begins
@@ -141,17 +141,18 @@ namespace csl {
 				}
 			    }
 
-			    it->increaseNextChar();
-			    
-			    
 			    foundFinal = 
 				it->hasError() &&
 				dic_.isFinal( nextState ) && 
-				! filterDic_.isFinal( nextFilterState );
-			}
+				! filterDic_.isFinal( filterStack_.top() );
+			    
+			    it->increaseNextChar();
+			    
+			    
+			} // if nextState
 			++it;
 		    }
-		} while( data_.at( getCurDepth() + 1 ).size() == 0 && label != 0 );
+		} while( ( ! foundContinuation ) && label != 0 );
 		if( label == 0 ) {
 		    data_.at( getCurDepth() ).clear();
 		    stackNotEmpty = back();
@@ -186,6 +187,8 @@ namespace csl {
 	    if( getCurDepth() == 0 ) return false;
 	    data_.at( getCurDepth() ).clear();
 	    data_.at( getCurDepth() ).reserve( 3 );
+	    filterStack_.pop();
+
 	    --curDepth_;
 	    word_.resize( getCurDepth() );
 //	    std::cerr<<"back: depth is "<<getCurDepth()<<std::endl;
@@ -225,17 +228,5 @@ namespace csl {
 
 } // eon
 
-int main( int argc, char** argv ) {
-    csl::MinDic< int > dic( argv[1]);
-    csl::MinDic< int > filterDic( argv[2]);
-
-    csl::PatternApplier pa( dic, filterDic, std::wstring( L"lb" ), std::wstring( L"x" ) );
-    
-    
-    while( pa.next() ) {
-	std::wcout<<"OUT: "<<pa.getWord()<<std::endl;
-	// std::cerr<<"Enter next-loop"<<std::endl;
-
-    }    
-}
+#include "./Position.tcc"
 
