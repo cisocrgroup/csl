@@ -84,12 +84,12 @@ namespace csl {
 	 * declare a root (or start state) of the automaton.
 	 */
 	inline void setRoot( StateId_t rootId ) {
-	    cells_[0].setValue( rootId );
+	    root_ = rootId;
 	}
 
 	/// returns the root
 	inline StateId_t getRoot() const {
-	    return cells_[0].getValue();
+	    return root_;
 	}
 
 	/**
@@ -284,11 +284,16 @@ namespace csl {
 		magicNumber_( 0 ),
 		cType_( 0 ),
 		nrOfCells_( 0 ),
-		lengthOfSusoStrings_( 0 ) {
+		lengthOfSusoStrings_( 0 ),
+		root_( 0 ) {
 	    }
 
 	    bits64 getMagicNumber() const {
 		return magicNumber_;
+	    }
+
+	    StateId_t getRoot() const {
+		return root_;
 	    }
 
 	    int getCType() const {
@@ -307,6 +312,7 @@ namespace csl {
 		cType_ = CellTypeValue;
 		nrOfCells_ = transTable.nrOfCells_;
 		lengthOfSusoStrings_ = transTable.lengthOfSusoStrings_;
+		root_ = transTable.root_;
 	    }
 	    
 
@@ -315,15 +321,20 @@ namespace csl {
 	    bits64 cType_;
 	    bits64 nrOfCells_;
 	    bits64 lengthOfSusoStrings_;
+	    bits64 root_;
 	};
 
 	Header header_;
 
+	StateId_t root_;
+	
+
 	/**
-	   The number of states. Note that this value is updated during construction
-	   only. If a table is loaded from a binary, this variable remains set to -1.
+	 * The number of states. Note that this value is updated during construction
+	 * only. If a table is loaded from a binary, this variable remains set to -1.
 	*/
 	size_t nrOfStates_;
+
 
 	/// the first free cell of the array
 	size_t firstFreeCell_;

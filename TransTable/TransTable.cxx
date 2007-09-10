@@ -70,13 +70,12 @@ namespace csl {
 	nrOfCells_ = 0;
 	allocCells( 80 );
 	nrOfStates_ = 0;
-	firstFreeCell_ = 1; // cells_[0] is never used
-	sizeOfUsedCells_ = 1; // cells_[0] is never used
+
+	cells_[0].setType( Cell_t::STATE ); // cells_[0] is the failure state
+	firstFreeCell_ = 1; // cells_[0] is the failure state
+	sizeOfUsedCells_ = 1; // cells_[0] is the failure state
 
 	header_.set( *this );
-//	header_.magicNumber_ = magicNumber_;
-//	header_.cType_ = CellTypeValue;
-//	header_.lengthOfSusoStrings_ = 0;
 
 	susoStrings_ = 0;
 	lengthOfSusoStrings_ = 0;
@@ -359,6 +358,7 @@ namespace csl {
 
 	lengthOfSusoStrings_ = header_.getLengthOfSusoStrings();
 	nrOfCells_ = header_.getNrOfCells();
+	root_ = header_.getRoot();
 
 			
 
