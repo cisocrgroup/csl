@@ -6,11 +6,11 @@ namespace csl {
 	hasError_( false ) {
     }
     
-    PatternApplier::Position::Position( StateId_t state, const wchar_t* nextChar, bool hasError, Position* backPtr ) :
+    PatternApplier::Position::Position( StateId_t state, const wchar_t* nextChar, bool hasError ) :
 	state_( state ),
 	nextChar_( nextChar ),
-	hasError_( hasError ),
-	backPtr_( backPtr ) {
+	hasError_( hasError ) {
+
     }
 
     bool PatternApplier::Position::operator<( const Position& other ) const {
