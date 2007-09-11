@@ -40,9 +40,5 @@ namespace csl {
 	++nextChar_;
     }
 	    
-    const PatternApplier::Position* PatternApplier::Position::getBackPtr() const {
-	return backPtr_;
-    }
-
 
 } // eon

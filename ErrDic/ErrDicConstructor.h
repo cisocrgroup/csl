@@ -97,8 +97,36 @@ namespace csl {
 	    size_t getDepth() const {
 		return depth_;
 	    }
+
+
+	    void forward() {
+		depth_ += 1;
+		if( size() <= depth_ + 1 ) resize( depth_ + 2 );
+		// std::cerr<<"forward: depth is "<<getCurDepth()<<std::endl;
+	    }
+	    
+	    bool back() {
+		if( depth_ == 0 ) return false;
+		at( depth_ ).clear();
+		at( depth_ + 1 ).clear(); // this might be in vain, as it should be empty anyway ?!
+		
+		--depth_;
+		word_.resize( depth_ );
+		// std::cerr<<"back: depth is "<<getCurDepth()<<std::endl;
+		return true;
+	    }
+
+	    std::wstring& getWord() {
+		return word_;
+	    }
+
+	    const std::wstring& getConstWord() const {
+		return word_;
+	    }
+
 	private:
 	    size_t depth_;
+	    std::wstring word_;
 	};
 
 
@@ -122,7 +150,7 @@ namespace csl {
 	}
 
 	const std::wstring& getWord() const {
-	    return word_;
+	    return ( stack_.getConstWord() );
 	}
 
 	bool next() {
@@ -136,13 +164,14 @@ namespace csl {
 		do { // this loop terminates if one continuation was found or if the stackItem is done
 		    // std::cerr<<"Enter conti loop"<<std::endl;
 
-		    foundContinuation = false;
 
 		    std::sort( stack_.at( getCurDepth() ).positions_.begin(), stack_.at( getCurDepth() ).positions_.end() );
 		    std::sort( stack_.at( getCurDepth() ).patternTracers_.begin(), stack_.at( getCurDepth() ).patternTracers_.begin() );
 
 		    StackItem::PositionContainer::iterator positionIt = stack_.at( getCurDepth() ).positions_.begin();
 		    StackItem::PatTracerContainer::iterator patTracerIt = stack_.at( getCurDepth() ).patternTracers_.begin();
+
+		    foundContinuation = false;
 
 		    if( positionIt->getNextChar() < patTracerIt->getNextChar() ) {
 
@@ -152,53 +181,31 @@ namespace csl {
 			while( ( positionIt != stack_.at( getCurDepth() ).positions_.end() ) && 
 			       ( positionIt->getNextChar() == label ) ) {
 
-			    StateId_t nextState = dic_.walk( positionIt->getState(), label );
-			    if( nextState ) {
-				addContinuation( nextState, dic_.getSusoString( nextState ), positionIt->hasError() );
-				if( size_t newState = dic_.walkStr( nextState, patternFrom_.c_str() ) ) {
-				    addPatternTracer( newState, patternTo_.c_str() );
-				}
-				
-				if( ! foundContinuation ) { // if continuation wasn't registered before
-				    foundContinuation = true;
-				    word_.resize( getCurDepth() + 1 );
-				    word_.at( getCurDepth() ) = label;
-				
-				    
-				    stack_.at( getCurDepth() + 1 ).filterPos_ = filterDic_.walk( stack_.at( getCurDepth() ).filterPos_, label );
-
-				    std::wcout<<word_<<std::endl;
-				} // register continuation for first time
-			    
-				foundFinal = 
-				    positionIt->hasError() &&
-				    dic_.isFinal( nextState ) && 
-				    ! filterDic_.isFinal( stack_.at( getCurDepth() + 1 ).filterPos_ );
-			    
-				positionIt->increaseNextChar();
-				
-				
-			    } // if nextState
-			    else std::cerr<<"VERY STRANGE"<<std::endl;
+			    checkPosition( *positionIt, foundContinuation, foundFinal );
 			    ++positionIt;
 			} // for all Positions with the same label
 		    } // if posIt < tracerIt
 
-		    else if( positionIt->getNextChar() == patTracerIt->getNextChar() ) {
-			label = positionIt->getNextChar();
-			for( all positions with that label ) {
-			}
+
+		    /////////////    POSITION == TRACER //////////////////////
+ 		    else if( positionIt->getNextChar() == patTracerIt->getNextChar() ) {
+ 			label = positionIt->getNextChar();
 			
+			// go through all Positions with that label
+			while( ( positionIt != stack_.at( getCurDepth() ).positions_.end() ) && 
+			       ( positionIt->getNextChar() == label ) ) {
+			    checkPosition( *positionIt, foundContinuation, foundFinal );
+			    ++positionIt;
+			} // for all Positions with the same label
+
 		    }
 
 		} while( ( ! foundContinuation ) && label != 0 );
 		if( label == 0 ) {
-		    stack_.at( getCurDepth() ).clear();
-		    stack_.at( getCurDepth() + 1 ).clear(); // this might be in vain, as it should be empty anyway ?!
-		    stackNotEmpty = back();
+		    stackNotEmpty = stack_.back();
 		}
 		else {
-		    forward();
+		    stack_.forward();
 		}
 		
 	    } while( !foundFinal && stackNotEmpty );
@@ -206,48 +213,49 @@ namespace csl {
 	}
 	
     private:
+	void checkPosition( Position& pos, bool& foundContinuation, bool& foundFinal ) {
+	    wchar_t label = pos.getNextChar();
+	    StateId_t nextState = dic_.walk( pos.getState(), label );
+	    if( nextState ) {
+		addContinuation( nextState, dic_.getSusoString( nextState ), pos.hasError() );
+		if( size_t newState = dic_.walkStr( nextState, patternFrom_.c_str() ) ) {
+		    addPatternTracer( newState, patternTo_.c_str() );
+		}
+				
+		if( ! foundContinuation ) { // if continuation wasn't registered before
+		    foundContinuation = true;
+		    stack_.getWord().resize( getCurDepth() + 1 );
+		    stack_.getWord().at( getCurDepth() ) = label;
+				
+				    
+		    stack_.at( getCurDepth() + 1 ).filterPos_ = filterDic_.walk( stack_.at( getCurDepth() ).filterPos_, label );
+
+		    std::wcout<<stack_.getWord()<<std::endl;
+		} // register continuation for first time
+			    
+		foundFinal = 
+		    pos.hasError() &&
+		    dic_.isFinal( nextState ) && 
+		    ! filterDic_.isFinal( stack_.at( getCurDepth() + 1 ).filterPos_ );
+			    
+		pos.increaseNextChar();
+				
+				
+	    } // if nextState
+	    else std::cerr<<"VERY STRANGE"<<std::endl;
+	}
+
 	void addContinuation( StateId_t state, const wchar_t* susoStr, bool hasError ) {
-	    stack_.at( getCurDepth() +1 ).positions_.insert( Position( state, susoStr, hasError ) );
+	    stack_.at( getCurDepth() +1 ).positions_.push_back( Position( state, susoStr, hasError ) );
 	}
 	
 	void addPatternTracer( StateId_t state, const wchar_t* patternPos ) {
-	    stack_.at( getCurDepth() + 1 ).patternTracers_.insert( PatternTracer( state, patternPos ) );
+	    stack_.at( getCurDepth() + 1 ).patternTracers_.push_back( PatternTracer( state, patternPos ) );
 	}
 
-	void newBranch( StateId_t state, const wchar_t* susoStr, size_t errors ) {
-	    assert( data_.at( getCurDepth() ).capacity() >= 3 );
-	    data_.at( getCurDepth() ).push_back( Position( state, susoStr, errors, 0 ) );
-	}
-	
-	void forward() {
-	    ++curDepth_;
-	    if( data_.size() <= getCurDepth() + 1 ) data_.resize( getCurDepth() + 2 );
-	    data_.at( getCurDepth() + 1 ).reserve( 3 );  // make sure the vector does not realloc
-//	    std::cerr<<"forward: depth is "<<getCurDepth()<<std::endl;
-	}
 	    
-	bool back() {
-	    if( getCurDepth() == 0 ) return false;
-	    data_.at( getCurDepth() ).clear();
-	    data_.at( getCurDepth() ).reserve( 3 );
-	    filterStack_.pop();
-
-	    --curDepth_;
-	    word_.resize( getCurDepth() );
-//	    std::cerr<<"back: depth is "<<getCurDepth()<<std::endl;
-	    return true;
-	}
-	    
-	bool isSuffix() const {
-	    if( word_.substr( word_.size() - patternTo_.size(), patternTo_.size() ) == patternTo_ ) {
-		std::wcerr<<"isSuffix: "<<word_<<std::endl;
-		return true;
-	    }
-	    else return false;
-	}
 
 	Stack stack_;
-	std::wstring word_;
 
 	size_t getCurDepth() const {
 	    return stack_.getDepth();
