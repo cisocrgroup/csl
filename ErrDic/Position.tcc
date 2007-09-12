@@ -35,9 +35,10 @@ namespace csl {
 	return *nextChar_;
     }
 
-    bool PatternApplier::Position::increaseNextChar() {
+    bool PatternApplier::Position::stepToNextChar() {
 	if( *nextChar_ == 0 ) return false;
 	++nextChar_;
+	return true;
     }
 	    
 

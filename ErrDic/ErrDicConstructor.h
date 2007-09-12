@@ -33,7 +33,7 @@ namespace csl {
 
 	    inline wchar_t getNextChar() const;
 
-	    inline bool increaseNextChar();
+	    inline bool stepToNextChar();
 	    
 	    inline const Position* getBackPtr() const;
 
@@ -49,20 +49,34 @@ namespace csl {
 	 */
 	class PatternTracer  {
 	public:
-	    PatternTracer( StateId_t state, const wchar_t* patternPos ) :
-		state_( state ),
+	    PatternTracer( size_t startStackPos, const wchar_t* patternPos ) :
+		startStackPos_( startStackPos ),
 		patternPos_( patternPos ) {
 	    }
 
 	    inline bool operator<( const PatternTracer& other ) const {
-		return *patternPos_ < *( other.patternPos_ );
+		return wcscmp( patternPos_, other.patternPos_ ) < 0;
 	    }
     
 	    inline wchar_t getNextChar() const {
 		return *patternPos_;
 	    }
 
-	    StateId_t state_;
+	    inline bool stepToNextChar() {
+		if( *patternPos_ == 0 ) return false;
+		++patternPos_;
+		return true;
+	    }
+
+ 	    inline const wchar_t* getPatternPos() const {
+		return patternPos_;
+	    }
+
+ 	    inline const size_t getStartStackPos() const {
+		return startStackPos_;
+	    }
+
+	    size_t startStackPos_;
 	    const wchar_t* patternPos_;
 	};
 
@@ -79,6 +93,12 @@ namespace csl {
 		positions_.clear();
 		patternTracers_.clear();
 		filterPos_ = 0;
+	    }
+
+	    void sort() {
+		std::sort( positions_.begin(), positions_.end() );
+		std::sort( patternTracers_.begin(), patternTracers_.end() );
+
 	    }
 
 	    PositionContainer positions_;
@@ -124,6 +144,14 @@ namespace csl {
 		return word_;
 	    }
 
+	    StackItem::PositionContainer& getPositions() {
+		return at( depth_ ).positions_;
+	    }
+
+	    StackItem::PatTracerContainer& getPatTracers() {
+		return at( depth_ ).patternTracers_;
+	    }
+
 	private:
 	    size_t depth_;
 	    std::wstring word_;
@@ -137,15 +165,14 @@ namespace csl {
 	    stack_(),
 	    patternFrom_( patternFrom ),
 	    patternTo_( patternTo ) {
-
-
+	    
+	    
 	    StateId_t st = dic_.getRoot();
 	    const wchar_t* suso = dic_.getSusoString( st );
 
 	    stack_.at( 0 ).positions_.push_back( Position( st, suso, false ) );
-	    if( size_t newState = dic_.walkStr( st, patternFrom_.c_str() ) ) {
-		stack_.at( 0 ).patternTracers_.push_back( PatternTracer( newState, patternTo_.c_str() ) );
-	    }
+
+	    stack_.at( 0 ).patternTracers_.push_back( PatternTracer( 0, patternTo_.c_str() ) );
 
 	}
 
@@ -165,46 +192,127 @@ namespace csl {
 		    // std::cerr<<"Enter conti loop"<<std::endl;
 
 
-		    std::sort( stack_.at( getCurDepth() ).positions_.begin(), stack_.at( getCurDepth() ).positions_.end() );
-		    std::sort( stack_.at( getCurDepth() ).patternTracers_.begin(), stack_.at( getCurDepth() ).patternTracers_.begin() );
+		    stack_.at( getCurDepth() ).sort();
 
-		    StackItem::PositionContainer::iterator positionIt = stack_.at( getCurDepth() ).positions_.begin();
-		    StackItem::PatTracerContainer::iterator patTracerIt = stack_.at( getCurDepth() ).patternTracers_.begin();
+		    std::wcout<<":"<<stack_.getConstWord()<<std::endl;
+		    StackItem::PositionContainer::iterator positionIt = stack_.getPositions().begin();
+		    while( positionIt != stack_.getPositions().end() && positionIt->getNextChar() == 0 ){// skip worn-out positions
+
+			/// CONTINUE TO THINK HERE !!!
+
+
+//			++positionIt;
+//			positionIt = stack_.getPositions().erase( positionIt );
+		    }
+
+		    StackItem::PatTracerContainer::iterator patTracerIt = stack_.getPatTracers().begin();
 
 		    foundContinuation = false;
 
-		    if( positionIt->getNextChar() < patTracerIt->getNextChar() ) {
+		    bool positionsEmpty = ( positionIt == stack_.getPositions().end() );
+		    bool patTracersEmpty = ( patTracerIt == stack_.getPatTracers().end() );
 
+		    if( positionsEmpty && patTracersEmpty ) {
+			// nothing to do here
+		    }
+		    ///// patTracer is either empty or greater than the position
+		    else if( ! positionsEmpty && ( patTracersEmpty || ( positionIt->getNextChar() < patTracerIt->getNextChar() ) ) ) {
+			
 			label = positionIt->getNextChar();
-
+			
 			// go through all Positions with that label
-			while( ( positionIt != stack_.at( getCurDepth() ).positions_.end() ) && 
+			while( ( positionIt != stack_.getPositions().end() ) && 
 			       ( positionIt->getNextChar() == label ) ) {
-
+			    
 			    checkPosition( *positionIt, foundContinuation, foundFinal );
 			    ++positionIt;
+
 			} // for all Positions with the same label
 		    } // if posIt < tracerIt
 
 
 		    /////////////    POSITION == TRACER //////////////////////
- 		    else if( positionIt->getNextChar() == patTracerIt->getNextChar() ) {
- 			label = positionIt->getNextChar();
+		    else if( !positionsEmpty && !patTracersEmpty && ( positionIt->getNextChar() == patTracerIt->getNextChar() ) ) {
+			label = positionIt->getNextChar();
 			
 			// go through all Positions with that label
-			while( ( positionIt != stack_.at( getCurDepth() ).positions_.end() ) && 
+			while( ( positionIt != stack_.getPositions().end() ) && 
 			       ( positionIt->getNextChar() == label ) ) {
 			    checkPosition( *positionIt, foundContinuation, foundFinal );
 			    ++positionIt;
 			} // for all Positions with the same label
+			
+			// go through all PatternTracers with that label
+			while( ( patTracerIt != stack_.getPatTracers().end() ) && 
+			       ( patTracerIt->getNextChar() == label ) ) {
 
-		    }
+			    patTracerIt->stepToNextChar();
+			    if( patTracerIt->getNextChar() == 0 ) {
+				for( 
+				    StackItem::PositionContainer::iterator backIt = stack_.getPositions().begin();
+				    backIt != stack_.getPositions().end();
+				    ++backIt
+				    ) {
+				    if( StateId_t newState = dic_.walkStr( backIt->getState(), patternFrom_.c_str() ) ) {
+					addContinuation( newState, dic_.getSusoString( newState), 1 );
+				    }
+				}
+			    }
+			    else {
+				addPatternTracer( patTracerIt->getStartStackPos(), patTracerIt->getPatternPos() );
+			    }
 
-		} while( ( ! foundContinuation ) && label != 0 );
-		if( label == 0 ) {
+			    stack_.getWord().resize( getCurDepth() + 1 );
+			    stack_.getWord().at( getCurDepth() ) = label;
+
+			    patTracerIt = stack_.getPatTracers().erase( patTracerIt );
+			    foundContinuation = true;
+			} // for all PatternTracers with the same label
+			
+		    } // POSITION == TRACER
+
+		    // TRACER < POSITION
+		    else if( ! patTracersEmpty && ( positionsEmpty || ( patTracerIt->getNextChar() < positionIt->getNextChar() ) ) ) {
+
+			label = patTracerIt->getNextChar();
+			// go through all PatternTracers with that label
+			while( ( patTracerIt != stack_.getPatTracers().end() ) && 
+			       ( patTracerIt->getNextChar() == label ) ) {
+
+			    patTracerIt->stepToNextChar();
+			    if( patTracerIt->getNextChar() == 0 ) {
+				for( 
+				    StackItem::PositionContainer::iterator backIt = stack_.at( patTracerIt->getStartStackPos() ).positions_.begin();
+				    backIt != stack_.getPositions().end();
+				    ++backIt
+				    ) {
+				    if( StateId_t newState = dic_.walkStr( backIt->getState(), patternFrom_.c_str() ) ) {
+					addContinuation( newState, dic_.getSusoString( newState), 1 );
+				    }
+				}
+			    }
+			    else {
+				addPatternTracer( patTracerIt->getStartStackPos(), patTracerIt->getPatternPos() );
+			    }
+
+			    stack_.getWord().resize( getCurDepth() + 1 );
+			    stack_.getWord().at( getCurDepth() ) = label;
+
+			    patTracerIt = stack_.getPatTracers().erase( patTracerIt );
+			    foundContinuation = true;
+			} // for all PatternTracers with the same label
+			
+		    } // TRACER < POSITION
+			     
+
+		} while( ( ! foundContinuation ) &&  ( stack_.getPositions().size() || stack_.getPatTracers().size() ) );
+
+		if( stack_.at( getCurDepth() + 1 ).positions_.size() == 0 &&
+		    stack_.at( getCurDepth() + 1 ).patternTracers_.size() == 0 ) {
 		    stackNotEmpty = stack_.back();
 		}
 		else {
+		    if( stack_.getPositions().size() > 0 ) addPatternTracer( getCurDepth() + 1, patternTo_.c_str() );
 		    stack_.forward();
 		}
 		
@@ -218,16 +326,13 @@ namespace csl {
 	    StateId_t nextState = dic_.walk( pos.getState(), label );
 	    if( nextState ) {
 		addContinuation( nextState, dic_.getSusoString( nextState ), pos.hasError() );
-		if( size_t newState = dic_.walkStr( nextState, patternFrom_.c_str() ) ) {
-		    addPatternTracer( newState, patternTo_.c_str() );
-		}
 				
 		if( ! foundContinuation ) { // if continuation wasn't registered before
 		    foundContinuation = true;
 		    stack_.getWord().resize( getCurDepth() + 1 );
 		    stack_.getWord().at( getCurDepth() ) = label;
-				
-				    
+		    
+		    
 		    stack_.at( getCurDepth() + 1 ).filterPos_ = filterDic_.walk( stack_.at( getCurDepth() ).filterPos_, label );
 
 		    std::wcout<<stack_.getWord()<<std::endl;
@@ -238,7 +343,8 @@ namespace csl {
 		    dic_.isFinal( nextState ) && 
 		    ! filterDic_.isFinal( stack_.at( getCurDepth() + 1 ).filterPos_ );
 			    
-		pos.increaseNextChar();
+		bool ret = pos.stepToNextChar(); // return value is for DEBUG
+		assert( ret ); // DEBUG
 				
 				
 	    } // if nextState
@@ -249,8 +355,8 @@ namespace csl {
 	    stack_.at( getCurDepth() +1 ).positions_.push_back( Position( state, susoStr, hasError ) );
 	}
 	
-	void addPatternTracer( StateId_t state, const wchar_t* patternPos ) {
-	    stack_.at( getCurDepth() + 1 ).patternTracers_.push_back( PatternTracer( state, patternPos ) );
+	void addPatternTracer( size_t startStackPos, const wchar_t* patternPos ) {
+	    stack_.at( getCurDepth() + 1 ).patternTracers_.push_back( PatternTracer( startStackPos, patternPos ) );
 	}
 
 	    
@@ -277,4 +383,5 @@ namespace csl {
 
 #include "./Position.tcc"
 
+    
     
