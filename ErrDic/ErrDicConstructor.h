@@ -188,6 +188,9 @@ namespace csl {
 	    bool foundContinuation = false;
 	    do { // this loop terminates at a final state
 		// std::cerr<<"Enter final loop"<<std::endl;
+
+		bool positionsEmpty;
+		bool patTracersEmpty;
 		do { // this loop terminates if one continuation was found or if the stackItem is done
 		    // std::cerr<<"Enter conti loop"<<std::endl;
 
@@ -201,7 +204,7 @@ namespace csl {
 			/// CONTINUE TO THINK HERE !!!
 
 
-//			++positionIt;
+			++positionIt;
 //			positionIt = stack_.getPositions().erase( positionIt );
 		    }
 
@@ -209,8 +212,8 @@ namespace csl {
 
 		    foundContinuation = false;
 
-		    bool positionsEmpty = ( positionIt == stack_.getPositions().end() );
-		    bool patTracersEmpty = ( patTracerIt == stack_.getPatTracers().end() );
+		    positionsEmpty = ( positionIt == stack_.getPositions().end() );
+		    patTracersEmpty = ( patTracerIt == stack_.getPatTracers().end() );
 
 		    if( positionsEmpty && patTracersEmpty ) {
 			// nothing to do here
@@ -281,11 +284,14 @@ namespace csl {
 
 			    patTracerIt->stepToNextChar();
 			    if( patTracerIt->getNextChar() == 0 ) {
+				std::cerr<<"depth is "<<getCurDepth()<<"Consider newStates at depth " << patTracerIt->getStartStackPos() << std::endl;
 				for( 
 				    StackItem::PositionContainer::iterator backIt = stack_.at( patTracerIt->getStartStackPos() ).positions_.begin();
-				    backIt != stack_.getPositions().end();
+				    backIt != stack_.at( patTracerIt->getStartStackPos() ).positions_.end();
 				    ++backIt
 				    ) {
+				    
+				    std::cerr<<"Try backstate="<<backIt->getState()<<std::endl;
 				    if( StateId_t newState = dic_.walkStr( backIt->getState(), patternFrom_.c_str() ) ) {
 					addContinuation( newState, dic_.getSusoString( newState), 1 );
 				    }
@@ -305,7 +311,7 @@ namespace csl {
 		    } // TRACER < POSITION
 			     
 
-		} while( ( ! foundContinuation ) &&  ( stack_.getPositions().size() || stack_.getPatTracers().size() ) );
+		} while( ( ! foundContinuation ) &&  ( !positionsEmpty || !patTracersEmpty ) );
 
 		if( stack_.at( getCurDepth() + 1 ).positions_.size() == 0 &&
 		    stack_.at( getCurDepth() + 1 ).patternTracers_.size() == 0 ) {
