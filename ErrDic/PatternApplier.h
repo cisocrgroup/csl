@@ -140,7 +140,7 @@ namespace csl {
 		return word_;
 	    }
 
-	    const std::wstring& getConstWord() const {
+	    const std::wstring& getWord() const {
 		return word_;
 	    }
 
@@ -164,7 +164,8 @@ namespace csl {
 	    filterDic_( filterDic ),
 	    stack_(),
 	    patternFrom_( patternFrom ),
-	    patternTo_( patternTo ) {
+	    patternTo_( patternTo ),
+	    isGood_( false ){
 	    
 	    
 	    StateId_t st = dic_.getRoot();
@@ -174,15 +175,39 @@ namespace csl {
 
 	    stack_.at( 0 ).patternTracers_.push_back( PatternTracer( 0, patternTo_.c_str() ) );
 
+	    tokenCount_ = 0;
+	    next();
+
+	    // std::wcerr<<"New PatternApplier with: "<<patternFrom_<<"->"<<patternTo_<<std::endl;
 	}
 
+	void printMe() {
+	    std::wcout<<"pa with pattern "<<patternFrom_<<"->"<<patternTo_<<" have spit out "<<tokenCount_<<" tokens"<<std::endl; 
+	}
+
+	bool operator<( const PatternApplier& other ) const {
+	    return getWord() < other.getWord();
+	}
+	
 	const std::wstring& getWord() const {
-	    return ( stack_.getConstWord() );
+	    return ( stack_.getWord() );
+	}
+
+	const std::wstring& getPatternFrom() const {
+	    return patternFrom_;
+	}
+
+	const std::wstring& getPatternTo() const {
+	    return patternTo_;
+	}
+
+	bool isGood() const {
+	    return isGood_;
 	}
 
 	bool next() {
+	    isGood_ = true;
 	    bool foundFinal = false;
-	    bool stackNotEmpty = true;
 	    wchar_t label = 0;
 
 	    bool foundContinuation = false;
@@ -197,18 +222,17 @@ namespace csl {
 
 		    stack_.at( getCurDepth() ).sort();
 
-		    std::wcout<<":"<<stack_.getConstWord()<<std::endl;
+		    // std::wcout<<":"<<stack_.getWord()<<std::endl; // DEBUG
 		    StackItem::PositionContainer::iterator positionIt = stack_.getPositions().begin();
 		    while( positionIt != stack_.getPositions().end() && positionIt->getNextChar() == 0 ){// skip worn-out positions
-
-			/// CONTINUE TO THINK HERE !!!
-
 
 			++positionIt;
 //			positionIt = stack_.getPositions().erase( positionIt );
 		    }
 
 		    StackItem::PatTracerContainer::iterator patTracerIt = stack_.getPatTracers().begin();
+
+		    
 
 		    foundContinuation = false;
 
@@ -284,15 +308,17 @@ namespace csl {
 
 			    patTracerIt->stepToNextChar();
 			    if( patTracerIt->getNextChar() == 0 ) {
-				std::cerr<<"depth is "<<getCurDepth()<<"Consider newStates at depth " << patTracerIt->getStartStackPos() << std::endl;
+				// std::cerr<<"depth is "<<getCurDepth()<<"Consider newStates at depth " << patTracerIt->getStartStackPos() << std::endl;
 				for( 
 				    StackItem::PositionContainer::iterator backIt = stack_.at( patTracerIt->getStartStackPos() ).positions_.begin();
 				    backIt != stack_.at( patTracerIt->getStartStackPos() ).positions_.end();
 				    ++backIt
 				    ) {
 				    
-				    std::cerr<<"Try backstate="<<backIt->getState()<<std::endl;
-				    if( StateId_t newState = dic_.walkStr( backIt->getState(), patternFrom_.c_str() ) ) {
+				    // std::cerr<<"Try backstate="<<backIt->getState()<<std::endl;
+				    StateId_t newState;
+				    if( ( ! backIt->hasError() ) && ( newState = dic_.walkStr( backIt->getState(), patternFrom_.c_str() ) ) ) {
+					if( dic_.isFinal( newState ) ) foundFinal = true;
 					addContinuation( newState, dic_.getSusoString( newState), 1 );
 				    }
 				}
@@ -312,18 +338,20 @@ namespace csl {
 			     
 
 		} while( ( ! foundContinuation ) &&  ( !positionsEmpty || !patTracersEmpty ) );
-
+		
 		if( stack_.at( getCurDepth() + 1 ).positions_.size() == 0 &&
 		    stack_.at( getCurDepth() + 1 ).patternTracers_.size() == 0 ) {
-		    stackNotEmpty = stack_.back();
+
+		    isGood_ = stack_.back();
 		}
 		else {
-		    if( stack_.getPositions().size() > 0 ) addPatternTracer( getCurDepth() + 1, patternTo_.c_str() );
+		    if( stack_.at( getCurDepth() + 1 ).positions_.size() > 0 ) addPatternTracer( getCurDepth() + 1, patternTo_.c_str() );
 		    stack_.forward();
 		}
 		
-	    } while( !foundFinal && stackNotEmpty );
-	    return ( stackNotEmpty );
+	    } while( !foundFinal && isGood() );
+	    
+	    if( isGood() ) ++tokenCount_;
 	}
 	
     private:
@@ -341,7 +369,7 @@ namespace csl {
 		    
 		    stack_.at( getCurDepth() + 1 ).filterPos_ = filterDic_.walk( stack_.at( getCurDepth() ).filterPos_, label );
 
-		    std::wcout<<stack_.getWord()<<std::endl;
+		    // std::wcout<<stack_.getWord()<<std::endl;
 		} // register continuation for first time
 			    
 		foundFinal = 
@@ -379,6 +407,9 @@ namespace csl {
 	// the error pattern
 	std::wstring patternFrom_;
 	std::wstring patternTo_;
+
+	size_t tokenCount_;
+	bool isGood_;
 
     }; // class PatternApplier
 

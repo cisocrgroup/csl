@@ -7,14 +7,6 @@ namespace csl {
     class SearchText {
     private:
 	class Buffer {
-	private:
-	    static const size_t bufSize_ = Global::lengthOfStr;
-	    wchar_t buffer_[bufSize_];
-	    
-	    std::wistream& stream_;
-
-	    size_t textPos_; ///< denotes the position of the current char in the text (0, if standing at the 1st char)
-	    size_t textRead_; ///< denotes the position of the last text symbol loaded into the buffer (0 if only the 1st symbol is loaded)
 	public:
 	    Buffer( std::wistream& );
 	
@@ -28,6 +20,16 @@ namespace csl {
 	    size_t getTextPos();
 
 	    wchar_t goBack( int delta );
+
+	private:
+	    static const size_t bufSize_ = Global::lengthOfStr;
+	    wchar_t buffer_[bufSize_];
+	    
+	    std::wistream& stream_;
+
+	    size_t textPos_; ///< denotes the position of the current char in the text (0, if standing at the 1st char)
+	    size_t textRead_; ///< denotes the position of the last text symbol loaded into the buffer (0 if only the 1st symbol is loaded)
+
 	}; // class Buffer
 
 	Buffer buffer_;
@@ -153,6 +155,13 @@ namespace csl {
 
 
     wchar_t SearchText::Buffer::moveOn() {
+
+// 	if( textPos_ == 2* bufSize_ ) {
+// 	    assert( textRead_ > bufSize_ );
+// 	    textPos_ -= bufSize_;
+// 	    textPos_ -= bufSize_;
+// 	}
+
 	++textPos_;
 	if( textPos_ > textRead_ ) { // the difference may never be more than 1
 	    ++textRead_;

@@ -12,7 +12,7 @@
 #include "../Global.h"
 namespace csl {
 
-    template< CellType C, class StateId_t = size_t >
+    template< CellType C, class StateId_t >
     class Cell {
 	// dummy class
 	// we have only specialisations

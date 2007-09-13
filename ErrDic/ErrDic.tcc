@@ -90,6 +90,9 @@ namespace csl {
 // 	size_t estimatedNrOfKeys = f_stat.st_size / 30;
 // 	std::cerr<<"Estimate about "<< estimatedNrOfKeys << " Keys."<< std::endl;
 	
+	/**
+	 * @TODO HARD-CODED SIZES
+	 */
 	originalHash_ =  new Hash< wchar_t >( 100000, originals_, header_.sizeOfOriginals_ );
 	patternHash_ =  new Hash< wchar_t >( 10000, errorPatterns_, header_.sizeOfErrorPatterns_ );
 

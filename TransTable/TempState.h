@@ -18,7 +18,7 @@ namespace csl {
     class TempState {
     private:
 	/**
-	 * Represents one transitions of the TempState
+	 * Represents one transition of the TempState
 	 */
 	class Transition {
 	public:

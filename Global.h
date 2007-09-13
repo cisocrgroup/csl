@@ -20,10 +20,10 @@ namespace csl {
 
     typedef unsigned int uint_t;
 
-    typedef unsigned int bits32;
+    typedef uint32_t bits32;
 
     typedef unsigned long long ulong_t;
-    typedef unsigned long long bits64;
+    typedef uint64_t bits64;
 
     typedef unsigned int StateId_t;
 

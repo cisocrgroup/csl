@@ -18,7 +18,7 @@
 
 namespace csl {
 
-    template< CellType CellTypeValue = BASIC >
+    template< CellType CellTypeValue >
     class TransTable {
     private:
 	/**
