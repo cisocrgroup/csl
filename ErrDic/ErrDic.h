@@ -124,6 +124,7 @@ namespace csl {
 	 * prepare the ErrDic-object for the creation of a new dictionary
 	 */
 	inline void initConstruction();
+
 	/**
 	 * do what is necessary to finish the construction of a new dictionary
 	 */

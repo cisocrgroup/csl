@@ -275,25 +275,33 @@ namespace csl {
 
 			    patTracerIt->stepToNextChar();
 			    if( patTracerIt->getNextChar() == 0 ) {
+				// std::cerr<<"depth is "<<getCurDepth()<<"Consider newStates at depth " << patTracerIt->getStartStackPos() << std::endl;
 				for( 
-				    StackItem::PositionContainer::iterator backIt = stack_.getPositions().begin();
-				    backIt != stack_.getPositions().end();
+				    StackItem::PositionContainer::iterator backIt = stack_.at( patTracerIt->getStartStackPos() ).positions_.begin();
+				    backIt != stack_.at( patTracerIt->getStartStackPos() ).positions_.end();
 				    ++backIt
 				    ) {
-				    if( StateId_t newState = dic_.walkStr( backIt->getState(), patternFrom_.c_str() ) ) {
+				    
+				    // std::cerr<<"Try backstate="<<backIt->getState()<<std::endl;
+				    StateId_t newState;
+				    if( ( ! backIt->hasError() ) && ( newState = dic_.walkStr( backIt->getState(), patternFrom_.c_str() ) ) ) {
+					if( dic_.isFinal( newState ) ) foundFinal = true;
 					addContinuation( newState, dic_.getSusoString( newState), 1 );
+					foundContinuation = true;
 				    }
 				}
 			    }
 			    else {
 				addPatternTracer( patTracerIt->getStartStackPos(), patTracerIt->getPatternPos() );
+				foundContinuation = true;
+			    }
+			    
+			    if( foundContinuation ) {
+				stack_.getWord().resize( getCurDepth() + 1 );
+				stack_.getWord().at( getCurDepth() ) = label;
 			    }
 
-			    stack_.getWord().resize( getCurDepth() + 1 );
-			    stack_.getWord().at( getCurDepth() ) = label;
-
 			    patTracerIt = stack_.getPatTracers().erase( patTracerIt );
-			    foundContinuation = true;
 			} // for all PatternTracers with the same label
 			
 		    } // POSITION == TRACER
@@ -320,18 +328,21 @@ namespace csl {
 				    if( ( ! backIt->hasError() ) && ( newState = dic_.walkStr( backIt->getState(), patternFrom_.c_str() ) ) ) {
 					if( dic_.isFinal( newState ) ) foundFinal = true;
 					addContinuation( newState, dic_.getSusoString( newState), 1 );
+					foundContinuation = true;
 				    }
 				}
 			    }
 			    else {
 				addPatternTracer( patTracerIt->getStartStackPos(), patTracerIt->getPatternPos() );
+				foundContinuation = true;
+			    }
+			    
+			    if( foundContinuation ) {
+				stack_.getWord().resize( getCurDepth() + 1 );
+				stack_.getWord().at( getCurDepth() ) = label;
 			    }
 
-			    stack_.getWord().resize( getCurDepth() + 1 );
-			    stack_.getWord().at( getCurDepth() ) = label;
-
 			    patTracerIt = stack_.getPatTracers().erase( patTracerIt );
-			    foundContinuation = true;
 			} // for all PatternTracers with the same label
 			
 		    } // TRACER < POSITION
@@ -345,7 +356,8 @@ namespace csl {
 		    isGood_ = stack_.back();
 		}
 		else {
-		    if( stack_.at( getCurDepth() + 1 ).positions_.size() > 0 ) addPatternTracer( getCurDepth() + 1, patternTo_.c_str() );
+		    if( stack_.at( getCurDepth() + 1 ).positions_.size() > 0 )
+			addPatternTracer( getCurDepth() + 1, patternTo_.c_str() );
 		    stack_.forward();
 		}
 		
@@ -372,10 +384,11 @@ namespace csl {
 		    // std::wcout<<stack_.getWord()<<std::endl;
 		} // register continuation for first time
 			    
-		foundFinal = 
-		    pos.hasError() &&
+		if( pos.hasError() &&
 		    dic_.isFinal( nextState ) && 
-		    ! filterDic_.isFinal( stack_.at( getCurDepth() + 1 ).filterPos_ );
+		    ! filterDic_.isFinal( stack_.at( getCurDepth() + 1 ).filterPos_ ) ) {
+		    foundFinal = true;
+		}
 			    
 		bool ret = pos.stepToNextChar(); // return value is for DEBUG
 		assert( ret ); // DEBUG

@@ -5,6 +5,7 @@
 
 #include "../MinDic/MinDic.h"
 #include "./PatternApplier.h"
+#include "./ErrDic.h"
 
 namespace csl {
 
@@ -16,7 +17,7 @@ namespace csl {
 	std::list< PatternApplier > list_;
     };
 
-    void ErrDicConstructor::constructErrDic( const MinDic< int >& dic_, const MinDic< int >& filterDic_, const char* patternFile ) {
+    void ErrDicConstructor::constructErrDic( const MinDic< int >& dic, const MinDic< int >& filterDic, const char* patternFile, ErrDic& errDic ) {
 
 	std::wifstream fi;
 	fi.imbue( std::locale( "de_DE.UTF-8" ) );
@@ -28,21 +29,19 @@ namespace csl {
 	    if( delimPos == std::wstring::npos ) {
 		throw exceptions::badInput( "ErrDicConstructor: Invalid line in pattern file" );
 	    }
-	    list_.push_back( PatternApplier( dic_, filterDic_, line.substr( 0, delimPos ), line.substr( delimPos + 1 ) ) );
+	    list_.push_back( PatternApplier( dic, filterDic, line.substr( 0, delimPos ), line.substr( delimPos + 1 ) ) );
 	    if( ! list_.back().isGood() ) list_.pop_back();
 
 	}
 	fi.close();
-
 	list_.sort();
-
 	std::wcerr<<"Loaded "<<list_.size()<<" patterns with s.th. to say"<<std::endl;
 
-
+	errDic.initConstruction();
 	size_t nrOfTokens = 0;
 	while( list_.begin() != list_.end() ) {
 	    PatternApplier& pa = *( list_.begin() );
-	    std::wcout<<pa.getWord()<<std::endl; //" "<<pa.getPatternFrom()<<"->"<<pa.getPatternTo()<<std::endl;
+	    std::wcout<<pa.getWord()<<" "<<pa.getPatternFrom()<<"->"<<pa.getPatternTo()<<std::endl;
  	    if( ++nrOfTokens % 100000 == 0 ) std::wcerr<< int( nrOfTokens / 1000 ) <<"k tokens"<<std::endl;
 	    pa.next();
 	    if( pa.isGood() ) {
@@ -54,14 +53,10 @@ namespace csl {
 		list_.splice( it, list_, list_.begin() );
 	    }
 	    else {
-		std::wcout<<"go away:"; pa.printMe();
 		list_.pop_front();
 	    }
 	}
 	
-	for( std::list< PatternApplier >::iterator it = list_.begin(); it != list_.end(); ++it ) {
-	    std::wcout<<it->getWord()<<std::endl;
-	}
     }
 
 } // eon
