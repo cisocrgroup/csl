@@ -11,7 +11,7 @@ namespace csl {
 
     class ErrDicConstructor {
     public:
-	void constructErrDic( const MinDic< int >& dic_, const MinDic< int >& filterDic_, const char* patternFile );
+	void constructErrDic( const MinDic< int >& dic_, const MinDic< int >& filterDic_, const char* patternFile, ErrDic& errDic );
 
     private:
 	std::list< PatternApplier > list_;
@@ -23,6 +23,7 @@ namespace csl {
 	fi.imbue( std::locale( "de_DE.UTF-8" ) );
 	fi.open( patternFile );
 
+	errDic.initConstruction();
 	std::wstring line;
 	while( getline( fi, line ) ) {
 	    size_t delimPos = line.find( ' ' );
@@ -31,6 +32,8 @@ namespace csl {
 	    }
 	    list_.push_back( PatternApplier( dic, filterDic, line.substr( 0, delimPos ), line.substr( delimPos + 1 ) ) );
 	    if( ! list_.back().isGood() ) list_.pop_back();
+
+	    if( list_.size() % 100 == 0 ) std::wcerr<<"Processed "<<list_.size()<<" patterns"<<std::endl;
 
 	}
 	fi.close();
@@ -41,7 +44,12 @@ namespace csl {
 	size_t nrOfTokens = 0;
 	while( list_.begin() != list_.end() ) {
 	    PatternApplier& pa = *( list_.begin() );
+
 	    std::wcout<<pa.getWord()<<" "<<pa.getPatternFrom()<<"->"<<pa.getPatternTo()<<std::endl;
+
+	    std::wstring pattern = pa.getPatternFrom() + L" " + pa.getPatternTo();
+	    errDic.addToken( pa.getWord().c_str(), L"test", pattern.c_str() );
+
  	    if( ++nrOfTokens % 100000 == 0 ) std::wcerr<< int( nrOfTokens / 1000 ) <<"k tokens"<<std::endl;
 	    pa.next();
 	    if( pa.isGood() ) {
@@ -56,6 +64,7 @@ namespace csl {
 		list_.pop_front();
 	    }
 	}
+	errDic.finishConstruction();
 	
     }
 

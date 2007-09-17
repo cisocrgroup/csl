@@ -2,7 +2,9 @@ namespace csl {
 
     inline ErrDic::ErrDic() :
 	originals_( 0 ),
+	sizeOfOriginals_( 0 ),
 	errorPatterns_( 0 ),
+	sizeOfErrorPatterns_( 0 ),
 	originalHash_( 0 ),
 	patternHash_( 0 ),
 	keyValueDelimiter_( Global::keyValueDelimiter )
@@ -36,15 +38,19 @@ namespace csl {
     
     inline void ErrDic::loadFromStream( FILE* fi ) {
 	fread( &header_, sizeof( Header ), 1, fi );
-	if ( ( header_.magicNumber_ != magicNumber_ ) ) {
+	if ( ( header_.getMagicNumber() != magicNumber_ ) ) {
 	    // throw exceptions::badDictFile( "ErrDic: Magic number comparison failed.\n" );
 	}
-	MinDic_t::loadFromStream( fi );
-	originals_ = (wchar_t*) malloc( header_.sizeOfOriginals_ * sizeof( wchar_t ) );
-	fread( originals_, sizeof( wchar_t ), header_.sizeOfOriginals_, fi );
 
-	errorPatterns_ = (wchar_t*) malloc( header_.sizeOfErrorPatterns_ * sizeof( wchar_t ) );
-	fread( errorPatterns_, sizeof( wchar_t ), header_.sizeOfErrorPatterns_, fi );
+	sizeOfOriginals_ = header_.getSizeOfOriginals();
+	sizeOfErrorPatterns_ = header_.getSizeOfErrorPatterns();
+
+	MinDic_t::loadFromStream( fi );
+	originals_ = (wchar_t*) malloc( header_.getSizeOfOriginals() * sizeof( wchar_t ) );
+	fread( originals_, sizeof( wchar_t ), header_.getSizeOfOriginals(), fi );
+
+	errorPatterns_ = (wchar_t*) malloc( header_.getSizeOfErrorPatterns() * sizeof( wchar_t ) );
+	fread( errorPatterns_, sizeof( wchar_t ), header_.getSizeOfErrorPatterns(), fi );
     }
 
     inline void ErrDic::writeToFile( char* dicFile ) const {
@@ -61,13 +67,15 @@ namespace csl {
     inline void ErrDic::writeToStream( FILE* fo ) const {
 	fwrite( &header_, sizeof( Header ), 1, fo );
 	MinDic_t::writeToStream( fo );
-	fwrite( originals_, sizeof( wchar_t ), header_.sizeOfOriginals_, fo );
-	fwrite( errorPatterns_, sizeof( wchar_t ), header_.sizeOfErrorPatterns_, fo );
+	fwrite( originals_, sizeof( wchar_t ), header_.getSizeOfOriginals(), fo );
+	fwrite( errorPatterns_, sizeof( wchar_t ), header_.getSizeOfErrorPatterns(), fo );
     }
 
     inline void ErrDic::initConstruction() {
 	MinDic_t::initConstruction();
 	
+	sizeOfOriginals_ = 0;
+	sizeOfErrorPatterns_ = 0;
     }
 
     inline void ErrDic::finishConstruction() {
@@ -85,16 +93,16 @@ namespace csl {
 	}
 
 	
-// 	struct stat f_stat;
-// 	stat( lexFile, &f_stat );
-// 	size_t estimatedNrOfKeys = f_stat.st_size / 30;
-// 	std::cerr<<"Estimate about "<< estimatedNrOfKeys << " Keys."<< std::endl;
+	struct stat f_stat;
+	stat( lexFile, &f_stat );
+	size_t estimatedNrOfKeys = f_stat.st_size / 30;
+	std::cerr<<"Estimate about "<< estimatedNrOfKeys << " Keys."<< std::endl;
 	
 	/**
 	 * @TODO HARD-CODED SIZES
 	 */
-	originalHash_ =  new Hash< wchar_t >( 100000, originals_, header_.sizeOfOriginals_ );
-	patternHash_ =  new Hash< wchar_t >( 10000, errorPatterns_, header_.sizeOfErrorPatterns_ );
+	originalHash_ =  new Hash< wchar_t >( 100000, originals_, (size_t&)sizeOfOriginals_ );
+	patternHash_ =  new Hash< wchar_t >( (size_t)10000, errorPatterns_, (size_t&)sizeOfErrorPatterns_ );
 
 
 	uchar bytesIn[Global::lengthOfLongStr];
@@ -151,17 +159,22 @@ namespace csl {
 	    else throw exceptions::badInput( "csl::ErrDic::compileDic: Input format violated." );
 	    
 
-	    size_t originalOffset = originalHash_->findOrInsert( original );
-	    size_t patternOffset = patternHash_->findOrInsert( errorPattern );
-	    
+	    addToken( key, original, errorPattern );
 
-//	    printf( "Insert entry: key=%ls, original=%ls, pattern=%ls\n", key, original, errorPattern );
-	    MinDic_t::addToken( key, MdAnnType( originalOffset, patternOffset ) );
-
+	    header_.set( *this );
 	}
 	fileHandle.close();
 
 	finishConstruction();
+    }
+
+    void ErrDic::addToken( const wchar_t* key, const wchar_t* original, const wchar_t* errorPattern ) {
+	size_t originalOffset = originalHash_->findOrInsert( original );
+	size_t patternOffset = patternHash_->findOrInsert( errorPattern );
+	    
+
+//	    printf( "Insert entry: key=%ls, original=%ls, pattern=%ls\n", key, original, errorPattern );
+	MinDic_t::addToken( key, MdAnnType( originalOffset, patternOffset ) );
     }
 
     void ErrDic::printDic() const {
@@ -199,8 +212,8 @@ namespace csl {
 
 
     inline void ErrDic::doAnalysis() const {
-	float originals_MB = (float)( header_.sizeOfOriginals_ * sizeof( wchar_t ) ) / 1000000;
-	float errorPatterns_MB = (float)( header_.sizeOfErrorPatterns_ * sizeof( wchar_t ) ) / 1000000;
+	float originals_MB = (float)( header_.getSizeOfOriginals() * sizeof( wchar_t ) ) / 1000000;
+	float errorPatterns_MB = (float)( header_.getSizeOfErrorPatterns() * sizeof( wchar_t ) ) / 1000000;
 
 	MinDic_t::doAnalysis();
 	printf( "**********\nErrDic Analysis\n**********\noriginals-buffer:\t%.3f MB\npattern-buffer:\t%.3f MB\n\n",

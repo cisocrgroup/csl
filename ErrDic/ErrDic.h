@@ -20,21 +20,21 @@ namespace csl {
      * @author Uli Reffle<uli@cis.uni-muenchen.de>
      * @date 2007
      */
-    class ErrDic : public MinDic< std::pair< size_t, size_t > > {
+    class ErrDic : public MinDic< std::pair< ssize_t, ssize_t > > {
     public:
-	typedef std::pair< size_t, size_t > MdAnnType;
+	typedef std::pair< ssize_t, ssize_t > MdAnnType;
 	typedef MinDic< MdAnnType > MinDic_t;
 	/**
-	 * Constructor. Doesn't do much but to set some variables to 0.
+	 * @brief Constructor. Doesn't do much but to set some variables to 0.
 	 */
 	inline ErrDic();
 	/**
-	 * The destructor deletes the allocated buffers.
+	 * @brief The destructor deletes the allocated buffers.
 	 */
 	inline ~ErrDic();
 
 	/**
-	 * Changes the expected character that separates the key from the annotations in the txt-file
+	 * @brief Changes the expected character that separates the key from the annotations in the txt-file
 	 */
 	inline void setKeyValueDelimiter( uchar c );
 
@@ -77,7 +77,7 @@ namespace csl {
 	};
 
 	/**
-	 * The basic lookup function
+	 * @brief The basic lookup function
 	 * @param[in] a key
 	 * @param[out] a pointer to an Entry-object - Here the result of the lookup is stored
 	 * @return true iff key is found inte ErrDic
@@ -86,53 +86,64 @@ namespace csl {
 	inline bool lookup( wchar_t* key, Entry* entry ) const;
 
 	/**
-	 * return the original token annotated with the entry with the given id (perfect hash value)
+	 * @brief return the original token annotated with the entry with the given id (perfect hash value)
 	 */
 	inline const wchar_t* getOriginalById( size_t id ) const {
-	    assert( getAnnotation( id ).first < header_.sizeOfOriginals_ );
+	    assert( getAnnotation( id ).first < sizeOfOriginals_ );
 	    return originals_ + getAnnotation( id ).first; 
 	}
 
 	/**
-	 * return the error pattern annotated with the entry with the given perfect hash value
+	 * @brief return the error pattern annotated with the entry with the given perfect hash value
 	 */
 	inline const wchar_t* getErrorPatternById( size_t id ) const {
-	    assert( getAnnotation( id ).second < header_.sizeOfErrorPatterns_ );
+	    assert( getAnnotation( id ).second < sizeOfErrorPatterns_ );
 	    return errorPatterns_ + getAnnotation( id ).second; 
 	}
 
 	/**
-	 * load an ErrDic from a binary file
+	 * @brief load an ErrDic from a binary file
 	 */
 	inline void loadFromFile( char* dicFile );
 	/**
-	 * load an ErrDic-object off an open stream
+	 * @brief load an ErrDic-object off an open stream
 	 */
 	inline void loadFromStream( FILE* fi );
 
 	/**
-	 * write the ErrDic in its current state to a file
+	 * @brief write the ErrDic in its current state to a file
 	 */
 	inline void writeToFile( char* dicFile ) const;
 
 	/**
-	 * write the ErrDic in its current state to an open stream
+	 * @brief write the ErrDic in its current state to an open stream
 	 */
 	inline void writeToStream( FILE* fo ) const;
 
 	/**
-	 * prepare the ErrDic-object for the creation of a new dictionary
+	 * @brief prepare the ErrDic-object for the creation of a new dictionary
 	 */
 	inline void initConstruction();
 
 	/**
-	 * do what is necessary to finish the construction of a new dictionary
+	 * @brief do what is necessary to finish the construction of a new dictionary
 	 */
 	inline void finishConstruction();
+
 	/**
-	 * create a new dictionary from a given text file
+	 * compile a new dictionary from a given errdic text file
 	 */
 	inline void compileDic( const char* lexFile );
+
+	/**
+	 * add a token to the error dictionary
+	 */
+	void addToken( const wchar_t* key, const wchar_t* orginal, const wchar_t* errorPattern );
+
+	/**
+	 * create a new dictionary from a given positive dict, filter dict and a set of patterns
+	 */
+	inline void createDic( const char* lexFile );
 
 	/**
 	 * print all entries and annotations of the dictionary to stdout
@@ -143,12 +154,13 @@ namespace csl {
 	 * print some statistics to stdout
 	 */
 	inline void doAnalysis() const;
-
+	
     private:
 	inline void printDic_rec( int pos, int depth, size_t perfHashValue ) const;
 
 
 	static const bits64 magicNumber_ = 2343572;
+
 
 	/**
 	 * The header for ErrDic-files
@@ -156,9 +168,26 @@ namespace csl {
 	class Header {
 	public:
 	    Header() : sizeOfOriginals_( 0 ), sizeOfErrorPatterns_( 0 ) {}
+	    bits64 getMagicNumber() const {
+		return magicNumber_;
+	    }
+	    ssize_t getSizeOfOriginals() const {
+		return sizeOfOriginals_;
+	    }
+
+	    ssize_t getSizeOfErrorPatterns() const {
+		return sizeOfErrorPatterns_;
+	    }
+
+	    void set( const ErrDic& errDic ) {
+		sizeOfOriginals_ = errDic.sizeOfOriginals_;
+		sizeOfErrorPatterns_ = errDic.sizeOfErrorPatterns_;
+	    }
+
+//	private:
 	    static const bits64 magicNumber_ = 45893126;
-	    size_t sizeOfOriginals_;
-	    size_t sizeOfErrorPatterns_;
+	    bits64 sizeOfOriginals_;
+	    bits64 sizeOfErrorPatterns_;
 	}; // class Header
 
 	Header header_;
@@ -168,10 +197,14 @@ namespace csl {
 	 */
 	wchar_t* originals_;
 
+	ssize_t sizeOfOriginals_;
+
 	/**
 	 * The buffer containing all the error-patterns
 	 */
 	wchar_t* errorPatterns_;
+
+	ssize_t sizeOfErrorPatterns_;
 	
 	/**
 	 * A hashtable for all the original words. That's how we manage to keep

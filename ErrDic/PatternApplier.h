@@ -17,7 +17,7 @@ namespace csl {
 	 * This class represents a position in the dictionary automaton. One or more of those objects 
 	 * form one stack item for the unified traversal of different branches of the automaton.
 	 */
-	class Position {
+	class Position  {
 	public:
 	    inline Position();
 		
@@ -162,7 +162,6 @@ namespace csl {
 	PatternApplier( const MinDic< int >& dic, const MinDic< int >& filterDic, const std::wstring& patternFrom, const std::wstring& patternTo ) :
 	    dic_( dic ),
 	    filterDic_( filterDic ),
-	    stack_(),
 	    patternFrom_( patternFrom ),
 	    patternTo_( patternTo ),
 	    isGood_( false ){
@@ -222,22 +221,25 @@ namespace csl {
 
 		    stack_.at( getCurDepth() ).sort();
 
+		    std::vector<Position>& positions = stack_.getPositions();
+		    std::vector<PatternTracer>& patTracers = stack_.getPatTracers();
+
 		    // std::wcout<<":"<<stack_.getWord()<<std::endl; // DEBUG
-		    StackItem::PositionContainer::iterator positionIt = stack_.getPositions().begin();
-		    while( positionIt != stack_.getPositions().end() && positionIt->getNextChar() == 0 ){// skip worn-out positions
+		    StackItem::PositionContainer::iterator positionIt = positions.begin();
+		    while( positionIt != positions.end() && positionIt->getNextChar() == 0 ){// skip worn-out positions
 
 			++positionIt;
-//			positionIt = stack_.getPositions().erase( positionIt );
+//			positionIt = positions.erase( positionIt );
 		    }
 
-		    StackItem::PatTracerContainer::iterator patTracerIt = stack_.getPatTracers().begin();
+		    StackItem::PatTracerContainer::iterator patTracerIt = patTracers.begin();
 
 		    
 
 		    foundContinuation = false;
 
-		    positionsEmpty = ( positionIt == stack_.getPositions().end() );
-		    patTracersEmpty = ( patTracerIt == stack_.getPatTracers().end() );
+		    positionsEmpty = ( positionIt == positions.end() );
+		    patTracersEmpty = ( patTracerIt == patTracers.end() );
 
 		    if( positionsEmpty && patTracersEmpty ) {
 			// nothing to do here
@@ -248,7 +250,7 @@ namespace csl {
 			label = positionIt->getNextChar();
 			
 			// go through all Positions with that label
-			while( ( positionIt != stack_.getPositions().end() ) && 
+			while( ( positionIt != positions.end() ) && 
 			       ( positionIt->getNextChar() == label ) ) {
 			    
 			    checkPosition( *positionIt, foundContinuation, foundFinal );
@@ -263,14 +265,14 @@ namespace csl {
 			label = positionIt->getNextChar();
 			
 			// go through all Positions with that label
-			while( ( positionIt != stack_.getPositions().end() ) && 
+			while( ( positionIt != positions.end() ) && 
 			       ( positionIt->getNextChar() == label ) ) {
 			    checkPosition( *positionIt, foundContinuation, foundFinal );
 			    ++positionIt;
 			} // for all Positions with the same label
 			
 			// go through all PatternTracers with that label
-			while( ( patTracerIt != stack_.getPatTracers().end() ) && 
+			while( ( patTracerIt != patTracers.end() ) && 
 			       ( patTracerIt->getNextChar() == label ) ) {
 
 			    patTracerIt->stepToNextChar();
@@ -301,7 +303,7 @@ namespace csl {
 				stack_.getWord().at( getCurDepth() ) = label;
 			    }
 
-			    patTracerIt = stack_.getPatTracers().erase( patTracerIt );
+			    patTracerIt = patTracers.erase( patTracerIt );
 			} // for all PatternTracers with the same label
 			
 		    } // POSITION == TRACER
@@ -311,7 +313,7 @@ namespace csl {
 
 			label = patTracerIt->getNextChar();
 			// go through all PatternTracers with that label
-			while( ( patTracerIt != stack_.getPatTracers().end() ) && 
+			while( ( patTracerIt != patTracers.end() ) && 
 			       ( patTracerIt->getNextChar() == label ) ) {
 
 			    patTracerIt->stepToNextChar();
@@ -342,7 +344,7 @@ namespace csl {
 				stack_.getWord().at( getCurDepth() ) = label;
 			    }
 
-			    patTracerIt = stack_.getPatTracers().erase( patTracerIt );
+			    patTracerIt = patTracers.erase( patTracerIt );
 			} // for all PatternTracers with the same label
 			
 		    } // TRACER < POSITION
@@ -364,6 +366,8 @@ namespace csl {
 	    } while( !foundFinal && isGood() );
 	    
 	    if( isGood() ) ++tokenCount_;
+
+	    return isGood();
 	}
 	
     private:
@@ -390,8 +394,7 @@ namespace csl {
 		    foundFinal = true;
 		}
 			    
-		bool ret = pos.stepToNextChar(); // return value is for DEBUG
-		assert( ret ); // DEBUG
+		pos.stepToNextChar();
 				
 				
 	    } // if nextState
@@ -407,13 +410,12 @@ namespace csl {
 	}
 
 	    
-
-	Stack stack_;
-
 	size_t getCurDepth() const {
 	    return stack_.getDepth();
 	}
 
+
+	Stack stack_;
 	const MinDic< int >& dic_;
 	const MinDic< int >& filterDic_;
 

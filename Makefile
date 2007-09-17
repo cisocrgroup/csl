@@ -6,9 +6,9 @@ LIB = ./lib
 #GCC = g++ -O3 -Wall -fpermissive # use this for optimal speed results
 
 #GCC = g++ -O3 -Wall # use this for optimized speed but with assertions being checked
-GCC = g++ -O3 -DNDEBUG -Wall # use this for optimal speed results
+#GCC = g++ -O3 -DNDEBUG -Wall # use this for optimal speed results
 #GCC = g++ -Wall --no-inline
-#GCC = g++ -ggdb --no-inline -Wall # use this if you want to use the gdb debugger
+GCC = g++ -ggdb --no-inline -Wall # use this if you want to use the gdb debugger
 
 AR = ar cru
 RANLIB = ranlib
@@ -51,7 +51,7 @@ $(OBJS)/Trie.o: $(TRIE_HEADERS) ./Trie/Trie.cxx
 MINDIC_HEADERS = ./MinDic/MinDic.h ./MinDic/MinDic.tcc ./MinDic/StateHash.h ./MinDic/StateHash.tcc $(TRANSTABLE_HEADERS) $(HASH_FILES)
 
 MINDICSTRING_HEADERS = ./MinDicString/MinDicString.h $(MINDIC_HEADERS) ./Hash/Hash.h
-ERRDIC_HEADERS =  ./ErrDic/ErrDic.h ./ErrDic/ErrDic.tcc $(MINDIC_HEADERS) ./Hash/Hash.h
+ERRDIC_HEADERS =  ./ErrDic/ErrDic.h ./ErrDic/ErrDic.tcc ./ErrDic/ErrDicConstructor.h ./ErrDic/PatternApplier.h ./ErrDic/Position.tcc  $(MINDIC_HEADERS) ./Hash/Hash.h
 
 FBDic_HEADERS = ./FBDic/FBDic.h ./FBDic/FBDic.tcc $(MINDIC_HEADERS)
 
@@ -112,6 +112,9 @@ $(BIN)/lookupMDString: ./MinDicString/lookupMDString.cxx $(TRANSTABLE_HEADERS) $
 
 $(BIN)/compileED: ./ErrDic/compileED.cxx $(ERRDIC_HEADERS)  $(OBJS)/Alphabet.o
 	$(GCC) -o $(BIN)/compileED ./ErrDic/compileED.cxx $(OBJS)/Alphabet.o
+
+$(BIN)/createED: ./ErrDic/createED.cxx $(ERRDIC_HEADERS)  $(OBJS)/Alphabet.o
+	$(GCC) -o $(BIN)/createED ./ErrDic/createED.cxx $(OBJS)/Alphabet.o
 
 $(BIN)/lookupED: ./ErrDic/lookupED.cxx $(ERRDIC_HEADERS)  $(OBJS)/Alphabet.o
 	$(GCC) -o $(BIN)/lookupED ./ErrDic/lookupED.cxx $(OBJS)/Alphabet.o
