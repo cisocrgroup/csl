@@ -187,7 +187,7 @@ namespace csl {
 	
 	// check alphabetical order
 	if( *lastKey_ && ( wcscmp( lastKey_, key ) >= 0 ) ) {
-	    printf( "Alphabetical order violated:\n>'%ls'\n>'%ls'\n\n", lastKey_, key );
+	    throw exceptions::badInput( "MinDic::addToken: Alphabetical order violated" );
 	    exit( 1 );
 	}
 

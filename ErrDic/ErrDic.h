@@ -89,7 +89,7 @@ namespace csl {
 	 * @brief return the original token annotated with the entry with the given id (perfect hash value)
 	 */
 	inline const wchar_t* getOriginalById( size_t id ) const {
-	    assert( getAnnotation( id ).first < sizeOfOriginals_ );
+	    assert( (size_t)getAnnotation( id ).first < sizeOfOriginals_ );
 	    return originals_ + getAnnotation( id ).first; 
 	}
 
@@ -97,7 +97,7 @@ namespace csl {
 	 * @brief return the error pattern annotated with the entry with the given perfect hash value
 	 */
 	inline const wchar_t* getErrorPatternById( size_t id ) const {
-	    assert( getAnnotation( id ).second < sizeOfErrorPatterns_ );
+	    assert( (size_t)getAnnotation( id ).second < sizeOfErrorPatterns_ );
 	    return errorPatterns_ + getAnnotation( id ).second; 
 	}
 
@@ -165,17 +165,18 @@ namespace csl {
 	/**
 	 * The header for ErrDic-files
 	 */
+
 	class Header {
 	public:
 	    Header() : sizeOfOriginals_( 0 ), sizeOfErrorPatterns_( 0 ) {}
 	    bits64 getMagicNumber() const {
 		return magicNumber_;
 	    }
-	    ssize_t getSizeOfOriginals() const {
+	    size_t getSizeOfOriginals() const {
 		return sizeOfOriginals_;
 	    }
 
-	    ssize_t getSizeOfErrorPatterns() const {
+	    size_t getSizeOfErrorPatterns() const {
 		return sizeOfErrorPatterns_;
 	    }
 
@@ -197,14 +198,14 @@ namespace csl {
 	 */
 	wchar_t* originals_;
 
-	ssize_t sizeOfOriginals_;
+	size_t sizeOfOriginals_;
 
 	/**
 	 * The buffer containing all the error-patterns
 	 */
 	wchar_t* errorPatterns_;
 
-	ssize_t sizeOfErrorPatterns_;
+	size_t sizeOfErrorPatterns_;
 	
 	/**
 	 * A hashtable for all the original words. That's how we manage to keep

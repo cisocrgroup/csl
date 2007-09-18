@@ -13,13 +13,33 @@ namespace csl {
     class PatternApplier {
     private:
 
+	class ListItem {
+	public:
+	    virtual ~ListItem();
+	    
+	    inline void setNextItem( ListItem* nextItem ) {
+		nextItem_ = nextItem;
+	    }
+	    inline ListItem* getNextItem() const {
+		return next_;
+	    }
+
+	    virtual wchar_t getNextChar() const;
+	    virtual bool stepToNextChar();
+
+	    virtual bool hasPathWithPattern() const;
+	    
+	private:
+	    ListItem* nextItem_;
+	};
 	/**
 	 * This class represents a position in the dictionary automaton. One or more of those objects 
 	 * form one stack item for the unified traversal of different branches of the automaton.
 	 */
-	class Position  {
+	class Position : public ListItem {
 	public:
-	    inline Position();
+	    inline Position() {
+	    } 
 		
 	    inline Position( StateId_t state, const wchar_t* nextChar, bool hasError );
 
@@ -35,10 +55,10 @@ namespace csl {
 
 	    inline bool stepToNextChar();
 	    
-	    inline const Position* getBackPtr() const;
 
 	private:
 	    StateId_t state_;
+	    const MinDic< int >& dic_;
 	    const wchar_t* nextChar_;
 	    bool hasError_;
 	}; // class Position
@@ -47,7 +67,7 @@ namespace csl {
 	/**
 	 * Objects of this class are used to keep track of when the error pattern can be applied.
 	 */
-	class PatternTracer  {
+	class PatternTracer : public ListItem {
 	public:
 	    PatternTracer( size_t startStackPos, const wchar_t* patternPos ) :
 		startStackPos_( startStackPos ),
@@ -76,34 +96,66 @@ namespace csl {
 		return startStackPos_;
 	    }
 
+	    inline bool hasPathWithPattern() const {
+		return false;
+	    }
+
 	    size_t startStackPos_;
 	    const wchar_t* patternPos_;
 	};
 
 	class StackItem {
 	public:
-	    typedef std::vector< Position > PositionContainer;
-	    typedef std::vector< PatternTracer > PatTracerContainer;
 	    
 	    StackItem() :
+		list_( 0 ),
 		filterPos_( 0 ) {
 	    }
 
+	    ~StackItem() {
+		clear();
+	    }
+
 	    void clear() {
-		positions_.clear();
-		patternTracers_.clear();
+		ListItem* listPos = list_;
+		ListItem* nextPos = 0;
+		while( ( listPos != 0 ) ) {
+		    nextPos = listPos->getNextItem();
+		    delete( listPos );
+		    listPos = nextPos;
+		}
+		
 		filterPos_ = 0;
+		newStates_.clear();
 	    }
 
-	    void sort() {
-		std::sort( positions_.begin(), positions_.end() );
-		std::sort( patternTracers_.begin(), patternTracers_.end() );
+	    void addItem( ListItem* newItem ) {
 
+		ListItem* listPos = list_;
+		ListItem* lastPos = 0;
+		while( ( listPos != 0 ) && listPos->getNextChar() < newItem->getNextChar() ) {
+		    lastPos = listPos;
+		    listPos = listPos->getNextItem();
+		    
+		}
+		if( lastPos ) lastPos->setNextItem( newItem );
+		newItem->setNextItem( listPos );
 	    }
 
-	    PositionContainer positions_;
-	    PatTracerContainer patternTracers_;
+	    void sortItem( ListItem* item ) {
+	    }
+
+	    void addNewState( StateId_t state ) {
+		newStates_.push_back( state );
+	    }
+
+	    void splice( ) {
+	    }
+
+	private:
+	    std::list< ListItem* > list_;
 	    StateId_t filterPos_;
+	    std::vector< StateId_t > newStates_;
 
 	};
 
@@ -117,7 +169,6 @@ namespace csl {
 	    size_t getDepth() const {
 		return depth_;
 	    }
-
 
 	    void forward() {
 		depth_ += 1;
@@ -144,13 +195,6 @@ namespace csl {
 		return word_;
 	    }
 
-	    StackItem::PositionContainer& getPositions() {
-		return at( depth_ ).positions_;
-	    }
-
-	    StackItem::PatTracerContainer& getPatTracers() {
-		return at( depth_ ).patternTracers_;
-	    }
 
 	private:
 	    size_t depth_;
@@ -219,27 +263,10 @@ namespace csl {
 		    // std::cerr<<"Enter conti loop"<<std::endl;
 
 
-		    stack_.at( getCurDepth() ).sort();
-
-		    std::vector<Position>& positions = stack_.getPositions();
-		    std::vector<PatternTracer>& patTracers = stack_.getPatTracers();
-
-		    // std::wcout<<":"<<stack_.getWord()<<std::endl; // DEBUG
-		    StackItem::PositionContainer::iterator positionIt = positions.begin();
-		    while( positionIt != positions.end() && positionIt->getNextChar() == 0 ){// skip worn-out positions
-
-			++positionIt;
-//			positionIt = positions.erase( positionIt );
-		    }
-
-		    StackItem::PatTracerContainer::iterator patTracerIt = patTracers.begin();
-
+		    StackItem& stackItem = stack_.at( getCurDepth() );
 		    
-
 		    foundContinuation = false;
 
-		    positionsEmpty = ( positionIt == positions.end() );
-		    patTracersEmpty = ( patTracerIt == patTracers.end() );
 
 		    if( positionsEmpty && patTracersEmpty ) {
 			// nothing to do here
@@ -376,12 +403,10 @@ namespace csl {
 	    StateId_t nextState = dic_.walk( pos.getState(), label );
 	    if( nextState ) {
 		addContinuation( nextState, dic_.getSusoString( nextState ), pos.hasError() );
-				
 		if( ! foundContinuation ) { // if continuation wasn't registered before
 		    foundContinuation = true;
 		    stack_.getWord().resize( getCurDepth() + 1 );
 		    stack_.getWord().at( getCurDepth() ) = label;
-		    
 		    
 		    stack_.at( getCurDepth() + 1 ).filterPos_ = filterDic_.walk( stack_.at( getCurDepth() ).filterPos_, label );
 

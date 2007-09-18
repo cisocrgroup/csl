@@ -23,7 +23,6 @@ namespace csl {
 	fi.imbue( std::locale( "de_DE.UTF-8" ) );
 	fi.open( patternFile );
 
-	errDic.initConstruction();
 	std::wstring line;
 	while( getline( fi, line ) ) {
 	    size_t delimPos = line.find( ' ' );
@@ -40,32 +39,38 @@ namespace csl {
 	list_.sort();
 	std::wcerr<<"Loaded "<<list_.size()<<" patterns with s.th. to say"<<std::endl;
 
-	errDic.initConstruction();
-	size_t nrOfTokens = 0;
-	while( list_.begin() != list_.end() ) {
-	    PatternApplier& pa = *( list_.begin() );
+	try {
 
-	    std::wcout<<pa.getWord()<<" "<<pa.getPatternFrom()<<"->"<<pa.getPatternTo()<<std::endl;
+	    errDic.initConstruction();
+	    size_t nrOfTokens = 0;
+	    
+	    while( list_.begin() != list_.end() ) {
+		PatternApplier& pa = *( list_.begin() );
+		
 
-	    std::wstring pattern = pa.getPatternFrom() + L" " + pa.getPatternTo();
-	    errDic.addToken( pa.getWord().c_str(), L"test", pattern.c_str() );
+		std::wstring pattern = pa.getPatternFrom() + L" " + pa.getPatternTo();
 
- 	    if( ++nrOfTokens % 100000 == 0 ) std::wcerr<< int( nrOfTokens / 1000 ) <<"k tokens"<<std::endl;
-	    pa.next();
-	    if( pa.isGood() ) {
-		std::list< PatternApplier >::iterator it = list_.begin();
-		++it; // skip first elt
-		for( ; ( it != list_.end() ) && ( *it < pa ); ++it ) {
-		    // do nothing else
+		std::wcout<<pa.getWord()<<" "<<pattern<<std::endl;
+//		errDic.addToken( pa.getWord().c_str(), L"test", pattern.c_str() );
+
+		if( ++nrOfTokens % 100000 == 0 ) std::wcerr<< int( nrOfTokens / 1000 ) <<"k tokens"<<std::endl;
+		pa.next();
+		if( pa.isGood() ) {
+		    std::list< PatternApplier >::iterator it = list_.begin();
+		    ++it; // skip first elt
+		    for( ; ( it != list_.end() ) && ( *it < pa ); ++it ) {
+			// do nothing else
+		    }
+		    list_.splice( it, list_, list_.begin() );
 		}
-		list_.splice( it, list_, list_.begin() );
+		else {
+		    list_.pop_front();
+		}
 	    }
-	    else {
-		list_.pop_front();
-	    }
+	    errDic.finishConstruction();
+	} catch( exceptions::badInput exc ) {
+	    std::wcout<<"ErrDic Creation failed: "<<exc.what()<<std::endl; 
 	}
-	errDic.finishConstruction();
-	
     }
 
 } // eon

@@ -46,11 +46,11 @@ namespace csl {
 	sizeOfErrorPatterns_ = header_.getSizeOfErrorPatterns();
 
 	MinDic_t::loadFromStream( fi );
-	originals_ = (wchar_t*) malloc( header_.getSizeOfOriginals() * sizeof( wchar_t ) );
-	fread( originals_, sizeof( wchar_t ), header_.getSizeOfOriginals(), fi );
+	originals_ = (wchar_t*) malloc( sizeOfOriginals_ * sizeof( wchar_t ) );
+	fread( originals_, sizeof( wchar_t ), sizeOfOriginals_, fi );
 
-	errorPatterns_ = (wchar_t*) malloc( header_.getSizeOfErrorPatterns() * sizeof( wchar_t ) );
-	fread( errorPatterns_, sizeof( wchar_t ), header_.getSizeOfErrorPatterns(), fi );
+	errorPatterns_ = (wchar_t*) malloc( sizeOfErrorPatterns_ * sizeof( wchar_t ) );
+	fread( errorPatterns_, sizeof( wchar_t ), sizeOfErrorPatterns_, fi );
     }
 
     inline void ErrDic::writeToFile( char* dicFile ) const {
@@ -76,14 +76,21 @@ namespace csl {
 	
 	sizeOfOriginals_ = 0;
 	sizeOfErrorPatterns_ = 0;
+
+	originalHash_ =  new Hash< wchar_t >( 100000, originals_, sizeOfOriginals_ );
+	patternHash_ =  new Hash< wchar_t >( 20000, errorPatterns_, sizeOfErrorPatterns_ );
+
     }
 
     inline void ErrDic::finishConstruction() {
 	MinDic_t::finishConstruction();
+	header_.set( *this );
+
+	delete( originalHash_ );
+	delete( patternHash_ );
     }
 
     inline void ErrDic::compileDic( const char* lexFile ) {
-	initConstruction();
 	
 	std::ifstream fileHandle( lexFile );
 	if( !fileHandle.good() ) {
@@ -93,16 +100,12 @@ namespace csl {
 	}
 
 	
-	struct stat f_stat;
-	stat( lexFile, &f_stat );
-	size_t estimatedNrOfKeys = f_stat.st_size / 30;
-	std::cerr<<"Estimate about "<< estimatedNrOfKeys << " Keys."<< std::endl;
+// 	struct stat f_stat;
+// 	stat( lexFile, &f_stat );
+// 	size_t estimatedNrOfKeys = f_stat.st_size / 30;
+// 	std::wcerr<<"Estimate about "<< estimatedNrOfKeys << " Keys."<< std::endl;
 	
-	/**
-	 * @TODO HARD-CODED SIZES
-	 */
-	originalHash_ =  new Hash< wchar_t >( 100000, originals_, (size_t&)sizeOfOriginals_ );
-	patternHash_ =  new Hash< wchar_t >( (size_t)10000, errorPatterns_, (size_t&)sizeOfErrorPatterns_ );
+	initConstruction();
 
 
 	uchar bytesIn[Global::lengthOfLongStr];
@@ -161,7 +164,6 @@ namespace csl {
 
 	    addToken( key, original, errorPattern );
 
-	    header_.set( *this );
 	}
 	fileHandle.close();
 
