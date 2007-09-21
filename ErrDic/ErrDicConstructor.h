@@ -31,6 +31,7 @@ namespace csl {
 	    }
 	    list_.push_back( PatternApplier( dic, filterDic, line.substr( 0, delimPos ), line.substr( delimPos + 1 ) ) );
 	    if( ! list_.back().isGood() ) list_.pop_back();
+	    std::wcerr<<"New Applier: "<<list_.back().getWord()<<std::endl;
 
 	    if( list_.size() % 100 == 0 ) std::wcerr<<"Processed "<<list_.size()<<" patterns"<<std::endl;
 
