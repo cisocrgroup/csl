@@ -1,4 +1,5 @@
 #include<istream>
+#include<errno.h>
 #include "../Global.h"
 #include "../MinDicString/MinDicString.h"
 
@@ -163,14 +164,22 @@ namespace csl {
 // 	}
 
 	++textPos_;
-	if( textPos_ > textRead_ ) { // the difference may never be more than 1
+	if( textPos_ > textRead_ ) { // the difference must never be more than 1
 	    ++textRead_;
 
 	    stream_.get( buffer_[textRead_ % bufSize_] );
+
+	    // HOW CAN AN ENCODING ERROR BE DETECTED???
+	    if( errno == EILSEQ ) { // if failbit is set BEFORE eof
+		throw exceptions::badInput( "SearchText: Encoding error in input sequence." );
+	    }
+
 	    // printf( "Read char: '%lc'\n", getCurChar() ); // DEBUG
 	    if( stream_.eof() ) {
 		buffer_[textRead_ % bufSize_] = 0;
 	    }
+
+
 //	    printf( "Read '%lc' on pos %d\n", buffer_[textPos_ % bufSize_], textPos_ ); // DEBUG
 	    
 	}
