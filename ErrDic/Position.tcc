@@ -13,17 +13,14 @@ namespace csl {
 
     }
 
-    bool PatternApplier::Position::operator<( const Position& other ) const {
-	return this->getNextChar() < other.getNextChar();
-    }
-
+    
     void PatternApplier::Position::set(  StateId_t state, const wchar_t* curChar, bool hasError ) {
 	state_ = state;
 	nextChar_ = curChar;
 	hasError_ = hasError;
     }
 
-    const StateId_t& PatternApplier::Position::getState() const {
+    StateId_t PatternApplier::Position::getState() const {
 	return state_;
     }
 

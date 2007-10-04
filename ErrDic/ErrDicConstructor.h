@@ -11,11 +11,13 @@ namespace csl {
 
     class ErrDicConstructor {
     public:
+
 	void constructErrDic( const MinDic< int >& dic_, const MinDic< int >& filterDic_, const char* patternFile, ErrDic& errDic );
 
     private:
-	std::list< PatternApplier > list_;
     };
+
+
 
     void ErrDicConstructor::constructErrDic( const MinDic< int >& dic, const MinDic< int >& filterDic, const char* patternFile, ErrDic& errDic ) {
 

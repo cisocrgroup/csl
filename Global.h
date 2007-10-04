@@ -124,6 +124,12 @@ namespace csl {
 	    const std::string msg_;
 	};
 
+	class LogicalError : public cslException {
+	public:
+	    LogicalError() {}
+	    LogicalError( const std::string msg ) : cslException( msg ) {}
+	};
+
 	class AlphabetError : public cslException {
 	public:
 	    AlphabetError() {}

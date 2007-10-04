@@ -1,6 +1,7 @@
 #include<iostream>
 
-#include "./ErrDicConstructor.h"
+#include "./ErrDic.h"
+#include "./PatternApplier.h"
 
 int main( int argc, char** argv ) {
 
@@ -12,14 +13,17 @@ int main( int argc, char** argv ) {
 
     setlocale(LC_CTYPE, "de_DE.UTF-8");  /*Setzt das Default Encoding für das Programm */
 
-    csl::MinDic< int > dic( argv[1]);
+    csl::MinDic< int > dic( argv[1] );
     csl::MinDic< int > filterDic( argv[2]);
 
 
     csl::ErrDic ed;
-    csl::ErrDicConstructor edc;
-    edc.constructErrDic( dic, filterDic, argv[3], ed );
-    ed.writeToFile( "./test.errdic" );
+    csl::PatternApplier applier( dic, filterDic, argv[3] );
+
+    while( applier.isGood() ) {
+	std::wcout<<applier.getWord()<<std::endl;
+    }
+
     
     
 }
