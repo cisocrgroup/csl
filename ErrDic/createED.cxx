@@ -20,8 +20,13 @@ int main( int argc, char** argv ) {
     csl::ErrDic ed;
     csl::PatternApplier applier( dic, filterDic, argv[3] );
 
+    size_t count = 0;
     while( applier.isGood() ) {
 	std::wcout<<applier.getWord()<<std::endl;
+	if( ! ( ++count % 10000 ) ) {
+	    std::wcerr<<count / 1000<<"k"<<std::endl;
+	}
+	applier.next();
     }
 
     

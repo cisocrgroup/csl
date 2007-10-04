@@ -14,9 +14,9 @@ namespace csl {
     }
 
     
-    void PatternApplier::Position::set(  StateId_t state, const wchar_t* curChar, bool hasError ) {
+    void PatternApplier::Position::set(  StateId_t state, const wchar_t* nextChar, bool hasError ) {
 	state_ = state;
-	nextChar_ = curChar;
+	nextChar_ = nextChar;
 	hasError_ = hasError;
     }
 
