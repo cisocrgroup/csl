@@ -1,12 +1,12 @@
 #include<iostream>
 
 #include "./ErrDic.h"
-#include "./PatternApplier.h"
+#include "./ErrDicConstructor.h"
 
 int main( int argc, char** argv ) {
 
-    if( argc != 4 ) {
-	std::cerr<<"Use like: "<<argv[0]<<" <pos._dic> <filterDic> <patternFile>"<<std::endl;
+    if( argc != 5 ) {
+	std::cerr<<"Use like: "<<argv[0]<<" <pos._dic> <filterDic> <patternFile> <errDicFile>"<<std::endl;
 	exit(1);
     }
 
@@ -18,18 +18,11 @@ int main( int argc, char** argv ) {
 
 
     csl::ErrDic ed;
-    csl::PatternApplier applier( dic, filterDic, argv[3] );
 
-    size_t count = 0;
-    while( applier.isGood() ) {
-	std::wcout<<applier.getWord()<<std::endl;
-	if( ! ( ++count % 10000 ) ) {
-	    std::wcerr<<count / 1000<<"k"<<std::endl;
-	}
-	applier.next();
-    }
+    csl::ErrDicConstructor edc;
 
-    
-    
+    edc.constructErrDic( dic, filterDic, argv[3], ed );
+
+    ed.writeToFile( argv[4] );
 }
 

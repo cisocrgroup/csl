@@ -197,7 +197,7 @@ namespace csl {
 		
 		if( isFinal( newPos ) ) {
 		    w[depth+1] = 0;
-		    // printf( "%ls#%s\n", w, annStrings_ + getAnnotation( newPerfHashValue ) );
+		    //printf( "%ls#%s\n", w, annStrings_ + getAnnotation( newPerfHashValue ) );
 		    //printf( "%ls#%d\n", w, newPerfHashValue );
 		    
 		    if( ( ++count_ % 100000 ) == 0 ) fprintf( stderr, "%d\n", (int)count_ );

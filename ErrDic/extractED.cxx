@@ -20,7 +20,7 @@ int main( int argc, char** argv ) {
 	else if( argc == 3 && ! strcmp( argv[2], "STAT" ) ) {
 	    t.doAnalysis();
 	}
-//	else t.printDic();
+	else t.printDic();
 
 
 	return 0;
