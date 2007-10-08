@@ -176,12 +176,16 @@ namespace csl {
 		ListItem* nextPos = 0;
 		while( ( listPos != 0 ) ) {
 		    nextPos = listPos->getNextItem();
-		    delete( listPos );
+		    if( listPos->isPosition() ) {
+			positionToStore( (Position*)listPos );
+		    }
+		    else {
+			patTracerToStore( (PatternTracer*)listPos );
+		    }
 		    listPos = nextPos;
 		}
 		list_ = 0;
 		
-		newStates_.clear();
 	    }
 
 	    void addItem( ListItem* newItem ) {
@@ -214,14 +218,6 @@ namespace csl {
 		addItem( first );
 	    }
 
-	    void setFilterPos( StateId_t pos ) {
-		filterPos_ = pos;
-	    }
-
-	    StateId_t getFilterPos() const {
-		return filterPos_;
-	    }
-
 	    bool empty() const {
 		return list_ == 0;
 	    }
@@ -235,19 +231,38 @@ namespace csl {
 		    return new Position( state, nextChar, hasError );
 		}
 		Position* pos = positionStore_;
-		pos->set( state, nextChar, hasError );
 		positionStore_ = (Position*)pos->getNextItem();
+		pos->set( state, nextChar, hasError );
+		pos->setNextItem( 0 );
+		return pos;
+	    }
+	    void positionToStore( Position* pos ) {
+		pos->setNextItem( positionStore_ );
+		positionStore_ = pos;		
+	    }
+
+	    PatternTracer* newPatTracer( StateId_t state, const wchar_t* nextChar, size_t depth ) {
+		if( patTracerStore_ ==  0 ) {
+		    return new PatternTracer( state, nextChar, depth );
+		}
+		PatternTracer* patTracer = patTracerStore_;
+		patTracerStore_ = (PatternTracer*)patTracer->getNextItem();
+		patTracer->set( state, nextChar, depth );
+		patTracer->setNextItem( 0 );
+		return patTracer;
+	    }
+	    void patTracerToStore( PatternTracer* patTracer ) {
+		patTracer->setNextItem( patTracerStore_ );
+		patTracerStore_ = patTracer;		
 	    }
 
 	private:
 	    ListItem* list_;
-	    StateId_t filterPos_;
-	    std::vector< StateId_t > newStates_;
 
 	    Position* positionStore_;
 	    PatternTracer* patTracerStore_;
 
-	};
+	}; // class StackItem
 
 
 	class Stack : public std::vector< StackItem > {
@@ -313,8 +328,8 @@ namespace csl {
 	    const wchar_t* suso = dic_.getSusoString( st );
 
 	    // insert initial positions and patTracers
-	    stack_.at( 0 ).addItem( new Position( st, suso, false ) );
-	    stack_.at( 0 ).addItem( new PatternTracer( patternGraph_.getRoot(), patternGraph_.getSusoString( patternGraph_.getRoot() ), 0 ) );
+	    stack_.at( 0 ).addItem( stack_.at( 0 ).newPosition( st, suso, false ) );
+	    stack_.at( 0 ).addItem( stack_.at( 0 ).newPatTracer( patternGraph_.getRoot(), patternGraph_.getSusoString( patternGraph_.getRoot() ), 0 ) );
 
 	    tokenCount_ = 0;
 	    next();
@@ -371,7 +386,7 @@ namespace csl {
 			PatternTracer* patTracer;
  			if( ( pos = dynamic_cast< Position* >( first ) ) ) {
  			    StateId_t nextState = dic_.walk( pos->getState(), label );
- 			    Position* newPos = new Position( nextState, dic_.getSusoString( nextState ), pos->hasError() );
+ 			    Position* newPos = nextStackItem.newPosition( nextState, dic_.getSusoString( nextState ), pos->hasError() );
 			    nextStackItem.addItem( newPos );
 			    // The 2nd constraint has to be dropped if insertions are allowed
 			    if( ! newPos->hasError() && ( newPos->getNextChar() != 0 ) ) addedTriggerPosition = true;
@@ -386,7 +401,7 @@ namespace csl {
 			}
  			else if( ( patTracer = dynamic_cast< PatternTracer* >( first ) ) ) {
  			    StateId_t nextState = patternGraph_.walk( patTracer->getState(), label );
- 			    PatternTracer* newTracer = new PatternTracer( nextState, patternGraph_.getSusoString( nextState ), patTracer->getDepth() + 1 );
+ 			    PatternTracer* newTracer = nextStackItem.newPatTracer( nextState, patternGraph_.getSusoString( nextState ), patTracer->getDepth() + 1 );
 			    // if pattern-right-side read completely
 			    StateId_t patStartState;
  			    if( ( patStartState = patternGraph_.walk( nextState, patternDelimiter_ ) ) ) {
@@ -415,7 +430,7 @@ namespace csl {
 					if( ( newDicState = dic_.walk( dicState, *c ) ) ) {
 					    StateId_t newPatState = patternGraph_.walk( patState, *c );
 					    if( patternGraph_.isFinal( newPatState ) ) {
-						Position* newPos = new Position( newDicState, dic_.getSusoString( newDicState ), true );
+						Position* newPos = nextStackItem.newPosition( newDicState, dic_.getSusoString( newDicState ), true );
 						nextStackItem.addItem( newPos );
 						// handle addedTriggerPosition here if allowing more than one error
 						if( dic_.isFinal( newDicState ) ) {
@@ -443,7 +458,7 @@ namespace csl {
 		    } // for all items with same label
 
   		    if( addedTriggerPosition ) {
-  			nextStackItem.addItem( new PatternTracer( patternGraph_.getRoot(), patternGraph_.getSusoString( patternGraph_.getRoot() ), 0 ) );
+  			nextStackItem.addItem( nextStackItem.newPatTracer( patternGraph_.getRoot(), patternGraph_.getSusoString( patternGraph_.getRoot() ), 0 ) );
   		    }
 		} while( !foundFinal && ! nextStackItem.isGood() && curStackItem.isGood() );
 

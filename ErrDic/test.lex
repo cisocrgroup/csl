@@ -1,1 +1,5 @@
-alert
+aalen
+albert
+alkohol
+berta
+konrad
