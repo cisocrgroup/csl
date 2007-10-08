@@ -3,27 +3,24 @@ namespace csl {
     PatternApplier::Position::Position() :
 	state_( 0 ),
 	nextChar_( 0 ),
-	errorsOrDepth_( 0 ),
-	nextItem_( 0 )
+	hasError_( false ),
+	perfHashValue_( 0 )
     {
     }
     
-    PatternApplier::Position::Position( PosType type, StateId_t state, const wchar_t* nextChar, size_t errorsOrDepth ) :
-	posType_( type ),
+    PatternApplier::Position::Position( StateId_t state, const wchar_t* nextChar, bool hasError, size_t perfHashValue ) :
 	state_( state ),
 	nextChar_( nextChar ),
-	errorsOrDepth_( errorsOrDepth ),
-	nextItem_( 0 )
+	hasError_( hasError ),
+	perfHashValue_( perfHashValue )
     {
     }
-
     
-    void PatternApplier::Position::set( PosType type, StateId_t state, const wchar_t* nextChar, size_t errorsOrDepth ) {
-	posType_ = type;
+    void PatternApplier::Position::set(  StateId_t state, const wchar_t* nextChar, bool hasError, size_t perfHashValue ) {
 	state_ = state;
 	nextChar_ = nextChar;
-	errorsOrDepth_ = errorsOrDepth;
-	nextItem_ = 0;
+	hasError_ = hasError;
+	perfHashValue_ = perfHashValue;
     }
 
     StateId_t PatternApplier::Position::getState() const {
@@ -31,13 +28,7 @@ namespace csl {
     }
 
     size_t PatternApplier::Position::hasError() const {
-	if( posType_ != DIC ) throw exceptions::LogicalError( "PatternApplier::Position::hasError() called for Position of type other than DIC" );
-	return errorsOrDepth_;
-    }
-
-    size_t PatternApplier::Position::getDepth() const {
-	if( posType_ != PATTRACER ) throw exceptions::LogicalError( "PatternApplier::Position::getDepth() called for Position of type other than PATTRACER" );
-	return errorsOrDepth_;
+	return hasError_;
     }
 
     wchar_t PatternApplier::Position::getNextChar() const {
@@ -49,5 +40,11 @@ namespace csl {
 	++nextChar_;
 	return true;
     }
+
+    size_t PatternApplier::Position::getPerfHashValue() const {
+	return perfHashValue_;
+    }
+
+	    
 
 } // eon
