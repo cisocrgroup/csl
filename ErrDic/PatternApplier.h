@@ -12,52 +12,18 @@ namespace csl {
     class PatternApplier {
     private:
 
-	class ListItem {
-	public:
-	    inline ListItem() : 
-		nextItem_( 0 ) {
-	    }
 
-	    inline virtual ~ListItem() {
-	    }
-	    
-	    bool operator<( const ListItem& other ) const {
-		if( getNextChar() == 0 ) {
-		    return false; // sort those objects to the very end
-		}
-		else if( other.getNextChar() == 0 ) {
-		    return true; // sort those objects to the very end
-		}
 
-		return this->getNextChar() < other.getNextChar();
-	    }
-	    virtual bool isPosition() const = 0;
-	    virtual bool isPatternTracer() const = 0;
-
-	    virtual wchar_t getNextChar() const = 0;
-	    virtual bool stepToNextChar() = 0;
-
-	    virtual StateId_t getState() const = 0;
-
-	    inline void setNextItem( ListItem* nextItem ) {
-		nextItem_ = nextItem;
-	    }
-	    inline ListItem* getNextItem() const {
-		return nextItem_;
-	    }
-
-	private:
-	    ListItem* nextItem_;
-	};
 	/**
 	 * This class represents a position in the dictionary automaton. One or more of those objects 
 	 * form one stack item for the unified traversal of different branches of the automaton.
 	 */
-	class Position : public ListItem {
+	class Position {
 	public:
+	    typedef enum{ DIC, PATTRACER } PosType;
 	    inline Position();
 		
-	    inline Position( StateId_t state, const wchar_t* nextChar, bool hasError );
+	    inline Position( PosType type, StateId_t state, const wchar_t* nextChar, size_t errorsOrDepth );
 
 	    inline virtual ~Position() {}
 
@@ -71,86 +37,43 @@ namespace csl {
 
 	    virtual StateId_t getState() const;
 
-	    inline void set(  StateId_t state, const wchar_t* nextChar, bool hasError );
+	    inline void set( PosType posType, StateId_t state, const wchar_t* nextChar, size_t errorsOrDepth );
 
 	    inline size_t hasError() const;
+	    inline size_t getDepth() const;
 
 	    inline wchar_t getNextChar() const;
 
 	    inline bool stepToNextChar();
+
+	    inline void setNextItem( Position* nextItem ) {
+		nextItem_ = nextItem;
+	    }
+	    inline Position* getNextItem() const {
+		return nextItem_;
+	    }
 	    
+	    bool operator<( const Position& other ) const {
+		if( getNextChar() == 0 ) {
+		    return false; // sort those objects to the very end
+		}
+		else if( other.getNextChar() == 0 ) {
+		    return true; // sort those objects to the very end
+		}
+		return this->getNextChar() < other.getNextChar();
+	    }
+
+	    inline PosType getType() const {
+		return posType_;
+	    }
 
 	private:
+	    PosType posType_;
 	    StateId_t state_;
 	    const wchar_t* nextChar_;
-	    bool hasError_;
+	    size_t errorsOrDepth_;
+	    Position* nextItem_;
 	}; // class Position
-
-
-	/**
-	 * Objects of this class are used to keep track of when the error pattern can be applied.
-	 */
-	class PatternTracer : public ListItem {
-	public:
-	    inline PatternTracer() :
-		state_( 0 ),
-		nextChar_( 0 ),
-		depth_( 0 ) {
-	    }
-
-	    inline PatternTracer( StateId_t state, const wchar_t* nextChar, size_t depth ) :
-		state_( state ),
-		nextChar_( nextChar),
-		depth_( depth ){
-		if( *nextChar_ == PatternApplier::patternDelimiter_ ) {
-		    ++nextChar_;
-		}
-	    }
-
-	    inline ~PatternTracer() {}
-
-	    void set(  StateId_t state, const wchar_t* nextChar, size_t depth ) {
-		state_ = state;
-		nextChar_ = nextChar;
-		depth_ = depth;
-	    }
-    
-	    inline bool isPosition() const {
-		return false;
-	    }
-
-	    inline bool isPatternTracer() const {
-		return true;
-	    }
-
-	    inline wchar_t getNextChar() const {
-		return *nextChar_;
-	    }
-
-	    bool stepToNextChar() {
-		if( *nextChar_ == 0 ) return false;
-		++nextChar_;
-		if( *nextChar_ == PatternApplier::patternDelimiter_ ) {
-		    std::wcout<<"HA"<<std::endl;
-		    ++nextChar_;
-		    if( *nextChar_ == 0 ) return false;
-		}
-		return true;
-	    }
-
-	    virtual StateId_t getState() const {
-		return state_;
-	    }
-
-	    inline size_t getDepth() const {
-		return depth_;
-	    }
-
-	private:
-	    StateId_t state_;
-	    const wchar_t* nextChar_;
-	    size_t depth_;
-	}; // class PatternTracer
 
 
 
@@ -158,13 +81,12 @@ namespace csl {
 	public:
 	    StackItem() :
 		list_( 0 ),
-		positionStore_( 0 ),
-		patTracerStore_( 0 )
+		positionStore_( 0 )
 		{
 		}
 
 	    /**
-	     * The destructor does NOT call clear(), that is, does NOT remove the ListItem-objects
+	     * The destructor does NOT call clear(), that is, does NOT remove the Position-objects
 	     * from the heap. That way, the StackItems can easily be copied.
 	     * Call clear() yourself if you now you don't need the StackItem any more ... 
 	     */
@@ -172,25 +94,13 @@ namespace csl {
 	    }
 
 	    void clear() {
-		ListItem* listPos = list_;
-		ListItem* nextPos = 0;
-		while( ( listPos != 0 ) ) {
-		    nextPos = listPos->getNextItem();
-		    if( listPos->isPosition() ) {
-			positionToStore( (Position*)listPos );
-		    }
-		    else {
-			patTracerToStore( (PatternTracer*)listPos );
-		    }
-		    listPos = nextPos;
-		}
+		listToStore( list_ );
 		list_ = 0;
-		
 	    }
 
-	    void addItem( ListItem* newItem ) {
-		ListItem* listPos = list_;
-		ListItem* lastPos = 0;
+	    void addItem( Position* newItem ) {
+		Position* listPos = list_;
+		Position* lastPos = 0;
 		while( ( listPos != 0 ) && ( *listPos < *newItem ) ) {
 		    lastPos = listPos;
 		    listPos = listPos->getNextItem();
@@ -202,17 +112,17 @@ namespace csl {
 		newItem->setNextItem( listPos );
 	    }
 	    
-	    ListItem* getFirst() {
+	    Position* getFirst() {
 		return list_;
 	    }
 
-	    const ListItem* getFirst() const {
+	    const Position* getFirst() const {
 		return list_;
 	    }
 
 	    void arrangeFirst() {
 		// log out first item and add it again
-		ListItem* first = list_;
+		Position* first = list_;
 		list_ = list_->getNextItem();
 
 		addItem( first );
@@ -226,41 +136,30 @@ namespace csl {
 		return ( getFirst() && ( getFirst()->getNextChar() != 0 ) );
 	    }
 
-	    Position* newPosition( StateId_t state, const wchar_t* nextChar, bool hasError ) {
+	    Position* newPosition( Position::PosType posType, StateId_t state, const wchar_t* nextChar, size_t errorsOrDepth ) {
 		if( positionStore_ ==  0 ) {
-		    return new Position( state, nextChar, hasError );
+		    return new Position( posType, state, nextChar, errorsOrDepth );
 		}
 		Position* pos = positionStore_;
-		positionStore_ = (Position*)pos->getNextItem();
-		pos->set( state, nextChar, hasError );
+		positionStore_ = pos->getNextItem();
+		pos->set( posType, state, nextChar, errorsOrDepth );
 		pos->setNextItem( 0 );
 		return pos;
 	    }
-	    void positionToStore( Position* pos ) {
-		pos->setNextItem( positionStore_ );
-		positionStore_ = pos;		
-	    }
-
-	    PatternTracer* newPatTracer( StateId_t state, const wchar_t* nextChar, size_t depth ) {
-		if( patTracerStore_ ==  0 ) {
-		    return new PatternTracer( state, nextChar, depth );
+	    void listToStore( Position* list ) {
+		if( ! list ) return;
+		Position* last = list;
+		while( last->getNextItem() ) {
+		    last = last->getNextItem();
 		}
-		PatternTracer* patTracer = patTracerStore_;
-		patTracerStore_ = (PatternTracer*)patTracer->getNextItem();
-		patTracer->set( state, nextChar, depth );
-		patTracer->setNextItem( 0 );
-		return patTracer;
-	    }
-	    void patTracerToStore( PatternTracer* patTracer ) {
-		patTracer->setNextItem( patTracerStore_ );
-		patTracerStore_ = patTracer;		
+		last->setNextItem( positionStore_ );
+		positionStore_ = list;
 	    }
 
 	private:
-	    ListItem* list_;
+	    Position* list_;
 
 	    Position* positionStore_;
-	    PatternTracer* patTracerStore_;
 
 	}; // class StackItem
 
@@ -328,8 +227,8 @@ namespace csl {
 	    const wchar_t* suso = dic_.getSusoString( st );
 
 	    // insert initial positions and patTracers
-	    stack_.at( 0 ).addItem( stack_.at( 0 ).newPosition( st, suso, false ) );
-	    stack_.at( 0 ).addItem( stack_.at( 0 ).newPatTracer( patternGraph_.getRoot(), patternGraph_.getSusoString( patternGraph_.getRoot() ), 0 ) );
+	    stack_.at( 0 ).addItem( stack_.at( 0 ).newPosition( Position::DIC, st, suso, false ) );
+	    stack_.at( 0 ).addItem( stack_.at( 0 ).newPosition( Position::PATTRACER, patternGraph_.getRoot(), patternGraph_.getSusoString( patternGraph_.getRoot() ), 0 ) );
 
 	    tokenCount_ = 0;
 	    next();
@@ -372,7 +271,7 @@ namespace csl {
  		do {
 
 
- 		    ListItem* first = curStackItem.getFirst();
+ 		    Position* first = curStackItem.getFirst();
  		    wchar_t label = first->getNextChar();
 
 		    
@@ -382,11 +281,9 @@ namespace csl {
 		    
 		    bool addedTriggerPosition = false;
  		    while( first && first->getNextChar() == label ) {
-			Position* pos;
-			PatternTracer* patTracer;
- 			if( ( pos = dynamic_cast< Position* >( first ) ) ) {
- 			    StateId_t nextState = dic_.walk( pos->getState(), label );
- 			    Position* newPos = nextStackItem.newPosition( nextState, dic_.getSusoString( nextState ), pos->hasError() );
+ 			if( first->getType() == Position::DIC ) {
+ 			    StateId_t nextState = dic_.walk( first->getState(), label );
+ 			    Position* newPos = nextStackItem.newPosition( Position::DIC, nextState, dic_.getSusoString( nextState ), first->hasError() );
 			    nextStackItem.addItem( newPos );
 			    // The 2nd constraint has to be dropped if insertions are allowed
 			    if( ! newPos->hasError() && ( newPos->getNextChar() != 0 ) ) addedTriggerPosition = true;
@@ -397,11 +294,11 @@ namespace csl {
 				foundFinal = true;
 			    }
 			    
-			    pos->stepToNextChar();
+			    first->stepToNextChar();
 			}
- 			else if( ( patTracer = dynamic_cast< PatternTracer* >( first ) ) ) {
- 			    StateId_t nextState = patternGraph_.walk( patTracer->getState(), label );
- 			    PatternTracer* newTracer = nextStackItem.newPatTracer( nextState, patternGraph_.getSusoString( nextState ), patTracer->getDepth() + 1 );
+ 			else if( first->getType() == Position::PATTRACER ) {
+ 			    StateId_t nextState = patternGraph_.walk( first->getState(), label );
+ 			    Position* newTracer = nextStackItem.newPosition( Position::PATTRACER, nextState, patternGraph_.getSusoString( nextState ), first->getDepth() + 1 );
 			    // if pattern-right-side read completely
 			    StateId_t patStartState;
  			    if( ( patStartState = patternGraph_.walk( nextState, patternDelimiter_ ) ) ) {
@@ -410,9 +307,9 @@ namespace csl {
 				std::stack< TwoStates > stack;
 				
 				
-				ListItem* item = stack_.at( getCurDepth() - patTracer->getDepth() ).getFirst();
+				Position* item = stack_.at( getCurDepth() - first->getDepth() ).getFirst();
 				while( item ) {
-				    if( item->isPosition() &&
+				    if( ( item->getType() == Position::DIC ) &&
 					! ((Position*)item)->hasError()
 					) {
 					stack.push( TwoStates( patStartState, item->getState() ) );
@@ -430,7 +327,7 @@ namespace csl {
 					if( ( newDicState = dic_.walk( dicState, *c ) ) ) {
 					    StateId_t newPatState = patternGraph_.walk( patState, *c );
 					    if( patternGraph_.isFinal( newPatState ) ) {
-						Position* newPos = nextStackItem.newPosition( newDicState, dic_.getSusoString( newDicState ), true );
+						Position* newPos = nextStackItem.newPosition( Position::DIC, newDicState, dic_.getSusoString( newDicState ), 1 );
 						nextStackItem.addItem( newPos );
 						// handle addedTriggerPosition here if allowing more than one error
 						if( dic_.isFinal( newDicState ) ) {
@@ -449,16 +346,16 @@ namespace csl {
  			    } // if pattern-right-side read completely
 				
 			    nextStackItem.addItem( newTracer );
-			    patTracer->stepToNextChar();
+			    first->stepToNextChar();
 				
 			}
 			
-			curStackItem.arrangeFirst(); // re-arrange list of ListItems
+			curStackItem.arrangeFirst(); // re-arrange list of Positions
 			first = curStackItem.getFirst(); // get the new 1st item
 		    } // for all items with same label
 
   		    if( addedTriggerPosition ) {
-  			nextStackItem.addItem( nextStackItem.newPatTracer( patternGraph_.getRoot(), patternGraph_.getSusoString( patternGraph_.getRoot() ), 0 ) );
+  			nextStackItem.addItem( nextStackItem.newPosition( Position::PATTRACER, patternGraph_.getRoot(), patternGraph_.getSusoString( patternGraph_.getRoot() ), 0 ) );
   		    }
 		} while( !foundFinal && ! nextStackItem.isGood() && curStackItem.isGood() );
 
