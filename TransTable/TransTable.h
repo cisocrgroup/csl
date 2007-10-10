@@ -148,7 +148,8 @@ namespace csl {
 	 * Implemented for TOKDIC only
 	 * @param state the state to start from
 	 * @param c the character to walk with (c already being coded according to custom alphabet)
-	 * @param perfHashValue the perfHash value of the current traansition is ADDED to this variable
+	 * @param perfHashValue the perfHash value of the current traansition is ADDED to this variable.
+	 *        If transition does not exist, the perfHashValue is left untouched
 	 */
 	inline StateId_t walkPerfHash( StateId_t state, char16 c, size_t& perfHashValue ) const;
 

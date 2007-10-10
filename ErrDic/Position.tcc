@@ -41,7 +41,7 @@ namespace csl {
 	return true;
     }
 
-    size_t PatternApplier::Position::getPerfHashValue() const {
+    size_t PatternApplier::Position::getPHValue() const {
 	return perfHashValue_;
     }
 
