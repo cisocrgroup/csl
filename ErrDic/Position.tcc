@@ -3,23 +3,23 @@ namespace csl {
     PatternApplier::Position::Position() :
 	state_( 0 ),
 	nextChar_( 0 ),
-	hasError_( false ),
+	error_(),
 	perfHashValue_( 0 )
     {
     }
     
-    PatternApplier::Position::Position( StateId_t state, const wchar_t* nextChar, bool hasError, size_t perfHashValue ) :
+    PatternApplier::Position::Position( StateId_t state, const wchar_t* nextChar, const Error& error, size_t perfHashValue ) :
 	state_( state ),
 	nextChar_( nextChar ),
-	hasError_( hasError ),
+	error_( error ),
 	perfHashValue_( perfHashValue )
     {
     }
     
-    void PatternApplier::Position::set(  StateId_t state, const wchar_t* nextChar, bool hasError, size_t perfHashValue ) {
+    void PatternApplier::Position::set(  StateId_t state, const wchar_t* nextChar, const Error& error, size_t perfHashValue ) {
 	state_ = state;
 	nextChar_ = nextChar;
-	hasError_ = hasError;
+	error_ = error;
 	perfHashValue_ = perfHashValue;
     }
 
@@ -28,7 +28,7 @@ namespace csl {
     }
 
     size_t PatternApplier::Position::hasError() const {
-	return hasError_;
+	return error_.isSet();
     }
 
     wchar_t PatternApplier::Position::getNextChar() const {

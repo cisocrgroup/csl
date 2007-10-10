@@ -1,5 +1,2 @@
-aalen
-albert
-alkohol
-berta
-konrad
+walk
+warp

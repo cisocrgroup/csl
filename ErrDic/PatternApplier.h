@@ -27,6 +27,35 @@ namespace csl {
 	    size_t patTracerPHValue;
 	};
 	
+	class Error {
+	public:
+	    Error() :
+		patternID_( -1 ),
+		position_( -1 ) {
+	    }
+	    Error( size_t errorPattern, size_t position ) :
+		patternID_( errorPattern ),
+		position_( position ) {
+	    }
+	    void set( size_t errorPattern, size_t position ) {
+		patternID_ = errorPattern;
+		position_ = position;
+	    }
+	    bool isSet() const {
+		return position_ != -1;
+	    }
+	    
+	    size_t getPosition() const {
+		return position_;
+	    }
+	    size_t getPatternID() const {
+		return patternID_;
+	    }
+	private:
+	    int patternID_;
+	    int position_;
+	};
+
 	class ListItem {
 	public:
 	    inline ListItem() : 
@@ -64,6 +93,8 @@ namespace csl {
 	private:
 	    ListItem* nextItem_;
 	};
+
+
 	/**
 	 * This class represents a position in the dictionary automaton. One or more of those objects 
 	 * form one stack item for the unified traversal of different branches of the automaton.
@@ -72,7 +103,7 @@ namespace csl {
 	public:
 	    inline Position();
 		
-	    inline Position( StateId_t state, const wchar_t* nextChar, bool hasError, size_t perfHashValue = 0 );
+	    inline Position( StateId_t state, const wchar_t* nextChar, const Error& error, size_t perfHashValue = 0 );
 
 	    inline virtual ~Position() {}
 
@@ -88,19 +119,24 @@ namespace csl {
 
 	    inline size_t getPHValue() const;
 
-	    inline void set(  StateId_t state, const wchar_t* nextChar, bool hasError, size_t perfHashValue = 0 );
+	    inline void set(  StateId_t state, const wchar_t* nextChar, const Error& error, size_t perfHashValue = 0 );
 
 	    inline size_t hasError() const;
+
+	    inline const Error& getError() const {
+		return error_;
+	    }
 
 	    inline wchar_t getNextChar() const;
 
 	    inline bool stepToNextChar();
+
 	    
 
 	private:
 	    StateId_t state_;
 	    const wchar_t* nextChar_;
-	    bool hasError_;
+	    Error error_;
 	    size_t perfHashValue_;
 	}; // class Position
 
@@ -317,7 +353,7 @@ namespace csl {
 	    const wchar_t* suso = dic_.getSusoString( st );
 
 	    // insert initial positions and patTracers
-	    stack_.at( 0 ).addItem( new Position( st, suso, false, 0 ) );
+	    stack_.at( 0 ).addItem( new Position( st, suso, Error(), 0 ) );
 	    stack_.at( 0 ).addItem( new PatternTracer( patternGraph_.getRoot(), patternGraph_.getSusoString( patternGraph_.getRoot() ), 0, 0 ) );
 
 	    tokenCount_ = 0;
@@ -370,14 +406,14 @@ namespace csl {
 		    // std::wcout<<"word: "<<stack_.getWord()<<std::endl;
 		    
 		    bool addedTriggerPosition = false;
- 		    while( first && first->getNextChar() == label && ! foundFinal ) {
+ 		    while( first && first->getNextChar() == label  ) {
 			Position* pos;
 			PatternTracer* patTracer;
  			if( ( pos = dynamic_cast< Position* >( first ) ) ) {
-			    size_t perfHashValue = pos->getPHValue();
- 			    StateId_t nextState = dic_.walkPerfHash( pos->getState(), label, perfHashValue );
-			    // note that dic_.walkPerfHash() updates perfHashValue
- 			    Position* newPos = new Position( nextState, dic_.getSusoString( nextState ), pos->hasError(), perfHashValue );
+			    size_t dicPHValue = pos->getPHValue();
+ 			    StateId_t nextState = dic_.walkPerfHash( pos->getState(), label, dicPHValue );
+			    // note that dic_.walkPerfHash() updates dicPHValue
+ 			    Position* newPos = new Position( nextState, dic_.getSusoString( nextState ), pos->getError(), dicPHValue );
 			    nextStackItem.addItem( newPos );
 			    // The 2nd constraint has to be dropped if insertions are allowed
 			    if( ! newPos->hasError() && ( newPos->getNextChar() != 0 ) ) addedTriggerPosition = true;
@@ -385,8 +421,8 @@ namespace csl {
 			    if( newPos->hasError() &&
 				dic_.isFinal( nextState ) && 
 				! filterDic_.lookup( stack_.getWord().c_str(), 0 ) ) {
-				dicPHValue_ = perfHashValue;
-				patTracerPHValue_ = patTracerHashValue;
+				dicPHValue_ = dicPHValue;
+				curError_ = &( newPos->getError() );
 				foundFinal = true;
 			    }
 			    
@@ -436,13 +472,13 @@ namespace csl {
 					if( ( newDicState = dic_.walkPerfHash( dicState, *c, newDicPHValue ) ) ) {
 					    StateId_t newPatState = patternGraph_.walkPerfHash( patState, *c, newPatTracerPHValue );
 					    if( patternGraph_.isFinal( newPatState ) ) {
-						Position* newPos = new Position( newDicState, dic_.getSusoString( newDicState ), true, newDicPHValue );
+						Position* newPos = new Position( newDicState, dic_.getSusoString( newDicState ), Error( newPatTracerPHValue, getCurDepth() - patTracer->getDepth() ), newDicPHValue );
 						nextStackItem.addItem( newPos );
 						// handle addedTriggerPosition here if allowing more than one error
 						if( dic_.isFinal( newDicState ) ) {
 						    foundFinal = true;
 						    dicPHValue_ = newDicPHValue;
-						    patTracerPHValue_ = newPatTracerPHValue;
+						    curError_ = &( newPos->getError() );
 						}
 					    }
 
@@ -484,11 +520,11 @@ namespace csl {
 	    return dicPHValue_;
 	}
 
-	const size_t getPattern() const {
-	    return patTracerPHValue_;
+	const wchar_t* getPattern() const {
+	    return patterns_.at( curError_->getPatternID() ).c_str();
 	}
 
-	static const wchar_t patternDelimiter_ = L',';
+	static const wchar_t patternDelimiter_ = L'_';
 
     private:
 	size_t getCurDepth() const {
@@ -504,7 +540,7 @@ namespace csl {
 	std::vector< std::wstring > patterns_;
 
 	size_t dicPHValue_;
-	size_t patTracerPHValue_;
+	const Error* curError_;
 	size_t tokenCount_;
 	bool isGood_;
 
