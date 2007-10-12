@@ -130,6 +130,7 @@ namespace csl {
 	    assert( key < 65536 );
 	    key_ = key;
 	}
+
 	wchar_t getKey() const {
 	    return key_;
 	}

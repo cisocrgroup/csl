@@ -420,7 +420,7 @@ namespace csl {
 			    
 			    if( newPos->hasError() &&
 				dic_.isFinal( nextState ) && 
-				! filterDic_.lookup( stack_.getWord().c_str(), 0 ) ) {
+				! filterDic_.lookup( stack_.getWord().c_str() ) ) {
 				dicPHValue_ = dicPHValue;
 				curError_ = &( newPos->getError() );
 				foundFinal = true;
