@@ -11,7 +11,7 @@ namespace csl {
     // The same problem exists for compareStates<BASIC>
 
     template< CellType CellTypeValue >
-    TransTable< CellTypeValue >::TransTable()
+    inline TransTable< CellTypeValue >::TransTable()
     {
 	
 	cells_ = 0;
@@ -20,14 +20,14 @@ namespace csl {
     }
 
     template< CellType CellTypeValue >
-    TransTable< CellTypeValue >::~TransTable() {
+    inline TransTable< CellTypeValue >::~TransTable() {
 	// if( cells_ ) free( cells_ );
 	// if( susoStrings_ ) free( susoStrings_ );
 	// header ?
     }
 
     template< CellType CellTypeValue >
-    const Alphabet& TransTable< CellTypeValue >::getAlphabet() const {
+    inline const Alphabet& TransTable< CellTypeValue >::getAlphabet() const {
 	return alph_;
     }
 
@@ -47,7 +47,7 @@ namespace csl {
 	}
 	return 0;
     }
-
+    
     template<>
     inline StateId_t TransTable< TOKDIC >::walkStrPerfHash( StateId_t state, const wchar_t* str, size_t& perfHashValue ) const {
 	while( *str && state ) {
@@ -65,7 +65,7 @@ namespace csl {
     }
 
     template< CellType CellTypeValue >
-    void TransTable< CellTypeValue >::initConstruction() {
+    inline void TransTable< CellTypeValue >::initConstruction() {
 	alph_.initConstruction();
 	nrOfCells_ = 0;
 	allocCells( 80 );
@@ -86,7 +86,7 @@ namespace csl {
     }
 
     template< CellType CellTypeValue >
-    void TransTable< CellTypeValue >::finishConstruction() {
+    inline void TransTable< CellTypeValue >::finishConstruction() {
 	alph_.finishConstruction();
 	nrOfCells_ = sizeOfUsedCells_;
 	
@@ -106,7 +106,7 @@ namespace csl {
      * resize the array of cells
      */
     template< CellType CellTypeValue >
-    void TransTable< CellTypeValue >::allocCells( size_t newNrOfCells ) {
+    inline void TransTable< CellTypeValue >::allocCells( size_t newNrOfCells ) {
 	cells_ = ( Cell_t* ) realloc( cells_, newNrOfCells * sizeof( Cell_t ) );
 	memset( ( cells_ + nrOfCells_ ), 0, ( newNrOfCells - nrOfCells_ ) * sizeof( Cell_t ) );
 	nrOfCells_ = newNrOfCells;
@@ -118,7 +118,7 @@ namespace csl {
      * find slot to store state
      */
     template<>
-    StateId_t TransTable< BASIC >::findSlot( const TempState& state ) {
+    inline StateId_t TransTable< BASIC >::findSlot( const TempState& state ) {
 	size_t slot = firstFreeCell_ - 1; // is incremented again at beginning of loop
 	size_t nrOfAnnotations = state.getNrOfAnnotations();
 
@@ -154,7 +154,7 @@ namespace csl {
      * find slot to store state
      */
     template<>
-    StateId_t TransTable< TOKDIC >::findSlot( const TempState& state ) {
+    inline StateId_t TransTable< TOKDIC >::findSlot( const TempState& state ) {
 	size_t slot = firstFreeCell_ - 1; // is incremented again at beginning of loop
 	size_t nrOfAnnotations = state.getNrOfAnnotations();
 
@@ -187,7 +187,7 @@ namespace csl {
     }
 
     template< CellType CellTypeValue >
-    StateId_t TransTable< CellTypeValue >::storeTempState( TempState& state ) {
+    inline StateId_t TransTable< CellTypeValue >::storeTempState( TempState& state ) {
 	return 0; // dummy
     }
 
@@ -326,7 +326,7 @@ namespace csl {
     ////////// FILE DUMP FUNCTIONALITY /////////////////////////////////////
 
     template< CellType CellTypeValue >
-    bool TransTable< CellTypeValue >::loadFromFile( const char* binFile ) {
+    inline bool TransTable< CellTypeValue >::loadFromFile( const char* binFile ) {
 	FILE * fi;
 
 	std::cerr << "TransTable: Reading " << binFile << " ... " << std::flush;
@@ -344,7 +344,7 @@ namespace csl {
     }
 
     template< CellType CellTypeValue >
-    void TransTable< CellTypeValue >::loadFromStream( FILE* fi ) {
+    inline void TransTable< CellTypeValue >::loadFromStream( FILE* fi ) {
 	fread( &header_, sizeof( Header ), 1, fi );
 
 	if ( ( header_.getMagicNumber() != magicNumber_ ) ) {
@@ -375,7 +375,7 @@ namespace csl {
     
 
     template< CellType CellTypeValue  >
-    void TransTable< CellTypeValue >::createBinary( char* compFile ) {
+    inline void TransTable< CellTypeValue >::createBinary( char* compFile ) {
 	FILE * fo = fopen( compFile, "wb" );
 	if ( !fo ) {
 	    std::cerr << "Couldn't open " << compFile << std::endl;
@@ -389,7 +389,7 @@ namespace csl {
     }
 
     template< CellType CellTypeValue  >
-    void TransTable< CellTypeValue >::writeToStream( FILE* fo ) const {
+    inline void TransTable< CellTypeValue >::writeToStream( FILE* fo ) const {
 	if ( !fo ) {
 	    throw exceptions::badFileHandle( "TransTable: Couldn't write to filehandle " );
 	}
@@ -417,7 +417,7 @@ namespace csl {
     }
 
     template< CellType CellTypeValue  >
-    void TransTable< CellTypeValue >::printCells() const {
+    inline void TransTable< CellTypeValue >::printCells() const {
 	std::wcout << L"i\ttype\tkey\tvalue" << std::endl << L"--------------" << std::endl;
 	for ( size_t i = 0; i < nrOfCells_; ++i ) {
 	    std::wcout << i << L"\t" << cells_[i].getType() << L"\t" << (unsigned int)cells_[i].getKey() << L"\t" << cells_[i].getValue() << std::endl;
@@ -425,7 +425,7 @@ namespace csl {
     }
 
     template< CellType CellTypeValue >
-    void TransTable< CellTypeValue >::toDot() const {
+    inline void TransTable< CellTypeValue >::toDot() const {
 	Cell_t * cellArray = TransTable::getCells();
 	printf( "Digraph TransTable_out { //DOTCODE\nrankdir=LR; //DOTCODE\n" );
 	for ( size_t i = 1; i < sizeOfUsedCells_; ++i ) {
@@ -472,7 +472,7 @@ namespace csl {
     }
 
     template<>
-    void TransTable< TOKDIC >::doAnalysis() const {
+    inline void TransTable< TOKDIC >::doAnalysis() const {
 	Cell_t * cellArray = getCells();
 
 	size_t empty = 0;

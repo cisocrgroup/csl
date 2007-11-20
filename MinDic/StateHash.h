@@ -45,7 +45,7 @@ class StateHash {
     static const int HASHC1 = 257;
     static const int HASHC2 = 107;
 
-    static const size_t tableSize_ = (size_t)( 1ll<<20 ) - 1;
+    static const size_t tableSize_ = (size_t)( 1ll<<26 ) - 1;
 
     int hashcode(const TempState& state) {
 	int h = (state.isFinal())? 0 : Global::maxNrOfChars;

@@ -218,7 +218,7 @@ namespace csl {
 	    }
 	    annotations_[nrOfKeys_] = annotation;
 	}
-
+	
 	wcscpy( lastKey_, key );
 	++nrOfKeys_;
 
@@ -292,7 +292,7 @@ namespace csl {
 
 		if( isFinal( newPos ) ) {
 		    w[depth+1] = 0;
-		    printf( "%ls#%d\n", w, getAnnotation( newPerfHashValue ) );
+		    // printf( "%ls#%d\n", w, getAnnotation( newPerfHashValue ) );
 		    //printf( "%ls#%d\n", w, newPerfHashValue );
 		    
 		    if( ( ++count_ % 100000 ) == 0 ) fprintf( stderr, "%d\n", (int)count_ );

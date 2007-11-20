@@ -11,6 +11,7 @@ my $noPermDelimiter = '$';
 my $tokensDelimiter = ',';
 
 
+my $permuteTokens = 0; # 0 / 1
 my $permuteParts = 0; # 0 / 1
 my $groundtruth = 0; # 0 / 1
 
@@ -38,7 +39,14 @@ GetOptions(
 if(@ARGV<3 or $help) {
     print STDERR <<TXT;
 
-Use like: ./get_queries.pl <alph_file> <text_db_file> <nr_of_queries>
+ Use like: ./get_queries.pl <alph_file> <text_db_file> <nr_of_queries>
+
+ One line in <text_db_file> would look like:
+ \%this,will,be,permuted\$this,will,not,be,permuted#42
+ Formally:
+ ((\%|\$)(\\w+,)*\\w+)+(#\\d+)?
+
+Mark parts that are to be permuted with a '%', others with a '$'
 
 Flags:
 --help             display this message and quit
@@ -109,7 +117,9 @@ for(1..$nr_of_queries) {
 	my @tokens = split( /$tokensDelimRex/, $part );
 	
 	if( $delim eq $permDelimiter ) {
-	    @tokens = sort { reverse($a) cmp reverse($b )} @tokens;
+	    shuffle( \@tokens );
+#	    @tokens = sort { reverse($a) cmp reverse($b )} @tokens;
+	
 	    push( @parts, join( $tokensDelimiter, @tokens ).',' );
 	}
 	else {
@@ -175,4 +185,16 @@ sub addErrors {
 	}
     }
     return $word;
+}
+
+sub shuffle {
+    my $arrRef = shift @_;
+    my $len = @$arrRef;
+    for( 1 .. $len ) {
+	my $rand1 = int( rand( $len ) );
+	my $rand2 = int( rand( $len ) );
+	my $tmp = $arrRef->[$rand1];
+	$arrRef->[$rand1] = $arrRef->[$rand2];
+	$arrRef->[$rand2] = $tmp;
+    }
 }

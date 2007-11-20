@@ -38,7 +38,7 @@ JNIEXPORT void JNICALL Java_csl_candidateExtractor_CandidateExtractor_nativeQuer
     jfieldID msMatchPointerID = env->GetFieldID( callerClass, "msMatchPointer_", "J" );
     csl::MSMatch<csl::FW_BW>* msMatch = (csl::MSMatch<csl::FW_BW>*)env->GetLongField( callerObj, msMatchPointerID );
 
-    // get the receiver-method
+    // get the receiver-method. Here, type-safety is somewhat gone: whatever class has a suitable method receive(...) will do
     jclass receiverClass = env->GetObjectClass( receiverObj );
     jmethodID receiveID = env->GetMethodID( receiverClass, "receive", "(Ljava/lang/String;FF)V" );
 

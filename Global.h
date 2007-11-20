@@ -13,7 +13,7 @@
    - rename typedefs to "fasel_t"
 */
 namespace csl {
-    typedef short char16;
+    typedef unsigned short char16;
     typedef unsigned wchar_t char32;
 
     typedef unsigned char uchar;
