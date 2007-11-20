@@ -6,7 +6,7 @@ namespace csl {
     template<>
     inline MSMatch< STANDARD >::MSMatch( size_t k, const char* compdicFile ) :
 	dictFW_( compdicFile ),
-	dictBW_(), // only as dummy
+	dictBW_( dictFW_ ), // only as dummy
 	caseMode_( asIs ),
 	k_( k )
     {
