@@ -30,6 +30,7 @@ namespace csl {
 	typedef TransTable< TOKDIC > TransTable_t;
 	typedef AnnType AnnType_t;
 
+
 	MinDic( const char* dicFile = 0 );
 
 	inline void loadFromFile( const char* binFile );
@@ -44,7 +45,7 @@ namespace csl {
 	 * The funtion that actually executes the computation of the trie.
 	 * @param txtFile The dictionary (including annotations) in txt format
 	 */
-	inline void compileDic( char* txtFile );
+	inline void compileDic( const char* txtFile );
 
 	inline void parseAnnotation( wchar_t* str, AnnType_t* annotation ) const;
 

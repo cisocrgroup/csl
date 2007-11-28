@@ -106,7 +106,7 @@ namespace csl {
     }
 
     template< class AnnType_t >
-    inline void MinDic< AnnType_t >::compileDic( char* txtFile ) {
+    inline void MinDic< AnnType_t >::compileDic( const char* txtFile ) {
 	wchar_t* key = 0;
 
 	initConstruction();
