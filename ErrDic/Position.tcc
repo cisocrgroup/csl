@@ -3,27 +3,25 @@ namespace csl {
     PatternApplier::Position::Position() :
 	state_( 0 ),
 	nextChar_( 0 ),
-	error_(),
-	perfHashValue_( 0 )
+	error_()
     {
     }
     
-    PatternApplier::Position::Position( StateId_t state, const wchar_t* nextChar, const Error& error, size_t perfHashValue ) :
+    PatternApplier::Position::Position( const MDState_t& state, const Error& error ) :
 	state_( state ),
-	nextChar_( nextChar ),
-	error_( error ),
-	perfHashValue_( perfHashValue )
+	nextChar_( state_.getSusoString() ),
+	error_( error )
     {
     }
     
-    void PatternApplier::Position::set(  StateId_t state, const wchar_t* nextChar, const Error& error, size_t perfHashValue ) {
-	state_ = state;
-	nextChar_ = nextChar;
-	error_ = error;
-	perfHashValue_ = perfHashValue;
-    }
+//     void PatternApplier::Position::set(  const MDState_t& state, const wchar_t* nextChar, const Error& error, size_t perfHashValue ) {
+// 	state_ = state;
+// 	nextChar_ = nextChar;
+// 	error_ = error;
+// 	perfHashValue_ = perfHashValue;
+//     }
 
-    StateId_t PatternApplier::Position::getState() const {
+    const PatternApplier::MDState_t& PatternApplier::Position::getState() const {
 	return state_;
     }
 
@@ -40,11 +38,5 @@ namespace csl {
 	++nextChar_;
 	return true;
     }
-
-    size_t PatternApplier::Position::getPHValue() const {
-	return perfHashValue_;
-    }
-
-	    
 
 } // eon

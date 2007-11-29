@@ -30,6 +30,64 @@ namespace csl {
 	typedef TransTable< TOKDIC > TransTable_t;
 	typedef AnnType AnnType_t;
 
+	/**
+	 * This class provides a much easier interface to the MinDic if the guts of the automaton
+	 * have to be explored state- and transition-wise.
+	 */
+	class State {
+	public:
+	    State( const MinDic< AnnType >& minDic ) :
+		minDic_( minDic ),
+		dicPos_( minDic_.getRoot() ),
+		perfHashValue_( 0 ) {
+	    }
+
+	    /**
+	     * 
+	     */
+	    bool walk( wchar_t c ) {
+		dicPos_ = minDic_.walkPerfHash( dicPos_, c, perfHashValue_ );
+		return isValid();
+	    }
+
+	    bool isValid() {
+		return ( dicPos_ != 0 );
+	    }
+
+	    bool hasTransition( wchar_t c ) const {
+		return minDic_.walk( dicPos_, c );
+	    }
+
+	    State getTransTarget( wchar_t c ) const {
+		size_t tmpPHValue = perfHashValue_;
+		return State( minDic_, minDic_.walkPerfHash( dicPos_, c, tmpPHValue ), tmpPHValue );
+	    }
+
+	    const wchar_t* getSusoString() const {
+		return minDic_.getSusoString( dicPos_ );
+	    }
+
+	    size_t getPerfHashValue() const {
+		return perfHashValue_;
+	    }
+
+	    bool isFinal() const {
+		return minDic_.isFinal( dicPos_ );
+	    }
+	    
+	    const AnnType& getAnnotation();
+
+	private:
+	    State( const MinDic< AnnType >& minDic, StateId_t dicPos, size_t perfHashValue ) :
+		minDic_( minDic ),
+		dicPos_( dicPos ),
+		perfHashValue_( perfHashValue ) {
+	    }
+
+	    const MinDic< AnnType >& minDic_;
+	    StateId_t dicPos_;
+	    size_t perfHashValue_;
+	}; // class State
 
 	MinDic( const char* dicFile = 0 );
 
