@@ -114,7 +114,7 @@ namespace csl {
 	class Position : public ListItem {
 	public:
 	    inline Position();
-		
+	    
 	    inline Position( const MDState_t& state, const Error& error );
 
 	    inline virtual ~Position() {}
@@ -143,12 +143,10 @@ namespace csl {
 
 	    inline bool stepToNextChar();
 
-	    
-
 	private:
 	    MDState_t state_;
 	    const wchar_t* nextChar_;
-	    Error error_;
+	    std::vector< Error > error_;
 	}; // class Position
 
 
@@ -501,11 +499,10 @@ namespace csl {
 			if( newPos->hasError() &&
 			    nextState.isFinal() && 
 			    ! filterDic_.lookup( stack_.getWord().c_str() ) ) {
-
+			    
 			    curError_ = newPos->getError();
 			    foundFinal = true;
 			}
-			    
 			pos->stepToNextChar();
 		    }
 

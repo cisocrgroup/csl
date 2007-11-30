@@ -29,7 +29,7 @@ namespace csl {
 	    size_t nrOfTokens = 0;
 
 	    while( applier.isGood() ) {
-//		std::wcout<<applier.getWord()<<", "<<applier.getPHValue()<<","<<applier.getPattern()<<","<<applier.getErrorPos()<<std::endl;
+//		std::wcout<<applier.getWord()<<", "<<applier.getPattern()<<","<<applier.getErrorPos()<<std::endl;
 		if( ! ( ++nrOfTokens % 100000 ) ) std::wcerr<<nrOfTokens / 1000<<"k"<<std::endl;
 
 //		errDic.addToken( applier.getWord().c_str(), L"elefant", applier.getPattern() );

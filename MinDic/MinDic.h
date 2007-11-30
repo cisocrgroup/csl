@@ -60,7 +60,8 @@ namespace csl {
 
 	    State getTransTarget( wchar_t c ) const {
 		size_t tmpPHValue = perfHashValue_;
-		return State( minDic_, minDic_.walkPerfHash( dicPos_, c, tmpPHValue ), tmpPHValue );
+		StateId_t newPos = minDic_.walkPerfHash( dicPos_, c, tmpPHValue );
+		return State( minDic_, newPos, tmpPHValue );
 	    }
 
 	    const wchar_t* getSusoString() const {
