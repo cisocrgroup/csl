@@ -83,7 +83,7 @@ namespace csl {
 	 * @return true iff key is found inte ErrDic
 	 * 
 	 */
-	inline bool lookup( wchar_t* key, Entry* entry ) const;
+	inline bool lookup( const wchar_t* key, Entry* entry ) const;
 
 	/**
 	 * @brief return the original token annotated with the entry with the given id (perfect hash value)
@@ -104,7 +104,7 @@ namespace csl {
 	/**
 	 * @brief load an ErrDic from a binary file
 	 */
-	inline void loadFromFile( char* dicFile );
+	inline void loadFromFile( const char* dicFile );
 	/**
 	 * @brief load an ErrDic-object off an open stream
 	 */
@@ -113,7 +113,7 @@ namespace csl {
 	/**
 	 * @brief write the ErrDic in its current state to a file
 	 */
-	inline void writeToFile( char* dicFile ) const;
+	inline void writeToFile( const char* dicFile ) const;
 
 	/**
 	 * @brief write the ErrDic in its current state to an open stream

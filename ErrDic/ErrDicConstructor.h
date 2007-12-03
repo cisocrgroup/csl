@@ -15,12 +15,12 @@ namespace csl {
 	void constructErrDic( const MinDic< int >& dic_, const MinDic< int >& filterDic_, const char* patternFile, ErrDic& errDic );
 
     private:
+	typedef PatternApplier::ErrorIterator_t ErrorIterator_t;
     };
 
 
-
     void ErrDicConstructor::constructErrDic( const MinDic< int >& dic, const MinDic< int >& filterDic, const char* patternFile, ErrDic& errDic ) {
-
+	
 	PatternApplier applier( dic, filterDic, patternFile );
 
 	try {
@@ -30,6 +30,8 @@ namespace csl {
 
 	    while( applier.isGood() ) {
 //		std::wcout<<applier.getWord()<<", "<<applier.getPattern()<<","<<applier.getErrorPos()<<std::endl;
+//		applier.printCurrent();
+
 		if( ! ( ++nrOfTokens % 100000 ) ) std::wcerr<<nrOfTokens / 1000<<"k"<<std::endl;
 
 //		errDic.addToken( applier.getWord().c_str(), L"elefant", applier.getPattern() );

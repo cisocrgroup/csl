@@ -2,15 +2,13 @@ namespace csl {
 
     PatternApplier::Position::Position() :
 	state_( 0 ),
-	nextChar_( 0 ),
-	error_()
+	nextChar_( 0 )
     {
     }
     
-    PatternApplier::Position::Position( const MDState_t& state, const Error& error ) :
+    PatternApplier::Position::Position( const MDState_t& state ) :
 	state_( state ),
-	nextChar_( state_.getSusoString() ),
-	error_( error )
+	nextChar_( state_.getSusoString() )
     {
     }
     
@@ -25,8 +23,8 @@ namespace csl {
 	return state_;
     }
 
-    size_t PatternApplier::Position::hasError() const {
-	return error_.isSet();
+    size_t PatternApplier::Position::hasErrors() const {
+	return ! errors_.empty();
     }
 
     wchar_t PatternApplier::Position::getNextChar() const {

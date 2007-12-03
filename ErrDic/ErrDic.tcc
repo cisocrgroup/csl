@@ -16,7 +16,7 @@ namespace csl {
 	if( errorPatterns_ ) delete( errorPatterns_ );
     }
 
-    inline bool ErrDic::lookup( wchar_t* key, Entry* entry ) const {
+    inline bool ErrDic::lookup( const wchar_t* key, Entry* entry ) const {
 	size_t tokID;
 	if( TransTable_t::getTokID( key, &tokID ) ) {
 	    *entry = Entry( *this, tokID );
@@ -25,7 +25,7 @@ namespace csl {
 	else return false;
     }
     
-    inline void ErrDic::loadFromFile( char* dicFile ) {
+    inline void ErrDic::loadFromFile( const char* dicFile ) {
 	FILE* fi = fopen( dicFile, "rb" );
 	if ( !fi ) {
 	    throw exceptions::badFileHandle( "csl::ErrDic: Couldn't open file '" +
@@ -53,7 +53,7 @@ namespace csl {
 	fread( errorPatterns_, sizeof( wchar_t ), sizeOfErrorPatterns_, fi );
     }
 
-    inline void ErrDic::writeToFile( char* dicFile ) const {
+    inline void ErrDic::writeToFile( const char* dicFile ) const {
 	FILE* fo = fopen( dicFile, "wb" );
 	if ( !fo ) {
 	    throw exceptions::badFileHandle( "ErrDic: Couldn't open file '" +

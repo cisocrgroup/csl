@@ -11,6 +11,8 @@ namespace csl {
 
     class PatternApplier {
     private:
+	class Position;
+
 	typedef MinDic<>::State MDState_t;
 
 	/**
@@ -19,9 +21,13 @@ namespace csl {
 	 */
 	class TraversalItem {
 	public:
-	    TraversalItem( const MDState_t& patState__, const MDState_t& dicState__ ) :
-		patState( patState__ ), dicState( dicState__ ) {
+
+	    TraversalItem( const Position& position__, const MDState_t& patState__, const MDState_t& dicState__ ) :
+		position( position__ ),
+		patState( patState__ ),
+		dicState( dicState__ ) {
 	    }
+	    const Position& position;
 	    MDState_t patState;
 	    MDState_t dicState;
 	};
@@ -47,6 +53,10 @@ namespace csl {
 		patternID_ = errorPattern;
 		position_ = position;
 	    }
+	    
+	    /**
+	     * @deprecated 
+	     */
 	    bool isSet() const {
 		return position_ != -1;
 	    }
@@ -115,7 +125,7 @@ namespace csl {
 	public:
 	    inline Position();
 	    
-	    inline Position( const MDState_t& state, const Error& error );
+	    inline Position( const MDState_t& state );
 
 	    inline virtual ~Position() {}
 
@@ -133,10 +143,28 @@ namespace csl {
 
 //	    inline void set(  StateId_t state, const wchar_t* nextChar, const Error& error, size_t perfHashValue = 0 );
 
-	    inline size_t hasError() const;
+	    inline size_t hasErrors() const;
+
+	    inline size_t getNrOfErrors() const {
+		return errors_.size();
+	    }
 	    
-	    inline const Error& getError() const {
-		return error_;
+	    inline const std::vector< Error >& getErrors() const {
+		return errors_;
+	    }
+
+	    /**
+	     * Add all errors in the range [it, end) to the list of errors
+	     */
+	    template< typename I >
+	    void addErrors( I it, I end ) {
+		for( ; it != end; ++it ) {
+		    addError( *it );
+		}
+	    }
+
+	    void addError( const Error& e ) {
+		errors_.push_back( e );
 	    }
 
 	    inline wchar_t getNextChar() const;
@@ -146,7 +174,7 @@ namespace csl {
 	private:
 	    MDState_t state_;
 	    const wchar_t* nextChar_;
-	    std::vector< Error > error_;
+	    std::vector< Error > errors_;
 	}; // class Position
 
 
@@ -394,6 +422,8 @@ namespace csl {
 
 
     public:
+	typedef std::vector< Error >::const_iterator ErrorIterator_t;
+
 	PatternApplier( const MinDic< int >& dic, const MinDic< int >& filterDic, const char* patternFile ) :
 	    dic_( dic ),
 	    filterDic_( filterDic ),
@@ -402,7 +432,7 @@ namespace csl {
 	    loadPatterns( patternFile );
 
 	    // insert initial positions and patTracers
-	    stack_.at( 0 ).addItem( new Position( MDState_t( dic_ ), Error() ) );
+	    stack_.at( 0 ).addItem( new Position( MDState_t( dic_ ) ) );
 	    stack_.at( 0 ).addItem( new PatternTracer( MDState_t( patternGraph_ ), 0 ) );
 
 	    tokenCount_ = 0;
@@ -427,12 +457,16 @@ namespace csl {
 
 	bool next();
 	
-	const wchar_t* getPattern() const {
-	    return patterns_.at( curError_.getPatternID() ).c_str();
+	const std::vector< Error >& getErrors() const {
+	    return curErrors_;
 	}
 
-	const size_t getErrorPos() const {
-	    return curError_.getPosition();
+	inline void printCurrent() const {
+	    std::wcout<<getWord()<<":";
+	    for( std::vector< Error >::const_iterator it = curErrors_.begin(); it != curErrors_.end(); ++it ) {
+		std::wcout<<"("<<patterns_.at( it->getPatternID() )<<","<<it->getPosition()<<"),";
+	    }
+	    std::wcout<<std::endl;
 	}
 
 	static const wchar_t patternDelimiter_ = L'_';
@@ -450,9 +484,11 @@ namespace csl {
 	MinDic< int > patternGraph_;
 	std::vector< std::wstring > patterns_;
 
-	Error curError_;
+	std::vector< Error > curErrors_;
 	size_t tokenCount_;
 	bool isGood_;
+
+	static const size_t maxNrOfErrors_ = 10;
 
     }; // class PatternApplier
 
@@ -484,6 +520,12 @@ namespace csl {
 		stack_.getWord().at( getCurDepth() ) = label;
 		// std::wcout<<"word: "<<stack_.getWord()<<std::endl;
 		    
+		/*
+		 * The variable addedTriggerPosition indicates if a new Position was 
+		 * inserted which shall trigger the insertion of a new PatternTracer.
+		 * This is not the case e.g. if the new Position has already the 
+		 * max. number of errors.
+		 */
 		bool addedTriggerPosition = false;
 		while( first && first->getNextChar() == label  ) {
 		    Position* pos;
@@ -491,16 +533,23 @@ namespace csl {
 
 		    if( ( pos = dynamic_cast< Position* >( first ) ) ) {
 			MDState_t nextState( (*pos).getState().getTransTarget( label ) );
-			Position* newPos = new Position( nextState, pos->getError() );
+			Position* newPos = new Position( nextState );
+			// copy all errors of pos to newPos
+			newPos->addErrors( pos->getErrors().begin(), pos->getErrors().end() );
+
 			nextStackItem.addItem( newPos );
-			// The 2nd constraint has to be dropped if insertions are allowed
-			if( ! newPos->hasError() && ( newPos->getNextChar() != 0 ) ) addedTriggerPosition = true;
+			
+			if( ( newPos->getNrOfErrors() < maxNrOfErrors_ ) &&
+			    ( newPos->getNextChar() != 0 ) // has to be dropped if insertions are allowed
+			    ) {
+			    addedTriggerPosition = true;
+			}
 			    
-			if( newPos->hasError() &&
+			if( newPos->hasErrors() &&
 			    nextState.isFinal() && 
 			    ! filterDic_.lookup( stack_.getWord().c_str() ) ) {
 			    
-			    curError_ = newPos->getError();
+			    curErrors_ = newPos->getErrors();
 			    foundFinal = true;
 			}
 			pos->stepToNextChar();
@@ -520,9 +569,9 @@ namespace csl {
 			    ListItem* item = stack_.at( getCurDepth() - patTracer->getDepth() ).getFirst();
 			    while( item ) {
 				if( item->isPosition() &&
-				    ! ((Position*)item)->hasError()
+				    ( ((Position*)item)->getNrOfErrors() < maxNrOfErrors_ )
 				    ) {
-				    stack.push( TraversalItem( patStartState, item->getState() ) );
+				    stack.push( TraversalItem( (const Position&)(*item), patStartState, item->getState() ) );
 				}
 				item = item->getNextItem();
 			    }
@@ -530,6 +579,7 @@ namespace csl {
 			    while( ! stack.empty() ) {
 				const MDState_t& patState = stack.top().patState;
 				const MDState_t& dicState = stack.top().dicState;
+				const Position& position = stack.top().position;
 
 				MDState_t newDicState( dic_ );
 				stack.pop();
@@ -539,18 +589,26 @@ namespace csl {
 					MDState_t newDicState = dicState.getTransTarget( *c );
 					MDState_t newPatState = patState.getTransTarget( *c );
 					if( newPatState.isFinal() ) {
-					    Position* newPos = new Position( newDicState, Error( newPatState.getPerfHashValue(), getCurDepth() - patTracer->getDepth() ) );
+					    Position* newPos = new Position( newDicState );
+					    newPos->addErrors( position.getErrors().begin(), position.getErrors().end() );
+					    newPos->addError( Error( newPatState.getPerfHashValue(), getCurDepth() - patTracer->getDepth() ) );
 					    nextStackItem.addItem( newPos );
-					    // handle addedTriggerPosition here if allowing more than one error
+					    
+					    if( ( newPos->getNrOfErrors() < maxNrOfErrors_ ) &&
+						( newPos->getNextChar() != 0 ) // has to be dropped if insertions are allowed
+						) {
+						addedTriggerPosition = true;
+					    }
+
 					    if( newDicState.isFinal() ) {
 						foundFinal = true;
-						curError_ = newPos->getError();
+						curErrors_ = newPos->getErrors();
 					    }
 					}
 					
 					// push new pair only if newPatState has some outgoing transitions
 					if( *( newPatState.getSusoString() ) ) {
-					    stack.push( TraversalItem( newPatState, newDicState ) );
+					    stack.push( TraversalItem( position, newPatState, newDicState ) );
 					}
 				    } // if could walk in dictionary
 				} // for all transitions from patState
