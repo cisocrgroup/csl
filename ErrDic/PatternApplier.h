@@ -443,10 +443,6 @@ namespace csl {
 
 	void loadPatterns( const char* patternFile );
 
-	void printMe() {
-	    std::wcout<<"print me "<<std::endl; 
-	}
-
 	const std::wstring& getWord() const {
 	    return ( stack_.getWord() );
 	}
@@ -461,12 +457,12 @@ namespace csl {
 	    return curErrors_;
 	}
 
-	inline void printCurrent() const {
-	    std::wcout<<getWord()<<":";
+	inline void printCurrent( std::wostream& os = std::wcout ) const {
+	    os<<getWord()<<":";
 	    for( std::vector< Error >::const_iterator it = curErrors_.begin(); it != curErrors_.end(); ++it ) {
-		std::wcout<<"("<<patterns_.at( it->getPatternID() )<<","<<it->getPosition()<<"),";
+		os<<"("<<patterns_.at( it->getPatternID() )<<","<<it->getPosition()<<"),";
 	    }
-	    std::wcout<<std::endl;
+	    os<<std::endl;
 	}
 
 	static const wchar_t patternDelimiter_ = L'_';
@@ -488,7 +484,7 @@ namespace csl {
 	size_t tokenCount_;
 	bool isGood_;
 
-	static const size_t maxNrOfErrors_ = 10;
+	static const size_t maxNrOfErrors_ = 7;
 
     }; // class PatternApplier
 

@@ -6,6 +6,7 @@
 #include "../MinDic/MinDic.h"
 #include "./PatternApplier.h"
 #include "./ErrDic.h"
+#include "../Stopwatch.h"
 
 namespace csl {
 
@@ -21,6 +22,8 @@ namespace csl {
 
     void ErrDicConstructor::constructErrDic( const MinDic< int >& dic, const MinDic< int >& filterDic, const char* patternFile, ErrDic& errDic ) {
 	
+	Stopwatch watch;
+	watch.start();
 	PatternApplier applier( dic, filterDic, patternFile );
 
 	try {
@@ -30,9 +33,14 @@ namespace csl {
 
 	    while( applier.isGood() ) {
 //		std::wcout<<applier.getWord()<<", "<<applier.getPattern()<<","<<applier.getErrorPos()<<std::endl;
-//		applier.printCurrent();
+		applier.printCurrent( std::wcout );
 
-		if( ! ( ++nrOfTokens % 100000 ) ) std::wcerr<<nrOfTokens / 1000<<"k"<<std::endl;
+		if( ! ( ++nrOfTokens % 100000 ) ) {
+		    std::wcerr<<nrOfTokens / 1000<<"k. "<<watch.readMilliseconds()<<" ms"<< std::endl;
+		    watch.start();
+		    applier.printCurrent( std::wcerr );
+
+		}
 
 //		errDic.addToken( applier.getWord().c_str(), L"elefant", applier.getPattern() );
 		

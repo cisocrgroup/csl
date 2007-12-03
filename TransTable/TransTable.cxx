@@ -393,7 +393,7 @@ namespace csl {
 	if ( !fo ) {
 	    throw exceptions::badFileHandle( "TransTable: Couldn't write to filehandle " );
 	}
-	std::cerr << "Writing TransTable"<<std::endl;
+	std::wcerr << "Writing TransTable"<<std::endl;
 	fwrite( &header_, sizeof( Header ), 1, fo );
 	alph_.writeToStream( fo );
 	fwrite( cells_, sizeof( Cell_t ), sizeOfUsedCells_, fo );
