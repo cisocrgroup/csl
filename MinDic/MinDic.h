@@ -37,16 +37,16 @@ namespace csl {
 	class State {
 	public:
 	    State( const MinDic< AnnType >& minDic ) :
-		minDic_( minDic ),
-		dicPos_( minDic_.getRoot() ),
+		minDic_( &minDic ),
+		dicPos_( minDic_->getRoot() ),
 		perfHashValue_( 0 ) {
 	    }
-
+	    
 	    /**
 	     * 
 	     */
 	    bool walk( wchar_t c ) {
-		dicPos_ = minDic_.walkPerfHash( dicPos_, c, perfHashValue_ );
+		dicPos_ = minDic_->walkPerfHash( dicPos_, c, perfHashValue_ );
 		return isValid();
 	    }
 
@@ -55,17 +55,17 @@ namespace csl {
 	    }
 
 	    bool hasTransition( wchar_t c ) const {
-		return minDic_.walk( dicPos_, c );
+		return minDic_->walk( dicPos_, c );
 	    }
 
 	    State getTransTarget( wchar_t c ) const {
 		size_t tmpPHValue = perfHashValue_;
-		StateId_t newPos = minDic_.walkPerfHash( dicPos_, c, tmpPHValue );
-		return State( minDic_, newPos, tmpPHValue );
+		StateId_t newPos = minDic_->walkPerfHash( dicPos_, c, tmpPHValue );
+		return State( *minDic_, newPos, tmpPHValue );
 	    }
 
 	    const wchar_t* getSusoString() const {
-		return minDic_.getSusoString( dicPos_ );
+		return minDic_->getSusoString( dicPos_ );
 	    }
 
 	    size_t getPerfHashValue() const {
@@ -73,19 +73,21 @@ namespace csl {
 	    }
 
 	    bool isFinal() const {
-		return minDic_.isFinal( dicPos_ );
+		return minDic_->isFinal( dicPos_ );
 	    }
 	    
-	    const AnnType& getAnnotation();
+	    const AnnType& getAnnotation() {
+		return minDic_->getAnnotation( getPerfHashValue() );
+	    }
 
 	private:
 	    State( const MinDic< AnnType >& minDic, StateId_t dicPos, size_t perfHashValue ) :
-		minDic_( minDic ),
+		minDic_( &minDic ),
 		dicPos_( dicPos ),
 		perfHashValue_( perfHashValue ) {
 	    }
 
-	    const MinDic< AnnType >& minDic_;
+	    const MinDic< AnnType >* minDic_;
 	    StateId_t dicPos_;
 	    size_t perfHashValue_;
 	}; // class State
@@ -122,6 +124,10 @@ namespace csl {
 	inline void printDic( StateId_t initState ) const;
 
 	
+	inline State getRootState() const {
+	    return State( *this );
+	}
+
 	/**
 	 * This method from TransTable is blocked for MinDic, not implemented here!
 	 */

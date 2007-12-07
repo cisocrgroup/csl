@@ -662,7 +662,6 @@ namespace csl {
 	patternGraph_.writeToFile( "./patterns.mdic" );
     }
 
-
 } // eon
 
 #include "./Position.tcc"

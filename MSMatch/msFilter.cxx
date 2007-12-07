@@ -46,7 +46,6 @@ int main( int argc, char** argv ) {
 //   	    std::cout<<list.getSize()<<" hits."<<std::endl;
 
 
-	    printf( "See: %ls: %d hits\n", query, list.getSize() );
 	    // print all hits
 	    size_t i;
 	    for( i = 0;i < list.getSize();++i ) {

@@ -217,7 +217,7 @@ namespace csl {
  	if( ( pos = curDict_->walkStr( curDict_->getRoot(), patLeft_ ) ) ) {
 	    levDistanceFirst_ = 0;
  	    wcscpy( word_, patLeft_ );
-	    printf( "FOUND FIRST:%ls, dist of 1st part is 0\n", word_ );
+	    // printf( "FOUND FIRST:%ls, dist of 1st part is 0\n", word_ );
 	    minDistSecond_ = 0;
 	    levDEASecond_->setDistance( 3 );
  	    intersectSecond( pos, LevDEA::Pos( 0, 0 ), wcslen( patLeft_ ) );
@@ -242,7 +242,7 @@ namespace csl {
 	if ( ( pos = curDict_->walkStr( curDict_->getRoot(), patRightRev_ ) ) ) {
 	    levDistanceFirst_ = 0;
 	    wcscpy( word_, patRightRev_ );
-	    printf( "FOUND FIRST:%ls, dist of 1st part is 0\n", word_ );
+	    //printf( "FOUND FIRST:%ls, dist of 1st part is 0\n", word_ );
 	    levDEASecond_->setDistance( 3 );
 	    minDistSecond_ = 2;
 	    
