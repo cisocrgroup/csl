@@ -29,10 +29,10 @@ int main( size_t argc, char** argv ) {
 	    mbstowcs( query, (char*)bytesIn, Global::lengthOfLongStr );
 	    
 	    int ann = 0;
-	    if( mdic.getAnnotation( query, &ann ) ) {
-		std::cout<<ann<<std::endl;
+	    if( mdic.lookup( query, &ann ) ) {
+		std::wcout<<query<<","<<ann<<std::endl;
 	    }
-	    else std::cout<<std::endl;
+	    else std::wcout<<std::endl;
 	}
 
     } catch( exceptions::cslException ex ) {

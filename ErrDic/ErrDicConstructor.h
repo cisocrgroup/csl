@@ -33,7 +33,7 @@ namespace csl {
 
 	    while( applier.isGood() ) {
 //		std::wcout<<applier.getWord()<<", "<<applier.getPattern()<<","<<applier.getErrorPos()<<std::endl;
-		applier.printCurrent( std::wcout );
+//		applier.printCurrent( std::wcout );
 
 		if( ! ( ++nrOfTokens % 100000 ) ) {
 		    std::wcerr<<nrOfTokens / 1000<<"k. "<<watch.readMilliseconds()<<" ms"<< std::endl;

@@ -484,7 +484,7 @@ namespace csl {
 	size_t tokenCount_;
 	bool isGood_;
 
-	static const size_t maxNrOfErrors_ = 7;
+	static const size_t maxNrOfErrors_ = 10;
 
     }; // class PatternApplier
 
@@ -640,6 +640,9 @@ namespace csl {
 	std::wifstream fi;
 	fi.imbue( std::locale( "de_DE.UTF-8" ) );
 	fi.open( patternFile );
+	if( ! fi ) {
+	    throw exceptions::badFileHandle( "PatternApplier: Couldn't open pattern file" );
+	}
 	
 	std::wstring line;
 	while( getline( fi, line ) ) {

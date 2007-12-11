@@ -1,5 +1,6 @@
 #include<iostream>
-#include"./MinDic/MinDic.h"
+#include "./MinDic/MinDic.h"
+#include "./Stopwatch.h"
 
 std::wstring indent( size_t depth ) {
     return std::wstring( depth, L'.' );
@@ -8,14 +9,18 @@ std::wstring indent( size_t depth ) {
 class WordWrinkler {
 public:
 
+    struct Answer {
+	std::wstring word;
+	std::vector< std::pair< std::wstring, std::wstring > > patterns;
+    };
+
     WordWrinkler( const char* patternFile ) {
 	loadPatterns( patternFile );
     }
     
-    template< typename Collector_t >
-    void wrinkle( std::wstring& word, Collector_t& collector ) {
+    void wrinkle( std::wstring& word, std::vector< Answer >* answers ) {
 	original_ = word;
-	collector_ = collector;
+	answers_ = answers;
 	
 	usedPatterns_.clear();
 	wrinkle_rec( original_, 0 );
@@ -26,12 +31,11 @@ private:
 
     typedef std::vector< std::wstring > RightList_t;
 
-    template< typename PatContainer_t >
-    void wrinkle_rec( std::wstring word, size_t left, size_t depth = 0 ) {
+    void wrinkle_rec( std::wstring word, size_t left ) {
 //	std::wcout<<indent(depth)<<"Enter wrinkle_rec with word="<<word<<", left="<<left<<std::endl;
-
+	
 	size_t wlength = word.length();
-
+	
 	bool foundLeftSide = false;
 	MDState_t patState( leftSides_ );
 	
@@ -50,9 +54,9 @@ private:
 	} // while left is shifted
 
 	if( foundLeftSide ) {
-	    wrinkle_rec( word, left + 1, depth + 1 );
-
-	    while( ( left + offset < wlength ) && patState.isValid() ) { 
+	    wrinkle_rec( word, left + 1 );
+	    
+	    do {
 		if( patState.isFinal() ) {
 		    const RightList_t& rights = rightSides_.at( patState.getAnnotation() );
 		    for( RightList_t::const_iterator it = rights.begin(); it != rights.end(); ++it ) {
@@ -60,26 +64,31 @@ private:
 			newWord.replace( left, offset + 1, *it );
 			
 			usedPatterns_.push_back( std::pair< std::wstring, std::wstring >( word.substr( left, offset + 1 ), *it ) );
-			wrinkle_rec( newWord, left + it->length(), depth + 1 );
+			wrinkle_rec( newWord, left + it->length() );
 			usedPatterns_.resize( usedPatterns_.size() - 1 );
 		    }
 		}
-		patState.walk( word.at( ++offset ) );
-	    }
+		++offset;
+	    } while( ( left + offset < wlength ) && patState.walk( word.at( offset ) ) );
+
 	}
 
 
 	if( ( wlength == left ) && ! usedPatterns_.empty() ) {
-	    collector_.
-	    std::wcout<<">>"<<word<<":";
+	    Answer answer;
+
+	    // std::wcout<<">>"<<word<<":";
+	    answer.word = word;
 	    for( std::vector< std::pair< std::wstring, std::wstring > >::const_iterator it = usedPatterns_.begin();
 		 it != usedPatterns_.end(); 
 		 ++it ) {
-		std::wcout<< "(" << it->first <<"->"<< it->second << ")";
+		// std::wcout<< "(" << it->first <<"->"<< it->second << ")";
+		answer.patterns.push_back( *it );
 	    }
-	    std::wcout<<std::endl;
-	}
+	    // std::wcout<<std::endl;
 
+	    answers_->push_back( answer );
+	}
 	
     } // wrinkle_rec
 
@@ -108,13 +117,14 @@ private:
 	fi.close();
 
 	leftSides_.initConstruction();
+
 	for( PatternMap_t::const_iterator it = patterns.begin(); it != patterns.end(); ++it ) {
 
-	    std::wcout<<it->first<<"->";
-	    for( RightList_t::const_iterator rit = it->second.begin(); rit != it->second.end(); ++rit ) {
-		std::wcout<<*rit<<" | ";
-	    }
-	    std::wcout<<std::endl;
+// 	    std::wcout<<it->first<<"->";
+// 	    for( RightList_t::const_iterator rit = it->second.begin(); rit != it->second.end(); ++rit ) {
+// 		std::wcout<<*rit<<" | ";
+// 	    }
+// 	    std::wcout<<std::endl;
 
 	    // here we copy the whole vector, but who cares ....
 	    rightSides_.push_back( it->second );
@@ -125,8 +135,9 @@ private:
     }
 
     std::wstring original_;
-    Collector_t collector_;
 
+    std::vector< Answer >* answers_;
+    
     std::vector< std::pair< std::wstring, std::wstring > > usedPatterns_;
 
     csl::MinDic< int > leftSides_;
@@ -137,13 +148,70 @@ private:
 int main( int argc, const char** argv ) {
     setlocale(LC_CTYPE, "de_DE.UTF-8");  /*Setzt das Default Encoding für das Programm */
 
+    Stopwatch watch;
+    watch.start();
 
     WordWrinkler ww( argv[1] );
-    std::wstring w;
 
-    while( std::wcin>>w ) {
-	ww.wrinkle( w );
-    }
+    size_t nrOfParadigms = 0;
+    size_t nrOfCookedParadigms = 0;
+    std::wstring paradigm;
+    while( std::wcin >> paradigm ) {
+	// comment lines beginning with '#' are handed on to the output
+	if( paradigm.at( 0 ) == L'#' ) {
+	    std::wcout<<paradigm<<std::endl;
+	    continue;
+	}
+
+	++nrOfParadigms;
+	std::vector< std::wstring > forms;
+	size_t begin = 0;
+	size_t sepPos = 0;
+	while( ( sepPos = paradigm.find_first_of( ',', begin ) ), sepPos != std::string::npos ) {
+	    forms.push_back( paradigm.substr( begin, sepPos - begin ) );
+	    begin = sepPos + 1;
+	}
+	forms.push_back( paradigm.substr( begin ) );
+	
+	
+	// find longest prefix and store suffixes
+	std::vector< std::wstring > suffixes;
+
+	std::wstring prefix = forms.at( 0 );
+	for( std::vector< std::wstring >::const_iterator it = forms.begin(); it != forms.end(); ++it ) {
+	    size_t pos = 0;
+	    while( pos < prefix.length() && pos < it->length() && prefix.at( pos ) == it->at( pos ) ) {
+		++pos;
+	    }
+	    prefix.resize( pos );
+	}
+
+	for( std::vector< std::wstring >::const_iterator it = forms.begin(); it != forms.end(); ++it ) {
+	    suffixes.push_back( it->substr( prefix.length() ) );
+
+	}
+
+
+//	std::wcout<<"Prefix: "<<prefix<<", suffixes: ";// DEBUG
+// 	for( std::vector< std::wstring >::const_iterator sufIt = suffixes.begin(); sufIt != suffixes.end(); ++sufIt ) { // DEBUG
+// 	    std::wcout<<"-"<<*sufIt<<", "; // DEBUG
+// 	} // DEBUG
+// 	std::wcout<<std::endl; // DEBUG
+	
+	
+	std::vector< WordWrinkler::Answer > answers;
+	ww.wrinkle( prefix, &answers );
+
+	for( std::vector< WordWrinkler::Answer >::const_iterator wrinkleIt = answers.begin(); wrinkleIt != answers.end(); ++wrinkleIt ) {
+	    ++nrOfCookedParadigms;
+	    for( std::vector< std::wstring >::const_iterator sufIt = suffixes.begin(); sufIt != suffixes.end(); std::wcout<<",", ++sufIt ) {
+		std::wcout<<wrinkleIt->word<<*sufIt;
+	    }
+	    std::wcout<<std::endl;
+	}
+    } // for all paradigms from stdin
+    
+    std::wcerr<<"Cooked "<<nrOfCookedParadigms<<" hypothetical paradigms out of "<<nrOfParadigms<<" real ones. Time: "<<watch.readMilliseconds()<<" milliseconds"<<std::endl;
 }
 
 
