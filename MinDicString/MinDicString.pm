@@ -22,12 +22,9 @@ sub new {
     
 #    my $binary = "~/MA/Zerl_web/lex/csl/trunk/bin/lookupMDString $self->{alphFile} $self->{dicFile}";
     my $binary = "$lookupBinary $self->{alphFile} $self->{dicFile}";
-
     
-
     open2( $self->{BINARY_OUT}, $self->{BINARY_IN}, $binary ) or die "Perl::MinDicString: $!";
-
-
+    
 
     if( defined $self->{encoding} ) {
 	if( $self->{encoding} eq 'iso' ) {

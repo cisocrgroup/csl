@@ -10,13 +10,34 @@
 
 namespace csl {
 
+    /**
+     * @deprecated
+     * 
+     * Not in use at the moment
+     */
     class ErrDicConstructor {
     public:
+	ErrDicConstructor() : 
+	    filterDic( 0 ),
+	    constraintDic( 0 ) {
+	}
 
-	void constructErrDic( const MinDic< int >& dic_, const MinDic< int >& filterDic_, const char* patternFile, ErrDic& errDic );
+	void constructErrDic( const MinDic< int >& dic_, const char* patternFile, ErrDic& errDic );
+
+	void setFilterDic( const MinDic< int >& filterDic ) {
+	    filterDic_ = filterDic;
+	}
+
+	void setConstraintDic( const MinDic< int >& constraintDic ) {
+	    constraintDic_ = &constraintDic;
+	}
 
     private:
 	typedef PatternApplier::ErrorIterator_t ErrorIterator_t;
+
+	const MinDic< int >* filterDic_;
+	const MinDic< int >& constraintDic_;
+
     };
 
 
@@ -33,7 +54,7 @@ namespace csl {
 
 	    while( applier.isGood() ) {
 //		std::wcout<<applier.getWord()<<", "<<applier.getPattern()<<","<<applier.getErrorPos()<<std::endl;
-//		applier.printCurrent( std::wcout );
+		// applier.printCurrent( std::wcout );
 
 		if( ! ( ++nrOfTokens % 100000 ) ) {
 		    std::wcerr<<nrOfTokens / 1000<<"k. "<<watch.readMilliseconds()<<" ms"<< std::endl;

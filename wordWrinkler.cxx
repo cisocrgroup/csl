@@ -32,7 +32,7 @@ private:
     typedef std::vector< std::wstring > RightList_t;
 
     void wrinkle_rec( std::wstring word, size_t left ) {
-//	std::wcout<<indent(depth)<<"Enter wrinkle_rec with word="<<word<<", left="<<left<<std::endl;
+	// std::wcout<<"Enter wrinkle_rec with word="<<word<<", left="<<left<<std::endl;
 	
 	size_t wlength = word.length();
 	
@@ -41,7 +41,7 @@ private:
 	
 	size_t offset = 0;
 	while( left < wlength && ! foundLeftSide ) {
-//	    std::wcout<<indent( depth )<<"Try with left="<<left<<std::endl;
+	    // std::wcout<<"Try with left="<<left<<std::endl; // DEBUG
 	    patState = leftSides_.getRootState();
 	    offset = 0;
 	    while( ! foundLeftSide && ( left + offset < wlength ) && patState.walk( word.at( left + offset ) ) ) { 
@@ -55,21 +55,24 @@ private:
 
 	if( foundLeftSide ) {
 	    wrinkle_rec( word, left + 1 );
+	    // std::wcout<<"Come back. word="<<word<<", left="<<left<<std::endl; // DEBUG
 	    
 	    do {
 		if( patState.isFinal() ) {
 		    const RightList_t& rights = rightSides_.at( patState.getAnnotation() );
 		    for( RightList_t::const_iterator it = rights.begin(); it != rights.end(); ++it ) {
+			// std::wcout<<"Here is a right side for left side "<<patState.getAnnotation()<<":"<<*it<<std::endl; // DEBUG
 			std::wstring newWord( word );
 			newWord.replace( left, offset + 1, *it );
 			
 			usedPatterns_.push_back( std::pair< std::wstring, std::wstring >( word.substr( left, offset + 1 ), *it ) );
 			wrinkle_rec( newWord, left + it->length() );
+			// std::wcout<<"Come back. word="<<word<<", left="<<left<<std::endl;// DEBUG
 			usedPatterns_.resize( usedPatterns_.size() - 1 );
 		    }
 		}
 		++offset;
-	    } while( ( left + offset < wlength ) && patState.walk( word.at( offset ) ) );
+	    } while( ( left + offset < wlength ) && patState.walk( word.at( left + offset ) ) );
 
 	}
 
@@ -77,15 +80,15 @@ private:
 	if( ( wlength == left ) && ! usedPatterns_.empty() ) {
 	    Answer answer;
 
-	    // std::wcout<<">>"<<word<<":";
+	    // std::wcout<<">>"<<word<<":";   // DEBUG
 	    answer.word = word;
 	    for( std::vector< std::pair< std::wstring, std::wstring > >::const_iterator it = usedPatterns_.begin();
 		 it != usedPatterns_.end(); 
 		 ++it ) {
-		// std::wcout<< "(" << it->first <<"->"<< it->second << ")";
+		// std::wcout<< "(" << it->first <<"->"<< it->second << ")"; // DEBUG
 		answer.patterns.push_back( *it );
 	    }
-	    // std::wcout<<std::endl;
+	    // std::wcout<<std::endl;  // DEBUG
 
 	    answers_->push_back( answer );
 	}
@@ -132,6 +135,7 @@ private:
 	    leftSides_.addToken( it->first.c_str(), rightSides_.size()-1 ); // annotate the proper index into rightSides_
 	}
 	leftSides_.finishConstruction();
+	// leftSides_.toDot(); // DEBUG
     }
 
     std::wstring original_;

@@ -5,6 +5,7 @@
 #include<set>
 
 #include "../Global.h"
+#include "../Stopwatch.h"
 #include "../MinDic/MinDic.h"
 
 namespace csl {
@@ -38,35 +39,16 @@ namespace csl {
 	 */
 	class Error {
 	public:
-	    Error() :
-		patternID_( -1 ),
-		position_( -1 ) {
-	    }
+	    Error();
 
+	    Error( size_t errorPattern, size_t position );
 
-	    Error( size_t errorPattern, size_t position ) :
-		patternID_( errorPattern ),
-		position_( position ) {
-	    }
+	    void set( size_t errorPattern, size_t position );
 
-	    void set( size_t errorPattern, size_t position ) {
-		patternID_ = errorPattern;
-		position_ = position;
-	    }
-	    
-	    /**
-	     * @deprecated 
-	     */
-	    bool isSet() const {
-		return position_ != -1;
-	    }
-	    
-	    size_t getPosition() const {
-		return position_;
-	    }
-	    size_t getPatternID() const {
-		return patternID_;
-	    }
+	    size_t getPosition() const;
+
+	    size_t getPatternID() const;
+
 	private:
 	    /**
 	     * An index pointing to the array of patterns
@@ -114,7 +96,8 @@ namespace csl {
 
 	private:
 	    ListItem* nextItem_;
-	};
+
+	}; // class ListItem
 
 
 	/**
@@ -129,10 +112,17 @@ namespace csl {
 
 	    inline virtual ~Position() {}
 
+	    /**
+	     * returns if this ListItem is a Position, which is: true
+	     */
 	    inline bool isPosition() const {
 		return true;
 	    }
 
+
+	    /**
+	     * returns if this ListItem is a PatternTracer, which is: false
+	     */
 	    inline bool isPatternTracer() const {
 		return false;
 	    }
@@ -175,6 +165,7 @@ namespace csl {
 	    MDState_t state_;
 	    const wchar_t* nextChar_;
 	    std::vector< Error > errors_;
+
 	}; // class Position
 
 
@@ -186,91 +177,45 @@ namespace csl {
 	    /**
 	     * Gives the tracer a standard initialisation
 	     */
-	    inline PatternTracer() :
-		state_( 0 ),
-		nextChar_( 0 ),
-		depth_( 0 ) {
-	    }
+	    inline PatternTracer();
 
 	    /**
 	     * Initialises a new tracer with given values
 	     */
-	    inline PatternTracer( const MDState_t& state, size_t depth ) :
-		state_( state ),
-		depth_( depth ) {
-		nextChar_ = state.getSusoString();
-
-		// is that for deletions???
-		if( *nextChar_ == PatternApplier::patternDelimiter_ ) {
-		    ++nextChar_;
-		}
-	    }
+	    inline PatternTracer( const MDState_t& state, size_t depth );
 
 	    /**
 	     * A do-nothing destructor
 	     */
-	    inline ~PatternTracer() {}
+	    inline ~PatternTracer();
 
-
-	    /**
-	     * sets all values
-	     */
-// 	    void set( StateId_t state, const wchar_t* nextChar, size_t depth, size_t perfHashValue = 0 ) {
-// 		state_ = state;
-// 		nextChar_ = nextChar;
-// 		depth_ = depth;
-// 		perfHashValue_ = perfHashValue;
-// 	    }
-    
 	    /**
 	     * returns if this ListItem is a Position, which is: false
 	     */
-	    inline bool isPosition() const {
-		return false;
-	    }
+	    inline bool isPosition() const;
 
 	    /**
 	     * returns if this ListItem is a PatternTracer, which is: true
 	     */
-	    inline bool isPatternTracer() const {
-		return true;
-	    }
+	    inline bool isPatternTracer() const;
 
 	    /**
 	     * returns the current character 
 	     */
-	    inline wchar_t getNextChar() const {
-		return *nextChar_;
-	    }
+	    inline wchar_t getNextChar() const;
 
 	    /**
 	     *
 	     */
-	    bool stepToNextChar() {
-		if( *nextChar_ == 0 ) return false;
-		++nextChar_;
-		if( *nextChar_ == PatternApplier::patternDelimiter_ ) {
-		    std::wcout<<"HA"<<std::endl;
-		    ++nextChar_;
-		    if( *nextChar_ == 0 ) return false;
-		}
-		return true;
-	    }
+	    bool stepToNextChar();
 
 	    /**
 	     * 
 	     */
-	    virtual const MDState_t& getState() const {
-		return state_;
-	    }
+	    virtual const MDState_t& getState() const;
 	    
-	    inline size_t getDepth() const {
-		return depth_;
-	    }
+	    inline size_t getDepth() const;
 	    
-// 	    size_t getPHValue() const {
-// 		return perfHashValue_;
-// 	    }
 	private:
 	    /**
 	     * the current state inside the mdic of all patterns
@@ -424,10 +369,11 @@ namespace csl {
     public:
 	typedef std::vector< Error >::const_iterator ErrorIterator_t;
 
-	PatternApplier( const MinDic< int >& dic, const MinDic< int >& filterDic, const char* patternFile ) :
+	PatternApplier( const MinDic< int >& dic, const char* patternFile ) :
 	    dic_( dic ),
-	    filterDic_( filterDic ),
-	    isGood_( false ){
+	    filterDic_( 0 ),
+	    constraintDic_( 0 ),
+	    isGood_( false ) {
 	    
 	    loadPatterns( patternFile );
 
@@ -439,6 +385,16 @@ namespace csl {
 	    next();
 
 	    // std::wcerr<<"New PatternApplier with: "<<patternFrom_<<"->"<<patternTo_<<std::endl;
+	}
+
+	void constructErrDic(  ErrDic& errDic );
+
+	void setFilterDic( const MinDic< int >& filterDic ) {
+	    filterDic_ = &filterDic;
+	}
+
+	void setConstraintDic( const MinDic< int >& constraintDic ) {
+	    constraintDic_ = &constraintDic;
 	}
 
 	void loadPatterns( const char* patternFile );
@@ -472,10 +428,10 @@ namespace csl {
 	    return stack_.getDepth();
 	}
 
-
 	Stack stack_;
 	const MinDic< int >& dic_;
-	const MinDic< int >& filterDic_;
+	const MinDic< int >* filterDic_;
+	const MinDic< int >* constraintDic_;
 	
 	MinDic< int > patternGraph_;
 	std::vector< std::wstring > patterns_;
@@ -484,7 +440,7 @@ namespace csl {
 	size_t tokenCount_;
 	bool isGood_;
 
-	static const size_t maxNrOfErrors_ = 10;
+	static const size_t maxNrOfErrors_ = 1;
 
     }; // class PatternApplier
 
@@ -543,7 +499,7 @@ namespace csl {
 			    
 			if( newPos->hasErrors() &&
 			    nextState.isFinal() && 
-			    ! filterDic_.lookup( stack_.getWord().c_str() ) ) {
+			    ! ( filterDic_ && filterDic_->lookup( stack_.getWord().c_str() ) ) ) {
 			    
 			    curErrors_ = newPos->getErrors();
 			    foundFinal = true;
@@ -576,7 +532,7 @@ namespace csl {
 				const MDState_t& patState = stack.top().patState;
 				const MDState_t& dicState = stack.top().dicState;
 				const Position& position = stack.top().position;
-
+				
 				MDState_t newDicState( dic_ );
 				stack.pop();
 				for( const wchar_t* c = patState.getSusoString();
@@ -665,9 +621,43 @@ namespace csl {
 	patternGraph_.writeToFile( "./patterns.mdic" );
     }
 
+    void PatternApplier::constructErrDic(  ErrDic& errDic ) {
+	
+	Stopwatch watch;
+	watch.start();
+
+	try {
+
+	    errDic.initConstruction();
+	    size_t nrOfTokens = 0;
+
+	    while( isGood() ) {
+//		std::wcout<<applier.getWord()<<", "<<applier.getPattern()<<","<<applier.getErrorPos()<<std::endl;
+		// applier.printCurrent( std::wcout );
+
+		if( ! ( ++nrOfTokens % 100000 ) ) {
+		    std::wcerr<<nrOfTokens / 1000<<"k. "<<watch.readMilliseconds()<<" ms"<< std::endl;
+		    watch.start();
+		    printCurrent( std::wcerr );
+		}
+
+//		errDic.addToken( applier.getWord().c_str(), L"elefant", applier.getPattern() );
+		
+		next();
+	    }
+	    
+	    errDic.finishConstruction();
+	    
+	} catch( exceptions::badInput exc ) {
+	    std::wcout<<"ErrDic Creation failed: "<<exc.what()<<std::endl; 
+	}
+    }
+
 } // eon
 
 #include "./Position.tcc"
+#include "./PatternTracer.tcc"
+#include "./Error.tcc"
 
     
     
