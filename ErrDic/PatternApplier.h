@@ -241,7 +241,8 @@ namespace csl {
 	class StackItem {
 	public:
 	    StackItem() :
-		list_( 0 )
+		list_( 0 ),
+		constraintPos_( 0 )
 		{
 		}
 
@@ -290,12 +291,12 @@ namespace csl {
 		addItem( first );
 	    }
 
-	    void setFilterPos( StateId_t pos ) {
-		filterPos_ = pos;
+	    void setConstraintPos( StateId_t pos ) {
+		constraintPos_ = pos;
 	    }
 
-	    StateId_t getFilterPos() const {
-		return filterPos_;
+	    StateId_t getConstraintPos() const {
+		return constraintPos_;
 	    }
 
 	    bool empty() const {
@@ -309,8 +310,9 @@ namespace csl {
 
 	private:
 	    ListItem* list_;
-	    StateId_t filterPos_;
-	};
+	    StateId_t constraintPos_;
+
+	}; // class StackItem
 
 
 	/**
@@ -363,7 +365,7 @@ namespace csl {
 	private:
 	    size_t depth_;
 	    std::wstring word_;
-	};
+	}; // class Stack
 
 
     public:
@@ -373,18 +375,26 @@ namespace csl {
 	    dic_( dic ),
 	    filterDic_( 0 ),
 	    constraintDic_( 0 ),
+	    isInitialised_( false ),
 	    isGood_( false ) {
 	    
 	    loadPatterns( patternFile );
 
+
+	    // std::wcerr<<"New PatternApplier with: "<<patternFrom_<<"->"<<patternTo_<<std::endl;
+	}
+
+	void init() {
 	    // insert initial positions and patTracers
 	    stack_.at( 0 ).addItem( new Position( MDState_t( dic_ ) ) );
 	    stack_.at( 0 ).addItem( new PatternTracer( MDState_t( patternGraph_ ), 0 ) );
 
+	    if( constraintDic_ ) {
+		stack_.at( 0 ).setConstraintPos( constraintDic_->getRoot() );
+	    }
 	    tokenCount_ = 0;
+	    isInitialised_ = true;
 	    next();
-
-	    // std::wcerr<<"New PatternApplier with: "<<patternFrom_<<"->"<<patternTo_<<std::endl;
 	}
 
 	void constructErrDic(  ErrDic& errDic );
@@ -428,11 +438,15 @@ namespace csl {
 	    return stack_.getDepth();
 	}
 
+	void addNewBranches( const MDState_t& patStartState, size_t deltaDepth, bool* addedTriggerPosition, bool* foundFinal );
+
 	Stack stack_;
 	const MinDic< int >& dic_;
 	const MinDic< int >* filterDic_;
 	const MinDic< int >* constraintDic_;
 	
+	bool isInitialised_;
+
 	MinDic< int > patternGraph_;
 	std::vector< std::wstring > patterns_;
 
@@ -440,12 +454,17 @@ namespace csl {
 	size_t tokenCount_;
 	bool isGood_;
 
-	static const size_t maxNrOfErrors_ = 1;
+	static const size_t maxNrOfErrors_ = 10;
 
     }; // class PatternApplier
 
 
     bool PatternApplier::next() {
+
+	if( ! isInitialised_ ) {
+	    throw exceptions::LogicalError( "csl::PatternApplier: Called next() before calling init() " );
+	}
+
 	isGood_ = true;
 	bool foundFinal = false;
 
@@ -463,11 +482,23 @@ namespace csl {
 	    StackItem& nextStackItem = stack_.at( getCurDepth() + 1 );
 		    
 		
-	    do {
+	    do { // while no continuation could be found and the curStackItem is still good
 
 		ListItem* first = curStackItem.getFirst();
 		wchar_t label = first->getNextChar();
 		    
+		bool constraintFailed = false;
+		if( constraintDic_ ) {
+		    StateId_t newConstraintPos = constraintDic_->walk( curStackItem.getConstraintPos(), label );
+		    if( newConstraintPos ) {
+			nextStackItem.setConstraintPos( newConstraintPos );
+			constraintFailed = false;
+		    }
+		    else {
+			constraintFailed = true;
+		    }
+		}
+
 		stack_.getWord().resize( getCurDepth() + 1 );
 		stack_.getWord().at( getCurDepth() ) = label;
 		// std::wcout<<"word: "<<stack_.getWord()<<std::endl;
@@ -479,16 +510,21 @@ namespace csl {
 		 * max. number of errors.
 		 */
 		bool addedTriggerPosition = false;
-		while( first && first->getNextChar() == label  ) {
+
+		// for all items with the same label
+		while( first && ( first->getNextChar() == label ) && ! foundFinal ) {
 		    Position* pos;
 		    PatternTracer* patTracer;
-
-		    if( ( pos = dynamic_cast< Position* >( first ) ) ) {
+		    
+		    if( constraintFailed ) {
+			// do nothing at all
+		    }
+		    else if( ( pos = dynamic_cast< Position* >( first ) ) ) {
 			MDState_t nextState( (*pos).getState().getTransTarget( label ) );
 			Position* newPos = new Position( nextState );
 			// copy all errors of pos to newPos
 			newPos->addErrors( pos->getErrors().begin(), pos->getErrors().end() );
-
+			
 			nextStackItem.addItem( newPos );
 			
 			if( ( newPos->getNrOfErrors() < maxNrOfErrors_ ) &&
@@ -496,82 +532,32 @@ namespace csl {
 			    ) {
 			    addedTriggerPosition = true;
 			}
-			    
+			
 			if( newPos->hasErrors() &&
 			    nextState.isFinal() && 
-			    ! ( filterDic_ && filterDic_->lookup( stack_.getWord().c_str() ) ) ) {
+			    ! ( filterDic_ && filterDic_->lookup( stack_.getWord().c_str() ) ) &&
+			    ( ! constraintDic_ || constraintDic_->isFinal( nextStackItem.getConstraintPos() ) ) ) {
 			    
 			    curErrors_ = newPos->getErrors();
 			    foundFinal = true;
 			}
-			pos->stepToNextChar();
-		    }
-
+		    } // if first item is a Position
 		    else if( ( patTracer = dynamic_cast< PatternTracer* >( first ) ) ) {
 			MDState_t nextState = (*patTracer).getState().getTransTarget( label );
-
+			
 			PatternTracer* newTracer = new PatternTracer( nextState, patTracer->getDepth() + 1 );
-
+			
 			// if pattern-right-side read completely
 			if( nextState.hasTransition( patternDelimiter_ ) ) {
 			    MDState_t patStartState = nextState.getTransTarget( patternDelimiter_ );
-
-			    std::stack< TraversalItem > stack;
-
-			    ListItem* item = stack_.at( getCurDepth() - patTracer->getDepth() ).getFirst();
-			    while( item ) {
-				if( item->isPosition() &&
-				    ( ((Position*)item)->getNrOfErrors() < maxNrOfErrors_ )
-				    ) {
-				    stack.push( TraversalItem( (const Position&)(*item), patStartState, item->getState() ) );
-				}
-				item = item->getNextItem();
-			    }
-
-			    while( ! stack.empty() ) {
-				const MDState_t& patState = stack.top().patState;
-				const MDState_t& dicState = stack.top().dicState;
-				const Position& position = stack.top().position;
-				
-				MDState_t newDicState( dic_ );
-				stack.pop();
-				for( const wchar_t* c = patState.getSusoString();
-				     *c != 0; ++c ) {
-				    if( dicState.hasTransition( *c ) ) {
-					MDState_t newDicState = dicState.getTransTarget( *c );
-					MDState_t newPatState = patState.getTransTarget( *c );
-					if( newPatState.isFinal() ) {
-					    Position* newPos = new Position( newDicState );
-					    newPos->addErrors( position.getErrors().begin(), position.getErrors().end() );
-					    newPos->addError( Error( newPatState.getPerfHashValue(), getCurDepth() - patTracer->getDepth() ) );
-					    nextStackItem.addItem( newPos );
-					    
-					    if( ( newPos->getNrOfErrors() < maxNrOfErrors_ ) &&
-						( newPos->getNextChar() != 0 ) // has to be dropped if insertions are allowed
-						) {
-						addedTriggerPosition = true;
-					    }
-
-					    if( newDicState.isFinal() ) {
-						foundFinal = true;
-						curErrors_ = newPos->getErrors();
-					    }
-					}
-					
-					// push new pair only if newPatState has some outgoing transitions
-					if( *( newPatState.getSusoString() ) ) {
-					    stack.push( TraversalItem( position, newPatState, newDicState ) );
-					}
-				    } // if could walk in dictionary
-				} // for all transitions from patState
-			    } // while stack not empty
-				
+ 			    addNewBranches( patStartState, patTracer->getDepth(), &addedTriggerPosition, &foundFinal );
 			} // if pattern-right-side read completely
-				
+			
 			nextStackItem.addItem( newTracer );
-			patTracer->stepToNextChar();
-				
-		    }
+			
+		    } // if first item is a pattern tracer
+		    
+		    first->stepToNextChar();
 			
 		    curStackItem.arrangeFirst(); // re-arrange list of ListItems
 		    first = curStackItem.getFirst(); // get the new 1st item
@@ -591,6 +577,59 @@ namespace csl {
 
 	return isGood();
     } // next()
+
+    void PatternApplier::addNewBranches( const MDState_t& patStartState, size_t deltaDepth, bool* addedTriggerPosition, bool* foundFinal ) {
+	std::stack< TraversalItem > stack;
+
+	ListItem* item = stack_.at( getCurDepth() - deltaDepth ).getFirst();
+	while( item ) {
+	    if( item->isPosition() &&
+		( ((Position*)item)->getNrOfErrors() < maxNrOfErrors_ )
+		) {
+		stack.push( TraversalItem( (const Position&)(*item), patStartState, item->getState() ) );
+	    }
+	    item = item->getNextItem();
+	}
+
+	while( ! stack.empty() ) {
+	    const MDState_t& patState = stack.top().patState;
+	    const MDState_t& dicState = stack.top().dicState;
+	    const Position& position = stack.top().position;
+				
+	    MDState_t newDicState( dic_ );
+	    stack.pop();
+	    for( const wchar_t* c = patState.getSusoString();
+		 *c != 0; ++c ) {
+		if( dicState.hasTransition( *c ) ) {
+		    MDState_t newDicState = dicState.getTransTarget( *c );
+		    MDState_t newPatState = patState.getTransTarget( *c );
+		    if( newPatState.isFinal() ) {
+			Position* newPos = new Position( newDicState );
+			newPos->addErrors( position.getErrors().begin(), position.getErrors().end() );
+			newPos->addError( Error( newPatState.getPerfHashValue(), getCurDepth() - deltaDepth ) );
+			stack_.at( getCurDepth() + 1 ).addItem( newPos );
+					    
+			if( ( newPos->getNrOfErrors() < maxNrOfErrors_ ) &&
+			    ( newPos->getNextChar() != 0 ) // has to be dropped if insertions are allowed
+			    ) {
+			    *addedTriggerPosition = true;
+			}
+
+			if( newDicState.isFinal() ) {
+ 			    *foundFinal = true;
+			    curErrors_ = newPos->getErrors();
+			}
+		    }
+					
+		    // push new pair only if newPatState has some outgoing transitions
+		    if( *( newPatState.getSusoString() ) ) {
+			stack.push( TraversalItem( position, newPatState, newDicState ) );
+		    }
+		} // if could walk in dictionary
+	    } // for all transitions from patState
+	} // while stack not empty
+				
+    }
 
     void PatternApplier::loadPatterns( const char* patternFile ) {
 	std::wifstream fi;
@@ -626,6 +665,7 @@ namespace csl {
 	Stopwatch watch;
 	watch.start();
 
+	init();
 	try {
 
 	    errDic.initConstruction();
@@ -633,7 +673,7 @@ namespace csl {
 
 	    while( isGood() ) {
 //		std::wcout<<applier.getWord()<<", "<<applier.getPattern()<<","<<applier.getErrorPos()<<std::endl;
-		// applier.printCurrent( std::wcout );
+		printCurrent( std::wcout );
 
 		if( ! ( ++nrOfTokens % 100000 ) ) {
 		    std::wcerr<<nrOfTokens / 1000<<"k. "<<watch.readMilliseconds()<<" ms"<< std::endl;

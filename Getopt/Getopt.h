@@ -39,18 +39,22 @@ public:
 	    
 	}
 
-	std::cout<<"Options:"<<std::endl;
-	for( std::map< std::string, std::string >::iterator it = options_.begin(); it != options_.end(); ++it ) {
-	    std::cout<<it->first<<" = "<<it->second<<std::endl;
-	}
-	std::cout<<"arguments:"<<std::endl;
-	for( std::vector< std::string >::iterator it = arguments_.begin(); it != arguments_.end(); ++it ) {
-	    std::cout<<*it<<std::endl;
-	}
+// 	std::cout<<"Options:"<<std::endl;
+// 	for( std::map< std::string, std::string >::iterator it = options_.begin(); it != options_.end(); ++it ) {
+// 	    std::cout<<it->first<<" = "<<it->second<<std::endl;
+// 	}
+// 	std::cout<<"arguments:"<<std::endl;
+// 	for( std::vector< std::string >::iterator it = arguments_.begin(); it != arguments_.end(); ++it ) {
+// 	    std::cout<<*it<<std::endl;
+// 	}
     }
 
     const std::string& getProgName() const {
 	return progName_;
+    }
+
+    bool hasOption( const std::string& key ) {
+	return ( options_.find( key ) != options_.end() );
     }
 
     const std::string& getOption( const std::string& key ) {
