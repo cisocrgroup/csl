@@ -19,7 +19,7 @@ int main( int argc, char** argv ) {
 
     csl::MinDic< int > dic( options.getArgument( 0 ).c_str() );
 
-    
+//    dic.toDot(); // DEBUG
 
 
     csl::ErrDic ed;

@@ -208,8 +208,9 @@ int main( int argc, const char** argv ) {
 
 	for( std::vector< WordWrinkler::Answer >::const_iterator wrinkleIt = answers.begin(); wrinkleIt != answers.end(); ++wrinkleIt ) {
 	    ++nrOfCookedParadigms;
-	    for( std::vector< std::wstring >::const_iterator sufIt = suffixes.begin(); sufIt != suffixes.end(); std::wcout<<",", ++sufIt ) {
-		std::wcout<<wrinkleIt->word<<*sufIt;
+	    for( std::vector< std::wstring >::const_iterator sufIt = suffixes.begin(); sufIt != suffixes.end(); ++sufIt ) {
+		std::wcout<<wrinkleIt->word<<*sufIt<<",";
+		
 	    }
 	    std::wcout<<std::endl;
 	}
