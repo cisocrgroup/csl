@@ -150,6 +150,12 @@ private:
 }; // class wordWrinkler
 
 int main( int argc, const char** argv ) {
+
+    if( argc != 2 ) {
+	std::wcerr<<"Use like: "<<argv[0]<<" <pattern-file>  < paradigms"<<std::endl;
+	exit( 1 );
+    }
+
     setlocale(LC_CTYPE, "de_DE.UTF-8");  /*Setzt das Default Encoding für das Programm */
 
     Stopwatch watch;
