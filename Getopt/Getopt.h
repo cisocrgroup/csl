@@ -5,7 +5,7 @@
 class Getopt {
 
 public:
-    Getopt( size_t argc, char** argv ) {
+    Getopt( size_t argc, const char** argv ) {
 	
 	progName_ = argv[0];
 

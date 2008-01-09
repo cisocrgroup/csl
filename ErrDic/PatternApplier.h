@@ -11,6 +11,7 @@
 namespace csl {
 
     class PatternApplier {
+
     private:
 	class Position;
 
@@ -48,7 +49,7 @@ namespace csl {
 	    size_t getPosition() const;
 
 	    size_t getPatternID() const;
-
+	    
 	private:
 	    /**
 	     * An index pointing to the array of patterns
@@ -71,10 +72,10 @@ namespace csl {
 	    
 	    bool operator<( const ListItem& other ) const {
 		if( getNextChar() == 0 ) {
-		    return false; // sort those objects to the very end
+		    return false; // sort *this to the very end
 		}
 		else if( other.getNextChar() == 0 ) {
-		    return true; // sort those objects to the very end
+		    return true; // sort 'other' to the very end
 		}
 
 		return this->getNextChar() < other.getNextChar();
@@ -376,7 +377,8 @@ namespace csl {
 	    filterDic_( 0 ),
 	    constraintDic_( 0 ),
 	    isInitialised_( false ),
-	    isGood_( false ) {
+	    isGood_( false ),
+	    maxNrOfErrors_( 5000 ) {
 	    
 	    loadPatterns( patternFile );
 
@@ -407,6 +409,10 @@ namespace csl {
 	    constraintDic_ = &constraintDic;
 	}
 
+	void setMaxNrOfErrors( size_t maxNrOfErrors ) {
+	    maxNrOfErrors_ = maxNrOfErrors;
+	}
+
 	void loadPatterns( const char* patternFile );
 
 	const std::wstring& getWord() const {
@@ -419,15 +425,27 @@ namespace csl {
 
 	bool next();
 	
-	const std::vector< Error >& getErrors() const {
+	const std::vector< std::vector< Error > >& getErrors() const {
 	    return curErrors_;
+	}
+
+	inline void printPatterns( std::wostream& os = std::wcout ) const {
+	    for( std::vector< std::vector< Error > >::const_iterator reading = curErrors_.begin();
+		 reading != curErrors_.end();
+		 ++reading ) {
+		os<< L"[";
+		for( std::vector< Error >::const_iterator error = reading->begin();
+		     error != reading->end();
+		     ++error ) {
+		    os<<L"(" << patterns_.at( error->getPatternID() ) << L", " << error->getPosition() << L")";
+		}
+	    os << L"]";
+	}
 	}
 
 	inline void printCurrent( std::wostream& os = std::wcout ) const {
 	    os<<getWord()<<":";
-	    for( std::vector< Error >::const_iterator it = curErrors_.begin(); it != curErrors_.end(); ++it ) {
-		os<<"("<<patterns_.at( it->getPatternID() )<<","<<it->getPosition()<<"),";
-	    }
+	    printPatterns( os );
 	    os<<std::endl;
 	}
 
@@ -450,13 +468,14 @@ namespace csl {
 	MinDic< int > patternGraph_;
 	std::vector< std::wstring > patterns_;
 
-	std::vector< Error > curErrors_;
+	std::vector< std::vector< Error > > curErrors_;
 	size_t tokenCount_;
 	bool isGood_;
 
-	static const size_t maxNrOfErrors_ = 10;
+	size_t maxNrOfErrors_;
 
     }; // class PatternApplier
+
 
 
     bool PatternApplier::next() {
@@ -467,6 +486,7 @@ namespace csl {
 
 	isGood_ = true;
 	bool foundFinal = false;
+	curErrors_.clear();
 
 	do { // this loop terminates at a final state
 	    // std::cerr<<"Enter final loop"<<std::endl;
@@ -501,7 +521,7 @@ namespace csl {
 
 		stack_.getWord().resize( getCurDepth() + 1 );
 		stack_.getWord().at( getCurDepth() ) = label;
-		// std::wcout<<"word: "<<stack_.getWord()<<std::endl;
+//		std::wcout<<"word: "<<stack_.getWord()<<std::endl;
 		    
 		/*
 		 * The variable addedTriggerPosition indicates if a new Position was 
@@ -510,9 +530,9 @@ namespace csl {
 		 * max. number of errors.
 		 */
 		bool addedTriggerPosition = false;
-
+		
 		// for all items with the same label
-		while( first && ( first->getNextChar() == label ) && ! foundFinal ) {
+		while( first && ( first->getNextChar() == label ) ) {
 		    Position* pos;
 		    PatternTracer* patTracer;
 		    
@@ -538,7 +558,7 @@ namespace csl {
 			    ! ( filterDic_ && filterDic_->lookup( stack_.getWord().c_str() ) ) &&
 			    ( ! constraintDic_ || constraintDic_->isFinal( nextStackItem.getConstraintPos() ) ) ) {
 			    
-			    curErrors_ = newPos->getErrors();
+			    curErrors_.push_back( newPos->getErrors() );
 			    foundFinal = true;
 			}
 		    } // if first item is a Position
@@ -617,7 +637,7 @@ namespace csl {
 
 			if( newDicState.isFinal() ) {
  			    *foundFinal = true;
-			    curErrors_ = newPos->getErrors();
+			    curErrors_.push_back( newPos->getErrors() );
 			}
 		    }
 					
@@ -672,7 +692,6 @@ namespace csl {
 	    size_t nrOfTokens = 0;
 
 	    while( isGood() ) {
-//		std::wcout<<applier.getWord()<<", "<<applier.getPattern()<<","<<applier.getErrorPos()<<std::endl;
 		printCurrent( std::wcout );
 
 		if( ! ( ++nrOfTokens % 100000 ) ) {
@@ -681,7 +700,7 @@ namespace csl {
 		    printCurrent( std::wcerr );
 		}
 
-//		errDic.addToken( applier.getWord().c_str(), L"elefant", applier.getPattern() );
+//		errDic.addToken( getWord().c_str(), L"elefant", L"x y" );
 		
 		next();
 	    }

@@ -187,6 +187,11 @@ namespace csl {
 	
 	// check alphabetical order
 	if( *lastKey_ && ( wcscmp( lastKey_, key ) >= 0 ) ) {
+	    std::wcerr<<"Alphabetical order violated:"<<std::endl
+		      <<"**********"<<std::endl
+		      <<lastKey_<<std::endl
+		      <<key<<std::endl
+		      <<"**********"<<std::endl;
 	    throw exceptions::badInput( "MinDic::addToken: Alphabetical order violated" );
 	    exit( 1 );
 	}

@@ -4,7 +4,7 @@
 #include "./PatternApplier.h"
 #include "../Getopt/Getopt.h"
 
-int main( int argc, char** argv ) {
+int main( int argc, const char** argv ) {
 
     Getopt options( argc, argv );
     
@@ -29,14 +29,18 @@ int main( int argc, char** argv ) {
     csl::MinDic< int > constraintDic;
     csl::MinDic< int > filterDic;
 
-    if( ! options.getOption( "constraintDic" ).empty() ) {
+    if( options.hasOption( "constraintDic" ) ) {
 	constraintDic.loadFromFile( options.getOption( "constraintDic" ).c_str() );
 	pa.setConstraintDic( constraintDic );
     }
 
-    if( ! options.getOption( "filterDic" ).empty() ) {
+    if( options.hasOption( "filterDic" ) ) {
 	filterDic.loadFromFile( options.getOption( "filterDic" ).c_str() );
 	pa.setFilterDic( filterDic );
+    }
+
+    if( options.hasOption( "maxNrOfErrors" ) ) {
+	pa.setMaxNrOfErrors( atoi( options.getOption( "maxNrOfErrors" ).c_str() ) );
     }
 
     pa.constructErrDic( ed );

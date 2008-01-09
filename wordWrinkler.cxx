@@ -1,6 +1,7 @@
 #include<iostream>
 #include "./MinDic/MinDic.h"
 #include "./Stopwatch.h"
+#include "./Getopt/Getopt.h"
 
 std::wstring indent( size_t depth ) {
     return std::wstring( depth, L'.' );
@@ -149,19 +150,18 @@ private:
 
 }; // class wordWrinkler
 
+
 int main( int argc, const char** argv ) {
 
-    if( argc != 2 ) {
-	std::wcerr<<"Use like: "<<argv[0]<<" <pattern-file>  < paradigms"<<std::endl;
-	exit( 1 );
-    }
+    Getopt options( argc, argv );
+    
 
     setlocale(LC_CTYPE, "de_DE.UTF-8");  /*Setzt das Default Encoding für das Programm */
 
     Stopwatch watch;
     watch.start();
 
-    WordWrinkler ww( argv[1] );
+    WordWrinkler ww( options.getOption( "patterns" ).c_str() );
 
     size_t nrOfParadigms = 0;
     size_t nrOfCookedParadigms = 0;
@@ -174,6 +174,8 @@ int main( int argc, const char** argv ) {
 	}
 
 	++nrOfParadigms;
+
+	// split input line at separator to get vector of word forms
 	std::vector< std::wstring > forms;
 	size_t begin = 0;
 	size_t sepPos = 0;
@@ -183,24 +185,24 @@ int main( int argc, const char** argv ) {
 	}
 	forms.push_back( paradigm.substr( begin ) );
 	
-	
-	// find longest prefix and store suffixes
-	std::vector< std::wstring > suffixes;
 
+	// find longest prefix
+	std::vector< std::wstring > suffixes;
 	std::wstring prefix = forms.at( 0 );
-	for( std::vector< std::wstring >::const_iterator it = forms.begin(); it != forms.end(); ++it ) {
+	for( std::vector< std::wstring >::const_iterator formIt = forms.begin(); formIt != forms.end(); ++formIt ) {
 	    size_t pos = 0;
-	    while( pos < prefix.length() && pos < it->length() && prefix.at( pos ) == it->at( pos ) ) {
+	    while( pos < prefix.length() 
+		   && pos < formIt->length() 
+		   && prefix.at( pos ) == formIt->at( pos ) ) {
 		++pos;
 	    }
 	    prefix.resize( pos );
 	}
 
-	for( std::vector< std::wstring >::const_iterator it = forms.begin(); it != forms.end(); ++it ) {
-	    suffixes.push_back( it->substr( prefix.length() ) );
-
+	// store suffixes
+	for( std::vector< std::wstring >::const_iterator formIt = forms.begin(); formIt != forms.end(); ++formIt ) {
+	    suffixes.push_back( formIt->substr( prefix.length() ) ); // store substring of form beginning at pos prefix.length()
 	}
-
 
 //	std::wcout<<"Prefix: "<<prefix<<", suffixes: ";// DEBUG
 // 	for( std::vector< std::wstring >::const_iterator sufIt = suffixes.begin(); sufIt != suffixes.end(); ++sufIt ) { // DEBUG
@@ -208,12 +210,13 @@ int main( int argc, const char** argv ) {
 // 	} // DEBUG
 // 	std::wcout<<std::endl; // DEBUG
 	
-	
 	std::vector< WordWrinkler::Answer > answers;
 	ww.wrinkle( prefix, &answers );
 
+	// iterate through all the pre-cooked stems
 	for( std::vector< WordWrinkler::Answer >::const_iterator wrinkleIt = answers.begin(); wrinkleIt != answers.end(); ++wrinkleIt ) {
 	    ++nrOfCookedParadigms;
+	    // append all suffixes to the stem
 	    for( std::vector< std::wstring >::const_iterator sufIt = suffixes.begin(); sufIt != suffixes.end(); ++sufIt ) {
 		std::wcout<<wrinkleIt->word<<*sufIt<<",";
 		

@@ -5,7 +5,7 @@
 
 using namespace csl;
 
-int main( int argc, char** argv ) {
+int main( int argc, const char** argv ) {
     setlocale(LC_CTYPE, "de_DE.UTF-8");  /*Setzt das Default Encoding für das Programm */
 
     Getopt options( argc, argv );
