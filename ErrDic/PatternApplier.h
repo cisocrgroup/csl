@@ -7,6 +7,7 @@
 #include "../Global.h"
 #include "../Stopwatch.h"
 #include "../MinDic/MinDic.h"
+#include "../LevDEA/LevDEA.h"
 
 namespace csl {
 
@@ -324,13 +325,14 @@ namespace csl {
 	    Stack() :
 		std::vector< StackItem >( 2 ),
 		depth_( 0 ) {
+
 		reserve( Global::lengthOfStr ); // do not allow realloc - very ugly !!!
 	    }
-	    
+
 	    size_t getDepth() const {
 		return depth_;
 	    }
-
+	    
 	    void forward() {
 		depth_ += 1;
 		if( size() <= depth_ + 1 ) {
@@ -361,7 +363,7 @@ namespace csl {
 		return word_;
 	    }
 
-	    
+    
 
 	private:
 	    size_t depth_;
@@ -376,6 +378,7 @@ namespace csl {
 	    dic_( dic ),
 	    filterDic_( 0 ),
 	    constraintDic_( 0 ),
+	    levDEA_( 0 ),
 	    isInitialised_( false ),
 	    isGood_( false ),
 	    maxNrOfErrors_( 5000 ) {
@@ -409,6 +412,12 @@ namespace csl {
 	    constraintDic_ = &constraintDic;
 	}
 
+	void setSearchPattern( const std::wstring& searchPattern, size_t searchDistance ) {
+	    searchPattern_ = pattern;
+	    searchDistance_ = levDistance;
+	    
+	}
+
 	void setMaxNrOfErrors( size_t maxNrOfErrors ) {
 	    maxNrOfErrors_ = maxNrOfErrors;
 	}
@@ -417,6 +426,12 @@ namespace csl {
 
 	const std::wstring& getWord() const {
 	    return ( stack_.getWord() );
+	}
+
+	std::wstring getBaseWord() const {
+	    std::wstring baseWord( getWord() );
+	    throw exceptions::cslException( "PatternApplier::getBaseWord not yet implemented" );
+	    return baseWord;
 	}
 
 	bool isGood() const {
@@ -428,6 +443,7 @@ namespace csl {
 	const std::vector< std::vector< Error > >& getErrors() const {
 	    return curErrors_;
 	}
+
 
 	inline void printPatterns( std::wostream& os = std::wcout ) const {
 	    for( std::vector< std::vector< Error > >::const_iterator reading = curErrors_.begin();
@@ -444,7 +460,7 @@ namespace csl {
 	}
 
 	inline void printCurrent( std::wostream& os = std::wcout ) const {
-	    os<<getWord()<<":";
+	    os<<getWord()<<"|";
 	    printPatterns( os );
 	    os<<std::endl;
 	}
@@ -508,6 +524,7 @@ namespace csl {
 		wchar_t label = first->getNextChar();
 		    
 		bool constraintFailed = false;
+
 		if( constraintDic_ ) {
 		    StateId_t newConstraintPos = constraintDic_->walk( curStackItem.getConstraintPos(), label );
 		    if( newConstraintPos ) {
@@ -518,6 +535,7 @@ namespace csl {
 			constraintFailed = true;
 		    }
 		}
+
 
 		stack_.getWord().resize( getCurDepth() + 1 );
 		stack_.getWord().at( getCurDepth() ) = label;
@@ -666,9 +684,8 @@ namespace csl {
 		throw exceptions::badInput( "ErrDicConstructor: Invalid line in pattern file" );
 	    }
 	    patterns_.push_back( line.substr( delimPos + 1 ) + patternDelimiter_ + line.substr( 0, delimPos ) );
-	    
-	    
 	}
+	
 	fi.close();
 	std::sort( patterns_.begin(), patterns_.end() );
 	patternGraph_.initConstruction();

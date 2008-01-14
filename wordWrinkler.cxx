@@ -58,7 +58,7 @@ private:
 	    wrinkle_rec( word, left + 1 );
 	    // std::wcout<<"Come back. word="<<word<<", left="<<left<<std::endl; // DEBUG
 	    
-	    do {
+	    do { // process all fitting leftsides beginning at left, shortest first
 		if( patState.isFinal() ) {
 		    const RightList_t& rights = rightSides_.at( patState.getAnnotation() );
 		    for( RightList_t::const_iterator it = rights.begin(); it != rights.end(); ++it ) {

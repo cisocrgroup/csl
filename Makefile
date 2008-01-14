@@ -112,8 +112,8 @@ $(BIN)/lookupMDString: ./MinDicString/lookupMDString.cxx $(TRANSTABLE_HEADERS) $
 $(BIN)/compileED: ./ErrDic/compileED.cxx $(ERRDIC_HEADERS)  $(OBJS)/Alphabet.o
 	$(GCC) -o $(BIN)/compileED ./ErrDic/compileED.cxx $(OBJS)/Alphabet.o
 
-$(BIN)/createED: ./ErrDic/createED.cxx $(ERRDIC_HEADERS)  $(OBJS)/Alphabet.o
-	$(GCC) -o $(BIN)/createED ./ErrDic/createED.cxx $(OBJS)/Alphabet.o
+$(BIN)/createED: ./ErrDic/createED.cxx $(ERRDIC_HEADERS)  $(OBJS)/Alphabet.o $(OBJS)/LevDEA.o
+	$(GCC) -o $(BIN)/createED ./ErrDic/createED.cxx $(OBJS)/Alphabet.o $(OBJS)/LevDEA.o
 
 $(BIN)/lookupED: ./ErrDic/lookupED.cxx $(ERRDIC_HEADERS)  $(OBJS)/Alphabet.o
 	$(GCC) -o $(BIN)/lookupED ./ErrDic/lookupED.cxx $(OBJS)/Alphabet.o
