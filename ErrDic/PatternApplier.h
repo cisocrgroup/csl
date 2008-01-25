@@ -71,6 +71,11 @@ namespace csl {
 	    inline virtual ~ListItem() {
 	    }
 	    
+	    // Do we want this ???
+// 	    inline ListItem( const ListItem& other ) :
+// 		nextItem_( 0 ) {
+// 	    }
+
 	    bool operator<( const ListItem& other ) const {
 		if( getNextChar() == 0 ) {
 		    return false; // sort *this to the very end
@@ -96,6 +101,8 @@ namespace csl {
 		return nextItem_;
 	    }
 
+	    virtual void print( std::wostream& os = std::wcout ) const = 0;
+
 	private:
 	    ListItem* nextItem_;
 
@@ -110,7 +117,7 @@ namespace csl {
 	public:
 	    inline Position();
 	    
-	    inline Position( const MDState_t& state );
+ 	    inline explicit Position( const MDState_t& state );
 
 	    inline virtual ~Position() {}
 
@@ -162,6 +169,14 @@ namespace csl {
 	    inline wchar_t getNextChar() const;
 
 	    inline bool stepToNextChar();
+
+	    inline void print( std::wostream& os = std::wcout ) const {
+		os << L"(POS:st=" << state_.getStateID() << L",c=" << *nextChar_ << ",";
+		for( std::vector< Error >::const_iterator it = errors_.begin(); it != errors_.end(); ++it ) {
+		    os << L"<" << it->getPatternID() << ">";
+		}
+		os << L")";
+	    }
 
 	private:
 	    MDState_t state_;
@@ -218,6 +233,10 @@ namespace csl {
 	    
 	    inline size_t getDepth() const;
 	    
+	    inline void print( std::wostream& os = std::wcout ) const {
+		os << "(TRA:" << "st=" << state_.getStateID() << ",c=" << *nextChar_ << ")";
+	    }
+
 	private:
 	    /**
 	     * the current state inside the mdic of all patterns
@@ -309,6 +328,14 @@ namespace csl {
 		return ( getFirst() && ( getFirst()->getNextChar() != 0 ) );
 	    }
 
+	    inline void print( std::wostream& os = std::wcout ) const {
+		ListItem* l = list_;
+		while( l ) {
+		    l->print();
+		    l = l->getNextItem();
+		}
+	    }
+
 
 	private:
 	    ListItem* list_;
@@ -363,6 +390,17 @@ namespace csl {
 		return word_;
 	    }
 
+	    inline void print( std::wostream& os = std::wcout ) const {
+		size_t i = 0;
+		for( const_iterator items = begin(); items != end(); ++items ) {
+		    os << i << ".\t";
+		    items->print();
+		    os << std::endl;
+		    ++i;
+		}
+	    }
+	    
+
     
 
 	private:
@@ -378,9 +416,9 @@ namespace csl {
 	    dic_( dic ),
 	    filterDic_( 0 ),
 	    constraintDic_( 0 ),
-	    levDEA_( 0 ),
 	    isInitialised_( false ),
 	    isGood_( false ),
+	    minNrOfErrors_( 1 ),
 	    maxNrOfErrors_( 5000 ) {
 	    
 	    loadPatterns( patternFile );
@@ -412,10 +450,8 @@ namespace csl {
 	    constraintDic_ = &constraintDic;
 	}
 
-	void setSearchPattern( const std::wstring& searchPattern, size_t searchDistance ) {
-	    searchPattern_ = pattern;
-	    searchDistance_ = levDistance;
-	    
+	void setMinNrOfErrors( size_t minNrOfErrors ) {
+	    minNrOfErrors_ = minNrOfErrors;
 	}
 
 	void setMaxNrOfErrors( size_t maxNrOfErrors ) {
@@ -488,6 +524,7 @@ namespace csl {
 	size_t tokenCount_;
 	bool isGood_;
 
+	size_t minNrOfErrors_;
 	size_t maxNrOfErrors_;
 
     }; // class PatternApplier
@@ -539,8 +576,9 @@ namespace csl {
 
 		stack_.getWord().resize( getCurDepth() + 1 );
 		stack_.getWord().at( getCurDepth() ) = label;
-//		std::wcout<<"word: "<<stack_.getWord()<<std::endl;
-		    
+
+//		stack_.print(); std::wcout<<"word: "<<stack_.getWord()<<std::endl; std::wcout<<"------"<<std::endl; // DEBUG
+
 		/*
 		 * The variable addedTriggerPosition indicates if a new Position was 
 		 * inserted which shall trigger the insertion of a new PatternTracer.
@@ -571,7 +609,7 @@ namespace csl {
 			    addedTriggerPosition = true;
 			}
 			
-			if( newPos->hasErrors() &&
+			if( newPos->getErrors().size() >= minNrOfErrors_ &&
 			    nextState.isFinal() && 
 			    ! ( filterDic_ && filterDic_->lookup( stack_.getWord().c_str() ) ) &&
 			    ( ! constraintDic_ || constraintDic_->isFinal( nextStackItem.getConstraintPos() ) ) ) {
@@ -628,12 +666,13 @@ namespace csl {
 	    }
 	    item = item->getNextItem();
 	}
-
+	
 	while( ! stack.empty() ) {
-	    const MDState_t& patState = stack.top().patState;
-	    const MDState_t& dicState = stack.top().dicState;
-	    const Position& position = stack.top().position;
-				
+	    const MDState_t patState = stack.top().patState; // by value, because the TraversalItem will be destroyed with the next pop()
+	    const MDState_t dicState = stack.top().dicState; // by value, see above
+	    const Position& position = stack.top().position; // by reference: also in the TraversalItem there's just a reference to the Pos object 
+	    
+   
 	    MDState_t newDicState( dic_ );
 	    stack.pop();
 	    for( const wchar_t* c = patState.getSusoString();
@@ -643,8 +682,10 @@ namespace csl {
 		    MDState_t newPatState = patState.getTransTarget( *c );
 		    if( newPatState.isFinal() ) {
 			Position* newPos = new Position( newDicState );
+
 			newPos->addErrors( position.getErrors().begin(), position.getErrors().end() );
 			newPos->addError( Error( newPatState.getPerfHashValue(), getCurDepth() - deltaDepth ) );
+
 			stack_.at( getCurDepth() + 1 ).addItem( newPos );
 					    
 			if( ( newPos->getNrOfErrors() < maxNrOfErrors_ ) &&
@@ -653,12 +694,16 @@ namespace csl {
 			    *addedTriggerPosition = true;
 			}
 
-			if( newDicState.isFinal() ) {
- 			    *foundFinal = true;
+			if( newPos->getErrors().size() >= minNrOfErrors_ &&
+			    newDicState.isFinal() && 
+			    ! ( filterDic_ && filterDic_->lookup( stack_.getWord().c_str() ) ) &&
+			    ( ! constraintDic_ || constraintDic_->isFinal( stack_.at( getCurDepth() + 1 ).getConstraintPos() ) ) ) {
+ 			    
+			    *foundFinal = true;
 			    curErrors_.push_back( newPos->getErrors() );
 			}
 		    }
-					
+		    
 		    // push new pair only if newPatState has some outgoing transitions
 		    if( *( newPatState.getSusoString() ) ) {
 			stack.push( TraversalItem( position, newPatState, newDicState ) );

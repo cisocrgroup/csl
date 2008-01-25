@@ -72,6 +72,10 @@ namespace csl {
 		return perfHashValue_;
 	    }
 
+	    StateId_t getStateID() const {
+		return dicPos_;
+	    }
+
 	    bool isFinal() const {
 		return minDic_->isFinal( dicPos_ );
 	    }

@@ -43,6 +43,10 @@ int main( int argc, const char** argv ) {
 	pa.setMaxNrOfErrors( atoi( options.getOption( "maxNrOfErrors" ).c_str() ) );
     }
 
+    if( options.hasOption( "minNrOfErrors" ) ) {
+	pa.setMinNrOfErrors( atoi( options.getOption( "minNrOfErrors" ).c_str() ) );
+    }
+
     pa.constructErrDic( ed );
 
     ed.writeToFile( options.getArgument( 2 ).c_str() );

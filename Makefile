@@ -5,9 +5,9 @@ LIB = ./lib
 ######## COMPILER AND FLAGS ###################
 
 #GCC = g++ -O3 -Wall # use this for optimized speed but with assertions being checked
-GCC = g++ -O3 -DNDEBUG -Wall # use this for optimal speed results
+#GCC = g++ -O3 -DNDEBUG -Wall # use this for optimal speed results
 #GCC = g++ -Wall --no-inline
-#GCC = g++ -ggdb --no-inline -Wall # use this if you want to use the gdb debugger
+GCC = g++ -ggdb --no-inline -Wall # use this if you want to use the gdb debugger
 
 AR = ar cru
 RANLIB = ranlib
