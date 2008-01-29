@@ -21,6 +21,7 @@ namespace csl {
      * LevDEA gives access to deterministic levenshtein automata.
      * It is an implementation of the concepts described in
      * "S. Mihov and K. Schulz. Fast approximate search in large dictionaries. Computational Linguistics, 30, 2004."
+     * *** Honestly, a somewhat older approach is used, not exactly the one described in the paper ***
      * Basically the implementation is derived from a C-implementation of Stoyan Mihov.
      * 
      * @caution This class is one huge memory leak!!!

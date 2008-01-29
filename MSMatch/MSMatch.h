@@ -84,11 +84,23 @@ namespace csl {
 	inline MSMatch( size_t k, const char* dicFile );
 	~MSMatch();
 
+	/**
+	 * compute candidates for the given query patterns; store the cands in the candReceiver object
+	 * @param[in] pattern
+	 * @param[out] candReceiver
+	 * @return always 0
+	 * @todo the return value is obviously legacy
+	 */
 	inline int query( const wchar_t* pattern, CandidateReceiver& candReceiver );
 
+	/**
+	 * returns a reference to the used dictionary 
+	 * (forward, in contrast to backward as is also used for the extraction)
+	 */
 	inline const MinDic_t& getFWDic() const {
 	    return dictFW_;
 	}
+
 	inline void setCaseMode( CaseMode caseMode ) {
 	    caseMode_ = caseMode;
 	}
