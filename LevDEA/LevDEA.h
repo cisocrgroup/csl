@@ -56,21 +56,40 @@ namespace csl {
 		pattern_pos_ = pattern_pos;
 	    };
 
+	    inline bool isValid() const {
+		return ( position() != -1 );
+	    }
 	};
 
-	LevDEA( int init_k );
+	LevDEA( int init_k = 0 );
 
 
 	~LevDEA();
 
+	inline Pos getRoot() const {
+	    return Pos( 0, 0 );
+	}
+
+
 	/**
-	 * Follow a transition in the automaton. Input-char c is translated into a bit-vector which then is 
-	 * used as "input symbol" for the automaton.
+	 * Follow a transition in the automaton. Input-char c is translated into 
+	 * a bit-vector which then is used as "input symbol" for the automaton.
+	 *
 	 * @param p a start position in the automaton
 	 * @param c a character
 	 * @return the new position
 	 */
 	inline Pos walk( const Pos& p, wchar_t c ) const;
+
+	/**
+	 * do a walk sequentially for a string
+	 *
+	 * @param p a start position in the automaton
+	 * @param str a c-string
+	 * @return the new position
+	 */
+	inline Pos walkStr( const Pos& p, const wchar_t* str ) const;
+	
 
 	/**
 	 * Returns true iff state p is a position standing for a final state
@@ -166,6 +185,17 @@ namespace csl {
 	table_cell & cell = table( calc_k_charvec( c, p.pattern_pos() ), p.position() );
 	return Pos( cell.target, p.pattern_pos() + cell.move_pattern );
     }
+
+    inline LevDEA::Pos LevDEA::walkStr( const Pos& position, const wchar_t* str ) const {
+	LevDEA::Pos p = position;
+
+	while( *str && p.isValid() ) {
+	    p = walk( p, *str );
+	    ++str;
+	}
+	return p;
+    }
+
 
     inline bool LevDEA::isFinal( const Pos& p ) const {
 	//         |  triangle has reached right bound |            |       fin_table gives dist >-1                                       |

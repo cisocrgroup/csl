@@ -88,6 +88,19 @@ namespace csl {
 	    newStr[len] = 0;
 	}
 
+	static const void reverse(const std::wstring& str, std::wstring* newStr) {
+	    if( &str == newStr ) {
+		// throw exceptions::cslException( "Global::reverse: source string may not be equal to target string" );
+	    }
+	    int len = str.length();
+	    newStr->resize( len );
+	    int i = 0;
+	    while(i < len) {
+		newStr->at( len-1-i ) = str.at( i );
+		++i;
+	    }
+	}
+
 	static const void printBits( bits64 n ) {
 	    int i;
 	    for ( i = 63;i >= 0;--i ) {

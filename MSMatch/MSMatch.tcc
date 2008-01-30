@@ -86,7 +86,7 @@ namespace csl {
 	const wchar_t* c = curDict_->getSusoString( dicPos );
 	for( ; *c; ++c ) {
 //	    printf( "word is %s, dicpos is %d, Try with %c(%d)\n", word_, dicPos, alph_.decode( *c ), *c );
-	    if( ( newLevPos = levDEASecond_->walk( levPos, *c ) ).position() != -1 ) {
+	    if( ( newLevPos = levDEASecond_->walk( levPos, *c ) ).isValid() ) {
 		newDicPos = curDict_->walk( dicPos, *c );
 		
 
@@ -118,7 +118,7 @@ namespace csl {
 
 	const wchar_t* c = curDict_->getSusoString( dicPos );
 	for( ; *c; ++c ) {
-	    if( ( newLevPos = levDEAFirst_->walk( levPos, *c ) ).position() != -1 ) {
+	    if( ( newLevPos = levDEAFirst_->walk( levPos, *c ) ).isValid() ) {
 		newDicPos = curDict_->walk( dicPos, *c );
 		assert( newDicPos ); // the transition always exists
 		word_[depth] = *c;
@@ -325,7 +325,7 @@ namespace csl {
 	static LevDEA::Pos newLevPos;
 
 	for( const wchar_t* c = dictFW_.getSusoString( dicPos ); *c; ++c ) {
-	    if( ( newDicPos = dictFW_.walk( dicPos, *c ) ) && ( newLevPos = curLevDEA_->walk( levPos, *c ) ).position() != -1 ) {
+	    if( ( newDicPos = dictFW_.walk( dicPos, *c ) ) && ( newLevPos = curLevDEA_->walk( levPos, *c ) ).isValid() ) {
 		word_[depth] = *c;
 
 //  word[depth+1]=0;std::cout<<"word="<<word<<std::endl;
