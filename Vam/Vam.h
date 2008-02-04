@@ -9,6 +9,8 @@
 #include "../MinDic/MinDic.h"
 #include "../LevDEA/LevDEA.h"
 
+#include "./PatternGraph.h"
+
 
 namespace csl {
 
