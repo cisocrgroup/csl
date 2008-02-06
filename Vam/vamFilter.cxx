@@ -22,7 +22,7 @@ int main(int argc, const char** argv ) {
 
     const std::wstring query( L"test" );
 
-    vam.setDistance( 0 );
+    vam.setDistance( 1 );
     vam.query( query, &answers );
     
     return 0;

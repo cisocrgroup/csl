@@ -3,58 +3,9 @@ namespace csl {
     Vam::Vam( const MinDic_t& baseDic, const char* patternFile ) :
 	baseDic_( baseDic )
     {
-	loadPatterns( patternFile );
+	patternGraph_.loadPatterns( patternFile );
     }
 
-    void Vam::loadPatterns( const char* patternFile ) {
-	std::wifstream fi;
-	fi.imbue( std::locale( "de_DE.UTF-8" ) );
-	fi.open( patternFile );
-	if( ! fi ) {
-	    throw csl::exceptions::badFileHandle( "WordWrinkler::Could not open pattern file" );
-	}
-	
-	typedef std::map< std::wstring, RightList_t > PatternMap_t;
-	PatternMap_t patterns;
-	std::wstring line;
-
-	while( getline( fi, line ) ) {
-	    size_t delimPos = line.find( L' ' );
-	    if( delimPos == std::wstring::npos ) {
-		throw csl::exceptions::badInput( "ErrDicConstructor: Invalid line in pattern file" );
-	    }
-	    std::wstring left;
-	    Global::reverse( line.substr( 0, delimPos ), &left );
-	    std::wstring right = line.substr( delimPos + 1 );
-	    
-	    patterns[left].push_back( right );
-	}
-	fi.close();
-
-	leftSides_.initConstruction();
-
-	
-	for( PatternMap_t::const_iterator it = patterns.begin(); it != patterns.end(); ++it ) {
-
-// 	    std::wcout<<it->first<<"->";
-// 	    for( RightList_t::const_iterator rit = it->second.begin(); rit != it->second.end(); ++rit ) {
-// 		std::wcout<<*rit<<" | ";
-// 	    }
-// 	    std::wcout<<std::endl;
-
-	    // here we copy the whole vector, but who cares ....
-	    rightSides_.push_back( it->second );
-
-	    // this might be done better :-)
-	    std::wstring reReversed;
-	    Global::reverse( it->first, &reReversed );
-	    
-	    leftSidesList_.push_back( reReversed );
-	    leftSides_.addToken( it->first.c_str(), rightSides_.size()-1 ); // annotate the proper index into rightSides_
-	}
-	leftSides_.finishConstruction();
-//	leftSides_.toDot(); // DEBUG
-    }
     
     void Vam::setDistance( size_t d ) {
 	levDEA_.setDistance( d );

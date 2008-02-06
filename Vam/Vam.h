@@ -104,7 +104,9 @@ namespace csl {
 	class StackItem : public std::vector< Position > {
 	public:
 	    StackItem( const Vam& myVam ) :
-		dicPos_( myVam.baseDic_ ) {
+		dicPos_( myVam.baseDic_ ),
+		patternPos_( myVam.patternGraph_, 0 )
+		{
 	    }
 
 	    void clear() {
@@ -113,24 +115,22 @@ namespace csl {
 	    }
 
 	    MDState_t dicPos_;
+	    PatternGraph::State patternPos_;
 	};
 	
 	class Stack : public std::vector< StackItem > {
 	    
 	};
 	
-	void loadPatterns( const char* patternFile );
-
-
 	/////   DATA MEMBERS OF VAM   //////////////////////
 
 	const MinDic_t& baseDic_;
 	LevDEA levDEA_;
 
-	MinDic_t leftSides_;
+	PatternGraph patternGraph_;
 	std::vector< std::wstring > leftSidesList_;
 	std::vector< RightList_t > rightSides_;
-
+	
 	std::wstring query_;
 	std::vector< Answer >* answers_;
 
