@@ -1,3 +1,6 @@
+#ifndef CSL_GETOPT_H
+#define CSL_GETOPT_H CSL_GETOPT_H
+
 #include<iostream>
 #include<map>
 #include<vector>
@@ -75,3 +78,5 @@ private:
     std::vector< std::string > arguments_;
 
 }; // class Getopt
+
+#endif

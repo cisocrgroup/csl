@@ -55,16 +55,27 @@ namespace csl {
 	 */
 	class Error {
 	public:
-	    Error();
+	    Error() :
+		position_( 0 ) {
+	    }
 	    
 	    Error( const std::wstring& pattern, size_t position ) :
 		pattern_( pattern ),
 		position_( position ) {
 		
 	    }
+
+	    bool isValid() const {
+		return ! pattern_.empty();
+	    }
 	    
-	    const std::wstring& getPattern() const;
-	    size_t getPosition() const;
+	    const std::wstring& getPattern() const {
+		return pattern_;
+	    }
+
+	    size_t getPosition() const {
+		return position_;
+	    }
 	    
 	    
 	private:
@@ -78,27 +89,19 @@ namespace csl {
 
 	class Position {
 	public:
-	    Position( const LevDEA::Pos& levPos, const Position* mother = 0 ) :
+	    Position( const LevDEA::Pos& levPos, const std::pair< int, int >& mother = std::make_pair( -1, -1 ) ) :
 		levPos_( levPos ),
-		error_( 0 ),
-		mother_( mother )
-		{
+		error_() {
+		mother_ = mother;
 	    }
-	    ~Position() {
-		if( error_ ) delete( error_ );
-	    }
-
-	    /**
-	     * The user has to create the error on the heap, this class
-	     * does the destruction
-	     */
-	    void addError( Error* error ) {
+	    
+	    void addError( const Error& error ) {
 		error_ = error;
 	    }
-
+	    
 	    LevDEA::Pos levPos_;
-	    Error* error_;
-	    const Position* mother_;
+	    Error error_;
+	    std::pair< int, int > mother_;
 	};
 
 	class StackItem : public std::vector< Position > {
@@ -107,7 +110,7 @@ namespace csl {
 		dicPos_( myVam.baseDic_ ),
 		patternPos_( myVam.patternGraph_, 0 )
 		{
-	    }
+		}
 
 	    void clear() {
 		std::vector< Position >::clear();

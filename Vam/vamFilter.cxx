@@ -1,6 +1,7 @@
-
+#include<iostream>
 #include "./Vam.h"
 #include "../Getopt/Getopt.h"
+#include "../Stopwatch.h"
 
 int main(int argc, const char** argv ) {
 
@@ -20,10 +21,17 @@ int main(int argc, const char** argv ) {
 
     std::vector< csl::Vam::Answer > answers;
 
-    const std::wstring query( L"test" );
+    std::wstring query;
 
     vam.setDistance( 1 );
-    vam.query( query, &answers );
+    Stopwatch watch;
+
+    while( std::wcin >> query ) {
+	watch.start();
+	vam.query( query, &answers );
+	std::wcout<<watch.readMilliseconds()<<" ms"<<std::endl;
+    }
+
     
     return 0;
 }

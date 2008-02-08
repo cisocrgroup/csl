@@ -17,56 +17,73 @@ namespace csl {
 	
 	levDEA_.loadPattern( query_.c_str() );
 	stack_.clear();
+	// create a first StackItem
 	stack_.push_back( StackItem( *this ) );
+	// insert an initial position at the the levDEA's start state
 	stack_.at( 0 ).push_back( Position( levDEA_.getRoot() ) );
+	// set the patternPos to the graph's root
+	stack_.at( 0 ).patternPos_ = patternGraph_.getRoot();
+
 	query_rec( 0 );
     }
     
     void Vam::query_rec( size_t depth ) {
 	// see if we can find a left pattern side from here backwards
 
-	// the pair is <id,length> for each left side
-	std::vector< std::pair< size_t, size_t > > completeLeftSides;
-	if( depth > 0 ) {
-	    MDState_t dicPos = baseDic_.getRootState();
-	    std::wstring::iterator wordPos = word_.begin() + depth;
-	    size_t length = 0;
-	    do {
-		dicPos.walk( *wordPos );
-		++length;
-		if( dicPos.isFinal() ) {
-		    completeLeftSides.push_back( std::make_pair( dicPos.getAnnotation(), length ) );
-		}
-	    } while( dicPos.isValid() && wordPos != word_.begin() );
-	    
-	    // for all found left sides
-	    for( std::vector< std::pair< size_t, size_t > >::const_iterator leftSide= completeLeftSides.begin();
-		 leftSide != completeLeftSides.end();
-		 ++leftSide ) {
-		
+	if( stack_.at( depth ).patternPos_.isFinal() ) {
+	    PatternGraph::State patPos = stack_.at( depth ).patternPos_;
+
+	    do { // for all final states reachable via errorLinks
 		// for all positions of the stackItem (tracked back leftside)
-	    	for( StackItem::iterator positions = stack_.at( depth - leftSide->second ).begin();
-		     positions != stack_.at( depth - leftSide->second ).end();
-		     ++positions ) {
+		size_t count = 0;
+	    	for( StackItem::iterator positions = stack_.at( depth - patPos.getDepth() ).begin();
+		     positions != stack_.at( depth - patPos.getDepth() ).end();
+		     ++positions, ++count ) {
 		    
 		    // for all right sides fitting the current leftSide
-		    for( RightList_t::const_iterator rightSide = rightSides_.at( leftSide->first ).begin();
-			 rightSide != rightSides_.at( leftSide->first ).end();
+		    for( RightList_t::const_iterator rightSide = patPos.getRightSides().begin();
+			 rightSide != patPos.getRightSides().end();
 			 ++rightSide ) {
-
+			
 			LevDEA::Pos newLevPos = levDEA_.walkStr( positions->levPos_, rightSide->c_str() );
 			if( newLevPos.isValid() )  {
-			    Position newPosition( newLevPos, &( *positions ) );
-			    newPosition.addError( new Error( leftSidesList_.at( leftSide->first ) + L" " + *rightSide, 42 ) );
+			    Position newPosition( newLevPos, std::make_pair( depth - patPos.getDepth(), count ) );
+			    newPosition.addError( Error( patPos.getWord() + L" " + *rightSide, depth - patPos.getDepth() ) );
 			    stack_.at( depth ).push_back( newPosition );
 			}
-			
 		    } // for all rightSides
 		} // for all positions
-	    } // for all found left sides
-	} // if depth > 0
 
-	
+		do {
+		    patPos.walkErrorLink();
+		} while( patPos.isValid() && ! patPos.isFinal() );
+		
+	    } while( patPos.isValid() );
+	} // if found left pattern side
+
+
+	// report matches
+	if( stack_.at( depth ).dicPos_.isFinal() ) {
+	    for( StackItem::iterator position = stack_.at( depth ).begin();
+		 position != stack_.at( depth ).end();
+		 ++position ) {
+		if( levDEA_.isFinal( position->levPos_ ) ) {
+		    std::wcout<<word_<<"|";
+		    const Position* cur = &( *position );
+
+		    while( cur ) {
+			if( cur->error_.isValid() ) {
+			    std::wcout << "(" << cur->error_.getPattern() << "," << cur->error_.getPosition() << ")";
+			}
+			
+			cur = ( cur->mother_.first == -1 ) ? 0 : &( stack_.at( cur->mother_.first ).at( cur->mother_.second ) ); 
+		    }
+		    std::wcout << "|d=" << levDEA_.getDistance( position->levPos_ ) <<  std::endl;
+		}
+	    }
+	}
+
+
 	// ** RECURSIVE PART **
 	// for all outgoing transitions
 	stack_.push_back( StackItem( *this ) );
@@ -81,18 +98,15 @@ namespace csl {
 
 	    // see which of the Positions can be moved with this *c
 	    // see also if the levDEA reaches a final state
-	    for( StackItem::iterator positions = stack_.at( depth ).begin();
-		 positions != stack_.at( depth ).end();
-		 ++positions ) {
-		LevDEA::Pos newLevPos = levDEA_.walk( positions->levPos_, *c );
+	    size_t count = 0;
+	    for( StackItem::iterator position = stack_.at( depth ).begin();
+		 position != stack_.at( depth ).end();
+		 ++position, ++count ) {
+		LevDEA::Pos newLevPos = levDEA_.walk( position->levPos_, *c );
 		if( newLevPos.isValid() ) {
-		    stack_.at( depth + 1 ).push_back( Position( newLevPos, &( *positions ) ) );
+		    stack_.at( depth + 1 ).patternPos_ = stack_.at( depth ).patternPos_.getTransTarget( *c );
+		    stack_.at( depth + 1 ).push_back( Position( newLevPos, std::make_pair( depth, count ) ) );
 		    
-		    if( stack_.at( depth + 1 ).dicPos_.isFinal() && levDEA_.isFinal( newLevPos ) ) {
-			std::wcout<<word_<<std::endl;
-		    }
-
-
 		}
 	    }
 	    

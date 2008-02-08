@@ -1,5 +1,6 @@
 
 #include<iostream>
+#include "../MinDic/MinDic.h"
 #include "./PatternGraph.h"
 
 
@@ -20,10 +21,14 @@ int main(int argc, const char** argv ) {
 
     std::wstring str( L"antannantonundonno" );
 
+
     std::wstring::const_iterator c = str.begin();
     csl::PatternGraph::State state = patGraph.getRoot();
 
     for( ; c != str.end(); ++c ) {
 	state.walk( *c );
+	if( state.isFinal() ) {
+	    std::wcout<<"HIT"<<std::endl;
+	}
     }
 }

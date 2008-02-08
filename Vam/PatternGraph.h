@@ -13,7 +13,7 @@ namespace csl {
      */
     class PatternGraph {
     public:
-
+	typedef std::vector< std::wstring > RightSides_t;
 
 	class State {
 	public:
@@ -28,8 +28,10 @@ namespace csl {
 	     *
 	     * @return the "distance" from the root to the target state
 	     */
-	    inline size_t walk( wchar_t c );
+	    inline bool walk( wchar_t c );
 
+	    inline bool walkErrorLink();
+	    
 	    /**
 	     * walk in the trie only - do not use error links
 	     * if walk is not possible, stay where you are
@@ -38,6 +40,10 @@ namespace csl {
 	     */
 	    inline bool walkStrict( wchar_t c );
 
+	    /**
+	     * This is equivalent to a 'walk' call, only that the state itself
+	     * rmains unchanged (-->const), but a copy of the target state
+	     */
 	    inline State getTransTarget( wchar_t c ) const;
 
 	    /**
@@ -56,6 +62,13 @@ namespace csl {
 	    inline size_t getDepth() const;
 	    
 	    inline bool isFinal() const;
+
+	    /**
+	     * @return a reference to the list of rightSides attached to the state (which must be final)
+	     */
+	    inline const RightSides_t& getRightSides() const;
+
+	    inline const std::wstring& getWord() const;
 
 	    /**
 	     * @return true iff the current state is not the failstate
@@ -81,6 +94,11 @@ namespace csl {
 		errorLink_( 0 ), depth_( 0 ), isFinal_( false ) {
 	    }
 	    
+	    /**
+	     * Returns the target stateIndex when walking with char c (Only in the trie, no errorlinks!). 
+	     *
+	     * @return the stateIndex of the follow-up state when walking in the trie with char c. ( 0 for fail state)
+	     */
 	    inline size_t getTransTarget( wchar_t c ) const {
 		std::vector< Transition_t >::const_iterator transition = transitions_.begin();
 		while( transition != transitions_.end() &&
@@ -97,13 +115,16 @@ namespace csl {
 	    
 	    typedef std::pair< wchar_t, State > Transition_t;
 	    std::vector< Transition_t > transitions_;
+	    RightSides_t rightSides_;
 	    size_t errorLink_;
+	    std::wstring word_;
 	    int depth_;
 	    bool isFinal_;
 	}; // class InternalState
 	
 
-
+	// *** PRIVATE of PATTERNGRAPH *** 
+	
 	inline void loadPatterns( const char* patternFile );
 
 	inline void addErrorLinks();
@@ -123,23 +144,22 @@ namespace csl {
 	 */
 	std::vector< InternalState > states_;
 
-
+	static const wchar_t patternDelimiter_ = L'_';
     };
 
 
     /********** IMPL   STATE  ********************/
 
-    size_t PatternGraph::State::walk( wchar_t c ) {
-	std::wcout<<"Reading "<<c<<", beginning at state "<<getStateIndex()<<std::endl;
+    bool PatternGraph::State::walk( wchar_t c ) {
+//	std::wcout<<"Reading "<<c<<", beginning at state "<<getStateIndex()<<std::endl; // DEBUG
 	while( isValid() && ( ! walkStrict( c ) ) ) {
 	    stateIndex_ = myGraph_->states_.at( getStateIndex() ).errorLink_;
-	    std::wcout<<"  Retreat to "<<getStateIndex()<<std::endl;
+	    // std::wcout<<"  Retreat to "<<getStateIndex()<<std::endl; // DEBUG
 	}
 	if( ! isValid() ) {
 	    stateIndex_ = 1;
 	}
-
-	return getDepth();
+	return isValid();
     }
 
     bool PatternGraph::State::walkStrict( wchar_t c ) {
@@ -152,8 +172,15 @@ namespace csl {
 	}
     }
 
+    bool PatternGraph::State::walkErrorLink() {
+	stateIndex_ = myGraph_->states_.at( getStateIndex() ).errorLink_;
+	return isValid();
+    }
+
     inline PatternGraph::State PatternGraph::State::getTransTarget( wchar_t c ) const {
-	return State( *myGraph_, myGraph_->states_.at( stateIndex_ ).getTransTarget( c ) );
+	State newState = *this;
+	newState.walk( c);
+	return newState;
     }
 
     inline size_t PatternGraph::State::getDepth() const {
@@ -184,7 +211,13 @@ namespace csl {
 	return ( stateIndex_ != 0 );
     }
 
+    inline const PatternGraph::RightSides_t& PatternGraph::State::getRightSides() const {
+	return myGraph_->states_.at( stateIndex_ ).rightSides_;
+    }
 
+    inline const std::wstring& PatternGraph::State::getWord() const {
+	return myGraph_->states_.at( stateIndex_ ).word_;
+    }
 
 
     /********* IMPL  PATTERNGRAPH *****************/
@@ -199,17 +232,16 @@ namespace csl {
 	    throw csl::exceptions::badFileHandle( "PatternGraph::Could not open pattern file" );
 	}
 	
-	typedef std::map< std::wstring, std::vector< std::wstring > > PatternMap_t;
-	PatternMap_t patterns;
 	std::wstring line;
 
+	size_t patternCount = 0;
 	while( getline( fi, line ) ) {
 	    size_t delimPos = line.find( L' ' );
 	    if( delimPos == std::wstring::npos ) {
 		throw csl::exceptions::badInput( "PatternGraph: Invalid line in pattern file" );
 	    }
-	    std::wstring left = line.substr( 0, delimPos );
-	    std::wstring right = line.substr( delimPos + 1 );
+ 	    std::wstring left = line.substr( 0, delimPos );
+ 	    std::wstring right = line.substr( delimPos + 1 );
 
 	    State state = getRoot();
 
@@ -235,36 +267,14 @@ namespace csl {
 		lastState = newSt;
 	    }
 	    states_.at( lastState.getStateIndex() ).isFinal_ = true;
-
-	    patterns[left].push_back( right );
+	    states_.at( lastState.getStateIndex() ).rightSides_.push_back( right );
+	    states_.at( lastState.getStateIndex() ).word_ = left;
 	}
 	fi.close();
 
 	addErrorLinks();
 
-	toDot();
-
-// 	leftSides_.initConstruction();
-// 	for( PatternMap_t::const_iterator it = patterns.begin(); it != patterns.end(); ++it ) {
-
-// // 	    std::wcout<<it->first<<"->";
-// // 	    for( RightList_t::const_iterator rit = it->second.begin(); rit != it->second.end(); ++rit ) {
-// // 		std::wcout<<*rit<<" | ";
-// // 	    }
-// // 	    std::wcout<<std::endl;
-
-// 	    // here we copy the whole vector, but who cares ....
-// 	    rightSides_.push_back( it->second );
-
-// 	    // this might be done better :-)
-// 	    std::wstring reReversed;
-// 	    Global::reverse( it->first, &reReversed );
-	    
-// 	    leftSidesList_.push_back( reReversed );
-// 	    leftSides_.addToken( it->first.c_str(), rightSides_.size()-1 ); // annotate the proper index into rightSides_
-// 	}
-// 	leftSides_.finishConstruction();
-// //	leftSides_.toDot(); // DEBUG
+	// toDot();
 
     }
 
@@ -286,14 +296,17 @@ namespace csl {
 		wchar_t label = transition->first;
 		size_t current = transition->second.getStateIndex();
 		size_t parentBack = parent;
-		size_t back = 0; // states_.at( parentBack ).getTransTarget( label );
+		size_t back = 0;
 		
 		while( ( back == 0 ) && ( parentBack != 0 ) ) {
 		    parentBack = states_.at( parentBack ).errorLink_;
 		    back = states_.at( parentBack ).getTransTarget( label );
 		}
 		if( parentBack == 0 ) back = 1;
-		
+
+		if( states_.at( back ).isFinal_ ) {
+		    states_.at( current ).isFinal_ = true;
+		}
 		states_.at( current).errorLink_ = back;
 	    }
 	}
