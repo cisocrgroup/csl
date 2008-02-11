@@ -108,7 +108,8 @@ namespace csl {
 	public:
 	    StackItem( const Vam& myVam ) :
 		dicPos_( myVam.baseDic_ ),
-		patternPos_( myVam.patternGraph_, 0 )
+		patternPos_( myVam.patternGraph_, 0 ),
+		lookAheadDepth_( 0 )
 		{
 		}
 
@@ -119,12 +120,14 @@ namespace csl {
 
 	    MDState_t dicPos_;
 	    PatternGraph::State patternPos_;
+	    size_t lookAheadDepth_;
 	};
 	
 	class Stack : public std::vector< StackItem > {
 	    
 	};
 	
+	void printPosition( const Position& pos ) const;
 	/////   DATA MEMBERS OF VAM   //////////////////////
 
 	const MinDic_t& baseDic_;

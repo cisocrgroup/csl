@@ -274,7 +274,7 @@ namespace csl {
 
 	addErrorLinks();
 
-	// toDot();
+	// toDot(); // DEBUG
 
     }
 
@@ -310,8 +310,7 @@ namespace csl {
 		states_.at( current).errorLink_ = back;
 	    }
 	}
-    }
-
+    } // method PatternGraph::addErrorLinks
 
     inline PatternGraph::State PatternGraph::newState() {
 	states_.resize( states_.size() + 1 );
@@ -319,7 +318,7 @@ namespace csl {
     }
 
     inline void PatternGraph::toDot() const {
-	printf( "Digraph PatternGraph { //DOTCODE\nrankdir=LR; //DOTCODE\n" );
+	printf( "Digraph PatternGraph { //DOTCODE\nrankdir=LR; //DOTCODE\nordering=out; //DOTCODE\n" );
 
 	size_t count = 0;
 	for( std::vector< InternalState >::const_iterator st = states_.begin() ; st != states_.end(); ++st ) {
