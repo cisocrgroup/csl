@@ -8,9 +8,9 @@
 
 
 namespace csl {
-    class TestMinDic : public CppUnit::TestFixture  {
+    class TestVam : public CppUnit::TestFixture  {
 
-	CPPUNIT_TEST_SUITE( TestMinDic );
+	CPPUNIT_TEST_SUITE( TestVam );
 	CPPUNIT_TEST( testBasics );
 	CPPUNIT_TEST_SUITE_END();
     public:
@@ -34,52 +34,6 @@ namespace csl {
      * test the basic methods for reading access like getRoot, walk, isFinal etc.
      */
     void TestMinDic::testBasics() {
-	std::wstring key( L"aachen" );
-	/*
-	 * walk key char by char and test if
-	 * - key could be walked completely
-	 * - pos_1 is a valid state of the automaton
-	 * - pos_1 is a final state
-	 */
-	StateId_t pos_1 = mdic_.getRoot(); // set pos_1 to root
-	const wchar_t* c = 0;
-	for( c = key.c_str(); *c && pos_1; ++c ) {
-	    pos_1 = mdic_.walk( pos_1, *c );
-	}
-
-	CPPUNIT_ASSERT( ! *c );
-	CPPUNIT_ASSERT( pos_1 );
-	assert( mdic_.isFinal( pos_1 ) );
-	int ann = 0;
-
-	/*
-	 * test if the same result is returned by walkStr
-	 */
-	uint_t pos_2 = mdic_.walkStr( mdic_.getRoot(), key.c_str() );
-	CPPUNIT_ASSERT( pos_1 == pos_2 );
-	
-	/*
-	 * test if walking with the empty string works
-	 */
-	key = L"";
-	CPPUNIT_ASSERT( mdic_.walkStr( mdic_.getRoot(), key.c_str() ) == mdic_.getRoot() );
-
-	CPPUNIT_ASSERT( 0 );
-
-	/*
-	 * test if the proper annotation is returned for the key
-	 */
-//	assert( mdic_.getAnnotation( (uchar*)key, &ann ) && ( ann == 15 ) );
-
-	/*
-	 * Test if walking with an invalid char is just failing and not causing any trouble
-	 */
-// 	pos_1 = mdic_.getRoot(); // set pos_1 to root
-// 	assert( alph_.code( '#' ) == 0 );
-// 	assert( mdic_.walk( pos_1, alph_.code( '#' ) ) == 0 );
-
-// 	assert( ! mdic_.walkStr( mdic_.getRoot(), (uchar*)"dies#das" ) );
-// 	assert( ! mdic_.walkStr( mdic_.getRoot(), (uchar*)"dies#" ) );
 
 
     }
