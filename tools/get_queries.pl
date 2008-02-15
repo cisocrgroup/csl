@@ -5,8 +5,8 @@ use Getopt::Long;
 
 #####CONFIG###########
 # These are default values - most of them can be overwritten by command-line flags
+my $structured = 0;
 my $permDelimiter = '%';
-
 my $noPermDelimiter = '$';
 my $tokensDelimiter = ',';
 
@@ -32,6 +32,7 @@ GetOptions(
 	   'error_rate=f' => \$symbol_error_rate,
 	   'errors=i' => \$errors,
 	   'glob=i' => \$glob,
+	   'structured' => \$structured,
 	   'permuteParts' => \$permuteParts,
 	   'groundtruth!' => \$groundtruth,
 	   );
@@ -55,6 +56,7 @@ Flags:
 --errors N         specify number of errors for each line (N>=0, default 0)
 --glob N           transform one area of N characters into a single '_'
 
+--structured       
 --permuteParts     Set this option to allow permutation of complete parts 
                    among each other
 --groundtruth      print pairs "groundtruth<SPACE>query";
@@ -108,46 +110,51 @@ for(1..$nr_of_queries) {
     }
 
     # PERMUTATIONS
-    my @parts = ();
 
-    while( $entry =~ m/($compDelimRex)(.+?)(?=$compDelimRex|$ )/gx ) {
-	my $delim = $1;
-	my $part = $2;
-	$part =~ s/,$//; # remove trailing delimiter
-	my @tokens = split( /$tokensDelimRex/, $part );
-	
-	if( $delim eq $permDelimiter ) {
-	    shuffle( \@tokens );
+    if( $structured ) {
+	my @parts = ();
+	while( $entry =~ m/($compDelimRex)(.+?)(?=$compDelimRex|$ )/gx ) {
+	    my $delim = $1;
+	    my $part = $2;
+	    $part =~ s/,$//; # remove trailing delimiter
+	    my @tokens = split( /$tokensDelimRex/, $part );
+	    
+	    if( $delim eq $permDelimiter ) {
+		shuffle( \@tokens );
 #	    @tokens = sort { reverse($a) cmp reverse($b )} @tokens;
+		
+		push( @parts, join( $tokensDelimiter, @tokens ).',' );
+	    }
+	    else {
+		push( @parts, $part.',' );
+	    }
+	}
 	
-	    push( @parts, join( $tokensDelimiter, @tokens ).',' );
+	if( $permuteParts ) {
+	    $entry = '';
+	    while(@parts) {
+		# take a random elt out of @parts, add it to $entry
+		$entry .= splice(@parts,int(rand(@parts)),1);
+	    }
 	}
 	else {
-	    push( @parts, $part.',' );
+	    $entry = join( '', @parts ).$tokensDelimiter;
 	}
-    }
-
-    if( $permuteParts ) {
-	$entry = '';
-	while(@parts) {
-	    # take a random elt out of @parts, add it to $entry
-	    $entry .= splice(@parts,int(rand(@parts)),1);
+	
+	# do this at the end so you can throw away the different delimiters
+	if($errors > 0) { # create symbol errors by number (not so terribly correct, caus deletions wrack the seen-array ... :-/)
+	    my @tokens=split(/$allDelimRex+/,$entry);
+	    for(@tokens) {
+		$_ = addErrors($_,$errors);
+	    }
+	    $entry = join($tokensDelimiter, @tokens).$tokensDelimiter;
 	}
-    }
+	
+	$entry =~ s/$compDelimRex/$tokensDelimiter/g; # Finally remove all structure from the query
+    } # if structured
     else {
-	$entry = join( '', @parts ).$tokensDelimiter;
+	$entry = addErrors( $entry, $errors );
     }
-
-    # do this at the end so you can throw away the different delimiters
-    if($errors > 0) { # create symbol errors by number (not so terribly correct, caus deletions wrack the seen-array ... :-/)
-	my @tokens=split(/$allDelimRex+/,$entry);
-	for(@tokens) {
-	    $_ = addErrors($_,$errors);
-	}
-	$entry = join($tokensDelimiter, @tokens).$tokensDelimiter;
-    }
-
-    $entry =~ s/$compDelimRex/$tokensDelimiter/g; # Finally remove all structure from the query
 
     if($groundtruth) {
 	print STDOUT "$db[$rand_index]\t$entry\n";

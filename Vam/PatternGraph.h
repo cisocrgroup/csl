@@ -6,23 +6,33 @@
 #include<vector>
 #include "../Global.h"
 #include "../Getopt/Getopt.h"
+
+#include "../Pattern/PatternSet.h"
+
 namespace csl {
 
     /**
      * A specialised variant of the Aho-Corasick trie.
      */
-    class PatternGraph {
+    class PatternGraph : public PatternSet {
     public:
-	typedef std::vector< std::wstring > RightSides_t;
-
+	// a string and an index into the list of patterns (from PatternSet)
+	typedef std::vector< std::pair< std::wstring, size_t > > RightSides_t;
+	
 	class State {
 	public:
 	    typedef std::vector< std::pair< wchar_t, State > >::const_iterator iterator;  
+
 	    State( const PatternGraph& myGraph, size_t stateIndex ) :
 		myGraph_( &myGraph ),
 		stateIndex_( stateIndex ) {
 	    }
 	    
+	    bool operator==( const State& other ) {
+		return( ( myGraph_ == other.myGraph_  ) && // compare pointers
+			( stateIndex_ == stateIndex_ ) );
+	    }
+
 	    /**
 	     * walk in the AC-Trie. Use error links when needed. 
 	     *
@@ -42,7 +52,7 @@ namespace csl {
 
 	    /**
 	     * This is equivalent to a 'walk' call, only that the state itself
-	     * rmains unchanged (-->const), but a copy of the target state
+	     * remains unchanged (-->const), but a copy of the target state
 	     */
 	    inline State getTransTarget( wchar_t c ) const;
 
@@ -123,9 +133,19 @@ namespace csl {
 	}; // class InternalState
 	
 
-	// *** PRIVATE of PATTERNGRAPH *** 
-	
+	PatternGraph();
+
 	inline void loadPatterns( const char* patternFile );
+
+	inline State getRoot() const;
+
+	inline size_t getNrOfPatterns() const; 
+
+	inline void toDot() const;
+
+
+	// *** PRIVATE of PATTERNGRAPH *** 
+    private:
 
 	inline void addErrorLinks();
 
@@ -134,18 +154,30 @@ namespace csl {
 	 */
 	inline State newState();
 
-	inline State getRoot() const;
-
-	inline void toDot() const;
 
 
 	/**
 	 * Don't forget the realloc-trouble here !!!
 	 */
 	std::vector< InternalState > states_;
+	
+	size_t nrOfPatterns_;
 
 	static const wchar_t patternDelimiter_ = L'_';
     };
+
+    PatternGraph::PatternGraph() :
+	nrOfPatterns_( 0 ) {
+    }
+
+    inline PatternGraph::State PatternGraph::getRoot() const {
+	return State( *this, 1 );
+    }
+
+
+    inline size_t PatternGraph::getNrOfPatterns() const {
+	return nrOfPatterns_;
+    }
 
 
     /********** IMPL   STATE  ********************/
@@ -187,9 +219,6 @@ namespace csl {
 	return myGraph_->states_.at( stateIndex_ ).depth_;
     }
 
-    inline PatternGraph::State PatternGraph::getRoot() const {
-	return State( *this, 1 );
-    }
 
     inline size_t PatternGraph::State::getStateIndex() const {
 	return stateIndex_;
@@ -223,25 +252,14 @@ namespace csl {
     /********* IMPL  PATTERNGRAPH *****************/
 
     inline void PatternGraph::loadPatterns( const char* patternFile ) {
+	PatternSet::loadPatterns( patternFile );
+
 	states_.resize( 2 ); // failure state at position 0, root at position 1 
 
-	std::wifstream fi;
-	fi.imbue( std::locale( "de_DE.UTF-8" ) );
-	fi.open( patternFile );
-	if( ! fi ) {
-	    throw csl::exceptions::badFileHandle( "PatternGraph::Could not open pattern file" );
-	}
-	
-	std::wstring line;
-
 	size_t patternCount = 0;
-	while( getline( fi, line ) ) {
-	    size_t delimPos = line.find( L' ' );
-	    if( delimPos == std::wstring::npos ) {
-		throw csl::exceptions::badInput( "PatternGraph: Invalid line in pattern file" );
-	    }
- 	    std::wstring left = line.substr( 0, delimPos );
- 	    std::wstring right = line.substr( delimPos + 1 );
+	for( const_iterator pattern = begin(); pattern != end(); ++pattern ) {
+
+	    const std::wstring& left = pattern->getLeft();
 
 	    State state = getRoot();
 
@@ -267,10 +285,9 @@ namespace csl {
 		lastState = newSt;
 	    }
 	    states_.at( lastState.getStateIndex() ).isFinal_ = true;
-	    states_.at( lastState.getStateIndex() ).rightSides_.push_back( right );
+	    states_.at( lastState.getStateIndex() ).rightSides_.push_back( std::make_pair( pattern->getRight(), pattern - begin() ) );
 	    states_.at( lastState.getStateIndex() ).word_ = left;
 	}
-	fi.close();
 
 	addErrorLinks();
 

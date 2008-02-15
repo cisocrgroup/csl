@@ -28,8 +28,15 @@ int main(int argc, const char** argv ) {
 
     while( std::wcin >> query ) {
 	watch.start();
+	answers.clear();
 	vam.query( query, &answers );
-	std::wcout<<watch.readMilliseconds()<<" ms"<<std::endl;
+	
+	for( std::vector< csl::Vam::Answer >::const_iterator it = answers.begin(); it!= answers.end(); ++it ) {
+	    it->print();
+	    std::wcout<<std::endl;
+	}
+	
+//	std::wcout<<watch.readMilliseconds()<<" ms"<<std::endl;
     }
 
     

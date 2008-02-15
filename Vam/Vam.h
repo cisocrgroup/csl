@@ -11,9 +11,15 @@
 
 #include "./PatternGraph.h"
 
+#include "../Pattern/Instruction.h"
 
 namespace csl {
 
+    /**
+     * Vam - Variant-aware Approximate Matching
+     *
+     * @author Ulrich Reffle, 2008
+     */
     class Vam {
 
     private:
@@ -24,18 +30,19 @@ namespace csl {
 	 */
 	typedef MinDic_t::State MDState_t;
 
-	/**
-	 * For each left pattern side, this container type holds the appropriate list
-	 * of right pattern sides
-	 */
-	typedef std::vector< std::wstring > RightList_t;
-
-
     public:
-	struct Answer {
+	class Answer {
+	public:
 	    std::wstring word;
-	    std::vector< std::pair< std::wstring, std::wstring > > patterns;
-	};
+	    std::wstring baseWord;
+	    Instruction instruction;
+
+	    void print( std::wostream& os = std::wcout ) const {
+		os<<word<<":"<<baseWord<<"+";
+		instruction.print( os );
+	    }
+
+	}; // class Answer
 
 	Vam( const MinDic_t& basedDic, const char* patternFile );
 
@@ -48,59 +55,21 @@ namespace csl {
 
     private:
 
-	/**
-	 * @brief Error is usually stored with a Position and represents one error operation 
-	 * that was used during the long life of the Position
-	 *
-	 */
-	class Error {
-	public:
-	    Error() :
-		position_( 0 ) {
-	    }
-	    
-	    Error( const std::wstring& pattern, size_t position ) :
-		pattern_( pattern ),
-		position_( position ) {
-		
-	    }
-
-	    bool isValid() const {
-		return ! pattern_.empty();
-	    }
-	    
-	    const std::wstring& getPattern() const {
-		return pattern_;
-	    }
-
-	    size_t getPosition() const {
-		return position_;
-	    }
-	    
-	    
-	private:
-	    std::wstring pattern_;
-	    /**
-	     * The char offset in the word where the error was inserted
-	     */
-	    int position_;
-	};
-	
 
 	class Position {
 	public:
 	    Position( const LevDEA::Pos& levPos, const std::pair< int, int >& mother = std::make_pair( -1, -1 ) ) :
 		levPos_( levPos ),
-		error_() {
+		posPattern_() {
 		mother_ = mother;
 	    }
 	    
-	    void addError( const Error& error ) {
-		error_ = error;
+	    void addPosPattern( const PosPattern& posPattern ) {
+		posPattern_ = posPattern;
 	    }
 	    
 	    LevDEA::Pos levPos_;
-	    Error error_;
+	    PosPattern posPattern_;
 	    std::pair< int, int > mother_;
 	};
 
@@ -109,9 +78,8 @@ namespace csl {
 	    StackItem( const Vam& myVam ) :
 		dicPos_( myVam.baseDic_ ),
 		patternPos_( myVam.patternGraph_, 0 ),
-		lookAheadDepth_( 0 )
-		{
-		}
+		lookAheadDepth_( 0 ) {
+	    }
 
 	    void clear() {
 		std::vector< Position >::clear();
@@ -124,10 +92,19 @@ namespace csl {
 	};
 	
 	class Stack : public std::vector< StackItem > {
-	    
+	public:
+	    Stack() {
+		// reserve( 500 );
+	    }
 	};
 	
 	void printPosition( const Position& pos ) const;
+
+	/**
+	 */
+	void reportMatch( const Position* cur ) const;
+	void reportMatch_rec( const Position* cur, Answer* answer ) const;
+
 	/////   DATA MEMBERS OF VAM   //////////////////////
 
 	const MinDic_t& baseDic_;
@@ -135,7 +112,7 @@ namespace csl {
 
 	PatternGraph patternGraph_;
 	std::vector< std::wstring > leftSidesList_;
-	std::vector< RightList_t > rightSides_;
+	std::vector< PatternGraph::RightSides_t > rightSides_;
 	
 	std::wstring query_;
 	std::vector< Answer >* answers_;

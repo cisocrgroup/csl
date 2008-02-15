@@ -7,6 +7,8 @@
 #include<exception>
 #define debug(s) (std::cout<<"DEBUG: "<<s<<std::endl)
 
+#include "./machine_dependent.h"
+
 /**
    This namespace covers a system of modules for string processing.
    @todo 
@@ -48,10 +50,7 @@ namespace csl {
 	FW_BW
     } MSMatchMode;
 
-
-
-    class Global {
-    public:
+    namespace Global {
 	static const size_t maxNrOfChars = 65536;
 
 	// those lengths are the maximum size of bytes from the input stream
@@ -115,7 +114,7 @@ namespace csl {
 	    printf( "\n" );
 	}
 	
-    };
+    }
 
     namespace exceptions {
 

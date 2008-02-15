@@ -3,8 +3,7 @@
 #include <cppunit/extensions/TestFactoryRegistry.h>
 #include <cppunit/ui/text/TestRunner.h>
 
-#include "./TestVam.h"
-
+#include "./TestPattern.h"
 
 int main() {
 //     // Get the top level suite from the registry
@@ -12,7 +11,7 @@ int main() {
 
 
 
-    // Adds the test to the list of test to run
+    // Adds the test to the list of tests to run
     CppUnit::TextUi::TestRunner runner;
     runner.addTest( suite );
     
@@ -25,6 +24,4 @@ int main() {
     // Return error code 1 if the one of test failed.
     return wasSucessful ? 0 : 1;    
 
-
-    return 0;
 }

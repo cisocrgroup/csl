@@ -28,12 +28,21 @@ namespace csl {
     }
     
     void Vam::query_rec( size_t depth ) {
+	
+ 	// std::wcout<<"query_rec( "<<depth<<" ):word="<<word_<<std::endl; // DEBUG
 
-// 	std::wcout<<"query_rec( "<<depth<<" ):word="<<word_<<std::endl;
+
+	stack_.push_back( StackItem( *this ) );
+
+	// this lets us use the []-operator for stack_ with a somewhat purer conscience
+	// But the at()-operator turned out to be a real bottleneck here ...
+	if( stack_.size() != depth + 2 ) {
+	    throw exceptions::LogicalError( "csl::Vam::query_rec: current stack seems out of sync with backtracking procedure" );
+	}
 
 	// apply all patterns whose left sides end here 
-	if( stack_.at( depth ).patternPos_.isFinal() ) {
-	    PatternGraph::State patPos = stack_.at( depth ).patternPos_;
+	if( stack_[depth].patternPos_.isFinal() ) {
+	    PatternGraph::State patPos = stack_[depth].patternPos_;
 
 	    do { // for all final states reachable via errorLinks
 		// for all positions of the stackItem (tracked back leftside)
@@ -47,89 +56,76 @@ namespace csl {
 		    // for all right sides fitting the current leftSide
 		    // Note that there might be final states with empty rightSides, namely those where a suffix
 		    // of the current path leads to a "real" final state with non-empty rightSides
-		    for( RightList_t::const_iterator rightSide = patPos.getRightSides().begin();
+		    for( PatternGraph::RightSides_t::const_iterator rightSide = patPos.getRightSides().begin();
 			 rightSide != patPos.getRightSides().end();
 			 ++rightSide ) {
 			
-			LevDEA::Pos newLevPos = levDEA_.walkStr( position->levPos_, rightSide->c_str() );
+			LevDEA::Pos newLevPos = levDEA_.walkStr( position->levPos_, rightSide->first.c_str() );
 			if( newLevPos.isValid() )  {
 			    Position newPosition( newLevPos, std::make_pair( depth - patPos.getDepth(), count ) );
-			    newPosition.addError( Error( patPos.getWord() + L" " + *rightSide, depth - patPos.getDepth() ) );
-			    stack_.at( depth ).push_back( newPosition );
-			}
-			else {
+			    newPosition.addPosPattern( PosPattern( patternGraph_.at( rightSide->second ), depth - patPos.getDepth() ) );
+			    stack_[depth].push_back( newPosition );
+			    stack_[depth].lookAheadDepth_ = 0;
 			}
 		    } // for all rightSides
 		} // for all positions
 
 		patPos.walkErrorLink();
-	    } while( patPos.isValid() && patPos.isFinal() && ( patPos.getDepth() >= stack_.at( depth ).lookAheadDepth_ ) );
+	    } while( patPos.isValid() && patPos.isFinal() && ( patPos.getDepth() >= stack_[depth].lookAheadDepth_ ) );
 
 	} // if found left pattern side
 
 
 	// report matches
-	if( ( stack_.at( depth ).lookAheadDepth_ == 0 ) && stack_.at( depth ).dicPos_.isFinal() ) {
-
+	if( ( stack_[depth].lookAheadDepth_ == 0 ) && stack_[depth].dicPos_.isFinal() ) {
 	    // for all positions
 	    size_t count = 0;
-	    for( StackItem::iterator position = stack_.at( depth ).begin();
-		 position != stack_.at( depth ).end();
+	    for( StackItem::iterator position = stack_[depth].begin();
+		 position != stack_[depth].end();
 		 ++position ) {
 		if( levDEA_.isFinal( position->levPos_ ) ) {
-		    std::wcout<<"[Result] "<<word_<<"|";
-		    const Position* cur = &( *position );
-		    
-		    while( cur ) {
-			if( cur->error_.isValid() ) {
-			    std::wcout << "(" << cur->error_.getPattern() << "," << cur->error_.getPosition() << ")";
-			}
-			
-			cur = ( cur->mother_.first == -1 ) ? 0 : &( stack_.at( cur->mother_.first ).at( cur->mother_.second ) ); 
-		    }
-		    std::wcout << "|d=" << levDEA_.getDistance( position->levPos_ ) <<  std::endl;
+		    reportMatch( &( *position ) );
+		    //std::wcout<<"|d=" << levDEA_.getDistance( position->levPos_ );
 		}
 		++count;
 	    } // for all positions
 	} // report matches
 	
-
-	stack_.push_back( StackItem( *this ) );
-	
 	// for all outgoing transitions
-	for( const wchar_t* c = stack_.at( depth ).dicPos_.getSusoString();
+	for( const wchar_t* c = stack_[depth].dicPos_.getSusoString();
 	     *c;
 	     ++c ) {
 	    stack_.at( depth + 1 ).clear();
-	    stack_.at( depth + 1 ).dicPos_ = stack_.at( depth ).dicPos_.getTransTarget( *c );
-	    word_.resize( depth + 1 );
-	    word_.at( depth ) = *c;
 
-	    stack_.at( depth + 1 ).patternPos_ = stack_.at( depth ).patternPos_.getTransTarget( *c );
+	    stack_[depth + 1].patternPos_ = stack_[depth].patternPos_.getTransTarget( *c );
 
 	    // see which of the Positions can be moved with this *c
 	    // see also if the levDEA reaches a final state
 	    size_t count = 0;
-	    for( StackItem::iterator position = stack_.at( depth ).begin();
-		 position != stack_.at( depth ).end();
+	    for( StackItem::iterator position = stack_[depth].begin();
+		 position != stack_[depth].end();
 		 ++position, ++count ) {
 		LevDEA::Pos newLevPos = levDEA_.walk( position->levPos_, *c );
 		if( newLevPos.isValid() ) {
-		    stack_.at( depth + 1 ).push_back( Position( newLevPos, std::make_pair( depth, count ) ) );
+		    stack_[depth + 1].push_back( Position( newLevPos, std::make_pair( depth, count ) ) );
 		}
 	    }
 	    
 	    // set lookAheadDepth_ for next stackItem: 
-	    if( ! stack_.at( depth + 1 ).empty() ) {
+	    if( ! stack_[depth + 1].empty() ) {
 		// set to 0 if new positions exist
-		stack_.at( depth + 1 ).lookAheadDepth_ = 0;
+		stack_[depth + 1].lookAheadDepth_ = 0;
 	    }
 	    else {
 		// increment if no new positions exist
-		stack_.at( depth + 1 ).lookAheadDepth_ = stack_.at( depth ).lookAheadDepth_ + 1;
+		stack_[depth + 1].lookAheadDepth_ = stack_[depth].lookAheadDepth_ + 1;
 	    }
 
-	    if( stack_.at( depth + 1 ).lookAheadDepth_ <= stack_.at( depth + 1 ).patternPos_.getDepth() ) {
+	    if( stack_[depth + 1].lookAheadDepth_ <= stack_[depth + 1].patternPos_.getDepth() ) {
+		stack_[depth + 1].dicPos_ = stack_[depth].dicPos_.getTransTarget( *c );
+		word_.resize( depth + 1 );
+		word_.at( depth ) = *c;
+
 		query_rec( depth + 1 );
 	    }
 	}
@@ -137,17 +133,27 @@ namespace csl {
 	stack_.pop_back();
     } // query_rec
 
-    void Vam::printPosition( const Position& pos ) const {
-	const Position* cur = &( pos );
-	std::wcout << "{" << pos.levPos_.position() << "}";
-	while( cur ) {
-	    if( cur->error_.isValid() ) {
-		std::wcout << "(" << cur->error_.getPattern() << "," << cur->error_.getPosition() << ")";
-	    }
-	    
-	    cur = ( cur->mother_.first == -1 ) ? 0 : &( stack_.at( cur->mother_.first ).at( cur->mother_.second ) ); 
-	}
-	std::wcout << "|d=" << levDEA_.getDistance( pos.levPos_ ) <<  std::endl;
+    void Vam::reportMatch( const Position* cur ) const {
+	Answer answer;
+	answer.word = query_; // FIXME !!!!!
+	answer.baseWord = word_; // FIXME !!!!!
+	reportMatch_rec( cur, &answer );
+	answers_->push_back( answer );
     }
+
+    void Vam::reportMatch_rec( const Position* cur, Answer* answer ) const {
+	if( cur->mother_.first == -1 ) {
+	    return;
+	}
+	else {
+	    reportMatch_rec( &( stack_.at( cur->mother_.first ).at( cur->mother_.second ) ), answer );
+	}
+
+	if( ! cur->posPattern_.empty() ) {
+	    answer->instruction.push_back( cur->posPattern_ );
+	}
+    }
+
+
     
 } // namespace csl
