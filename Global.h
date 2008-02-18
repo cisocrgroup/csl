@@ -16,16 +16,16 @@
 */
 namespace csl {
     typedef unsigned short char16;
-    typedef unsigned wchar_t char32;
+    typedef wchar_t char32;
 
     typedef unsigned char uchar;
 
     typedef unsigned int uint_t;
 
-    typedef uint32_t bits32;
+    typedef int bits32;
 
     typedef unsigned long long ulong_t;
-    typedef uint64_t bits64;
+    typedef unsigned long long bits64;
 
     typedef unsigned int StateId_t;
 

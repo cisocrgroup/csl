@@ -280,7 +280,7 @@ namespace csl {
 	bool wasUpperCase = 0;
 	if( ( caseMode_ != asIs ) && iswupper( pattern_[0] ) ) {
 	    wasUpperCase = 1;
-	    pattern_[0] = towctrans( pattern_[0], wctrans( "tolower" ) );
+	    pattern_[0] = std::tolower( pattern_[0] );
 	}
 
 	// split pattern into 2 halves
@@ -307,9 +307,9 @@ namespace csl {
 
 	for( CandidateMap::iterator it = results_.begin(); it != results_.end(); ++it ) {
 	    if( ( caseMode_ == restoreCase ) && wasUpperCase ) {
-		std::wstring tmp = it->first;
-		tmp.replace( 0, 1, 1, towctrans( tmp.at( 0 ), wctrans( "toupper" ) ) );
-		candReceiver_->receive( tmp.c_str(), (it->second).first , (it->second).second  );
+			std::wstring tmp = it->first;
+			tmp.at( 0 ) = std::toupper( tmp.at( 0 ));
+			candReceiver_->receive( tmp.c_str(), (it->second).first , (it->second).second  );
 	    }
 	    else candReceiver_->receive( (it->first).c_str(), (it->second).first , (it->second).second );
 	}

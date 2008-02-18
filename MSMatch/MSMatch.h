@@ -3,6 +3,7 @@
 
 #include<string>
 #include<map>
+#include<cctype>
 #include "../LevFilter/LevFilter.h"
 #include "../MinDic/MinDic.h"
 #include "../FBDic/FBDic.h"
