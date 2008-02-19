@@ -161,9 +161,8 @@ namespace csl {
 	    }
 	    else throw exceptions::badInput( "csl::ErrDic::compileDic: Input format violated." );
 	    
-
 	    addToken( key, original, errorPattern );
-
+	    
 	}
 	fileHandle.close();
 

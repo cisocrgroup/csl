@@ -1,11 +1,20 @@
-#ifndef CSL_PATTERN
-#define CSL_PATTERN CSL_PATTERN
+#ifndef CSL_PATTERN_H
+#define CSL_PATTERN_H CSL_PATTERN_H
 
 #include<string>
 #include<iostream>
 
 namespace csl {
 
+    /**
+     * @brief Pattern holds one string substitution alpha --> beta which is allowed in a certain context.
+     *
+     * The Pattern object simply has two string components left and right. If both are empty, the pattern is
+     * something like a "neutral element", or a dummy. Then, empty() returns true. It is sometimes needed where
+     * the implementation expects a Pattern without there really being one.
+     *
+     * @author Ulrich Reffle, 2008
+     */
     class Pattern {
     public:
 
@@ -31,7 +40,9 @@ namespace csl {
 	 */
 	const std::wstring& getRight() const;
 
-
+	/**
+	 * @brief returns if pattern is "empty"
+	 */
 	bool empty() const {
 	    return ( left_.empty() && right_.empty() );
 	}

@@ -10,8 +10,19 @@
 
 namespace csl {
 
+    /**
+     * @brief A collection of patterns that should be available in some context.
+     *
+     * @author Ulrich Reffle, 2008
+     */
     class PatternSet : public std::vector< Pattern > {
     public:
+	/**
+	 * @brief Reads a set of patterns from a file.
+	 *
+	 * The file is expected to contain one pattern per line, with a blank to
+	 * separate left from right side.
+	 */
 	void loadPatterns( const char* patternFile );
     private:
 	
@@ -34,7 +45,7 @@ namespace csl {
 		throw exceptions::badInput( "PatternGraph: Invalid line in pattern file" );
 	    }
 
-	    push_back( Pattern( line.substr( 0, delimPos ), line.substr( delimPos + 1 ) ) );
+	    this->push_back( Pattern( line.substr( 0, delimPos ), line.substr( delimPos + 1 ) ) );
 	}
     }
 

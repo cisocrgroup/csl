@@ -60,8 +60,8 @@ MSMatch: ./bin/msFilter
 
 LEVFILTER_HEADERS = ./LevFilter/LevFilter.h
 
-LEVDEA_HEADERS = ./LevDEA/LevDEA.h ./LevDEA/LevDEA_postables.h ./LevDEA/LevDEA_postables.h $(GLOBAL_H) $(ALPHABET_HEADERS)
-$(OBJS)/LevDEA.o: $(LEVDEA_HEADERS) ./LevDEA/LevDEA.cxx ./LevDEA/LevDEA_postables.cxx
+LEVDEA_HEADERS = ./LevDEA/LevDEA.h ./LevDEA/LevDEA_postables.h ./LevDEA/LevDEA_postables.tcc $(GLOBAL_H) $(ALPHABET_HEADERS)
+$(OBJS)/LevDEA.o: $(LEVDEA_HEADERS) ./LevDEA/LevDEA.cxx ./LevDEA/LevDEA_postables.tcc
 	$(GCC) -c ./LevDEA/LevDEA.cxx -o $(OBJS)/LevDEA.o
 
 MSMATCH_HEADERS = ./MSMatch/MSMatch.h ./MSMatch/MSMatch.tcc $(LEVFILTER_HEADERS) $(GLOBAL_H) $(LEVDEA_HEADERS) $(FBDIC_HEADERS)
