@@ -7,6 +7,9 @@
 
 namespace csl {
 
+    /**
+     * @brief Represents an instruction in the sense we use the word in connection with orthogrpahical variants.
+     */
     class Instruction : public std::vector< PosPattern > {
     public:
 	void print(  std::wostream& os = std::wcout ) const {

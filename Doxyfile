@@ -471,7 +471,7 @@ RECURSIVE              = YES
 # excluded from the INPUT source files. This way you can easily exclude a 
 # subdirectory from a directory tree whose root is specified with the INPUT tag.
 
-EXCLUDE                = ./csl/LevDEA/LevDEA.cxx ./csl/LevDEA/lev0data.cxx ./csl/LevDEA/lev1data.cxx ./csl/LevDEA/lev2data.cxx ./csl/LevDEA/lev3data.cxx ./csl/LevDEA/LevDEA_postables.tcc ./csl/LevDEA/LevDEA_cslversion.h ./csl/LevDEA/LevDEA_cslversion.tcc
+EXCLUDE                = ./csl/LevDEA/LevDEA.cxx ./csl/LevDEA/lev0data.cxx ./csl/LevDEA/lev1data.cxx ./csl/LevDEA/lev2data.cxx ./csl/LevDEA/lev3data.cxx ./csl/LevDEA/LevDEA_postables.tcc ./csl/LevDEA/LevDEA_cslversion.h ./csl/LevDEA/LevDEA_cslversion.tcc ./csl/locale_test.cxx
 
 # The EXCLUDE_SYMLINKS tag can be used select whether or not files or 
 # directories that are symbolic links (a Unix filesystem feature) are excluded 
@@ -718,7 +718,7 @@ TREEVIEW_WIDTH         = 250
 # If the GENERATE_LATEX tag is set to YES (the default) Doxygen will 
 # generate Latex output.
 
-GENERATE_LATEX         = NO
+GENERATE_LATEX         = YES
 
 # The LATEX_OUTPUT tag is used to specify where the LaTeX docs will be put. 
 # If a relative path is entered the value of OUTPUT_DIRECTORY will be 

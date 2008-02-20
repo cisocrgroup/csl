@@ -20,27 +20,6 @@ namespace csl {
 	typedef AnnType AnnType_t;
 	typedef MinDic< AnnType_t > MinDic_t;
 
-	class Entry {
-	public:
-	    Entry( const std::wstring& key, const AnnType_t& annotation ) :
-		key_( key ),
-		annotation_( annotation ) {
-	    }
-	    const std::wstring& getKey() const {
-		return key_;
-	    }
-	    const AnnType_t& getAnnotation() const {
-		return annotation_;
-	    }
-
-	    bool operator<( const Entry& other ) const {
-		return this->getKey() < other.getKey();
-	    }
-
-	private:
-	    std::wstring key_;
-	    AnnType_t annotation_;
-	};
 
 	FBDic( const char* dicFile = 0 );
     
@@ -70,6 +49,31 @@ namespace csl {
     private:
 	MinDic_t fwDic_;
 	MinDic_t bwDic_;
+
+	/**
+	 * During construction, used to represent one entry of the dictionary
+	 */
+	class Entry {
+	public:
+	    Entry( const std::wstring& key, const AnnType_t& annotation ) :
+		key_( key ),
+		annotation_( annotation ) {
+	    }
+	    const std::wstring& getKey() const {
+		return key_;
+	    }
+	    const AnnType_t& getAnnotation() const {
+		return annotation_;
+	    }
+
+	    bool operator<( const Entry& other ) const {
+		return this->getKey() < other.getKey();
+	    }
+
+	private:
+	    std::wstring key_;
+	    AnnType_t annotation_;
+	};
 
 	std::vector< Entry > entries_;
 

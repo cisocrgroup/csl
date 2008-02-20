@@ -32,6 +32,9 @@ namespace csl {
     class LevDEA {
 
     public:
+	/**
+	 * @brief External representation of a state of the Levenshtein Automaton
+	 */
 	class Pos {
 	private:
 	    /// holds the current position in the automaton

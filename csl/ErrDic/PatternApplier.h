@@ -11,8 +11,10 @@
 
 namespace csl {
 
+    /**
+     * @brief The central class for the construction of error/variant dicionaries in alphabetical order
+     */
     class PatternApplier {
-
     private:
 	class Position;
 

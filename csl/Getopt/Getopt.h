@@ -5,8 +5,11 @@
 #include<map>
 #include<vector>
 
+/**
+ * @brief A class for thet parsing of command line arguments.
+ * Heavily under construction!!!
+ */
 class Getopt {
-
 public:
     Getopt( size_t argc, const char** argv ) {
 	

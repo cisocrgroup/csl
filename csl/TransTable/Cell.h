@@ -12,6 +12,9 @@
 #include "../Global.h"
 namespace csl {
 
+    /**
+     * @brief Represents one cell in the sparse table.
+     */
     template< CellType C, class StateId_t >
     class Cell {
 	// dummy class
@@ -20,7 +23,7 @@ namespace csl {
 
 
     /**
-     * This specialisation is not at all maintained at the moment !!!
+     * @brief This specialisation is not at all maintained at the moment !!!
      */
     template< class StateId_t >
     class Cell< BASIC, StateId_t > { // of class TransTable
@@ -104,6 +107,9 @@ namespace csl {
 
 
 
+    /**
+     * @brief Represents one cell in the sparse table.
+     */
     template< class StateId_t >
     class Cell< TOKDIC, StateId_t > { // of class TransTable
     public:

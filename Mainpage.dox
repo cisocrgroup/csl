@@ -1,0 +1,21 @@
+/**
+ * @mainpage
+ * <p>
+ *  This library is a collection of modules we implemented at the CIS. All modules have in common that they use or extend the sparse transition table implementation <tt>TransTable</tt>.
+ * </p>
+ *  What follows is a very short description of the most important classes.
+ * <ul>
+ * <li>csl::MinDic implements the  construction and usage of minimzed acyclic finite-state automata.</li>
+ * <li>csl::MSMatch offers a very efficient method to extract correction candidates
+ * for a garbled token from a huge lexicon.</li>
+ * <li>With csl::ErrDic and csl::createED so-called <em>Error Dictionaries</em> are created and used. 
+ * They are powerful tools for the computation of error-profiles for a text.</li>
+ * </ul>
+ * <p>
+ * Though running quite stable in many tests, the library is constantly under construction and development.<br>
+ * <b>So far, none of the interfaces documented here are fixed or guaranteed to remain unchanged in future versions. Both software and documentation are not complete in some places.</b><br>
+ * </p>
+ * <p>We are always happy to receive feedback, bug reports or suggestions. Please mail to uli@cis.uni-muenchen.de</p>
+ *
+ * @author Ulrich Reffle
+ */

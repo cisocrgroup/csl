@@ -20,6 +20,9 @@ namespace csl {
      * Many ideas for the implementation are adapted from a C-program written
      * by Stoyan Mihov.
      * 
+     * Note that a MinDic inherits from TransTable and so offers all of TransTable's 
+     * interface to the guts of the automaton. However this might change in the future.
+     *
      * @author Ulrich Reffle, <uli@cis.uni-muenchen.de>
      * @date Apr 2006
      *
