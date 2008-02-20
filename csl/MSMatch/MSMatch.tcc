@@ -1,5 +1,5 @@
-#ifndef CSL_MSMATCH_CXX
-#define CSL_MSMATCH_CXX CSL_MSMATCH_CXX
+#ifndef CSL_MSMATCH_TCC
+#define CSL_MSMATCH_TCC CSL_MSMATCH_TCC
 
 namespace csl {
 
@@ -263,7 +263,7 @@ namespace csl {
 
 
     template<>
-    inline int MSMatch< FW_BW >::query( const wchar_t* pattern, CandidateReceiver& candReceiver ) {
+    inline void MSMatch< FW_BW >::query( const wchar_t* pattern, CandidateReceiver& candReceiver ) {
 	if( ! *pattern ) {
 	    throw( exceptions::badInput( "csl::MSMatch::query: Empty pattern string is forbidden" ) );
 	}
@@ -313,8 +313,6 @@ namespace csl {
 	    }
 	    else candReceiver_->receive( (it->first).c_str(), (it->second).first , (it->second).second );
 	}
-
-	return 0;
     }
 
     

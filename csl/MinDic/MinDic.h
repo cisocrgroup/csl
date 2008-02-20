@@ -20,14 +20,22 @@ namespace csl {
      * Many ideas for the implementation are adapted from a C-program written
      * by Stoyan Mihov.
      * 
-     * @author Ulrich Reffle, <uli@reffle.de>
+     * @author Ulrich Reffle, <uli@cis.uni-muenchen.de>
      * @date Apr 2006
      *
      */
     template< class AnnType = int >
     class MinDic : public TransTable< TOKDIC > {
-    public:
+    private:
 	typedef TransTable< TOKDIC > TransTable_t;
+
+    public:
+	/**
+	 * @brief The datatype of the annotation that comes with each dictionary entry.
+	 * Note that \c AnnType_t, currently,  has to be a trivial datatype: if you store
+	 * an object x of type AnnType_t, the MinDic will store exactly sizeof(AnnType_t) bytes,
+	 * beginning at address &x. Heap data will be lost.
+	 */
 	typedef AnnType AnnType_t;
 
 	/**
@@ -36,6 +44,9 @@ namespace csl {
 	 */
 	class State {
 	public:
+	    /**
+	     * @param a reference to the \c MinDic the \c State belongs to.
+	     */
 	    State( const MinDic< AnnType >& minDic ) :
 		minDic_( &minDic ),
 		dicPos_( minDic_->getRoot() ),
@@ -85,6 +96,7 @@ namespace csl {
 	    }
 
 	private:
+
 	    State( const MinDic< AnnType >& minDic, StateId_t dicPos, size_t perfHashValue ) :
 		minDic_( &minDic ),
 		dicPos_( dicPos ),
@@ -96,46 +108,17 @@ namespace csl {
 	    size_t perfHashValue_;
 	}; // class State
 
+	/**
+	 * @brief Create a new MinDic. An optional file-path as argument invokes a call to loadFromFile.
+	 * @param a file containing a compiled MinDic. (optional; often: *.mdic)
+	 */
 	MinDic( const char* dicFile = 0 );
 
-	inline void loadFromFile( const char* binFile );
-	
-	inline void loadFromStream( FILE* fi );
-	
-	inline void writeToFile( char* binFile ) const;
-
-	inline void writeToStream( FILE* fo ) const;
 
 	/**
-	 * The funtion that actually executes the computation of the trie.
-	 * @param txtFile The dictionary (including annotations) in txt format
+	 * @name Lookup
 	 */
-	inline void compileDic( const char* txtFile );
-
-	inline void parseAnnotation( wchar_t* str, AnnType_t* annotation ) const;
-
-	inline void initConstruction();
-	inline void finishConstruction();
-
-	/**
-	 * processes one input line: separates the key from the annotations (if present)
-	 * and performs the insertion into the trie
-	 * @arg a cstring pointing to the current line
-	 */
-	inline void addToken( const wchar_t* input, const AnnType_t& value );
-
-	/// extracts the trie to stdout
-	inline void printDic( StateId_t initState ) const;
-
-	
-	inline State getRootState() const {
-	    return State( *this );
-	}
-
-	/**
-	 * This method from TransTable is blocked for MinDic, not implemented here!
-	 */
-	inline int getFirstAnn( StateId_t state );
+	//@{
 
 	/**
 	 * Use this function to do a convenient lookup. If you don't need the annotation, just pass on
@@ -146,6 +129,7 @@ namespace csl {
 	 * @return true iff key was found in the dictionary
 	 */
 	inline bool lookup( const wchar_t* key, AnnType_t* annotation = 0 ) const;	
+
 	/**
 	 * @deprecacted this method is renamed to lookup()
 	 */
@@ -153,13 +137,102 @@ namespace csl {
 
 
 	inline const AnnType_t& getAnnotation( size_t perfHashValue ) const;
+
+	/**
+	 * Get a State object of the automaton's root/ start state. 
+	 * @return a State object of the automaton's root/ start state. 
+	 * @see State
+	 */
+	inline State getRootState() const {
+	    return State( *this );
+	}
+
+	//@}
+
+
+	/**
+	 * @name Loading from /writing to hard disk
+	 */
+	//@{
+	/**
+	 * @brief Load a compiled MinDic from hard disk.
+	 * @param a file containing a compiled MinDic. (often: *.mdic)
+	 */
+	inline void loadFromFile( const char* binFile );
 	
+	/**
+	 * @brief Load a compiled MinDic from an open file stream.
+	 * @param fi a c-style file pointer.
+	 */
+	inline void loadFromStream( FILE* fi );
+	
+	/**
+	 * @brief dump MinDic automaton to a file in binary form.
+	 * @param binFile File to write the automaton into.
+	 */
+	inline void writeToFile( char* binFile ) const;
+
+	/**
+	 * @brief dump MinDic automaton to an open file stream
+	 * @param fo a c-style file pointer.
+	 */
+	inline void writeToStream( FILE* fo ) const;
+
+	//@}
+	
+	/**
+	 * @name Construction of a new MinDic
+	 */
+	//@{
+	/**
+	 * The funtion that actually executes the computation of the trie.
+	 * @todo Should this method be public??? Maybe not ...
+	 * @param txtFile The dictionary (including annotations) in txt format
+	 */
+	inline void compileDic( const char* txtFile );
+
+	/**
+	 * @todo add documentation
+	 */
+	inline void parseAnnotation( wchar_t* str, AnnType_t* annotation ) const;
+
+	/**
+	 * @brief prepares the object for construction of a new MinDic.
+	 * Call before calling addToken() for the first time. 
+	 */
+	inline void initConstruction();
+	inline void finishConstruction();
+
+	/**
+	 * processes one input line: separates the key from the annotations (if present)
+	 * and performs the insertion into the trie
+	 * @arg a cstring pointing to the current line
+	 */
+	inline void addToken( const wchar_t* input, const AnnType_t& value );
+
+	//@}
+
+	/**
+	 * @name Convenience, Information, Debug
+	 */
+	//@{
+
 	inline void printDic() const;
+
+	/// extracts the trie to stdout
+	inline void printDic( StateId_t initState ) const;
 
 	inline size_t getNrOfKeys() const;
 
 	inline void doAnalysis() const;
-	
+
+	/**
+	 * This method from TransTable is blocked for MinDic, not implemented here!
+	 */
+	inline int getFirstAnn( StateId_t state );
+
+ 	//@}
+
     protected:
 	inline const AnnType_t& annotationsAt( size_t n ) const;
 

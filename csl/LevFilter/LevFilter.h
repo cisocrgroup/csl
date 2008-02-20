@@ -19,8 +19,10 @@ namespace csl {
 	class CandidateReceiver;
 
 	/**
-	   @
-	*/
+	 * compute candidates for \c query and report them to \c candReceiver
+	 * @param query
+	 * @param candReceiver
+	 */
 	virtual int query( const wchar_t* query, CandidateReceiver& candReceiver ) = 0;
 
 	virtual ~LevFilter() {
@@ -42,6 +44,10 @@ namespace csl {
 	 * LevFilter calls this method for each candidate.
 	 */
 	virtual void receive( const wchar_t* str, int levDistance, int annotation ) = 0;
+
+	/**
+	 * @todo this method might not be needed anymore. Should be deprecated.
+	 */
 	virtual void reset() = 0;
     };
 

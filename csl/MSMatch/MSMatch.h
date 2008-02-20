@@ -12,32 +12,76 @@
 
 namespace csl {
     /**
-     * MSMatch provides approximate matching in large dictionaries using determinstic Levenshtein automata.
+     * @brief MSMatch provides approximate matching in large dictionaries using determinstic Levenshtein automata.
      * It is an implementation of the concepts described in
      * "S. Mihov and K. Schulz. Fast approximate search in large dictionaries. Computational Linguistics, 30, 2004."
      * Basically the implementation is derived from a C-implementation of Stoyan Mihov.
      *
      * It uses the universal levenshtein automaton that is implemented in class LevDEA.
-     * @see csl::LevDEA
      *
-     * @author Uli Reffle, <uli@reffle.de>
+     * MSMatch implements the interface \c LevFilter, that is, it provides a method query taking a word as input and
+     * a \c CandidateReceiver as output argument. To use MSMatch, just implement a \c CandidateReceiver for your needs.<br>
+     *
+     * @see csl::LevDEA, csl::LevFilter, csl::LevFilter::CandidateReceiver
+     *
+     * @todo At the moment the levenshtein threshold can only be set once at construction. It should be easy to provide
+     *       some method like setDistance() to change this anytime. 
+     * @todo remove fixed-length string components. Change interface to std::wstring
+     *
+     * @author Ulrich Reffle, <uli@cis.uni-muenchen.de>
      * @date   2006
      */
     template< MSMatchMode Mode = STANDARD >
     class MSMatch : public LevFilter {
     public:
 	/**
+	 * The datatype returned by the method getFWDic().
+	 */
+	typedef MinDic< int > MinDic_t;
+
+	/**
 	 * Three modes are offered for case handling:
 	 * 
 	 */
-	enum CaseMode { asIs, // don't change anything, take query as it comes
-			toLower, // change query to lower case and return all candidates lower case 
-			restoreCase // do search in lower case, but upcase first character of all cands if query was uppercase 
+	enum CaseMode { asIs, /**< don't change anything, take query as it comes*/
+			toLower, /**< change query to lower case and return all candidates lower case */
+			restoreCase /**< do search in lower case, but upcase first character of all cands if query was uppercase */
 	}; 
 
+	/**
+	 * Create an MSMatch object with a levenshtein threshold \c k and a path specifying a file with a compiled FBDic.
+	 * 
+	 * @param k the levenshtein threshold: MSMatch will extract candidates with distance lower or equal to \c k
+	 * @param FBDicFile a path specifying a file with a compiled FBDic
+	 */
+	inline MSMatch( size_t k, const char* FBDicFile );
+	~MSMatch();
+
+	/**
+	 * @brief compute candidates for the given query patterns; store the cands in the candReceiver object.
+	 * @param[in] pattern
+	 * @param[out] candReceiver
+	 */
+	inline void query( const wchar_t* pattern, LevFilter::CandidateReceiver& candReceiver );
+
+	/**
+	 * @brief returns a reference to the used dictionary.
+	 * (forward, in contrast to backward as is also used for the extraction)
+	 */
+	inline const MinDic_t& getFWDic() const {
+	    return dictFW_;
+	}
+
+	/**
+	 * @brief Specify a case mode (one of CaseMode) to decide the treatment of uppercased input.
+	 * @param caseMode
+	 */
+	inline void setCaseMode( CaseMode caseMode ) {
+	    caseMode_ = caseMode;
+	}
+
     private:
-	typedef MinDic< int > MinDic_t;
-	FBDic< int > fbDic_;
+	FBDic<> fbDic_;
 	const MinDic_t& dictFW_;
 	const MinDic_t& dictBW_;
 
@@ -81,30 +125,6 @@ namespace csl {
 	inline void queryCases_2();
 	inline void queryCases_3();
 
-    public:
-	inline MSMatch( size_t k, const char* dicFile );
-	~MSMatch();
-
-	/**
-	 * compute candidates for the given query patterns; store the cands in the candReceiver object
-	 * @param[in] pattern
-	 * @param[out] candReceiver
-	 * @return always 0
-	 * @todo the return value is obviously legacy
-	 */
-	inline int query( const wchar_t* pattern, CandidateReceiver& candReceiver );
-
-	/**
-	 * returns a reference to the used dictionary 
-	 * (forward, in contrast to backward as is also used for the extraction)
-	 */
-	inline const MinDic_t& getFWDic() const {
-	    return dictFW_;
-	}
-
-	inline void setCaseMode( CaseMode caseMode ) {
-	    caseMode_ = caseMode;
-	}
 
   };
 
