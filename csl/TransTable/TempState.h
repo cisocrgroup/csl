@@ -43,7 +43,7 @@ namespace csl {
 
 	std::vector<wchar_t> susoString_;
 
-	int phSum_;
+	size_t phSum_;
 
 	bool isFinal_;
 

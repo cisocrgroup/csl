@@ -2,6 +2,7 @@
 #define CSL_ALPHABET_CXX CSL_ALPHABET_CXX
 
 #include<iostream>
+#include<algorithm>
 #include "./Alphabet.h"
 
 
@@ -18,7 +19,7 @@ namespace csl {
      * @todo trouble with signed/unsigned
      */
     void Alphabet::addChar( wchar_t c ) {
-	if( (unsigned wchar_t)c >= Global::maxNrOfChars ) {
+	if( c >= Global::maxNrOfChars ) {
 	    throw exceptions::outOfRange( "Alphabet::addChar: add requested for out-of-range codepoint." );
 	}
 	// printf( "csl::Alphabet::addChar: Add char %lc\n", c ); // DEBUG
@@ -29,7 +30,7 @@ namespace csl {
     }
 
     bool Alphabet::hasChar( wchar_t c ) const {
-	if( (unsigned wchar_t)c >= Global::maxNrOfChars )
+	if( c >= Global::maxNrOfChars )
 	    throw exceptions::outOfRange( "Alphabet::hasChar: lookup requested for out-of-range codepoint." );
 	return hasChar_[ c ];
     }
@@ -52,7 +53,7 @@ namespace csl {
 	if ( ( header_.magicNumber_ != magicNumber_ ) )
 	    throw exceptions::badDictFile( "csl::Alphabet::loadFromStream: Magic number comparison failed.\n" );
 
-	allChars_.reserve( header_.size_ );
+	allChars_.reserve( (size_t)header_.size_ );
 	wchar_t c;
 	for( size_t i = 0; i < header_.size_; ++i ) {
 	    fread( &c, sizeof( wchar_t), 1, fi );

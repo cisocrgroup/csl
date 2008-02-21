@@ -66,11 +66,11 @@ namespace csl {
 
     template< class AnnType_t >
     inline void MinDic< AnnType_t >::initConstruction() {
-	TransTable_t::initConstruction();
-	tempStates_ =( TempState* ) malloc( Global::lengthOfStr * sizeof( TempState ) ); // allocate memory for all tempStates
-	for( size_t i = 0; i < Global::lengthOfStr; ++i ) {
-	    new( &( tempStates_[i] ) ) TempState(); // call constructor for all tempStates
-	}
+		TransTable_t::initConstruction();
+		tempStates_ =( TempState* ) malloc( Global::lengthOfStr * sizeof( TempState ) ); // allocate memory for all tempStates
+		for( size_t i = 0; i < Global::lengthOfStr; ++i ) {
+			new( &( tempStates_[i] ) ) TempState(); // call constructor for all tempStates
+		}
 	
 	hashtable_ = new StateHash( *this );
 
@@ -128,19 +128,19 @@ namespace csl {
 	while ( fileHandle.getline(( char* ) bytesIn, Global::lengthOfLongStr ), fileHandle.good() )  {
 	    
 	    if ( fileHandle.gcount() ==  Global::lengthOfLongStr - 1 ) {
-		printf( "Looks like an overlong input line: line %zd\n", lineCount );
-		// throw exceptions::badInput( "csl::MinDic::compileDic: Maximum length of input line violated (set by Global::lengthOfLongStr)" );
+			printf( "Looks like an overlong input line: line %zd\n", lineCount );
+			// throw exceptions::badInput( "csl::MinDic::compileDic: Maximum length of input line violated (set by Global::lengthOfLongStr)" );
 	    }
 	    else if( mbstowcs( line, (char*)bytesIn, Global::lengthOfLongStr ) == (size_t)-1 ) {
-		printf( "Encoding error in input line %zd\n", lineCount );
-		throw exceptions::badInput( "csl::MinDic::compileDic: Encoding error." );
+			printf( "Encoding error in input line %zd\n", lineCount );
+			throw exceptions::badInput( "csl::MinDic::compileDic: Encoding error." );
 	    }
 	    else {
-		key = line;
-		AnnType_t annotation;
-		parseAnnotation( line, &annotation );
-		addToken( key, annotation );
-		++lineCount;
+			key = line;
+			AnnType_t annotation;
+			parseAnnotation( line, &annotation );
+			addToken( key, annotation );
+			++lineCount;
 	    }
 	}
 
@@ -170,7 +170,7 @@ namespace csl {
 
 	key = key;
 
-	// printf("input: %ls -> %d\n", key, value );
+	printf("input: %ls -> %d\n", key, annotation );
 
 
 	// remark: maybe this could be spared if we remember the length during widechar-conversion

@@ -266,12 +266,12 @@ namespace csl {
 		return magicNumber_;
 	    }
 	    size_t getNrOfKeys() const {
-		return nrOfKeys_;
+		return (size_t)nrOfKeys_;
 	    }
 
 	    void set( const MinDic& minDic ) {
-		magicNumber_ = minDic.magicNumber_;
-		nrOfKeys_ = minDic.nrOfKeys_;
+			magicNumber_ = minDic.magicNumber_;
+			nrOfKeys_ = minDic.nrOfKeys_;
 	    }
 	private:
 	    bits64 magicNumber_;

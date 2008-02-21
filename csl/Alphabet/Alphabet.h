@@ -1,9 +1,8 @@
-#include <iostream>
-
 #ifndef CSL_ALPHABET_H
 #define CSL_ALPHABET_H CSL_ALPHABET_H
 
-
+#include <iostream>
+#include<string>
 #include<vector>
 
 #include "../Global.h"
@@ -15,9 +14,9 @@ namespace csl {
      * @author Uli Reffle
      * @date 2007
      */
-    class Alphabet {
+    class CSL_DECLSPEC Alphabet {
     private:
-	std::vector<wchar_t> allChars_;
+	std::vector< wchar_t > allChars_;
 
 	const bits64 magicNumber_;
 

@@ -294,18 +294,18 @@ namespace csl {
 	    }
 
 	    StateId_t getRoot() const {
-		return root_;
+		return (StateId_t)root_;
 	    }
 
 	    int getCType() const {
-		return cType_;
+		return (int)cType_;
 	    }
 
 	    size_t getNrOfCells() const {
-		return nrOfCells_;
+		return (size_t)nrOfCells_;
 	    }
 	    size_t getLengthOfSusoStrings() const {
-		return lengthOfSusoStrings_;
+		return (size_t)lengthOfSusoStrings_;
 	    }
 
 	    void set( const TransTable< CellTypeValue >& transTable ) {

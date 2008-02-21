@@ -29,7 +29,7 @@ namespace csl {
      * @author Ulrich Reffle, <uli@cis.uni-muenchen.de>
      * @date 2006
      */
-    class LevDEA {
+    class CSL_DECLSPEC LevDEA {
 
     public:
 	/**
@@ -114,7 +114,7 @@ namespace csl {
 	 *
 	 * @todo do sth about the paths to the levenshtein tables
 	 */
-	void setDistance( int k );
+	void setDistance( size_t k );
 
 	void loadPattern( const wchar_t* p );
 

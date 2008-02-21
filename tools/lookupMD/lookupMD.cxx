@@ -1,6 +1,5 @@
-#include "../Global.h"
-#include "../Alphabet/Alphabet.h"
-#include "./MinDic.h"
+#include "csl/csl.h"
+
 using namespace csl;
 
 int main( size_t argc, char** argv ) {

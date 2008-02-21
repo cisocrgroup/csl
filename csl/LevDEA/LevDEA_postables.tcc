@@ -26,7 +26,7 @@ namespace csl {
     }
 
 
-    void LevDEA::setDistance( int initK ) {
+    void LevDEA::setDistance( size_t initK ) {
 	k_ = initK;
 
 	/*

@@ -235,7 +235,7 @@ namespace csl {
 
     template<>
     inline wchar_t* Hash<wchar_t>::strncpyTemplate( charType_t* w1, const charType_t* w2, size_t n ) const {
-	return wcsncpy( w1, w2, n );
+		return wcsncpy( w1, w2, n );
     }
 
     template<>

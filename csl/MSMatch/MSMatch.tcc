@@ -345,7 +345,8 @@ namespace csl {
 		intersect( newDicPos, newLevPos, depth + 1 );
 	    }
 	}
-    }
+	}
+	
 
     template<>
     inline int MSMatch< STANDARD >::query( const wchar_t* pattern, CandidateReceiver& candReceiver ) {
@@ -360,7 +361,7 @@ namespace csl {
 	intersect( dictFW_.getRoot(), LevDEA::Pos( 0, 0 ), 0 );
 
 	return 0;
-    }
+	} // method query()
 } // eon
 
 #endif

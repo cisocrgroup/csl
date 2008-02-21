@@ -9,6 +9,16 @@
 
 #include "./machine_dependent.h"
 
+#ifdef WIN32
+#pragma warning(disable:4996) // wcsncpy deprecated
+#pragma warning(disable:4251) // strange warning about std::vector
+
+#define CSL_DECLSPEC __declspec(dllexport)
+#else
+#define CSL_DECLSPEC 
+#endif
+
+
 /**
    This namespace covers a system of modules for string processing.
    @todo 
@@ -78,8 +88,8 @@ namespace csl {
 
 
 	static const void reverse(const wchar_t* str, wchar_t* newStr) {
-	    int len = wcslen( str );
-	    int i = 0;
+	    size_t len = wcslen( str );
+	    size_t i = 0;
 	    while(i < len) {
 		newStr[len-1-i] = str[i];
 		++i;
@@ -87,7 +97,12 @@ namespace csl {
 	    newStr[len] = 0;
 	}
 
-	static const void reverse(const std::wstring& str, std::wstring* newStr) {
+	/**
+	 * write the reversed \c str to \c newStr
+	 * @param[in] str some string
+	 * @param[out] the resukt is written to this string
+	 */
+	static const void reverse( const std::wstring& str, std::wstring* newStr ) {
 	    if( &str == newStr ) {
 		// throw exceptions::cslException( "Global::reverse: source string may not be equal to target string" );
 	    }
