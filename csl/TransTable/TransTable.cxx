@@ -147,7 +147,7 @@ namespace csl {
 		}
 	    }
 	}
-	return slot;
+	return (StateId_t) slot;
     }
 
     /**
@@ -183,7 +183,7 @@ namespace csl {
 		}
 	    }
 	}
-	return slot;
+	return (StateId_t)slot;
     }
 
     template< CellType CellTypeValue >
@@ -234,7 +234,7 @@ namespace csl {
 	for ( ;! ( cells_[firstFreeCell_].isEmpty() );++firstFreeCell_ );
 
 
-	return slot;
+	return (StateId_t)slot;
     }
 
 
@@ -245,7 +245,7 @@ namespace csl {
 
 	// add offset for susoString as value
 	size_t susoPtr = susoHash_->findOrInsert( state.getSusoString() );
-	state.addAnnotation( susoPtr );
+	state.addAnnotation( (int)susoPtr );
 
 	uint_t slot = findSlot( state );
 
@@ -262,7 +262,7 @@ namespace csl {
 	// insert all transitions
 	for ( TempState::ConstIterator it = state.getConstIterator(); it.isValid() ; ++it ) {
 	    alph_.addChar( it->getLabel() );
-	    cells_[slot + it->getLabel()].setTrans( it->getLabel(), it->getTarget(), it->getPhNumber() );
+	    cells_[slot + it->getLabel()].setTrans( it->getLabel(), it->getTarget(), (int)it->getPhNumber() );
 	}
 	
 	// update sizeOfUsedCells_
@@ -458,7 +458,7 @@ namespace csl {
 	printf( "Digraph TransTable_out { //DOTCODE\nrankdir=LR; //DOTCODE\nordering=out;\n //DOTCODE\n" );
 	for ( size_t i = 1; i < sizeOfUsedCells_; ++i ) {
 	    if ( cellArray[i].isOfType( Cell_t::TRANS ) ) {
-		StateId_t base = i - cellArray[i].getKey();
+		StateId_t base = (StateId_t)( i - cellArray[i].getKey() );
 		printf( "%zd->%zd[label=\"%lc (%d)\"] //DOTCODE\n", (size_t)base, (size_t)cellArray[i].getValue(), cellArray[i].getKey(), cellArray[i].getAddByte()  );
 
 	    } else if ( cellArray[i].isOfType( Cell_t::STATE ) ) {

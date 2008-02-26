@@ -106,12 +106,12 @@ namespace csl {
 	    if( &str == newStr ) {
 		// throw exceptions::cslException( "Global::reverse: source string may not be equal to target string" );
 	    }
-	    int len = str.length();
+	    size_t len = str.length();
 	    newStr->resize( len );
-	    int i = 0;
+	    size_t i = 0;
 	    while(i < len) {
-		newStr->at( len-1-i ) = str.at( i );
-		++i;
+			newStr->at( len-1-i ) = str.at( i );
+			++i;
 	    }
 	}
 

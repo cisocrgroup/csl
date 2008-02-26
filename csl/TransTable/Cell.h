@@ -158,7 +158,7 @@ namespace csl {
 	    return addByte_;
 	}
 
-	void setTrans(int key, int value, int addByte) {
+	void setTrans(wchar_t key, StateId_t value, int addByte) {
 	    assert(value_ == 0);
 	    setKey(key);
 	    setValue(value);

@@ -37,13 +37,13 @@ namespace csl {
 	 */
 	class Pos {
 	private:
-	    /// holds the current position in the automaton
+		/// holds the current position in the automaton (may equal to -1)
 	    int position_;
 	    /// holds the current position in the pattern
 	    size_t pattern_pos_;
 
 	public:
-	    Pos( size_t position = 0, size_t pattern_pos = 0 ) {
+	    Pos( int position = 0, size_t pattern_pos = 0 ) {
 		position_ = position;
 		pattern_pos_ = pattern_pos;
 	    }
@@ -54,7 +54,7 @@ namespace csl {
 	    inline size_t pattern_pos() const {
 		return pattern_pos_;
 	    }
-	    inline void set( size_t position, size_t pattern_pos ) {
+	    inline void set( int position, size_t pattern_pos ) {
 		position_ = position;
 		pattern_pos_ = pattern_pos;
 	    };
@@ -202,12 +202,12 @@ namespace csl {
 
     inline bool LevDEA::isFinal( const Pos& p ) const {
 	//         |  triangle has reached right bound |            |       fin_table gives dist >-1                                       |
-	return ( ( patLength_ - p.pattern_pos() < 2 * k_ + 1 ) && ( fin_table( 2*k_ -( patLength_ - p.pattern_pos() ), p.position() ) != -1 ) );
+	return ( ( patLength_ - p.pattern_pos() < 2 * k_ + 1 ) && ( fin_table( (int)(2*k_ -( patLength_ - p.pattern_pos() )), p.position() ) != -1 ) );
     }
 
     inline int LevDEA::getDistance( const Pos& p ) const {
 	if ( patLength_ - p.pattern_pos() >= 2 * k_ + 1 ) return -1;
-	return fin_table( 2 * k_ - ( patLength_ - p.pattern_pos() ), p.position() );
+	return fin_table( (int)(2 * k_ - ( patLength_ - p.pattern_pos() )), p.position() );
     }
 
 } // eon

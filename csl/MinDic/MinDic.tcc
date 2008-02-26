@@ -2,9 +2,10 @@ namespace csl {
 
     template< class AnnType_t >
     inline MinDic< AnnType_t >::MinDic( const char* dicFile ) {
-	if( dicFile ) {
-	    loadFromFile( dicFile );
-	}
+		std::wcout<<"MinDic Constructor"<<std::endl;	
+		if( dicFile ) {
+			loadFromFile( dicFile );
+		}	
     }
     
     template< class AnnType_t >
@@ -21,7 +22,8 @@ namespace csl {
 	fclose( fi );
     }
 
-    template< class AnnType_t >
+
+	template< class AnnType_t >
     inline void MinDic< AnnType_t >::loadFromStream( FILE* fi ) {
 	// read the MinDic-Header
 	fread( &header_, sizeof( Header ), 1, fi );
@@ -51,7 +53,8 @@ namespace csl {
 	fclose( fo );
     }
 
-    template< class AnnType_t >
+
+	template< class AnnType_t >
     inline void MinDic< AnnType_t >::writeToStream( FILE* fo ) const {
 	
 	// write the header
@@ -86,7 +89,7 @@ namespace csl {
 	// store the very last word
 	int i = wcslen( lastKey_ ); // let this be an integer, because it has to get -1 to break the loop below
 	StateId_t storedState = 0;
-	for( ; i >= 0; --i ) {
+	for(	 ; i >= 0; --i ) {
 	    storedState = replaceOrRegister( tempStates_[i] );
 	    tempStates_[i].reset();
 	    if( i > 0 ) tempStates_[i-1].addTransition( lastKey_[i-1], storedState, tempStates_[i].getPhValue() );
@@ -109,7 +112,9 @@ namespace csl {
     inline void MinDic< AnnType_t >::compileDic( const char* txtFile ) {
 	wchar_t* key = 0;
 
+	std::wcout<<"Before initConstruction()"<<std::endl;
 	initConstruction();
+	std::wcout<<"After initConstruction()"<<std::endl;
 
 	std::ifstream fileHandle( txtFile );
 	if( !fileHandle.good() ) {
@@ -126,6 +131,7 @@ namespace csl {
 
 	size_t lineCount = 0;
 	while ( fileHandle.getline(( char* ) bytesIn, Global::lengthOfLongStr ), fileHandle.good() )  {
+		std::wcout<<"line loop"<<std::endl;
 	    
 	    if ( fileHandle.gcount() ==  Global::lengthOfLongStr - 1 ) {
 			printf( "Looks like an overlong input line: line %zd\n", lineCount );
@@ -196,19 +202,23 @@ namespace csl {
 	    exit( 1 );
 	}
 
+	std::wcout<<"NOW I'M HERE: alph. order checked"<<std::endl;
 	///////////////////// store suffix of lastKey_
 	commonPrefix = 0;
-	while( key[commonPrefix] == lastKey_[commonPrefix] && key[commonPrefix] ) {
+	while( ( key[commonPrefix] == lastKey_[commonPrefix] ) && key[commonPrefix] ) {
+		std::wcout<<"NOW I'M HERE: find common prefix"<<std::endl;
 	    ++commonPrefix;
 	}
 	// e.g., commonPrefix==2 if first two letters of both words are equal
 
-	i = wcslen( lastKey_ );
-	for( ; i > commonPrefix; --i ) {
+	
+	for( int i = wcslen( lastKey_ ); i > commonPrefix; --i ) {
+		std::wcout<<"NOW I'M HERE: store tail of lastKey"<<std::endl;
 	    storedState = replaceOrRegister( tempStates_[i] );
 	    tempStates_[i-1].addTransition( lastKey_[i-1], storedState, tempStates_[i].getPhValue() );
 	    tempStates_[i].reset();
 	}
+	std::wcout<<"NOW I'M HERE: store tail done"<<std::endl;
 	
 	//////////////////// set final state of key
 	tempStates_[lengthOfKey].setFinal( true );
@@ -230,7 +240,9 @@ namespace csl {
 	if( ! ( nrOfKeys_ %  100000 ) ) {
 	    fprintf( stderr, "%zdk tokens processed.  %zdk states. key was: %ls\n", nrOfKeys_ /1000, TransTable_t::getNrOfStates() / 1000, key );
 	}
-    }
+	std::wcout<<"NOW I'M HERE: addToken done"<<std::endl;
+
+	} // mehthod addToken()
     
     template< class AnnType_t >
     inline StateId_t MinDic< AnnType_t >::replaceOrRegister( TempState& state ) {

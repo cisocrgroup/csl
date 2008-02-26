@@ -77,7 +77,7 @@ namespace csl {
 	/**
 	 * the data structure holding the actual table
 	 */
-	std::vector<uint_t> table_;
+	std::vector< size_t > table_;
 
 	/**
 	 * counts the number of inserted keys
@@ -181,8 +181,8 @@ namespace csl {
     }
 
     template< class charType_t >
-    inline uint_t Hash< charType_t >::getTableSize() const {
-	return table_.size();
+    inline size_t Hash< charType_t >::getTableSize() const {
+		return table_.size();
     }
 
     template< class charType_t >
@@ -194,13 +194,13 @@ namespace csl {
      * @todo FIND A GOOD NUMBER FOR THE HASHING !!!
      */
     template<>
-    inline uint_t Hash< uchar >::getHashCode( const charType_t* str ) const {
-	uint_t h = 0;
+    inline size_t Hash< uchar >::getHashCode( const charType_t* str ) const {
+	size_t h = 0;
 	while( *str ) {
 	    h = h * 257 + *str; // MIND THIS NUMBER
 	    ++str;
 	}
-	return ( h % getTableSize() );
+	return (size_t)( h % getTableSize() );
     }
 
     template<>

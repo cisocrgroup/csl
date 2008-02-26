@@ -125,7 +125,7 @@ namespace csl {
 	~TempState() {
 	}
 	
-	inline int getPhValue() const {
+	inline size_t getPhValue() const {
 	    return phSum_ + ( isFinal() ? 1 : 0 );
 	}
 
@@ -169,7 +169,7 @@ namespace csl {
 	    annotations_.push_back( newAnn );
 	}
 
-	inline int getNrOfAnnotations() const {
+	inline size_t getNrOfAnnotations() const {
 	    return annotations_.size();
 	}
 
