@@ -10,6 +10,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "compileMD", "tools\compileM
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "lookupMD", "tools\lookupMD\lookupMD.vcproj", "{54FB758C-F041-41FB-B6FB-BD6CD3A29991}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "extractMD", "tools\extractMD\extractMD.vcproj", "{F7DA9310-3BDE-44D6-8079-F5A3E6F5A2AA}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -28,6 +30,10 @@ Global
 		{54FB758C-F041-41FB-B6FB-BD6CD3A29991}.Debug|Win32.Build.0 = Debug|Win32
 		{54FB758C-F041-41FB-B6FB-BD6CD3A29991}.Release|Win32.ActiveCfg = Release|Win32
 		{54FB758C-F041-41FB-B6FB-BD6CD3A29991}.Release|Win32.Build.0 = Release|Win32
+		{F7DA9310-3BDE-44D6-8079-F5A3E6F5A2AA}.Debug|Win32.ActiveCfg = Debug|Win32
+		{F7DA9310-3BDE-44D6-8079-F5A3E6F5A2AA}.Debug|Win32.Build.0 = Debug|Win32
+		{F7DA9310-3BDE-44D6-8079-F5A3E6F5A2AA}.Release|Win32.ActiveCfg = Release|Win32
+		{F7DA9310-3BDE-44D6-8079-F5A3E6F5A2AA}.Release|Win32.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

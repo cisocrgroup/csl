@@ -2,9 +2,9 @@
 <VisualStudioProject
 	ProjectType="Visual C++"
 	Version="8,00"
-	Name="lookupMD"
-	ProjectGUID="{54FB758C-F041-41FB-B6FB-BD6CD3A29991}"
-	RootNamespace="lookupMD"
+	Name="extractMD"
+	ProjectGUID="{F7DA9310-3BDE-44D6-8079-F5A3E6F5A2AA}"
+	RootNamespace="extractMD"
 	Keyword="Win32Proj"
 	>
 	<Platforms>
@@ -40,7 +40,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="&quot;D:\winHome\Visual Studio 2005\Projects\csl&quot;"
+				AdditionalIncludeDirectories="&quot;$(SolutionDir)&quot;"
 				PreprocessorDefinitions="WIN32;_DEBUG;_CONSOLE"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
@@ -61,7 +61,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="$(OutDir)/csl.lib"
+				AdditionalDependencies="kernel32.lib $(NoInherit) &quot;$(OutDir)/csl.lib&quot;"
 				LinkIncremental="2"
 				GenerateDebugInformation="true"
 				SubSystem="1"
@@ -136,7 +136,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="&quot;$(OutDir)/csl.lib&quot;"
+				AdditionalDependencies="kernel32.lib $(NoInherit) &quot;$(OutDir)/csl.lib&quot;"
 				LinkIncremental="1"
 				GenerateDebugInformation="true"
 				SubSystem="1"
@@ -171,10 +171,6 @@
 		</Configuration>
 	</Configurations>
 	<References>
-		<ProjectReference
-			ReferencedProjectIdentifier="{E9A7B45F-197C-4EC6-A8F5-39C8CF948DCB}"
-			RelativePathToProject=".\csl\csl.vcproj"
-		/>
 	</References>
 	<Files>
 		<Filter
@@ -183,7 +179,7 @@
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
 			<File
-				RelativePath=".\lookupMD.cxx"
+				RelativePath=".\extractMD.cxx"
 				>
 			</File>
 			<File

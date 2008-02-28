@@ -177,7 +177,8 @@ namespace csl {
 	    }
 	    
 	    // check if all required cells for transitions are available
-	    for ( TempState::ConstIterator it = state.getConstIterator(); mightFit && it.isValid() ; ++it ) {
+		for ( TempState::TransitionConstIterator it = state.transitionsBegin();
+			mightFit && ( it != state.transitionsEnd() ) ; ++it ) {
 		if ( !cells_[slot + it->getLabel()].isEmpty() ) {
 		    mightFit = false;
 		}
@@ -260,7 +261,9 @@ namespace csl {
 	}
 
 	// insert all transitions
-	for ( TempState::ConstIterator it = state.getConstIterator(); it.isValid() ; ++it ) {
+	for ( TempState::TransitionConstIterator it = state.transitionsBegin();
+		it != state.transitionsEnd() ; 
+		++it ) {
 	    alph_.addChar( it->getLabel() );
 	    cells_[slot + it->getLabel()].setTrans( it->getLabel(), it->getTarget(), (int)it->getPhNumber() );
 	}
@@ -283,17 +286,19 @@ namespace csl {
 
     template<>
     inline bool TransTable< TOKDIC >::compareStates( const TempState& temp, StateId_t comp ) const {
-	if ( temp.isFinal() != isFinal( comp ) ) return false; // both must be either final or not
 
-	const wchar_t* c_comp = getSusoString( comp );
-	TempState::ConstIterator tempIt = temp.getConstIterator();
-	while( tempIt.isValid() && *c_comp ) {
+		if ( temp.isFinal() != isFinal( comp ) ) return false; // both must be either final or not
+
+		const wchar_t* c_comp = getSusoString( comp );
+	TempState::TransitionConstIterator tempIt = temp.transitionsBegin();
+	while( ( tempIt != temp.transitionsEnd() ) && *c_comp ) {
+
 	    if( tempIt->getLabel() != *c_comp ) return false; // both must have the same char as next label
 	    if ( tempIt->getTarget() != walk( comp, *c_comp ) ) return false; // both must point to the same state
 	    ++tempIt;
 	    ++c_comp;
 	}
-	if( ( tempIt.isValid() ) || ( *c_comp != 0 )) return false; // both must be at the end simultaneously
+	if( ( tempIt != temp.transitionsEnd() ) || ( *c_comp != 0 )) return false; // both must be at the end simultaneously
 	return true;
     }
 
@@ -305,9 +310,9 @@ namespace csl {
     inline bool TransTable< CellTypeValue >::compareStates( const TempState& temp, StateId_t comp ) const {
 	if ( temp.isFinal() != isFinal( comp ) ) return false;
 
-	TempState::ConstIterator tempIt = temp.getConstIterator();
+	TempState::TransitionConstIterator tempIt = temp.transitionsBegin();
 	wchar_t compLabel = 1;
-	while( tempIt.isValid() ) {
+	while( tempIt != temp.transitionsEnd() ) {
 	    while( compLabel < tempIt->getLabel() ) { 
 		if( walk( comp, compLabel ) ) return false; // chars without a label in temp must be 0
 		++compLabel;
@@ -427,48 +432,72 @@ namespace csl {
     template< CellType CellTypeValue >
     inline void TransTable< CellTypeValue >::toDot() const {
 	Cell_t * cellArray = TransTable::getCells();
-	printf( "Digraph TransTable_out { //DOTCODE\nrankdir=LR; //DOTCODE\n" );
+	std::wcout<<"Digraph TransTable_out { //DOTCODE\nrankdir=LR; //DOTCODE"<<std::endl;
 	for ( size_t i = 1; i < sizeOfUsedCells_; ++i ) {
 	    if ( cellArray[i].isOfType( Cell_t::TRANS ) ) {
 		StateId_t base = i - cellArray[i].getKey();
 
-		printf( "%d->%d[label=\"%lc (%d)\"] //DOTCODE\n", base, cellArray[i].getValue(), cellArray[i].getKey(), cellArray[i].getAddByte()  );
+		std::wcout<<
+			base<<
+			"->"<<
+			cellArray[i].getValue()<<
+			"[label=\""<<
+			cellArray[i].getKey()<<
+			"("<<cellArray[i].getAddByte()<<")\"] //DOTCODE"<<
+			std::endl;
 	    } else if ( cellArray[i].isOfType( Cell_t::STATE ) ) {
 		int peripheries = ( cellArray[i].isOfType( Cell_t::FINALSTATE ) ) ? 2 : 1;
-		printf( "%d[peripheries=%d] //DOTCODE\n", i, peripheries );
+		std::wcout<<
+			i<<
+			"[peripheries="<<peripheries<<"] //DOTCODE"<<
+			std::endl;
 
 		if ( cellArray[i].isOfType( Cell_t::HAS_ANN ) ) {
-		    printf( "%d->%d[label=\"[", i, i );
+			std::wcout<< i << "->" << i << "[";
 
 		    AnnIterator it( *this, i );
 		    while ( it.isValid() ) {
-			printf( "%d,", *it );
-			++it;
+				std::wcout << *it << ",";
+				++it;
 		    }
-		    printf( "]\",fontcolor=blue,style=dotted,dir=none] //DOTCODE\n" );
+			std::wcout << "]\",fontcolor=blue,style=dotted,dir=none] //DOTCODE" << std::endl;
 		}
 	    }
 	}
-	printf( "} //DOTCODE\n" );
+	std::wcout<< "} //DOTCODE" << std::endl;
     }
 
     template<>
     inline void TransTable< TOKDIC >::toDot() const {
 	Cell_t * cellArray = getCells();
-	printf( "Digraph TransTable_out { //DOTCODE\nrankdir=LR; //DOTCODE\nordering=out;\n //DOTCODE\n" );
+	std::wcout << 
+		"Digraph TransTable_out { //DOTCODE" << std::endl <<
+		"rankdir=LR; //DOTCODE" << std::endl <<
+		"ordering=out; //DOTCODE" << std::endl;
+
 	for ( size_t i = 1; i < sizeOfUsedCells_; ++i ) {
 	    if ( cellArray[i].isOfType( Cell_t::TRANS ) ) {
 		StateId_t base = (StateId_t)( i - cellArray[i].getKey() );
-		printf( "%zd->%zd[label=\"%lc (%d)\"] //DOTCODE\n", (size_t)base, (size_t)cellArray[i].getValue(), cellArray[i].getKey(), cellArray[i].getAddByte()  );
+		std::wcout<<
+			base<<
+			"->"<<
+			cellArray[i].getValue()<<
+			"[llllabel=\""<<
+			cellArray[i].getKey()<<
+			"("<<cellArray[i].getAddByte()<<")\"] //DOTCODE"<<
+			std::endl;
 
 	    } else if ( cellArray[i].isOfType( Cell_t::STATE ) ) {
 		int peripheries = ( cellArray[i].isOfType( Cell_t::FINALSTATE ) ) ? 2 : 1;
-		printf( "%zd[peripheries=%d] //DOTCODE\n", i, peripheries );
+		std::wcout<<
+			i<<
+			"[peripheries="<<peripheries<<"] //DOTCODE"<<
+			std::endl;
 		
 		if ( cellArray[i].isOfType( Cell_t::HAS_ANN ) ) {}
 	    }
 	}
-	printf( "} //DOTCODE\n" );
+	std::wcout << "} //DOTCODE\n" << std::endl;
     }
 
     template<>

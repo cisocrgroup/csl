@@ -39,15 +39,15 @@ namespace csl {
 	    size_t phNumber_;
 	}; // class Transition
 
-	std::vector<Transition> transitions_;
+	std::vector< Transition > transitions_;
 
-	std::vector<wchar_t> susoString_;
+	std::vector< wchar_t > susoString_;
 
 	size_t phSum_;
 
 	bool isFinal_;
 
-	std::vector<int> annotations_;
+	std::vector< int > annotations_;
 
 	class Iterator {
 	public:
@@ -82,7 +82,11 @@ namespace csl {
 	}
 
     public:
-
+		typedef std::vector< Transition >::const_iterator TransitionConstIterator; 
+		
+	/**
+	* @deprecated Why did I ever introduce this kind of iterator ???
+	*/
 	class ConstIterator {
 	public:
 	    ConstIterator( const TempState& myTempState ) : myTempState_( myTempState ),
@@ -97,7 +101,8 @@ namespace csl {
 	    }
 
 	    const Transition* operator->() {
-		return &( myTempState_.transitions_[index_] );
+			return &( myTempState_.transitions_[index_] );
+		//return &( myTempState_.transitions_.at( index_ ) );
 	    }
 
 	    const Transition& operator++() {
@@ -110,8 +115,19 @@ namespace csl {
 	    size_t index_;
 	}; // class ConstIterator
 
+	/**
+	* @deprecated 
+	*/
 	ConstIterator getConstIterator() const {
 	    return ConstIterator( *this );
+	}
+
+	TransitionConstIterator transitionsBegin() const {
+	    return transitions_.begin();
+	}
+
+	TransitionConstIterator transitionsEnd() const {
+	    return transitions_.end();
 	}
 
 

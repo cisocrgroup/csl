@@ -1,7 +1,7 @@
 #include<iostream>
-#include "../Getopt/Getopt.h"
-#include "../Alphabet/Alphabet.h"
-#include "./MinDic.h"
+#include "csl/Getopt/Getopt.h"
+#include "csl/Alphabet/Alphabet.h"
+#include "csl/MinDic/MinDic.h"
 
 using namespace csl;
 
@@ -11,8 +11,8 @@ int main( int argc, const char** argv ) {
     Getopt options( argc, argv );
 
     if( options.getArgumentCount() != 1 ) {
-	std::cerr<<std::endl
-		 <<"Use like: "<< options.getProgName() <<"[options] <binDic> "<<std::endl
+	std::wcerr<<std::endl
+		 <<"Use like: extractMD [options] <binDic> "<<std::endl
 		 <<"Options:"<<std::endl
 		 <<"--stat=1\tto print statistics of the MinDic"<<std::endl
 		 <<"--dot=1\tto print dotcode for the MinDic"
@@ -34,7 +34,7 @@ int main( int argc, const char** argv ) {
 
 	return 0;
     } catch ( exceptions::cslException ex ) {
-	std::cerr << "Dictionary extraction failed: " << ex.what() << std::endl;
+	std::wcerr << "Dictionary extraction failed: " << ex.what() << std::endl;
 	return 1;
     }
 }

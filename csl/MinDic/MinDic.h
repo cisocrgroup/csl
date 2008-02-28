@@ -197,7 +197,7 @@ namespace csl {
 	/**
 	 * @todo add documentation
 	 */
-	inline void parseAnnotation( wchar_t* str, AnnType_t* annotation ) const;
+	inline void parseAnnotation( std::wstring* str, AnnType_t* annotation ) const;
 
 	/**
 	 * @brief prepares the object for construction of a new MinDic.

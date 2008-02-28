@@ -48,19 +48,23 @@ class StateHash {
     static const size_t tableSize_ = (size_t)( 1ll<<26 ) - 1;
 
     int hashcode(const TempState& state) {
-	int h = (state.isFinal())? 0 : Global::maxNrOfChars;
-	
+		int h = (state.isFinal())? 0 : Global::maxNrOfChars;
+		if( state.isFinal()	) {
+		}
 //	for(int j = 1; j <= alphSize_; h = h*HASHC1 + j + alphSize_ * state.getTransTarget(j), ++j);
-	for( TempState::ConstIterator it = state.getConstIterator();
-	     it.isValid();
-	     h = h*HASHC1 + it->getLabel() + Global::maxNrOfChars * it->getTarget(), ++it );
-	return (abs(h) % tableSize_);
+		for( TempState::TransitionConstIterator it = state.transitionsBegin();
+			it != state.transitionsEnd();
+			h = h*HASHC1 + it->getLabel() + Global::maxNrOfChars * it->getTarget(), ++it ) {
+
+		}
+		return (abs(h) % tableSize_);
     }
     
 public:
     StateHash(TransTable_t& trans) : trans_(trans) {
 	try {
 	    table_ = new ChainLink*[tableSize_];
+		memset( table_, 0, tableSize_ * sizeof(ChainLink*) );
 	} catch( std::bad_alloc exc ) {
 	    std::cout<<"csl::StateHash: Could not allocate hashtable: " <<  exc.what() << std::endl;
 	    throw exc;
@@ -88,11 +92,12 @@ public:
     }
 
     size_t findState(const TempState& state) {
-	ChainLink* ch = table_[hashcode(state)];
-	while( ch && !trans_.compareStates( state, ch->value ) ) {
-	    ch = ch->next;
-	}
-	return ( ch )? ch->value : 0;
+		
+		ChainLink* ch = table_[hashcode(state)];
+		while( ch && !trans_.compareStates( state, ch->value ) ) {
+			ch = ch->next;
+		}
+		return ( ch )? ch->value : 0;
     }
 };
 #endif
