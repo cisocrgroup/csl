@@ -20,6 +20,14 @@ namespace csl {
 	    std::wcout<<"]";
 	}
 	
+	void applyTo( std::wstring* str ) const {
+	    // iterate through PosPatterns in reverse order: that way the positions remain intact
+	    // even if the Patterns change the word length
+	    for( const_reverse_iterator rit = rbegin(); rit != rend(); ++rit ) {
+		str->replace( rit->getPosition(), rit->getLeft().length(), rit->getRight() );
+	    }
+	}
+
     private:
 
     }; // class Instruction

@@ -33,13 +33,19 @@ namespace csl {
     public:
 	class Answer {
 	public:
+	    /// the suggested correction candidate
 	    std::wstring word;
+	    /// the underlying word in the modern dictionary
 	    std::wstring baseWord;
+	    /// the coresponding Instruction: word = baseWord + instruction
 	    Instruction instruction;
+
+	    size_t levDistance;
 
 	    void print( std::wostream& os = std::wcout ) const {
 		os<<word<<":"<<baseWord<<"+";
 		instruction.print( os );
+		os<<",dist="<<levDistance;
 	    }
 
 	}; // class Answer

@@ -1,4 +1,5 @@
-#include "csl/csl.h"
+#include "csl/MinDic/MinDic.h"
+#include "csl/Getopt/Getopt.h"
 #include<iostream>
 
 
@@ -21,9 +22,9 @@ int main(int argc, char** argv) {
 		std::wcout<<"compileMD failed: "<<ex.what()<<std::endl;
 		return(1);
     }
-
-    // t.toDot();
- //   t.printCells();
- //   t.printDic();
+    
+    //   t.toDot();
+    //   t.printCells();
+    //   t.printDic();
 
 }

@@ -1,4 +1,4 @@
-#include "csl/csl.h"
+#include "csl/MinDic/MinDic.h"
 
 using namespace csl;
 

@@ -135,9 +135,11 @@ namespace csl {
 
     void Vam::reportMatch( const Position* cur ) const {
 	Answer answer;
-	answer.word = query_; // FIXME !!!!!
-	answer.baseWord = word_; // FIXME !!!!!
 	reportMatch_rec( cur, &answer );
+	answer.baseWord = word_; 
+	answer.word = word_; answer.instruction.applyTo( &( answer.word ) );
+	answer.levDistance = levDEA_.getDistance( cur->levPos_ );
+
 	answers_->push_back( answer );
     }
 
