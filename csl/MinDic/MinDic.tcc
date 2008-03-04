@@ -282,6 +282,7 @@ namespace csl {
 		size_t newPerfHashValue;
 
 		const wchar_t* transitions = getSusoString( pos );
+		std::wcout<<"state="<<pos<<", trans="<<transitions<<std::endl;
 		while( *transitions ) {
 			newPerfHashValue = perfHashValue;;
 			if( ( newPos = walkPerfHash( pos, *transitions, newPerfHashValue ) ) ) {

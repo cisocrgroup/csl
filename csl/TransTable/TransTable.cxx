@@ -247,6 +247,7 @@ namespace csl {
 	// add offset for susoString as value
 	size_t susoPtr = susoHash_->findOrInsert( state.getSusoString() );
 	state.addAnnotation( (int)susoPtr );
+	std::wcout<<"Insert: "<<state.getSusoString()<<" at "<<susoPtr<<std::endl;
 
 	uint_t slot = findSlot( state );
 
@@ -482,7 +483,7 @@ namespace csl {
 			base<<
 			"->"<<
 			cellArray[i].getValue()<<
-			"[llllabel=\""<<
+			"[label=\""<<
 			cellArray[i].getKey()<<
 			"("<<cellArray[i].getAddByte()<<")\"] //DOTCODE"<<
 			std::endl;

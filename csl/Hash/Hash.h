@@ -4,7 +4,6 @@
 #include<vector>
 
 #include "../Global.h"
-#include <cwchar>
 
 namespace csl {
 
@@ -229,17 +228,17 @@ namespace csl {
     }
 
     template<>
-    inline int Hash<wchar_t>::strcmpTemplate( const charType_t* w1, const charType_t* w2 ) const {
+    inline int Hash< wchar_t >::strcmpTemplate( const charType_t* w1, const charType_t* w2 ) const {
 	return wcscmp( w1, w2 );
     }
 
     template<>
-    inline wchar_t* Hash<wchar_t>::strncpyTemplate( charType_t* w1, const charType_t* w2, size_t n ) const {
+    inline wchar_t* Hash< wchar_t >::strncpyTemplate( charType_t* w1, const charType_t* w2, size_t n ) const {
 		return wcsncpy( w1, w2, n );
     }
 
     template<>
-    inline size_t Hash<wchar_t>::strlenTemplate( const charType_t* w ) const {
+    inline size_t Hash< wchar_t >::strlenTemplate( const charType_t* w ) const {
 	return wcslen( w );
     }
 
