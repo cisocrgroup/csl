@@ -86,8 +86,11 @@ $(OBJS)/PermuteMatch_old.o: $(PERMUTEMATCH_OLD_H) ./PermuteMatch/PermuteMatch.cx
 	$(GCC) -c ./PermuteMatch/PermuteMatch.cxx -o $(OBJS)/PermuteMatch_old.o
 
 
+
 ########### BINARIES ########################
 
+$(BIN)/vamFilter: ./Vam/vamFilter.cxx $(OBJS)/LevDEA.o $(OBJS)/Alphabet.o
+	$(GCC) -o $(BIN)/vamFilter ./Vam/vamFilter.cxx $(OBJS)/LevDEA.o $(OBJS)/Alphabet.o
 $(BIN)/stats: ./TransTable/stats.cxx $(TRANSTABLE_HEADERS) $(OBJS)/Alphabet.o
 	$(GCC) -o $(BIN)/stats ./TransTable/stats.cxx $(OBJS)/Alphabet.o
 
