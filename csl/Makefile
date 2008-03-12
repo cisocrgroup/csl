@@ -178,7 +178,7 @@ sysconfdir = ${prefix}/etc
 target_alias = 
 SUBDIRS = Getopt Alphabet TransTable MinDic FBDic Hash LevFilter LevDEA ResultSet MSMatch
 lib_LTLIBRARIES = libcsl.la
-libcsl_la_SOURCES = ./csl/Alphabet/Alphabet.cxx ./csl/LevDEA/LevDEA.cxx 
+libcsl_la_SOURCES = ./Alphabet/Alphabet.cxx ./LevDEA/LevDEA.cxx 
 all: all-recursive
 
 .SUFFIXES:
@@ -272,19 +272,19 @@ include ./$(DEPDIR)/LevDEA.Plo
 #	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) \
 #	$(LTCXXCOMPILE) -c -o $@ $<
 
-Alphabet.lo: ./csl/Alphabet/Alphabet.cxx
-	if $(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT Alphabet.lo -MD -MP -MF "$(DEPDIR)/Alphabet.Tpo" -c -o Alphabet.lo `test -f './csl/Alphabet/Alphabet.cxx' || echo '$(srcdir)/'`./csl/Alphabet/Alphabet.cxx; \
+Alphabet.lo: ./Alphabet/Alphabet.cxx
+	if $(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT Alphabet.lo -MD -MP -MF "$(DEPDIR)/Alphabet.Tpo" -c -o Alphabet.lo `test -f './Alphabet/Alphabet.cxx' || echo '$(srcdir)/'`./Alphabet/Alphabet.cxx; \
 	then mv -f "$(DEPDIR)/Alphabet.Tpo" "$(DEPDIR)/Alphabet.Plo"; else rm -f "$(DEPDIR)/Alphabet.Tpo"; exit 1; fi
-#	source='./csl/Alphabet/Alphabet.cxx' object='Alphabet.lo' libtool=yes \
+#	source='./Alphabet/Alphabet.cxx' object='Alphabet.lo' libtool=yes \
 #	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) \
-#	$(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o Alphabet.lo `test -f './csl/Alphabet/Alphabet.cxx' || echo '$(srcdir)/'`./csl/Alphabet/Alphabet.cxx
+#	$(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o Alphabet.lo `test -f './Alphabet/Alphabet.cxx' || echo '$(srcdir)/'`./Alphabet/Alphabet.cxx
 
-LevDEA.lo: ./csl/LevDEA/LevDEA.cxx
-	if $(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT LevDEA.lo -MD -MP -MF "$(DEPDIR)/LevDEA.Tpo" -c -o LevDEA.lo `test -f './csl/LevDEA/LevDEA.cxx' || echo '$(srcdir)/'`./csl/LevDEA/LevDEA.cxx; \
+LevDEA.lo: ./LevDEA/LevDEA.cxx
+	if $(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT LevDEA.lo -MD -MP -MF "$(DEPDIR)/LevDEA.Tpo" -c -o LevDEA.lo `test -f './LevDEA/LevDEA.cxx' || echo '$(srcdir)/'`./LevDEA/LevDEA.cxx; \
 	then mv -f "$(DEPDIR)/LevDEA.Tpo" "$(DEPDIR)/LevDEA.Plo"; else rm -f "$(DEPDIR)/LevDEA.Tpo"; exit 1; fi
-#	source='./csl/LevDEA/LevDEA.cxx' object='LevDEA.lo' libtool=yes \
+#	source='./LevDEA/LevDEA.cxx' object='LevDEA.lo' libtool=yes \
 #	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) \
-#	$(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o LevDEA.lo `test -f './csl/LevDEA/LevDEA.cxx' || echo '$(srcdir)/'`./csl/LevDEA/LevDEA.cxx
+#	$(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o LevDEA.lo `test -f './LevDEA/LevDEA.cxx' || echo '$(srcdir)/'`./LevDEA/LevDEA.cxx
 
 mostlyclean-libtool:
 	-rm -f *.lo
