@@ -25,47 +25,35 @@ namespace csl {
 
     template< class AnnType_t >
     void FBDic< AnnType_t >::compileDic( const char* txtFile ) {
-	wchar_t* key = 0;
 
 	fwDic_.initConstruction();
 
-	std::ifstream fileHandle( txtFile );
+	std::wifstream fileHandle( txtFile );
+	fileHandle.imbue( std::locale( "" ) ); // imbue the stream with the environment's standard locale
 	if( !fileHandle.good() ) {
 	    throw exceptions::badFileHandle( "Couldn't open file '" + 
 					     std::string( txtFile ) + 
 					     "' for reading." );
 	}
 
-	wchar_t line[Global::lengthOfLongStr];
-	wchar_t reversedKey[Global::lengthOfLongStr];
-	unsigned char bytesIn[Global::lengthOfLongStr];
-
-	// set the last byte to 0. So we can recognize if an overlong string was read by getline().
-	bytesIn[Global::lengthOfLongStr - 1] = 0; 
+	std::wstring line;
+	std::wstring reversedKey;
 
 	size_t lineCount = 0;
-	while ( fileHandle.getline(( char* ) bytesIn, Global::lengthOfLongStr ), fileHandle.good() )  {
-	    
-	    if ( fileHandle.gcount() ==  Global::lengthOfLongStr - 1 ) {
-		printf( "Looks like an overlong input line: line %zd\n", lineCount );
-		// throw exceptions::badInput( "csl::MinDic::compileDic: Maximum length of input line violated (set by Global::lengthOfLongStr)" );
-	    }
-	    else if( mbstowcs( line, (char*)bytesIn, Global::lengthOfLongStr ) == (size_t)-1 ) {
-		printf( "Encoding error in input line %zd\n", lineCount );
-		throw exceptions::badInput( "csl::MinDic::compileDic: Encoding error." );
-	    }
-	    else {
-		key = line;
-		AnnType_t annotation;
-		fwDic_.parseAnnotation( line, &annotation );
-		fwDic_.addToken( key, annotation );
-		++lineCount;
+	while( std::getline( fileHandle, line ).good() )  {
 
-		Global::reverse( key, reversedKey );
-		entries_.push_back( Entry( std::wstring( reversedKey ), annotation ) );
+	    if ( line.length() > Global::lengthOfLongStr ) {
+		throw exceptions::badInput( "csl::MinDic::compileDic: Maximum length of input line violated (set by Global::lengthOfLongStr)" );
 	    }
+	    AnnType_t annotation;
+	    fwDic_.parseAnnotation( &line, &annotation );
+	    
+	    fwDic_.addToken( line.c_str(), annotation );
+	    ++lineCount;
+
+	    Global::reverse( line, &reversedKey );
+	    entries_.push_back( Entry( std::wstring( reversedKey ), annotation ) );
 	}
-	fileHandle.close();
 	fwDic_.finishConstruction();
 
 	std::sort( entries_.begin(), entries_.end() );

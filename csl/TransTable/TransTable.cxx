@@ -247,7 +247,7 @@ namespace csl {
 	// add offset for susoString as value
 	size_t susoPtr = susoHash_->findOrInsert( state.getSusoString() );
 	state.addAnnotation( (int)susoPtr );
-	std::wcout<<"Insert: "<<state.getSusoString()<<" at "<<susoPtr<<std::endl;
+	// std::wcout<<"Insert: "<<state.getSusoString()<<" at "<<susoPtr<<std::endl;
 
 	uint_t slot = findSlot( state );
 

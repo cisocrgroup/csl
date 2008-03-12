@@ -1,1 +1,3 @@
-SUBDIRS = csl
+
+SUBDIRS = csl tools
+
