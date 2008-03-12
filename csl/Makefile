@@ -170,13 +170,13 @@ localstatedir = ${prefix}/var
 mandir = ${prefix}/man
 mkdir_p = mkdir -p --
 oldincludedir = /usr/include
-prefix = /usr/local
+prefix = /mounts/Users/student/uli/implement/csl/trunk
 program_transform_name = s,x,x,
 sbindir = ${exec_prefix}/sbin
 sharedstatedir = ${prefix}/com
 sysconfdir = ${prefix}/etc
 target_alias = 
-SUBDIRS = Getopt Alphabet TransTable MinDic FBDic Hash LevFilter LevDEA ResultSet MSMatch
+SUBDIRS = Getopt Alphabet TransTable MinDic FBDic Hash LevFilter LevDEA ResultSet MSMatch Vam
 lib_LTLIBRARIES = libcsl.la
 libcsl_la_SOURCES = ./Alphabet/Alphabet.cxx ./LevDEA/LevDEA.cxx 
 all: all-recursive
