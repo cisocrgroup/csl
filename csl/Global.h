@@ -7,7 +7,6 @@
 #include<exception>
 #define debug(s) (std::cout<<"DEBUG: "<<s<<std::endl)
 
-#include "./machine_dependent.h"
 
 #ifdef WIN32
 #pragma warning(disable:4996) // wcsncpy deprecated

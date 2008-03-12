@@ -349,7 +349,7 @@ namespace csl {
 	
 
     template<>
-    inline int MSMatch< STANDARD >::query( const wchar_t* pattern, CandidateReceiver& candReceiver ) {
+    inline void MSMatch< STANDARD >::query( const wchar_t* pattern, CandidateReceiver& candReceiver ) {
 	candReceiver_ = &candReceiver;
 	wcscpy( pattern_, pattern );
 
@@ -360,7 +360,6 @@ namespace csl {
 
 	intersect( dictFW_.getRoot(), LevDEA::Pos( 0, 0 ), 0 );
 
-	return 0;
 	} // method query()
 } // eon
 

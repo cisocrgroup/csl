@@ -7,10 +7,10 @@
 namespace csl {
 
 
-#include "lev0data.cxx"
-#include "lev1data.cxx"
-#include "lev2data.cxx"
-#include "lev3data.cxx"
+#include "lev0data.tcc"
+#include "lev1data.tcc"
+#include "lev2data.tcc"
+#include "lev3data.tcc"
     
     LevDEA::LevDEA( int init_k ) : k_( 0 ),
 				   charvecs_( Global::maxNrOfChars, 0 )
