@@ -17,6 +17,7 @@ AC_CONFIG_FILES([
 	csl/LevDEA/Makefile
 	csl/ResultSet/Makefile
 	csl/MSMatch/Makefile
+	csl/Pattern/Makefile
 	csl/Vam/Makefile
 
 	tools/Makefile
