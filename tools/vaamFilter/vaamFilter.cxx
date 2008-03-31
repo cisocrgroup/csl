@@ -1,7 +1,7 @@
 #include<iostream>
-#include "./Vam.h"
-#include "../Getopt/Getopt.h"
-#include "../Stopwatch.h"
+#include "csl/Vam/Vam.h"
+#include "csl/Getopt/Getopt.h"
+#include "csl/Stopwatch.h"
 
 /**
  * Vaam

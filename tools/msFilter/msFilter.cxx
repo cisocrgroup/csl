@@ -1,6 +1,6 @@
-#include "./MSMatch.h"
-#include "../ResultSet/ResultSet.h"
-#include "../Global.h"
+#include "csl/MSMatch/MSMatch.h"
+#include "csl/ResultSet/ResultSet.h"
+#include "csl/Global.h"
 using namespace csl;
 
 

@@ -1,1 +1,1 @@
-ADD_LIBRARY(Alphabet STATIC Alphabet.cxx)
+#ADD_LIBRARY(Alphabet STATIC Alphabet.cxx)

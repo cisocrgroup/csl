@@ -41,7 +41,9 @@ int main( int argc, const char** argv ) {
 
     csl::ErrDic ed;
 
-    csl::PatternApplier pa( dic, options.getArgument( 1 ).c_str() );
+    csl::PatternSet patternSet();
+
+    csl::PatternApplier pa( dic,  );
 
     csl::MinDic< int > constraintDic;
     csl::MinDic< int > filterDic;

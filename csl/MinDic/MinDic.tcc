@@ -155,7 +155,7 @@ namespace csl {
 
 	template< class AnnType_t >
 	inline void MinDic< AnnType_t >::addToken( const wchar_t* key, const AnnType_t& annotation ) {
-		static size_t commonPrefix, i, lengthOfKey;
+	    static size_t commonPrefix, lengthOfKey;
 		static StateId_t storedState;
 
 		key = key;
@@ -194,7 +194,7 @@ namespace csl {
 		// e.g., commonPrefix==2 if first two letters of both words are equal
 
 
-		for( int i = wcslen( lastKey_ ); i > commonPrefix; --i ) {
+		for( size_t i = wcslen( lastKey_ ); i > commonPrefix; --i ) {
 			storedState = replaceOrRegister( tempStates_[i] );
 			tempStates_[i-1].addTransition( lastKey_[i-1], storedState, tempStates_[i].getPhValue() );
 			tempStates_[i].reset();
@@ -282,16 +282,13 @@ namespace csl {
 		size_t newPerfHashValue;
 
 		const wchar_t* transitions = getSusoString( pos );
-		std::wcout<<"state="<<pos<<", trans="<<transitions<<std::endl;
 		while( *transitions ) {
 			newPerfHashValue = perfHashValue;;
 			if( ( newPos = walkPerfHash( pos, *transitions, newPerfHashValue ) ) ) {
 				w[depth] = *transitions;
-
 				if( isFinal( newPos ) ) {
-					w[depth+1] = 0;
-					printf( "%ls#%d\n", w, getAnnotation( newPerfHashValue ) );
-					//printf( "%ls#%d\n", w, newPerfHashValue );
+				    w[depth+1] = 0;
+				    std::wcout<<w<<"#"<<getAnnotation( newPerfHashValue )<<std::endl;
 
 					if( ( ++count_ % 100000 ) == 0 ) fprintf( stderr, "%d\n", (int)count_ );
 				} // if isFinal

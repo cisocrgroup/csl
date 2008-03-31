@@ -29,10 +29,8 @@ namespace csl {
      */
     template< class AnnType = int >
     class MinDic : public TransTable< TOKDIC > {
-    private:
-	typedef TransTable< TOKDIC > TransTable_t;
-
     public:
+	typedef TransTable< TOKDIC > TransTable_t;
 	/**
 	 * @brief The datatype of the annotation that comes with each dictionary entry.
 	 * Note that \c AnnType_t, currently,  has to be a trivial datatype: if you store
@@ -188,7 +186,7 @@ namespace csl {
 	 */
 	//@{
 	/**
-	 * The funtion that actually executes the computation of the trie.
+	 * @brief The funtion that actually executes the computation of the trie.
 	 * @todo Should this method be public??? Maybe not ...
 	 * @param txtFile The dictionary (including annotations) in txt format
 	 */
@@ -204,6 +202,7 @@ namespace csl {
 	 * Call before calling addToken() for the first time. 
 	 */
 	inline void initConstruction();
+
 	inline void finishConstruction();
 
 	/**

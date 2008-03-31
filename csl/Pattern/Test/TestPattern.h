@@ -2,6 +2,7 @@
 #define CSL_TEST_PATTERN_H CSL_TEST_PATTERN_H
 
 #include "../Pattern.h"
+#include "../PatternSet.h"
 #include "../PosPattern.h"
 
 #include <cppunit/extensions/HelperMacros.h>
@@ -16,11 +17,13 @@ namespace csl {
 
 	CPPUNIT_TEST_SUITE( TestPattern );
 	CPPUNIT_TEST( testPattern );
+	CPPUNIT_TEST( testPatternSet );
 	CPPUNIT_TEST( testPosPattern );
 	CPPUNIT_TEST_SUITE_END();
     public:
 
 	void testPattern();
+	void testPatternSet();
 	void testPosPattern();
 
 
@@ -34,11 +37,17 @@ namespace csl {
      * test the basic methods of class Pattern.
      */
     void TestPattern::testPattern() {
-	// test constructor and the getters
+	// test constructor and the getters. 
 	csl::Pattern p1( L"left", L"right" );
 	CPPUNIT_ASSERT( p1.getLeft() == L"left" );
 	CPPUNIT_ASSERT( p1.getRight() == L"right" );
     }
+
+    void TestPattern::testPatternSet() {
+	csl::PatternSet pSet;
+	pSet.loadPatterns( "./test.patterns.txt" );
+    }
+
 
     void TestPattern::testPosPattern() {
 	csl::Pattern p1( L"left", L"right" );

@@ -9,16 +9,16 @@ namespace csl {
     /**
      * @brief the Pattern class is simply enriched by a member variable indicating a position inside a word
      */
-    class PosPattern : public Pattern {
+    class PosPattern : public PatternSet::PatternRef {
     public:
 	/**
 	 * @brief creates an empty Pattern at position 0
 	 */
 	PosPattern();
 
-	PosPattern( const Pattern& pattern, size_t position );
+	PosPattern( const PatternRef& patternRef, size_t position );
 	
-	PosPattern( const std::wstring& left, const std::wstring& right, size_t position );
+	// PosPattern( const std::wstring& left, const std::wstring& right, size_t position );
 	
 	size_t getPosition() const;
 
@@ -29,20 +29,20 @@ namespace csl {
 	
     }; // class PosPattern
     
-    PosPattern::PosPattern() :
-	Pattern(),
-	position_( 0 ) {
-    }
+//     PosPattern::PosPattern() :
+// 	PatternRef(),
+// 	position_( 0 ) {
+//     }
 
-    PosPattern::PosPattern( const Pattern& pattern, size_t position ) :
-	Pattern( pattern ),
+    PosPattern::PosPattern( const PatternRef& patternRef, size_t position ) :
+	PatternRef( patternRef ),
 	position_( position ) {
     }
     
-    PosPattern::PosPattern( const std::wstring& left, const std::wstring& right, size_t position ) :
-	Pattern( left, right ),
-	position_( position ) {
-    }
+//     PosPattern::PosPattern( const std::wstring& left, const std::wstring& right, size_t position ) :
+// 	Pattern( left, right ),
+// 	position_( position ) {
+//     }
 
     size_t PosPattern::getPosition() const {
 	return position_;
@@ -50,7 +50,7 @@ namespace csl {
 
     void PosPattern::print( std::wostream& os ) const {
 	os << "(";
-	Pattern::print( os );
+	PatternRef::print( os );
 	os << "," << getPosition() << ")";
 
     }

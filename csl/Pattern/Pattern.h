@@ -17,7 +17,6 @@ namespace csl {
      */
     class Pattern {
     public:
-
 	/**
 	 * @brief Constructs an empty pattern with left == right == ""
 	 */

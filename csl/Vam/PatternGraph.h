@@ -12,7 +12,15 @@
 namespace csl {
 
     /**
-     * A specialised variant of the Aho-Corasick trie.
+     * @brief A specialised variant of the Aho-Corasick trie to search 
+     * in the set of left sides of a PatternSet.
+     *
+     * For the sake of simplicity and efficiency, the implementation details of
+     * class \c PatternSet are used here: Internally we use simple \c size_t variables 
+     * to refer to a \c Pattern instead of using the official and public \c PatternRef
+     * interface. 
+     *
+     * @author Ulrich Reffle, 2008
      */
     class PatternGraph : public PatternSet {
     public:
@@ -257,7 +265,9 @@ namespace csl {
 	states_.resize( 2 ); // failure state at position 0, root at position 1 
 
 	size_t patternCount = 0;
-	for( const_iterator pattern = begin(); pattern != end(); ++pattern ) {
+	for( PatternList_t::const_iterator pattern = patternList().begin();
+	     pattern != patternList().end();
+	     ++pattern ) {
 
 	    const std::wstring& left = pattern->getLeft();
 
@@ -285,7 +295,7 @@ namespace csl {
 		lastState = newSt;
 	    }
 	    states_.at( lastState.getStateIndex() ).isFinal_ = true;
-	    states_.at( lastState.getStateIndex() ).rightSides_.push_back( std::make_pair( pattern->getRight(), pattern - begin() ) );
+	    states_.at( lastState.getStateIndex() ).rightSides_.push_back( std::make_pair( pattern->getRight(), pattern - patternList().begin() ) );
 	    states_.at( lastState.getStateIndex() ).word_ = left;
 	}
 
