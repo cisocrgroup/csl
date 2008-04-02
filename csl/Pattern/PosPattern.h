@@ -29,10 +29,10 @@ namespace csl {
 	
     }; // class PosPattern
     
-//     PosPattern::PosPattern() :
-// 	PatternRef(),
-// 	position_( 0 ) {
-//     }
+    PosPattern::PosPattern() :
+	PatternRef(),
+	position_( 0 ) {
+    }
 
     PosPattern::PosPattern( const PatternRef& patternRef, size_t position ) :
 	PatternRef( patternRef ),

@@ -1,5 +1,5 @@
 #include<iostream>
-#include "csl/Vam/Vam.h"
+#include "csl/Vaam/Vaam.h"
 #include "csl/Getopt/Getopt.h"
 #include "csl/Stopwatch.h"
 
@@ -33,9 +33,9 @@ int main(int argc, const char** argv ) {
     csl::MinDic<> baseDic;
     baseDic.loadFromFile( opt.getArgument( 1 ).c_str() );
 
-    csl::Vam vam( baseDic, opt.getArgument( 2 ).c_str() );
+    csl::Vaam vam( baseDic, opt.getArgument( 2 ).c_str() );
 
-    std::vector< csl::Vam::Answer > answers;
+    std::vector< csl::Vaam::Answer > answers;
 
     std::wstring query;
 
@@ -55,7 +55,7 @@ int main(int argc, const char** argv ) {
 	    // all interpretations of the query in one line
 	    if( maxDistance != 0 ) throw csl::exceptions::cslException( "This kind of output is suitable only for output 0" );
 	    
-	    for( std::vector< csl::Vam::Answer >::const_iterator it = answers.begin(); it!= answers.end(); ++it ) {
+	    for( std::vector< csl::Vaam::Answer >::const_iterator it = answers.begin(); it!= answers.end(); ++it ) {
 		it->print();
 		if( it + 1  != answers.end() ) std::wcout<<"|";
 	    }
@@ -63,7 +63,7 @@ int main(int argc, const char** argv ) {
 	}
 	else {
 	    // new line for each interpretation of the query
-	    for( std::vector< csl::Vam::Answer >::const_iterator it = answers.begin(); it!= answers.end(); ++it ) {
+	    for( std::vector< csl::Vaam::Answer >::const_iterator it = answers.begin(); it!= answers.end(); ++it ) {
 		it->print();
 		std::wcout<<std::endl;
 	    }

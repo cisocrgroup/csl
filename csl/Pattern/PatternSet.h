@@ -16,8 +16,13 @@ namespace csl {
      * @author Ulrich Reffle, 2008
      */
     class PatternSet {
+    protected:
+	typedef std::vector< Pattern > PatternList_t;
 
     public:
+	typedef PatternList_t::iterator iterator;
+	typedef PatternList_t::const_iterator const_iterator;
+
 	/**
 	 * @brief A \c PatternRef -object serves as pointer to a distinct member of
 	 * a \c PatternSet.
@@ -29,12 +34,22 @@ namespace csl {
 	public:
 	    friend class PatternSet;
 	
+
+	    /**
+	     * @brief create an "empty" PatternRef, similar to a Null-pointer
+	     *
+	     */
+	    PatternRef() :
+		patternSet_( 0 ),
+		index_( 0 ) {
+	    }
+
 	    /**
 	     * @brief get the left side of the pattern
 	     * @return the left side of the pattern
 	     */
 	    const std::wstring& getLeft() const {
-		return patternSet_.patternList().at( index_ ).getLeft();
+		return patternSet_->patternList().at( index_ ).getLeft();
 	    }
 	
 	    /**
@@ -42,31 +57,33 @@ namespace csl {
 	     * @return the right side of the pattern
 	     */
 	    const std::wstring& getRight() const {
-		return patternSet_.patternList().at( index_ ).getLeft();
+		return patternSet_->patternList().at( index_ ).getRight();
 	    }
 
 	    /**
 	     * @brief returns if pattern is "empty"
 	     */
 	    bool empty() const {
-		return patternSet_.patternList().at( index_ ).empty();
+		return ( patternSet_ == 0 );
 	    }
 
 	    void print( std::wostream& os = std::wcout ) const {
-		patternSet_.patternList().at( index_ ).print( os );
+		patternSet_->patternList().at( index_ ).print( os );
 	    }
 
 	private:
+
+
 	    /**
 	     * @brief Constructs a new PatternRef to the \c i-th position of \c patternSet
 	     */
 	    PatternRef( const PatternSet& patternSet, size_t i ) :
-		patternSet_( patternSet ),
+		patternSet_( &patternSet ),
 		index_( i ) {
 	    
 	    }
 
-	    const PatternSet& patternSet_;
+	    const PatternSet* patternSet_;
 	    size_t index_;
 
 	}; // class PatternRef
@@ -77,14 +94,31 @@ namespace csl {
 	 */
 	PatternSet();
 
+
 	/**
 	 * @brief Returns a \c PatternRef object pointing to the \c i -th position of the
 	 * set
 	 */
-	PatternRef at( size_t i ) const {
+	PatternRef refAt( size_t i ) const {
 	    return PatternRef( *this, i );
 	}
+
+
+	/**
+	 * @brief returns an iterator at the first pattern of the list
+	 *
+	 * Note that this is not the necessarily the first element of the internal container
+	 */
+	iterator begin() {
+	    return ++( patternList_.begin() );
+	}
 	
+	/**
+	 * @brief returns a classical past-the-end iterator
+	 */
+	iterator end() {
+	    return patternList_.end();
+	}
 	
 
 	/**
@@ -96,9 +130,7 @@ namespace csl {
 	void loadPatterns( const char* patternFile );
 
     protected:
-	typedef std::vector< Pattern > PatternList_t;
 
-	Pattern emptyPattern_;
 	const PatternList_t& patternList() const {
 	    return patternList_;
 	}
@@ -108,8 +140,8 @@ namespace csl {
     }; // class PatternSet
 
 
-    PatternSet::PatternSet() :
-	emptyPattern_( Pattern() ) {
+    PatternSet::PatternSet() {
+	patternList_.push_back( Pattern() );
     }
 
     void PatternSet::loadPatterns( const char* patternFile ) {

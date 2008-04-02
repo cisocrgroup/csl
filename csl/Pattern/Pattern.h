@@ -27,6 +27,16 @@ namespace csl {
 	 */
 	Pattern( const std::wstring& left, const std::wstring& right );
 
+	bool operator< ( const Pattern& other ) const {
+	    if( getLeft() < other.getLeft() ) {
+		return true;
+	    }
+	    else if( getLeft() > other.getLeft() ) {
+		return false;
+	    }
+	    else return ( getRight() < other.getRight() );
+	}
+
 	/**
 	 * @brief get the left side of the pattern
 	 * @return the left side of the pattern

@@ -24,6 +24,7 @@ namespace csl {
 	    // iterate through PosPatterns in reverse order: that way the positions remain intact
 	    // even if the Patterns change the word length
 	    for( const_reverse_iterator rit = rbegin(); rit != rend(); ++rit ) {
+		// std::wcout<<"pos="<< rit->getPosition()<<"left="<<rit->getLeft()<<",llength="<< rit->getLeft().length()<<", right="<< rit->getRight()<<std::endl; // DEBUG
 		str->replace( rit->getPosition(), rit->getLeft().length(), rit->getRight() );
 	    }
 	}

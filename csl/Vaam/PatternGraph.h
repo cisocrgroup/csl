@@ -265,7 +265,7 @@ namespace csl {
 	states_.resize( 2 ); // failure state at position 0, root at position 1 
 
 	size_t patternCount = 0;
-	for( PatternList_t::const_iterator pattern = patternList().begin();
+	for( PatternList_t::const_iterator pattern = patternList().begin() + 1; // skip 1st pattern: it's the empty pattern!
 	     pattern != patternList().end();
 	     ++pattern ) {
 
@@ -345,7 +345,10 @@ namespace csl {
     }
 
     inline void PatternGraph::toDot() const {
-	printf( "Digraph PatternGraph { //DOTCODE\nrankdir=LR; //DOTCODE\nordering=out; //DOTCODE\n" );
+	std::wcout<< "Digraph PatternGraph { //DOTCODE"<<std::endl
+		  <<"rankdir=LR; //DOTCODE"<<std::endl
+		  <<"ordering=out; //DOTCODE"<<std::endl;
+	
 
 	size_t count = 0;
 	for( std::vector< InternalState >::const_iterator st = states_.begin() ; st != states_.end(); ++st ) {

@@ -2,20 +2,20 @@
 #define CSL_TEST_VAM_H CSL_TEST_VAM_H
 
 #include "../../Global.h"
-#include "../Vam.h"
+#include "../Vaam.h"
 
 #include <cppunit/extensions/HelperMacros.h>
 
 
 namespace csl {
-    class TestVam : public CppUnit::TestFixture  {
+    class TestVaam : public CppUnit::TestFixture  {
 
-	CPPUNIT_TEST_SUITE( TestVam );
+	CPPUNIT_TEST_SUITE( TestVaam );
 	CPPUNIT_TEST( testBasics );
 	CPPUNIT_TEST( testPatternGraph );
 	CPPUNIT_TEST_SUITE_END();
     public:
-	TestVam();
+	TestVaam();
 	void testBasics();
 	void testPatternGraph();
 // 	void testConstructionDetails();
@@ -23,18 +23,18 @@ namespace csl {
 
     private:
 	
-    }; // class TestVam
+    }; // class TestVaam
 
-    CPPUNIT_TEST_SUITE_REGISTRATION( TestVam );
+    CPPUNIT_TEST_SUITE_REGISTRATION( TestVaam );
 
-    TestVam::TestVam() :
+    TestVaam::TestVaam() :
 	CppUnit::TestFixture() {
 	
     }
 
-    void TestVam::testPatternGraph() {
+    void TestVaam::testPatternGraph() {
 	PatternGraph pg;
-	pg.loadPatterns( ( Global::CSLROOT + "Vam/Test/testPatterns.txt" ).c_str() );
+	pg.loadPatterns( ( Global::CSLROOT + "Vaam/Test/testPatterns.txt" ).c_str() );
 
 	// implicit copy constructor
 	PatternGraph::State st = pg.getRoot();
@@ -58,10 +58,10 @@ namespace csl {
     /**
      * test the basic methods for reading access like getRoot, walk, isFinal etc.
      */
-    void TestVam::testBasics() {
+    void TestVaam::testBasics() {
 	MinDic<> dic;
-	dic.loadFromFile( ( Global::CSLROOT + "Vam/Test/smallDic.mdic" ).c_str() );
-	Vam vam( dic, ( Global::CSLROOT + "Vam/Test/testPatterns.txt" ).c_str() );
+	dic.loadFromFile( ( Global::CSLROOT + "Vaam/Test/smallDic.mdic" ).c_str() );
+	Vaam vam( dic, ( Global::CSLROOT + "Vaam/Test/testPatterns.txt" ).c_str() );
 	
     }
 

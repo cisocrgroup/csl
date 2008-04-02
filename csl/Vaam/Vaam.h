@@ -16,11 +16,11 @@
 namespace csl {
 
     /**
-     * Vam - Variant-aware Approximate Matching
+     * Vaam - Variant-aware Approximate Matching
      *
      * @author Ulrich Reffle, 2008
      */
-    class Vam {
+    class Vaam {
 
     private:
 	typedef MinDic<> MinDic_t;
@@ -50,7 +50,7 @@ namespace csl {
 
 	}; // class Answer
 
-	Vam( const MinDic_t& basedDic, const char* patternFile );
+	Vaam( const MinDic_t& basedDic, const char* patternFile );
 
 	inline void setDistance( size_t d );
 
@@ -76,14 +76,18 @@ namespace csl {
 	    
 	    LevDEA::Pos levPos_;
 	    PosPattern posPattern_;
+
+	    /**
+	     * (x,y) indicates that the mother is the y-th element at stackpos x (if I remember correctly)
+	     */ 
 	    std::pair< int, int > mother_;
 	};
 
 	class StackItem : public std::vector< Position > {
 	public:
-	    StackItem( const Vam& myVam ) :
-		dicPos_( myVam.baseDic_ ),
-		patternPos_( myVam.patternGraph_, 0 ),
+	    StackItem( const Vaam& myVaam ) :
+		dicPos_( myVaam.baseDic_ ),
+		patternPos_( myVaam.patternGraph_, 0 ),
 		lookAheadDepth_( 0 ) {
 	    }
 
@@ -109,6 +113,11 @@ namespace csl {
 	/**
 	 */
 	void reportMatch( const Position* cur ) const;
+
+	/**
+	 * This method picks up all patterns used to get the match and adds them
+	 * to the instruction of the \c Answer -object
+	 */
 	void reportMatch_rec( const Position* cur, Answer* answer ) const;
 
 	/////   DATA MEMBERS OF VAM   //////////////////////
@@ -130,9 +139,9 @@ namespace csl {
 	std::wstring word_;
 	
 	
-    }; // class Vam
+    }; // class Vaam
     
 } // namespace csl
 
 
-#include "./Vam.tcc"
+#include "./Vaam.tcc"

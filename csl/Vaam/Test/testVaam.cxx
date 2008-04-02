@@ -3,7 +3,7 @@
 #include <cppunit/extensions/TestFactoryRegistry.h>
 #include <cppunit/ui/text/TestRunner.h>
 
-#include "./TestVam.h"
+#include "./TestVaam.h"
 
 
 int main() {

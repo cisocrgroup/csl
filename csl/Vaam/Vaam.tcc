@@ -1,17 +1,17 @@
 namespace csl {
 
-    Vam::Vam( const MinDic_t& baseDic, const char* patternFile ) :
+    Vaam::Vaam( const MinDic_t& baseDic, const char* patternFile ) :
 	baseDic_( baseDic )
     {
 	patternGraph_.loadPatterns( patternFile );
     }
 
     
-    void Vam::setDistance( size_t d ) {
+    void Vaam::setDistance( size_t d ) {
 	levDEA_.setDistance( d );
     }
 
-    void Vam::query( const std::wstring& word, std::vector< Answer >* answers ) {
+    void Vaam::query( const std::wstring& word, std::vector< Answer >* answers ) {
 	query_ = word;
 	answers_ = answers;
 	
@@ -27,7 +27,7 @@ namespace csl {
 	query_rec( 0 );
     }
     
-    void Vam::query_rec( size_t depth ) {
+    void Vaam::query_rec( size_t depth ) {
 	
  	// std::wcout<<"query_rec( "<<depth<<" ):word="<<word_<<std::endl; // DEBUG
 
@@ -37,18 +37,18 @@ namespace csl {
 	// this lets us use the []-operator for stack_ with a somewhat purer conscience
 	// But the at()-operator turned out to be a real bottleneck here ...
 	if( stack_.size() != depth + 2 ) {
-	    throw exceptions::LogicalError( "csl::Vam::query_rec: current stack seems out of sync with backtracking procedure" );
+	    throw exceptions::LogicalError( "csl::Vaam::query_rec: current stack seems out of sync with backtracking procedure" );
 	}
 
 	// apply all patterns whose left sides end here 
 	if( stack_[depth].patternPos_.isFinal() ) {
 	    PatternGraph::State patPos = stack_[depth].patternPos_;
-
+	    
 	    do { // for all final states reachable via errorLinks
-		// for all positions of the stackItem (tracked back leftside)
-
 		assert( patPos.isFinal() );
 		size_t count = 0;
+
+		// for all positions of the stackItem (tracked back leftside)
 	    	for( StackItem::iterator position = stack_.at( depth - patPos.getDepth() ).begin();
 		     position != stack_.at( depth - patPos.getDepth() ).end();
 		     ++position, ++count ) {
@@ -63,7 +63,7 @@ namespace csl {
 			LevDEA::Pos newLevPos = levDEA_.walkStr( position->levPos_, rightSide->first.c_str() );
 			if( newLevPos.isValid() )  {
 			    Position newPosition( newLevPos, std::make_pair( depth - patPos.getDepth(), count ) );
-			    newPosition.addPosPattern( PosPattern( patternGraph_.at( rightSide->second ), depth - patPos.getDepth() ) );
+			    newPosition.addPosPattern( PosPattern( patternGraph_.refAt( rightSide->second ), depth - patPos.getDepth() ) );
 			    stack_[depth].push_back( newPosition );
 			    stack_[depth].lookAheadDepth_ = 0;
 			}
@@ -133,7 +133,7 @@ namespace csl {
 	stack_.pop_back();
     } // query_rec
 
-    void Vam::reportMatch( const Position* cur ) const {
+    void Vaam::reportMatch( const Position* cur ) const {
 	Answer answer;
 	reportMatch_rec( cur, &answer );
 	answer.baseWord = word_; 
@@ -143,7 +143,7 @@ namespace csl {
 	answers_->push_back( answer );
     }
 
-    void Vam::reportMatch_rec( const Position* cur, Answer* answer ) const {
+    void Vaam::reportMatch_rec( const Position* cur, Answer* answer ) const {
 	if( cur->mother_.first == -1 ) {
 	    return;
 	}
