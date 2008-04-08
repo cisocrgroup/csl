@@ -15,11 +15,12 @@ int main(int argc, char** argv) {
 //    std::wcin.imbue( std::locale( "de_DE.utf-8" ) );
 
     std::wofstream fileOut;
-    fileOut.imbue( CSL_U8_LOCALE ); // set the stream locale
+    fileOut.imbue( CSL_UTF8_LOCALE ); // set the stream locale
     fileOut.open( "out.txt" ); // use binary to prevent fwrite from replacing \n with \r\n
-
+ 
     std::wifstream fileIn; 
-    fileIn.imbue( CSL_U8_LOCALE ); // set the stream locale
+    fileIn.imbue( CSL_UTF8_LOCALE ); // set the stream locale
+
     fileIn.open( argv[1] ); // use binary to prevent fwrite from replacing \n with \r\n
 
 

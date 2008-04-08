@@ -4,6 +4,7 @@
 #include <fstream>
 #include <vector>
 #include "../Global.h"
+#include "../codecvt/UTF8_Codecvt.h"
 #include "../TransTable/TransTable.h"
 #include "../Alphabet/Alphabet.h"
 

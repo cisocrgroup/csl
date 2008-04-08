@@ -1,10 +1,11 @@
-#include <locale>
+#include<locale>
+#include<iostream>
 
 /**
  * This is a convenience macro to create a new locale with most of
  * the system's standard locale but with the csl_internal utf8 codecvt facet.
  */
-#define CSL_U8_LOCALE ( std::locale( std::locale( "" ), new UTF8_Codecvt() ) )
+#define CSL_UTF8_LOCALE ( std::locale( std::locale( "" ), new UTF8_Codecvt() ) )
 
 /**
  * @brief This is a custom implementation of a codecvt facet for utf-8, as it does not seem
@@ -43,11 +44,15 @@ public:
 
 	const unsigned int leadByteMasks[5] = {256, 256, 31, 15, 7};
 
-	fromNext = from;
-	toNext = to;
+
 	while( from != fromEnd ) {
+	    // the ...Next variables remain on positions where complete characters are processed, i.e. no
+	    // special mbstate_t is needed in case of "partial" return
+	    fromNext = from;
+	    toNext = to;
+	    if( to == toEnd ) return partial; // per run of this loop we write exactly one internal char
 	    if( ( *from & 0x80 ) == 0 ) { // 1-byte leadbyte
-		std::wcerr<<"1 sequence"<<std::endl;
+		// std::wcerr<<"1 sequence"<<std::endl;  // DEBUG
 		*to = *from;
 		++to; ++from;
 	    }
@@ -59,10 +64,13 @@ public:
 		    ++nrOfBytes;
 		    leadByte <<= 1;
 		}
-		std::wcerr<<nrOfBytes<<" sequence"<<std::endl;
+		// std::wcerr<<nrOfBytes<<" sequence"<<std::endl;  // DEBUG
 
 		*to = *from & leadByteMasks[nrOfBytes];
 		
+		if( from + nrOfBytes - 1 >= fromEnd ) {
+		    return partial;
+		}
 		while( --nrOfBytes ) {
 		    ++from;
 		    *to <<= 6;
@@ -74,10 +82,10 @@ public:
 		// error
 	    }
 	}
+
 	fromNext = from;
 	toNext = to;
-
-	std::wcout<<"just finished a do_in: "<<toNext<<std::endl;
+	// std::wcout<<"just finished a do_in: "<<toNext<<std::endl;
 	return ok;
     }
 
@@ -96,16 +104,16 @@ public:
 		++to;
 	    }
 	    else if( *from < 0x80 ) { // 1 byte
-		std::wcerr<<"1-byte: "<<*from<<std::endl;
+		// std::wcout<<"1-byte: "<<*from<<std::endl; // DEBUG
 		*to = *from;
 		++to;
 	    }
 	    else if( *from < 0x800 ) { // 2 bytes
 		if( to + 1 >= toEnd ) {
-		    std::wcerr<< "to-Buffer too small" <<std::endl;
+		    std::wcout<< "to-Buffer too small" <<std::endl;
 		    return partial;
 		}
-		std::wcerr<<"2-byte: "<<*from<<std::endl;
+		// std::wcerr<<"2-byte: "<<*from<<std::endl;  // DEBUG
 
 		*to = ( *from >> 6 ) | 0xC0;
 		*( to + 1 ) = ( *from & 0x3F ) | 0x80;
@@ -114,10 +122,10 @@ public:
 	    }
 	    else if( *from < 0x10000 ) { // 3 bytes
 		if( to + 2 >= toEnd ) {
-		    std::wcerr<< "to-Buffer too small" <<std::endl;
+		    // std::wcerr<< "to-Buffer too small" <<std::endl;  // DEBUG
 		    return partial;
 		}
-		std::wcerr<<"3-byte: "<<*from<<std::endl;
+		// std::wcerr<<"3-byte: "<<*from<<std::endl;  // DEBUG
 		*( to + 2 ) = ( *from & 0x3F ) | 0x80;
 		*( to + 1 ) = ( ( *from >> 6 ) & 0x3F ) | 0x80;
 		*to = ( *from >> 12 ) | 0xE0;
@@ -129,7 +137,7 @@ public:
 		    std::wcerr<< "to-Buffer too small" <<std::endl;
 		    return partial;
 		}
-		std::wcerr<<"4-byte: "<<*from<<std::endl;
+		// std::wcerr<<"4-byte: "<<*from<<std::endl;  // DEBUG
 		*( to + 3 ) = ( *from & 0x3F ) | 0x80;
 		*( to + 2 ) = ( ( *from >> 6 ) & 0x3F ) | 0x80;
 		*( to + 1 ) = ( ( *from >> 12 ) & 0x3F ) | 0x80;
