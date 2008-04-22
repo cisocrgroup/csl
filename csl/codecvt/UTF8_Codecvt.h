@@ -1,3 +1,6 @@
+#ifndef CSL_UTF8_CODECVT_H
+#define CSL_UTF8_CODECVT_H CSL_UTF8_CODECVT_H
+
 #include<locale>
 #include<iostream>
 
@@ -40,8 +43,8 @@ public:
     }
 
     virtual result do_in(state_type& state, const char *from, const char *fromEnd, const char *&fromNext,
-		      wchar_t *to, wchar_t *toEnd, wchar_t *&toNext) const {
-
+			 wchar_t *to, wchar_t *toEnd, wchar_t *&toNext) const {
+	
 	const unsigned int leadByteMasks[5] = {256, 256, 31, 15, 7};
 
 
@@ -51,7 +54,8 @@ public:
 	    fromNext = from;
 	    toNext = to;
 	    if( to == toEnd ) return partial; // per run of this loop we write exactly one internal char
-	    if( ( *from & 0x80 ) == 0 ) { // 1-byte leadbyte
+
+	    if( ( *from & 0x80 ) == 0 ) { // 1-byte leadbyte with leading 0
 		// std::wcerr<<"1 sequence"<<std::endl;  // DEBUG
 		*to = *from;
 		++to; ++from;
@@ -73,13 +77,17 @@ public:
 		}
 		while( --nrOfBytes ) {
 		    ++from;
+		    if( ! ( ( *from & 0x80 ) && !( *from & 0x40 ) ) ) { // if not a proper follow-byte
+			return error;
+		    }
 		    *to <<= 6;
 		    *to |= *from & 0x3f;
 		}
 		++to; ++from;
 	    }
 	    else {
-		// error
+		// no leadbyte, though expected
+		return error;
 	    }
 	}
 
@@ -158,3 +166,4 @@ private:
 
 }; // class
 
+#endif

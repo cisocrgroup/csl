@@ -26,27 +26,32 @@ int main(int argc, const char** argv ) {
     Getopt opt( argc, argv );
 
     if( opt.getArgumentCount() < 3 ) {
-	std::wcerr<<"Use like: vamFilter <distance> <dictionary> <pattern-file>"<<std::endl;
+	std::wcerr<<"Use like: vaamFilter <distance> <dictionary> <pattern-file>"<<std::endl;
 	exit( 1 );
     }
 
     csl::MinDic<> baseDic;
     baseDic.loadFromFile( opt.getArgument( 1 ).c_str() );
 
-    csl::Vaam vam( baseDic, opt.getArgument( 2 ).c_str() );
+    csl::Vaam vaam( baseDic, opt.getArgument( 2 ).c_str() );
+
+    if( opt.hasOption( "maxNrOfPatterns" ) ) {
+	vaam.setMaxNrOfPatterns( atoi( opt.getOption( "maxNrOfPatterns" ).c_str() ) );
+    }
+
 
     std::vector< csl::Vaam::Answer > answers;
 
     std::wstring query;
 
     size_t maxDistance = atoi( opt.getArgument( 0 ).c_str() );
-    vam.setDistance( maxDistance );
+    vaam.setDistance( maxDistance );
     Stopwatch watch;
 
     while( std::wcin >> query ) {
 	watch.start();
 	answers.clear();
-	vam.query( query, &answers );
+	vaam.query( query, &answers );
 
 	if( answers.empty() ) {
 	    std::wcout<<query<<":NONE"<<std::endl;

@@ -55,6 +55,8 @@ namespace csl {
 
 	inline void setDistance( size_t d );
 
+	inline void setMaxNrOfPatterns( size_t n );
+
 	inline void query( const std::wstring& word, std::vector< Answer >* answers );
 
 	inline void query_rec( size_t depth );
@@ -65,18 +67,25 @@ namespace csl {
 
 	class Position {
 	public:
-	    Position( const LevDEA::Pos& levPos, const std::pair< int, int >& mother = std::make_pair( -1, -1 ) ) :
+	    Position( const LevDEA::Pos& levPos, size_t nrOfPatternsApplied, const std::pair< int, int >& mother = std::make_pair( -1, -1 ) ) :
 		levPos_( levPos ),
-		posPattern_() {
+		posPattern_(),
+		nrOfPatternsApplied_( nrOfPatternsApplied ) {
 		mother_ = mother;
 	    }
 	    
 	    void addPosPattern( const PosPattern& posPattern ) {
 		posPattern_ = posPattern;
 	    }
-	    
+
+	    size_t getNrOfPatternsApplied() const {
+		return nrOfPatternsApplied_;
+	    }
+
 	    LevDEA::Pos levPos_;
 	    PosPattern posPattern_;
+
+	    size_t nrOfPatternsApplied_;
 
 	    /**
 	     * (x,y) indicates that the mother is the y-th element at stackpos x (if I remember correctly)
@@ -138,7 +147,8 @@ namespace csl {
 	 * The current string under construction
 	 */
 	std::wstring word_;
-	
+
+	size_t maxNrOfPatterns_;
 	
     }; // class Vaam
     

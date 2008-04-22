@@ -18,7 +18,7 @@ public:
 	std::string openFlag;
 	for( size_t i = 1; i < argc; ++i ) {
 	    std::string word = argv[i];
-	    
+
 	    if( word.length() > 2 && word.at( 0 ) == '-' && word.at( 1 ) == '-' ) {
 		if( ! openFlag.empty() ) {
 		    options_[openFlag] = "1";

@@ -91,6 +91,8 @@ void main (int argc, char **argv) {
 		
 	state = cell_to_int(0);
 	i=0; j=0; subst=-1; subst1=0;
+
+	ushort newline = '\n';
 	while (testin(i)!=0) {
 		c=testin(j);
 		c1 = codes[c];
@@ -105,10 +107,11 @@ void main (int argc, char **argv) {
 			if (subst!=-1) {
 				i=subst+1; j=i; state = cell_to_int(0);
 				fwrite(infos+subst1,sizeof(ushort),wstrlen(infos+subst1),fo);
+				fwrite()
 				subst=-1;
 			} else {
 				c2 = testin(i);
-				fwrite(&c2,sizeof(ushort),1,fo);
+				fwrite(&c2,sizeof(ushort),1,fo); // write char as is to stream
 				i++; j=i; state = cell_to_int(0);
 			}
 		}

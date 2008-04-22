@@ -45,7 +45,7 @@ namespace csl {
 	
 	inline void reset();
 
-	inline uint_t getTableSize() const;
+	inline size_t getTableSize() const;
 
 	inline size_t getLengthOfKeyStrings() const;
     private:
@@ -60,7 +60,7 @@ namespace csl {
 	 * is necessary.
 	 * @return the hashcode for str
 	 */
-	inline uint_t getHashCode( const charType_t* key ) const;
+	inline size_t getHashCode( const charType_t* key ) const;
 
 	inline const charType_t* getStringAt( size_t offset ) const;
 
@@ -203,7 +203,7 @@ namespace csl {
     }
 
     template<>
-    inline uint_t Hash< wchar_t >::getHashCode( const charType_t* str ) const {
+    inline size_t Hash< wchar_t >::getHashCode( const charType_t* str ) const {
 	uint_t h = 0;
 	while( *str ) {
 	    h = h * 65537 + *str; // MIND THIS NUMBER

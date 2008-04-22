@@ -1,7 +1,8 @@
 namespace csl {
 
     Vaam::Vaam( const MinDic_t& baseDic, const char* patternFile ) :
-	baseDic_( baseDic )
+	baseDic_( baseDic ),
+	maxNrOfPatterns_( 1000 )
     {
 	patternGraph_.loadPatterns( patternFile );
     }
@@ -9,6 +10,10 @@ namespace csl {
     
     void Vaam::setDistance( size_t d ) {
 	levDEA_.setDistance( d );
+    }
+
+    void Vaam::setMaxNrOfPatterns( size_t n ) {
+	maxNrOfPatterns_ = n;
     }
 
     void Vaam::query( const std::wstring& word, std::vector< Answer >* answers ) {
@@ -19,8 +24,8 @@ namespace csl {
 	stack_.clear();
 	// create a first StackItem
 	stack_.push_back( StackItem( *this ) );
-	// insert an initial position at the the levDEA's start state
-	stack_.at( 0 ).push_back( Position( levDEA_.getRoot() ) );
+	// insert an initial position at the the levDEA's start state, with 0 applied patterns
+	stack_.at( 0 ).push_back( Position( levDEA_.getRoot(), 0 ) );
 	// set the patternPos to the graph's root
 	stack_.at( 0 ).patternPos_ = patternGraph_.getRoot();
 
@@ -52,7 +57,9 @@ namespace csl {
 	    	for( StackItem::iterator position = stack_.at( depth - patPos.getDepth() ).begin();
 		     position != stack_.at( depth - patPos.getDepth() ).end();
 		     ++position, ++count ) {
-		    
+		    if( position->getNrOfPatternsApplied() == maxNrOfPatterns_ )
+			continue;
+
 		    // for all right sides fitting the current leftSide
 		    // Note that there might be final states with empty rightSides, namely those where a suffix
 		    // of the current path leads to a "real" final state with non-empty rightSides
@@ -62,7 +69,8 @@ namespace csl {
 			
 			LevDEA::Pos newLevPos = levDEA_.walkStr( position->levPos_, rightSide->first.c_str() );
 			if( newLevPos.isValid() )  {
-			    Position newPosition( newLevPos, std::make_pair( depth - patPos.getDepth(), count ) );
+			    //                              1 more applied pattern than cur position       store current position as 'mother'-position
+			    Position newPosition( newLevPos, position->getNrOfPatternsApplied() + 1, std::make_pair( depth - patPos.getDepth(), count ) );
 			    newPosition.addPosPattern( PosPattern( patternGraph_.refAt( rightSide->second ), depth - patPos.getDepth() ) );
 			    stack_[depth].push_back( newPosition );
 			    stack_[depth].lookAheadDepth_ = 0;
@@ -107,7 +115,7 @@ namespace csl {
 		 ++position, ++count ) {
 		LevDEA::Pos newLevPos = levDEA_.walk( position->levPos_, *c );
 		if( newLevPos.isValid() ) {
-		    stack_[depth + 1].push_back( Position( newLevPos, std::make_pair( depth, count ) ) );
+		    stack_[depth + 1].push_back( Position( newLevPos, position->getNrOfPatternsApplied(), std::make_pair( depth, count ) ) );
 		}
 	    }
 	    
