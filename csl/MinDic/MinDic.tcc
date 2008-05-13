@@ -41,7 +41,7 @@ namespace csl {
 	}
 
 	template< class AnnType_t >
-	inline void MinDic< AnnType_t >::writeToFile( char* binFile ) const {
+	inline void MinDic< AnnType_t >::writeToFile( char const* binFile ) const {
 		FILE* fo = fopen( binFile, "wb" );
 		if( ! fo ) {
 			throw exceptions::badFileHandle( "MinDic: Couldn't open file '" +
@@ -127,6 +127,9 @@ namespace csl {
 
 		size_t lineCount = 0;
 		while( std::getline( fileHandle, line ).good() )  {
+		    if( errno == EILSEQ ) { // if failbit is set BEFORE eof
+			throw exceptions::badInput( "MinDic::compileDic: Encoding error in input sequence." );
+		    }
 
 			if ( line.length() > Global::lengthOfLongStr ) {
 				throw exceptions::badInput( "csl::MinDic::compileDic: Maximum length of input line violated (set by Global::lengthOfLongStr)" );
@@ -151,6 +154,7 @@ namespace csl {
 			*annotation = wcstol( (str->substr( delimPos )).c_str() , 0, 0 );
 			str->resize( delimPos );
 		}
+		else *annotation = 0;
 	}
 
 	template< class AnnType_t >

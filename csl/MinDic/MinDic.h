@@ -3,6 +3,7 @@
 
 #include <fstream>
 #include <vector>
+#include <errno.h>
 #include "../Global.h"
 #include "../codecvt/UTF8_Codecvt.h"
 #include "../TransTable/TransTable.h"
@@ -172,7 +173,7 @@ namespace csl {
 	 * @brief dump MinDic automaton to a file in binary form.
 	 * @param binFile File to write the automaton into.
 	 */
-	inline void writeToFile( char* binFile ) const;
+	inline void writeToFile( char const* binFile ) const;
 
 	/**
 	 * @brief dump MinDic automaton to an open file stream

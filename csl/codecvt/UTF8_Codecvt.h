@@ -3,6 +3,7 @@
 
 #include<locale>
 #include<iostream>
+#include<errno.h>
 
 /**
  * This is a convenience macro to create a new locale with most of
@@ -78,6 +79,7 @@ public:
 		while( --nrOfBytes ) {
 		    ++from;
 		    if( ! ( ( *from & 0x80 ) && !( *from & 0x40 ) ) ) { // if not a proper follow-byte
+			errno = EILSEQ;
 			return error;
 		    }
 		    *to <<= 6;
@@ -87,6 +89,7 @@ public:
 	    }
 	    else {
 		// no leadbyte, though expected
+		errno = EILSEQ;
 		return error;
 	    }
 	}

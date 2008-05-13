@@ -1,5 +1,5 @@
-add_subdirectory( compileMD )
 add_subdirectory( extractMD )
+add_subdirectory( compileMD )
 add_subdirectory( lookupMD )
 add_subdirectory( msFilter )
 add_subdirectory( vaamFilter )

@@ -30,7 +30,7 @@ namespace csl {
 	key = 0; // does not point to anything
 	*lastKey = 0; // reset the string to ""
 	
-//	dotShot();
+	dotShot();
 	while( fileHandle.getline( (char*)bytesIn, Global::lengthOfLongStr ) )  {
 	    mbstowcs( line, (char*)bytesIn, Global::lengthOfLongStr );
 //	    fprintf( stderr, "%d\t%ls\n", count_, line ); //DEBUG!
@@ -56,7 +56,7 @@ namespace csl {
 	setRoot( storeTempState( tempStates_->at( 0 ) ) ); // store root and give root's id to TransTable
 	
 	key = 0; // no more keys
-//	dotShot();
+	dotShot();
 
 
 	TransTable_t::finishConstruction();
@@ -137,7 +137,7 @@ namespace csl {
 	} else if( annotateWordCount_ == true ) {
 	    tempStates_->at( lengthOfKey ).addAnnotation( count_ ); // use wordcount as value
 	}
-	// dotShot();
+	dotShot();
 	wcscpy( lastKey, key );
     }
 

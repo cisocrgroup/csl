@@ -1,5 +1,7 @@
-#SUBDIRS = Getopt Alphabet TransTable MinDic FBDic Hash LevFilter LevDEA ResultSet MSMatch Pattern Vam
-add_subdirectory(Alphabet)
 
+add_subdirectory(FBDic)
+add_subdirectory(ErrDic)
+add_subdirectory(MinDicString)
+add_subdirectory(Trie)
 
-ADD_LIBRARY(csl SHARED Alphabet/Alphabet.cxx LevDEA/LevDEA.cxx)
+ADD_LIBRARY(csl STATIC Alphabet/Alphabet.cxx LevDEA/LevDEA.cxx Trie/Trie.cxx)

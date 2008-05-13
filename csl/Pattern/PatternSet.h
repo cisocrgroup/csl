@@ -3,6 +3,7 @@
 
 #include<fstream>
 #include<vector>
+#include<errno.h>
 
 #include "../Global.h"
 #include "./Pattern.h"
@@ -156,6 +157,10 @@ namespace csl {
 
 	size_t patternCount = 0;
 	while( getline( fi, line ) ) {
+	    if( errno == EILSEQ ) { // if failbit is set BEFORE eof
+		throw exceptions::badInput( "PatternSet::loadPatterns: Encoding error in input sequence." );
+	    }
+
 	    size_t delimPos = line.find( L' ' );
 	    if( delimPos == std::wstring::npos ) {
 		throw exceptions::badInput( "PatternGraph: Invalid line in pattern file" );

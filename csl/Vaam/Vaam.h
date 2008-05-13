@@ -154,5 +154,4 @@ namespace csl {
     
 } // namespace csl
 
-
 #include "./Vaam.tcc"

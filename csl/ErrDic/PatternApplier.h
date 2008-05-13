@@ -3,6 +3,7 @@
 #include<vector>
 #include<stack>
 #include<set>
+#include<errno.h>
 
 #include "../Global.h"
 #include "../Stopwatch.h"
@@ -726,6 +727,10 @@ namespace csl {
 	
 	std::wstring line;
 	while( getline( fi, line ) ) {
+	    if( errno == EILSEQ ) { // if failbit is set BEFORE eof
+		throw exceptions::badInput( "PatternApplier::loadPatterns: Encoding error in input sequence." );
+	    }
+
 	    size_t delimPos = line.find( L' ' );
 	    if( delimPos == std::wstring::npos ) {
 		throw exceptions::badInput( "ErrDicConstructor: Invalid line in pattern file" );
@@ -758,7 +763,7 @@ namespace csl {
 	    while( isGood() ) {
 		printCurrent( std::wcout );
 
-		if( ! ( ++nrOfTokens % 100000 ) ) {
+		if( ! ( ++nrOfTokens % 10000 ) ) {
 		    std::wcerr<<nrOfTokens / 1000<<"k. "<<watch.readMilliseconds()<<" ms"<< std::endl;
 		    watch.start();
 		    printCurrent( std::wcerr );
