@@ -89,7 +89,6 @@ namespace csl {
 
 	}; // class PatternRef
 
-
 	/**
 	 * @brief 
 	 */

@@ -12,7 +12,7 @@ namespace csl {
 #include "lev2data.tcc"
 #include "lev3data.tcc"
     
-    LevDEA::LevDEA( int init_k ) : k_( 0 ),
+    LevDEA::LevDEA( int init_k ) : k_( init_k ),
 				   charvecs_( Global::maxNrOfChars, 0 )
     {
 	*pattern_ = 0; // set pattern to empty word

@@ -1,7 +1,7 @@
 #ifndef CSL_POS_PATTERN
 #define CSL_POS_PATTERN CSL_POS_PATTERN
 
-#include "./Pattern.h"
+#include "./PatternSet.h"
 
 
 namespace csl {
@@ -15,18 +15,17 @@ namespace csl {
 	 * @brief creates an empty Pattern at position 0
 	 */
 	PosPattern();
-
+	
 	PosPattern( const PatternRef& patternRef, size_t position );
 	
 	// PosPattern( const std::wstring& left, const std::wstring& right, size_t position );
 	
 	size_t getPosition() const;
-
+	
 	void print( std::wostream& os = std::wcout ) const;
 	
     private:
 	size_t position_;
-	
     }; // class PosPattern
     
     PosPattern::PosPattern() :

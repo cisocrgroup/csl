@@ -24,7 +24,16 @@ namespace csl {
 	}
 	else return false;
     }
-    
+
+    inline bool ErrDic::query( std::wstring const& key, VariantRecognizer::Answer* answer ) const {
+	Entry entry;
+	lookup( key.c_str(), &entry );
+	answer.baseWord = entry.getOriginal();
+	answer.pattern = 
+	
+    }    
+
+
     inline void ErrDic::loadFromFile( const char* dicFile ) {
 	FILE* fi = fopen( dicFile, "rb" );
 	if ( !fi ) {

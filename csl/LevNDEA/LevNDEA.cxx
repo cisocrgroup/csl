@@ -79,7 +79,6 @@ namespace csl {
 
 	// write updated automaton into stackIndex+1
 	// check if there are active states at all (-> couldWalk)
-	// check if one (and which) of the final states is active
 	for ( size_t curFloor = 1; curFloor <= maxFloorIndex_; ++curFloor ) {
 
 	    floors[stackIndex+1][curFloor] =
@@ -88,16 +87,15 @@ namespace csl {
 		( floors[stackIndex][curFloor-1] >> 1 ) |  // diagonal transition: no matter what c is (note the |= and the >>1 operator!)
 		( floors[stackIndex+1][curFloor-1] >> 1 );  // diagonal epsilon transition: note that a shifted version of the SAME stack's lower floor is used
 
-
 	    // delete bits beyond the relevant range
 	    // might be unnecessary
 	    floors[stackIndex+1][curFloor] &= allBits_;
 
-
+	    
 	    // update couldWalk
 	    couldWalk = couldWalk || floors[stackIndex+1][curFloor];
-
-// printFloors(stackIndex+1);
+	    
+	    // printFloors(stackIndex+1);
 
 	}
 	return couldWalk;

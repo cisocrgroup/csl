@@ -4,6 +4,7 @@
 #include "../Global.h"
 #include "../MinDic/MinDic.h"
 #include "../Hash/Hash.h"
+#include "../VariantRecognizer/VariantRecognizer.h"
 #include <sys/stat.h>
 
 namespace csl {
@@ -20,7 +21,8 @@ namespace csl {
      * @author Uli Reffle<uli@cis.uni-muenchen.de>
      * @date 2007
      */
-    class ErrDic : public MinDic< std::pair< ssize_t, ssize_t > > {
+    class ErrDic : public MinDic< std::pair< ssize_t, ssize_t > >,
+		   public VariantRecognizer  {
     public:
 	typedef std::pair< ssize_t, ssize_t > MdAnnType;
 	typedef MinDic< MdAnnType > MinDic_t;
@@ -77,13 +79,18 @@ namespace csl {
 	};
 
 	/**
-	 * @brief The basic lookup function
+	 * @brief The basic lookup function. DEPRECATED, use query() instead
 	 * @param[in] a key
 	 * @param[out] a pointer to an Entry-object - Here the result of the lookup is stored
 	 * @return true iff key is found inte ErrDic
 	 * 
+	 * @deprecated use query() instead
 	 */
 	inline bool lookup( const wchar_t* key, Entry* entry ) const;
+	
+
+	inline bool query( std::wstring const& key, VariantRecognizer::Answer* entry ) const;
+
 
 	/**
 	 * @brief return the original token annotated with the entry with the given id (perfect hash value)

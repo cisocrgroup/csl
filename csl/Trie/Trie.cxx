@@ -85,7 +85,7 @@ namespace csl {
 	    valueString = ( c + 1 );
 	} else { // no values given
 	    key = input;
-	    valueString = L"";
+	    valueString[0] = 0;
 	}
 	lengthOfKey = wcslen( key );
 	if( lengthOfKey > Global::lengthOfStr ) {

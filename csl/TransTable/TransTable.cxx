@@ -439,13 +439,14 @@ namespace csl {
 		StateId_t base = i - cellArray[i].getKey();
 
 		std::wcout<<
-			base<<
-			"->"<<
-			cellArray[i].getValue()<<
-			"[label=\""<<
-			cellArray[i].getKey()<<
-			"("<<cellArray[i].getAddByte()<<")\"] //DOTCODE"<<
-			std::endl;
+		    base<<
+		    "->"<<
+		    cellArray[i].getValue()<<
+		    "[label=\""<<
+		    cellArray[i].getKey()<<
+		    // "("<<cellArray[i].getAddByte()<<")" <<
+		    "\"] //DOTCODE"<<
+		    std::endl;
 	    } else if ( cellArray[i].isOfType( Cell_t::STATE ) ) {
 		int peripheries = ( cellArray[i].isOfType( Cell_t::FINALSTATE ) ) ? 2 : 1;
 		std::wcout<<
@@ -480,13 +481,14 @@ namespace csl {
 	    if ( cellArray[i].isOfType( Cell_t::TRANS ) ) {
 		StateId_t base = (StateId_t)( i - cellArray[i].getKey() );
 		std::wcout<<
-			base<<
-			"->"<<
-			cellArray[i].getValue()<<
-			"[label=\""<<
-			cellArray[i].getKey()<<
-			"("<<cellArray[i].getAddByte()<<")\"] //DOTCODE"<<
-			std::endl;
+		    base<<
+		    "->"<<
+		    cellArray[i].getValue()<<
+		    "[label=\""<<
+		    cellArray[i].getKey()<<
+		    // "("<<cellArray[i].getAddByte()<<")"<<
+		    "\"] //DOTCODE"<<
+		    std::endl;
 
 	    } else if ( cellArray[i].isOfType( Cell_t::STATE ) ) {
 		int peripheries = ( cellArray[i].isOfType( Cell_t::FINALSTATE ) ) ? 2 : 1;

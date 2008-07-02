@@ -208,15 +208,13 @@ namespace csl {
 		tempStates_[lengthOfKey].setFinal( true );
 
 		// store value
-		if( 1 ) {
-			// see that annotation buffer is large enough
-			if( sizeOfAnnotationBuffer_ <= ( nrOfKeys_ + 1 ) ) {
-				sizeOfAnnotationBuffer_ *= 2;
-				annotations_ = (AnnType_t*)realloc( annotations_, sizeOfAnnotationBuffer_ * sizeof( AnnType_t ) );
-				if( !annotations_ ) throw( exceptions::cslException( "csl::MinDic: could not re-allocate memory for annotation array." ) );
-			}
-			annotations_[nrOfKeys_] = annotation;
+		// first, see that annotation buffer is large enough
+		if( sizeOfAnnotationBuffer_ <= ( nrOfKeys_ + 1 ) ) {
+		    sizeOfAnnotationBuffer_ *= 2;
+		    annotations_ = (AnnType_t*)realloc( annotations_, sizeOfAnnotationBuffer_ * sizeof( AnnType_t ) );
+		    if( !annotations_ ) throw( exceptions::cslException( "csl::MinDic: could not re-allocate memory for annotation array." ) );
 		}
+		annotations_[nrOfKeys_] = annotation;
 
 		wcscpy( lastKey_, key );
 		++nrOfKeys_;

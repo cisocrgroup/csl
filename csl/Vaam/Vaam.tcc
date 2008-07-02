@@ -2,6 +2,7 @@ namespace csl {
 
     Vaam::Vaam( const MinDic_t& baseDic, const char* patternFile ) :
 	baseDic_( baseDic ),
+	levDEA_( 0 ),
 	maxNrOfPatterns_( 1000 )
     {
 	patternGraph_.loadPatterns( patternFile );

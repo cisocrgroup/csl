@@ -27,13 +27,24 @@ namespace csl {
 	csl::Alphabet alph_;
 	char* lexFile_;
 	csl::MinDic<> mdic_;
-	
     };
+
+    CPPUNIT_TEST_SUITE_REGISTRATION( TestMinDic );
+
+    TestMinDic::TestMinDic() {
+	std::wcout<<"KONSTRUKTOR"<<std::endl;
+    }
+
+    void TestMinDic::run() {
+	testBasics();
+    }
+    
 
     /**
      * test the basic methods for reading access like getRoot, walk, isFinal etc.
      */
     void TestMinDic::testBasics() {
+	std::wcout<<"TEST"<<std::endl;
 	std::wstring key( L"aachen" );
 	/*
 	 * walk key char by char and test if

@@ -7,12 +7,12 @@
 
 #include "../Global.h"
 #include "../Stopwatch.h"
+#include "../VariantRecognizer/VariantRecognizer.h"
 #include "../MinDic/MinDic.h"
 #include "../LevDEA/LevDEA.h"
 
 #include "./PatternGraph.h"
 
-#include "../Pattern/Instruction.h"
 
 namespace csl {
 
@@ -21,7 +21,7 @@ namespace csl {
      *
      * @author Ulrich Reffle, 2008
      */
-    class Vaam {
+    class Vaam : public VariantRecognizer {
 
     private:
 	typedef MinDic<> MinDic_t;
@@ -32,37 +32,27 @@ namespace csl {
 	typedef MinDic_t::State MDState_t;
 
     public:
-	class Answer {
-	public:
-	    /// the suggested correction candidate
-	    std::wstring word;
-	    /// the underlying word in the modern dictionary
-	    std::wstring baseWord;
-	    /// the coresponding Instruction: word = baseWord + instruction
-	    Instruction instruction;
-
-	    size_t levDistance;
-
-	    void print( std::wostream& os = std::wcout ) const {
-		os<<word<<":"<<baseWord<<"+";
-		instruction.print( os );
-		os<<",dist="<<levDistance;
-	    }
-
-	}; // class Answer
-
 	Vaam( const MinDic_t& basedDic, const char* patternFile );
 
+	/**
+	 * @brief In addition to pattern applications, allow fuzzy search with distance up to @c d
+	 */
 	inline void setDistance( size_t d );
 
+	/**
+	 * @brief restrict allowed number of pattern applications to less or equal than @c n
+	 */
 	inline void setMaxNrOfPatterns( size_t n );
 
+	/**
+	 * @brief query a @c word to get possible interpretations as a variant.
+	 */
 	inline void query( const std::wstring& word, std::vector< Answer >* answers );
 
-	inline void query_rec( size_t depth );
 	
 
     private:
+	inline void query_rec( size_t depth );
 
 
 	class Position {
