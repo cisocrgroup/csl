@@ -7,7 +7,6 @@
 
 #include "../Global.h"
 #include "../Stopwatch.h"
-#include "../VariantRecognizer/VariantRecognizer.h"
 #include "../MinDic/MinDic.h"
 #include "../LevDEA/LevDEA.h"
 

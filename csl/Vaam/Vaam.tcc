@@ -72,7 +72,9 @@ namespace csl {
 			if( newLevPos.isValid() )  {
 			    //                              1 more applied pattern than cur position       store current position as 'mother'-position
 			    Position newPosition( newLevPos, position->getNrOfPatternsApplied() + 1, std::make_pair( depth - patPos.getDepth(), count ) );
-			    newPosition.addPosPattern( PosPattern( patternGraph_.refAt( rightSide->second ), depth - patPos.getDepth() ) );
+			    newPosition.addPosPattern( PosPattern( patternGraph_.refAt( rightSide->second ).getLeft(),
+								   patternGraph_.refAt( rightSide->second ).getRight(),
+								   depth - patPos.getDepth() ) );
 			    stack_[depth].push_back( newPosition );
 			    stack_[depth].lookAheadDepth_ = 0;
 			}

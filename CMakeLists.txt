@@ -6,6 +6,8 @@ SET(CMAKE_CXX_FLAGS -O3)
 
 SET( USER_SOFTWARE_DIRS /mounts/Users/student/uli/soft )
 
+include_directories (${csl_SOURCE_DIR})
+
 SET( CPPUNIT_DIR . )
 FIND_PACKAGE( CPPUNIT )
 

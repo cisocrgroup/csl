@@ -1,7 +1,7 @@
 #ifndef CSL_I_ERRDIC_H
 #define CSL_I_ERRDIC_H CSL_I_ERRDIC_H
 
-#include "../Pattern/Instruction.h"
+#include "../Pattern/Interpretation.h"
 
 namespace csl {
 
@@ -20,36 +20,6 @@ namespace csl {
      */
     class iErrDic {
     public:
-	class Answer {
-	public:
-	    std::wstring const& getWord() const {
-		return word;
-	    }
-
-	    std::wstring const& getBaseWord() const {
-		return baseWord;
-	    }
-
-	    Instruction const& getInstruction() const {
-		return instruction;
-	    }
-
-	    /// the suggested correction candidate
-	    std::wstring word;
-	    /// the underlying word in the modern dictionary
-	    std::wstring baseWord;
-	    /// the coresponding Instruction: word = baseWord + instruction
-	    Instruction instruction;
-
-	    size_t levDistance;
-
-	    void print( std::wostream& os = std::wcout ) const {
-		os<<word<<":"<<baseWord<<"+";
-		instruction.print( os );
-		os<<",dist="<<levDistance;
-	    }
-	    
-	}; // class iErrDic
 
 	/**
 	 * @brief For instaces of a VariantRecognizer which returns only one interpretation
@@ -58,12 +28,10 @@ namespace csl {
 	 * (maybe the one with the highest score of some sort).
 	 *
 	 */
-	virtual bool query( const std::wstring& word, Answer* answer ) const = 0;
+	virtual bool query( const std::wstring& word, Interpretation* answer ) const = 0;
 
-    };
-
+    }; // class iErrDic
 
 }
-
 
 #endif
