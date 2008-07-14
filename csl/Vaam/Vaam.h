@@ -21,7 +21,7 @@ namespace csl {
      *
      * @author Ulrich Reffle, 2008
      */
-    class Vaam : public VariantRecognizer {
+    class Vaam {
 
     private:
 	typedef MinDic<> MinDic_t;

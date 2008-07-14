@@ -3,6 +3,8 @@
 #include "csl/Getopt/Getopt.h"
 #include "csl/Stopwatch.h"
 
+#define CSL_VAAMFILTER_PRINTNONE true
+
 /**
  * Vaam
  * 
@@ -54,24 +56,30 @@ int main(int argc, const char** argv ) {
 	vaam.query( query, &answers );
 
 	if( answers.empty() ) {
+#ifndef CSL_VAAMFILTER_PRINTNONE
 	    std::wcout<<query<<":NONE"<<std::endl;
+#endif
 	}
 	else if( maxDistance == 0 ) {
 	    // all interpretations of the query in one line
 	    if( maxDistance != 0 ) throw csl::exceptions::cslException( "This kind of output is suitable only for output 0" );
 	    
+#ifndef CSL_VAAMFILTER_PRINTNONE
 	    for( std::vector< csl::Vaam::Answer >::const_iterator it = answers.begin(); it!= answers.end(); ++it ) {
 		it->print();
 		if( it + 1  != answers.end() ) std::wcout<<"|";
 	    }
 	    std::wcout<<std::endl;
+#endif
 	}
 	else {
 	    // new line for each interpretation of the query
+#ifndef CSL_VAAMFILTER_PRINTNONE
 	    for( std::vector< csl::Vaam::Answer >::const_iterator it = answers.begin(); it!= answers.end(); ++it ) {
 		it->print();
 		std::wcout<<std::endl;
 	    }
+#endif
 	}
 
 	
