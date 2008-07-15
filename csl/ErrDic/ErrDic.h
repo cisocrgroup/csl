@@ -4,7 +4,8 @@
 #include "../Global.h"
 #include "../MinDic/MinDic.h"
 #include "../Hash/Hash.h"
-#include "../VariantRecognizer/VariantRecognizer.h"
+#include "./iErrDic.h"
+#include "../Pattern/Interpretation.h"
 #include <sys/stat.h>
 
 namespace csl {
@@ -22,7 +23,7 @@ namespace csl {
      * @date 2007
      */
     class ErrDic : public MinDic< std::pair< ssize_t, ssize_t > >,
-		   public VariantRecognizer  {
+		   public iErrDic {
     public:
 	typedef std::pair< ssize_t, ssize_t > MdAnnType;
 	typedef MinDic< MdAnnType > MinDic_t;
@@ -70,6 +71,7 @@ namespace csl {
 	    const wchar_t* getOriginal() const {
 		return myErrDic_->getOriginalById( id_ );
 	    }
+
 	    const wchar_t* getErrorPattern() const {
 		return myErrDic_->getErrorPatternById( id_ );
 	    }
@@ -89,7 +91,16 @@ namespace csl {
 	inline bool lookup( const wchar_t* key, Entry* entry ) const;
 	
 
-	inline bool query( std::wstring const& key, VariantRecognizer::Answer* entry ) const;
+	/**
+	 * @brief The new basic query/lookup method.
+	 *
+	 * Slightly different from the old version, it uses the standardized 'Interpretation'-object
+	 * as answer (instead of the ErrDic-internal type @c Entry )
+	 *
+	 * @param[in] key
+	 * @param[out] entry a pointer to an Interpretation-object - Here the result of the lookup is stored
+	 */
+	inline bool query( std::wstring const& key, Interpretation* interpretation ) const;
 
 
 	/**

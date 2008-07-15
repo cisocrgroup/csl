@@ -49,12 +49,11 @@ class StateHash {
 
     int hashcode(const TempState& state) {
 		int h = (state.isFinal())? 0 : Global::maxNrOfChars;
-		if( state.isFinal()	) {
+		if( state.isFinal() ) {
 		}
-//	for(int j = 1; j <= alphSize_; h = h*HASHC1 + j + alphSize_ * state.getTransTarget(j), ++j);
 		for( TempState::TransitionConstIterator it = state.transitionsBegin();
-			it != state.transitionsEnd();
-			h = h*HASHC1 + it->getLabel() + Global::maxNrOfChars * it->getTarget(), ++it ) {
+		     it != state.transitionsEnd();
+		     h = h*HASHC1 + it->getLabel() + Global::maxNrOfChars * it->getTarget(), ++it ) {
 
 		}
 		return (abs(h) % tableSize_);

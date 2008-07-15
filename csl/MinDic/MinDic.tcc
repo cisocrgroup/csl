@@ -124,7 +124,7 @@ namespace csl {
 		}
 
 		std::wstring line;
-
+		
 		size_t lineCount = 0;
 		while( std::getline( fileHandle, line ).good() )  {
 		    if( errno == EILSEQ ) { // if failbit is set BEFORE eof
@@ -151,8 +151,9 @@ namespace csl {
 		size_t delimPos = str->find_first_of( Global::keyValueDelimiter );
 
 		if( delimPos != str->npos ) {
-			*annotation = wcstol( (str->substr( delimPos )).c_str() , 0, 0 );
+			*annotation = wcstol( (str->substr( delimPos + 1 ) ).c_str() , 0, 0 );
 			str->resize( delimPos );
+
 		}
 		else *annotation = 0;
 	}
@@ -220,7 +221,7 @@ namespace csl {
 		++nrOfKeys_;
 
 		if( ! ( nrOfKeys_ %  100000 ) ) {
-			fprintf( stderr, "%zdk tokens processed.  %zdk states. key was: %ls\n", nrOfKeys_ /1000, TransTable_t::getNrOfStates() / 1000, key );
+		    fprintf( stderr, "%zdk tokens processed.  %zdk states. key was: %ls\n", nrOfKeys_ /1000, TransTable_t::getNrOfStates() / 1000, key );
 		}
 
 	} // method addToken()

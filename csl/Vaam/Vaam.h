@@ -11,6 +11,7 @@
 #include "../LevDEA/LevDEA.h"
 
 #include "./PatternGraph.h"
+#include "../Pattern/Interpretation.h"
 
 
 namespace csl {
@@ -31,7 +32,7 @@ namespace csl {
 	typedef MinDic_t::State MDState_t;
 
     public:
-	Vaam( const MinDic_t& basedDic, const char* patternFile );
+	Vaam( const MinDic_t& baseDic, const char* patternFile );
 
 	/**
 	 * @brief In addition to pattern applications, allow fuzzy search with distance up to @c d
@@ -46,12 +47,12 @@ namespace csl {
 	/**
 	 * @brief query a @c word to get possible interpretations as a variant.
 	 */
-	inline void query( const std::wstring& word, std::vector< Answer >* answers );
+	inline bool query( std::wstring const& word, std::vector< Interpretation >* interpretations ) const;
 
 	
 
     private:
-	inline void query_rec( size_t depth );
+	inline void query_rec( size_t depth ) const;
 
 
 	class Position {
@@ -111,31 +112,34 @@ namespace csl {
 
 	/**
 	 */
-	void reportMatch( const Position* cur ) const;
+	void reportMatch( const Position* cur, int baseWordScore ) const;
 
 	/**
 	 * This method picks up all patterns used to get the match and adds them
-	 * to the instruction of the \c Answer -object
+	 * to the instruction of the \c Interpretation -object
+	 *
+	 * @param[in]  cur
+	 * @param[in]  baseWordScore
+	 * @param[out] answer
 	 */
-	void reportMatch_rec( const Position* cur, Answer* answer ) const;
+	void reportMatch_rec( const Position* cur, Interpretation* answer ) const;
 
-	/////   DATA MEMBERS OF VAM   //////////////////////
+	/////   DATA MEMBERS OF VAAM    //////////////////////
 
 	const MinDic_t& baseDic_;
-	LevDEA levDEA_;
 
 	PatternGraph patternGraph_;
 	std::vector< std::wstring > leftSidesList_;
 	std::vector< PatternGraph::RightSides_t > rightSides_;
 	
-	std::wstring query_;
-	std::vector< Answer >* answers_;
-
-	Stack stack_;
+	mutable LevDEA levDEA_;
+	mutable std::wstring query_;
+	mutable std::vector< Interpretation >* interpretations_;
+	mutable Stack stack_;
 	/**
 	 * The current string under construction
 	 */
-	std::wstring word_;
+	mutable std::wstring word_;
 
 	size_t maxNrOfPatterns_;
 	

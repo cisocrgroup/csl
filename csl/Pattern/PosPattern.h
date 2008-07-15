@@ -22,7 +22,6 @@ namespace csl {
 	
 	void print( std::wostream& os = std::wcout ) const;
 	
-BLAA
     private:
 	size_t position_;
     }; // class PosPattern

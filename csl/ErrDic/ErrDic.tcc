@@ -25,12 +25,22 @@ namespace csl {
 	else return false;
     }
 
-    inline bool ErrDic::query( std::wstring const& key, VariantRecognizer::Answer* answer ) const {
+    inline bool ErrDic::query( std::wstring const& key, Interpretation* answer ) const {
 	Entry entry;
-	lookup( key.c_str(), &entry );
-	answer.baseWord = entry.getOriginal();
-	answer.pattern = 
-	
+	if( lookup( key.c_str(), &entry ) ) {
+	    answer->clear();
+	    answer->baseWord = entry.getOriginal();
+
+	    std::wstring patString( entry.getErrorPattern() );
+	    size_t delimiter = patString.find_first_of( ' ' );
+	    if( delimiter == std::wstring::npos ) {
+		throw exceptions::cslException( "csl::ErrDic: Bad pattern format in ErrDic" );
+	    }
+	    answer->instruction.push_back( PosPattern( patString.substr( 0, delimiter ), patString.substr( delimiter + 1 ), 42 ) );
+
+	    return true;
+	}
+	else return false;
     }    
 
 

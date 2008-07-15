@@ -24,70 +24,6 @@ namespace csl {
 	typedef PatternList_t::iterator iterator;
 	typedef PatternList_t::const_iterator const_iterator;
 
-	/**
-	 * @brief A \c PatternRef -object serves as pointer to a distinct member of
-	 * a \c PatternSet.
-	 * 
-	 * The important property of this kind of pointer is that it never expires
-	 * as long as the \c PatternSet -object lives. 
-	 */
-	class PatternRef {
-	public:
-	    friend class PatternSet;
-	
-
-	    /**
-	     * @brief create an "empty" PatternRef, similar to a Null-pointer
-	     *
-	     */
-	    PatternRef() :
-		patternSet_( 0 ),
-		index_( 0 ) {
-	    }
-
-	    /**
-	     * @brief get the left side of the pattern
-	     * @return the left side of the pattern
-	     */
-	    const std::wstring& getLeft() const {
-		return patternSet_->patternList().at( index_ ).getLeft();
-	    }
-	
-	    /**
-	     * @brief get the right side of the pattern
-	     * @return the right side of the pattern
-	     */
-	    const std::wstring& getRight() const {
-		return patternSet_->patternList().at( index_ ).getRight();
-	    }
-
-	    /**
-	     * @brief returns if pattern is "empty"
-	     */
-	    bool empty() const {
-		return ( patternSet_ == 0 );
-	    }
-
-	    void print( std::wostream& os = std::wcout ) const {
-		patternSet_->patternList().at( index_ ).print( os );
-	    }
-
-	private:
-
-
-	    /**
-	     * @brief Constructs a new PatternRef to the \c i-th position of \c patternSet
-	     */
-	    PatternRef( const PatternSet& patternSet, size_t i ) :
-		patternSet_( &patternSet ),
-		index_( i ) {
-	    
-	    }
-
-	    const PatternSet* patternSet_;
-	    size_t index_;
-
-	}; // class PatternRef
 
 	/**
 	 * @brief 
@@ -96,11 +32,11 @@ namespace csl {
 
 
 	/**
-	 * @brief Returns a \c PatternRef object pointing to the \c i -th position of the
+	 * @brief Returns a reference pointing to the \c i -th position of the
 	 * set
 	 */
-	PatternRef refAt( size_t i ) const {
-	    return PatternRef( *this, i );
+	Pattern const& at( size_t i ) const {
+	    return patternList_.at( i );
 	}
 
 

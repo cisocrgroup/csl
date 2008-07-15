@@ -17,9 +17,9 @@ namespace csl {
 	maxNrOfPatterns_ = n;
     }
 
-    void Vaam::query( const std::wstring& word, std::vector< Answer >* answers ) {
+    bool Vaam::query( const std::wstring& word, std::vector< Interpretation >* interpretations ) const {
 	query_ = word;
-	answers_ = answers;
+	interpretations_ = interpretations;
 	
 	levDEA_.loadPattern( query_.c_str() );
 	stack_.clear();
@@ -31,9 +31,11 @@ namespace csl {
 	stack_.at( 0 ).patternPos_ = patternGraph_.getRoot();
 
 	query_rec( 0 );
+
+	return ! interpretations_->empty();
     }
     
-    void Vaam::query_rec( size_t depth ) {
+    void Vaam::query_rec( size_t depth ) const {
 	
  	// std::wcout<<"query_rec( "<<depth<<" ):word="<<word_<<std::endl; // DEBUG
 
@@ -72,8 +74,8 @@ namespace csl {
 			if( newLevPos.isValid() )  {
 			    //                              1 more applied pattern than cur position       store current position as 'mother'-position
 			    Position newPosition( newLevPos, position->getNrOfPatternsApplied() + 1, std::make_pair( depth - patPos.getDepth(), count ) );
-			    newPosition.addPosPattern( PosPattern( patternGraph_.refAt( rightSide->second ).getLeft(),
-								   patternGraph_.refAt( rightSide->second ).getRight(),
+			    newPosition.addPosPattern( PosPattern( patternGraph_.at( rightSide->second ).getLeft(),
+								   patternGraph_.at( rightSide->second ).getRight(),
 								   depth - patPos.getDepth() ) );
 			    stack_[depth].push_back( newPosition );
 			    stack_[depth].lookAheadDepth_ = 0;
@@ -95,7 +97,7 @@ namespace csl {
 		 position != stack_[depth].end();
 		 ++position ) {
 		if( levDEA_.isFinal( position->levPos_ ) ) {
-		    reportMatch( &( *position ) );
+		    reportMatch( &( *position ), stack_[depth].dicPos_.getAnnotation() );
 		    //std::wcout<<"|d=" << levDEA_.getDistance( position->levPos_ );
 		}
 		++count;
@@ -144,26 +146,27 @@ namespace csl {
 	stack_.pop_back();
     } // query_rec
 
-    void Vaam::reportMatch( const Position* cur ) const {
-	Answer answer;
-	reportMatch_rec( cur, &answer );
-	answer.baseWord = word_; 
-	answer.word = word_; answer.instruction.applyTo( &( answer.word ) );
-	answer.levDistance = levDEA_.getDistance( cur->levPos_ );
+    void Vaam::reportMatch( const Position* cur, int baseWordScore ) const {
+	Interpretation interpretation;
+	reportMatch_rec( cur, &interpretation );
+	interpretation.baseWord = word_; 
+	interpretation.word = word_; interpretation.instruction.applyTo( &( interpretation.word ) );
+	interpretation.levDistance = levDEA_.getDistance( cur->levPos_ );
+	interpretation.baseWordScore = baseWordScore;
 
-	answers_->push_back( answer );
+	interpretations_->push_back( interpretation );
     }
 
-    void Vaam::reportMatch_rec( const Position* cur, Answer* answer ) const {
+    void Vaam::reportMatch_rec( const Position* cur, Interpretation* interpretation ) const {
 	if( cur->mother_.first == -1 ) {
 	    return;
 	}
 	else {
-	    reportMatch_rec( &( stack_.at( cur->mother_.first ).at( cur->mother_.second ) ), answer );
+	    reportMatch_rec( &( stack_.at( cur->mother_.first ).at( cur->mother_.second ) ), interpretation );
 	}
 
 	if( ! cur->posPattern_.empty() ) {
-	    answer->instruction.push_back( cur->posPattern_ );
+	    interpretation->instruction.push_back( cur->posPattern_ );
 	}
     }
 
