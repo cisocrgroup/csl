@@ -1,7 +1,7 @@
 #ifndef LEVDEA_POSTABLES_TCC
 #define LEVDEA_POSTABLES_TCC LEVDEA_POSTABLES_TCC
 
-
+#include<stdlib.h>
 #include "./LevDEA.h"
 
 namespace csl {

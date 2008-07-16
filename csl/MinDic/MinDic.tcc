@@ -116,20 +116,17 @@ namespace csl {
 		std::wcout<<"After initConstruction()"<<std::endl;
 
 		std::wifstream fileHandle( txtFile );
-		fileHandle.imbue( CSL_UTF8_LOCALE ); // imbue the stream with the environment's standard locale
+		fileHandle.imbue( CSL_UTF8_LOCALE ); // imbue the stream with csl's custom utf8 locale
 		if( !fileHandle.good() ) {
-			throw exceptions::badFileHandle( "Couldn't open file '" + 
-				std::string( txtFile ) + 
-				"' for reading." );
+		    throw exceptions::badFileHandle( "Couldn't open file '" + 
+						     std::string( txtFile ) + 
+						     "' for reading." );
 		}
 
 		std::wstring line;
 		
 		size_t lineCount = 0;
 		while( std::getline( fileHandle, line ).good() )  {
-		    if( errno == EILSEQ ) { // if failbit is set BEFORE eof
-			throw exceptions::badInput( "MinDic::compileDic: Encoding error in input sequence." );
-		    }
 
 			if ( line.length() > Global::lengthOfLongStr ) {
 				throw exceptions::badInput( "csl::MinDic::compileDic: Maximum length of input line violated (set by Global::lengthOfLongStr)" );
@@ -139,6 +136,9 @@ namespace csl {
 
 			addToken( line.c_str(), annotation );
 			++lineCount;
+		}
+		if( errno == EILSEQ ) { // catch encoding error
+		    throw exceptions::badInput( "MinDic::compileDic: Encoding error in input sequence." );
 		}
 
 		fileHandle.close();
@@ -248,6 +248,11 @@ namespace csl {
 		else {
 			return false;
 		}
+	}
+
+	template< class AnnType_t >
+	inline bool MinDic< AnnType_t >::lookup( std::wstring const& key, AnnType_t* annotation ) const {
+	    return lookup( key.c_str(), annotation );
 	}
 
 	template< class AnnType_t >

@@ -131,7 +131,9 @@ namespace csl {
 	 * @param[out] annotation a pointer where to store the found annotation. If NULL, then annotation is discarded
 	 * @return true iff key was found in the dictionary
 	 */
-	inline bool lookup( const wchar_t* key, AnnType_t* annotation = 0 ) const;	
+	inline bool lookup( const wchar_t* key, AnnType_t* annotation = 0 ) const;
+
+	inline bool lookup( std::wstring const& key, AnnType_t* annotation = 0 ) const;
 
 	/**
 	 * @deprecacted this method is renamed to lookup()

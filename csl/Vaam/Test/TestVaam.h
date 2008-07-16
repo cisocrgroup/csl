@@ -33,8 +33,9 @@ namespace csl {
     }
 
     void TestVaam::testPatternGraph() {
+
 	PatternGraph pg;
-	pg.loadPatterns( ( Global::CSLROOT + "Vaam/Test/testPatterns.txt" ).c_str() );
+	pg.loadPatterns( ( Global::cslRootDir + "csl/Vaam/Test/small.patterns.txt" ).c_str() );
 
 	// implicit copy constructor
 	PatternGraph::State st = pg.getRoot();
@@ -59,12 +60,23 @@ namespace csl {
      * test the basic methods for reading access like getRoot, walk, isFinal etc.
      */
     void TestVaam::testBasics() {
-	MinDic<> dic;
-	dic.loadFromFile( ( Global::CSLROOT + "Vaam/Test/smallDic.mdic" ).c_str() );
-	Vaam vam( dic, ( Global::CSLROOT + "Vaam/Test/testPatterns.txt" ).c_str() );
-	
-    }
+	MinDic<> baseDic( ( Global::cslRootDir + "csl/Vaam/Test/small.base.mdic" ).c_str() );
+	MinDic<> filterDic( ( Global::cslRootDir + "csl/Vaam/Test/small.filter.mdic" ).c_str() );
+	Vaam vaam( baseDic, ( Global::cslRootDir + "csl/Vaam/Test/small.patterns.txt" ).c_str() );
 
+	std::vector< Interpretation > answers;
+
+	// a standard variant
+	CPPUNIT_ASSERT( vaam.query( std::wstring( L"xachen" ), &answers ) );
+
+	// without the filterDic_ this should be a variant
+	CPPUNIT_ASSERT( vaam.query( std::wstring( L"hanne" ), &answers ) );
+
+	// now it should be filtered
+	vaam.setFilterDic( filterDic );
+	CPPUNIT_ASSERT( ! vaam.query( std::wstring( L"hanne" ), &answers ) );
+
+    }
 
 } // namespace csl
 

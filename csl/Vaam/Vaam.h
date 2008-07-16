@@ -49,6 +49,8 @@ namespace csl {
 	 */
 	inline bool query( std::wstring const& word, std::vector< Interpretation >* interpretations ) const;
 
+
+	inline void setFilterDic( MinDic<> const& filterDic );
 	
 
     private:
@@ -126,7 +128,8 @@ namespace csl {
 
 	/////   DATA MEMBERS OF VAAM    //////////////////////
 
-	const MinDic_t& baseDic_;
+	MinDic_t const& baseDic_;
+	MinDic_t const* filterDic_;
 
 	PatternGraph patternGraph_;
 	std::vector< std::wstring > leftSidesList_;
@@ -139,7 +142,7 @@ namespace csl {
 	/**
 	 * The current string under construction
 	 */
-	mutable std::wstring word_;
+	mutable std::wstring baseWord_;
 
 	size_t maxNrOfPatterns_;
 	

@@ -2,6 +2,7 @@ namespace csl {
 
     Vaam::Vaam( const MinDic_t& baseDic, const char* patternFile ) :
 	baseDic_( baseDic ),
+	filterDic_( 0 ),
 	levDEA_( 0 ),
 	maxNrOfPatterns_( 1000 )
     {
@@ -20,7 +21,7 @@ namespace csl {
     bool Vaam::query( const std::wstring& word, std::vector< Interpretation >* interpretations ) const {
 	query_ = word;
 	interpretations_ = interpretations;
-	
+	interpretations_->clear();
 	levDEA_.loadPattern( query_.c_str() );
 	stack_.clear();
 	// create a first StackItem
@@ -35,9 +36,14 @@ namespace csl {
 	return ! interpretations_->empty();
     }
     
+    void Vaam::setFilterDic( MinDic_t const& filterDic ) {
+	filterDic_ = &filterDic;
+    }
+
+
     void Vaam::query_rec( size_t depth ) const {
 	
- 	// std::wcout<<"query_rec( "<<depth<<" ):word="<<word_<<std::endl; // DEBUG
+ 	// std::wcout<<"query_rec( "<<depth<<" ):word="<<baseWord_<<std::endl; // DEBUG
 
 
 	stack_.push_back( StackItem( *this ) );
@@ -90,7 +96,9 @@ namespace csl {
 
 
 	// report matches
-	if( ( stack_[depth].lookAheadDepth_ == 0 ) && stack_[depth].dicPos_.isFinal() ) {
+	if( ( stack_[depth].lookAheadDepth_ == 0 ) &&  // we are not in the lookahead-phase AND
+	    ( stack_[depth].dicPos_.isFinal() ) // arrived at a final state of the dic AND
+	    ) {
 	    // for all positions
 	    size_t count = 0;
 	    for( StackItem::iterator position = stack_[depth].begin();
@@ -136,8 +144,8 @@ namespace csl {
 
 	    if( stack_[depth + 1].lookAheadDepth_ <= stack_[depth + 1].patternPos_.getDepth() ) {
 		stack_[depth + 1].dicPos_ = stack_[depth].dicPos_.getTransTarget( *c );
-		word_.resize( depth + 1 );
-		word_.at( depth ) = *c;
+		baseWord_.resize( depth + 1 );
+		baseWord_.at( depth ) = *c;
 
 		query_rec( depth + 1 );
 	    }
@@ -148,11 +156,19 @@ namespace csl {
 
     void Vaam::reportMatch( const Position* cur, int baseWordScore ) const {
 	Interpretation interpretation;
+
+	interpretation.baseWord = baseWord_; 
 	reportMatch_rec( cur, &interpretation );
-	interpretation.baseWord = word_; 
-	interpretation.word = word_; interpretation.instruction.applyTo( &( interpretation.word ) );
 	interpretation.levDistance = levDEA_.getDistance( cur->levPos_ );
 	interpretation.baseWordScore = baseWordScore;
+
+	// find out what word we're talking about by applying the pattern to the baseWord
+	interpretation.word = baseWord_; interpretation.instruction.applyTo( &( interpretation.word ) );
+
+	if( filterDic_ && filterDic_->lookup( interpretation.word ) ) { // if there's a filterDic_ and interpretation.word is in it
+	    return;
+	}
+
 
 	interpretations_->push_back( interpretation );
     }

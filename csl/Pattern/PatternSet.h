@@ -82,7 +82,7 @@ namespace csl {
 
     void PatternSet::loadPatterns( const char* patternFile ) {
 	std::wifstream fi;
-	fi.imbue( std::locale( "de_DE.UTF-8" ) );
+	fi.imbue( CSL_UTF8_LOCALE );
 	fi.open( patternFile );
 	if( ! fi ) {
 	    throw exceptions::badFileHandle( "PatternSet::Could not open pattern file" );
@@ -91,11 +91,7 @@ namespace csl {
 	std::wstring line;
 
 	size_t patternCount = 0;
-	while( getline( fi, line ) ) {
-	    if( errno == EILSEQ ) { // if failbit is set BEFORE eof
-		throw exceptions::badInput( "PatternSet::loadPatterns: Encoding error in input sequence." );
-	    }
-
+	while( getline( fi, line ).good() ) {
 	    size_t delimPos = line.find( L' ' );
 	    if( delimPos == std::wstring::npos ) {
 		throw exceptions::badInput( "PatternGraph: Invalid line in pattern file" );
@@ -103,6 +99,11 @@ namespace csl {
 
 	    patternList_.push_back( Pattern( line.substr( 0, delimPos ), line.substr( delimPos + 1 ) ) );
 	}
+	if( errno == EILSEQ ) { // catch encoding error
+	    throw exceptions::badInput( "csl::PatternSet: Encoding error in input sequence." );
+	}
+
+	std::wcerr<<"csl::PatternSet: Loaded "<<patternList_.size() - 1 << " patterns." << std::endl;
     } // PatternSet::loadPatterns
 
 
