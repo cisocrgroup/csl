@@ -57,7 +57,7 @@ namespace csl {
 		     it != answers_.end();
 		     ++it ) {
 		    if( it->baseWordScore > answer->baseWordScore ) {
-			std::wcout<<"Replace: "<<answer->baseWord<<"-->"<<it->baseWord<<std::endl;
+			// std::wcout<<"Replace: "<<answer->baseWord<<"-->"<<it->baseWord<<std::endl;
 			*answer = *it;
 		    }
 		}

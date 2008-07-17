@@ -1,6 +1,6 @@
 namespace csl {
 
-    inline ErrDic::ErrDic() :
+    inline ErrDic::ErrDic( char const* errDicFile ) :
 	originals_( 0 ),
 	sizeOfOriginals_( 0 ),
 	errorPatterns_( 0 ),
@@ -9,6 +9,9 @@ namespace csl {
 	patternHash_( 0 ),
 	keyValueDelimiter_( Global::keyValueDelimiter )
     {
+	if( errDicFile ) {
+	    loadFromFile( errDicFile );
+	}
     }
 
     inline ErrDic::~ErrDic() {

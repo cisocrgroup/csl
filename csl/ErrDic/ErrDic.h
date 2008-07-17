@@ -27,10 +27,12 @@ namespace csl {
     public:
 	typedef std::pair< ssize_t, ssize_t > MdAnnType;
 	typedef MinDic< MdAnnType > MinDic_t;
+
 	/**
 	 * @brief Constructor. Doesn't do much but to set some variables to 0.
 	 */
-	inline ErrDic();
+	inline ErrDic( char const* errDicFile = 0 );
+
 	/**
 	 * @brief The destructor deletes the allocated buffers.
 	 */
