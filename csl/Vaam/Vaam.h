@@ -16,8 +16,35 @@
 
 namespace csl {
 
-    /**
+    /*
      * Vaam - Variant-aware Approximate Matching
+     */
+
+    /**
+     * @brief Vaam is a module for approximate matching in large dictionaries, considering
+     * spelling variants (defined with a set of rewrite patterns) and also spelling errors
+     * (using levenshtein distance).
+     *
+     * As input the tool needs 
+     * - a wordList @c baseDic compiled as FSA (use the tool compileMD to get such an automaton from a word list. 
+     * - a file containing a list of patterns, one per line. A line containing 't th' indicates that a 't' in 
+     *   @c baseDic could be transformed to 'th'.
+     * - a threshold @c maxNrOfPatterns specifying the maximum number of pattern applications in one word (default: 1000, which is near to infinite ).
+     * - a distance threshold @c distance specifying the maximum number of edit operations allowed on top of the
+     *   application of variant patterns (default: 0, allow variant patterns only).
+     *
+     * Definition of the output:
+     *
+     * We define a so-called hypothetical dictionary @c hypotheticalDic that contains all spelling variants
+     * which can be obtained by applying a sequence of up to @c maxNrOfPatterns variant patterns to any 
+     * word of @c baseDic. One entry of @c hypotheticalDic is a triple @c<word,baseWord,instruction> where
+     * @c instruction is the above mentioned sequence to get the variant @c word from the original word 
+     * @c baseWord from @c baseDic.
+     * 
+     * For a query @c q the algorithm returns all such triples from @c hypotheticalDic where the standard 
+     * levenshtein distance between 
+     *
+     * @see csl::Interpretation, csl::Instruction, csl::PosPattern, csl::Pattern
      *
      * @author Ulrich Reffle, 2008
      */

@@ -3,7 +3,7 @@ namespace csl {
     Vaam::Vaam( const MinDic_t& baseDic, const char* patternFile ) :
 	baseDic_( baseDic ),
 	filterDic_( 0 ),
-	levDEA_( 0 ),
+	levDEA_( 0 ), // Here the default levenshtein threshold is specified
 	maxNrOfPatterns_( 1000 )
     {
 	patternGraph_.loadPatterns( patternFile );

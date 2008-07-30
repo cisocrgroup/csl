@@ -54,7 +54,7 @@ namespace csl {
 	 * Dumps the automaton into a file
 	 * @param binFile filename to dump the automaton into (usually .dic)
 	 */
-	inline void createBinary( char* binFile );
+	inline void createBinary( char const* binFile );
 
 	/**
 	 * 
@@ -258,7 +258,7 @@ namespace csl {
 	 * This number specifies the maximum size of the area that is considered when
 	 * looking for a slot. Free cells 
 	 */
-	static const size_t searchWindow = 1000;
+	static const size_t searchWindow = 500000;
 
 	Alphabet alph_;
 	

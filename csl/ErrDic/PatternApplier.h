@@ -3,6 +3,7 @@
 #include<vector>
 #include<stack>
 #include<set>
+#include<algorithm>
 #include<errno.h>
 
 #include "../Global.h"

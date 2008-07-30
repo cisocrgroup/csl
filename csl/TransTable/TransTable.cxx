@@ -381,7 +381,7 @@ namespace csl {
     
 
     template< CellType CellTypeValue  >
-    inline void TransTable< CellTypeValue >::createBinary( char* compFile ) {
+    inline void TransTable< CellTypeValue >::createBinary( char const* compFile ) {
 	FILE * fo = fopen( compFile, "wb" );
 	if ( !fo ) {
 	    std::cerr << "Couldn't open " << compFile << std::endl;

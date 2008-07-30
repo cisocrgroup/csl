@@ -6,6 +6,7 @@ add_subdirectory(ErrDic)
 add_subdirectory(MinDicString)
 add_subdirectory(Trie)
 add_subdirectory(Vaam)
+add_subdirectory(SimpleFSA)
 
 ADD_LIBRARY(csl STATIC Alphabet/Alphabet.cxx LevDEA/LevDEA.cxx Trie/Trie.cxx)
 

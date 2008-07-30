@@ -3,6 +3,7 @@
 
 #include<vector>
 #include<string>
+#include<algorithm>
 #include "../Global.h"
 #include "../MinDic/MinDic.h"
 

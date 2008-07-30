@@ -2,7 +2,7 @@
 #include "./MinDicString.h"
 
 using namespace csl;
-int main( size_t argc, char** argv ) {
+int main( int argc, char** argv ) {
     setlocale(LC_CTYPE, "de_DE.UTF-8");  /*Setzt das Default Encoding für das Programm */
 
 

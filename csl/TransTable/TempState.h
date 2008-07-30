@@ -200,6 +200,7 @@ namespace csl {
 
 	/**
 	 * mark the state as final/ not final
+	 * @todo THIS SEEMS VERY VERY BUGGY
 	 */
 	void setFinal( bool b ) {
 	    if( ! isFinal_ ) {
