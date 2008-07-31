@@ -8,7 +8,7 @@
 /**
  * Vaam
  * 
- * @file vaamFilter
+ * @file vaamFilter.cxx
  * 
  * @brief vaamFilter is a command-line tool for the usage of the class Vaam.
  * It is invoked with a distance bound \c k, a compiled minimized dictionary \c dic
@@ -20,6 +20,11 @@
  * @see csl::Vaam
  * @author Ulrich Reffle, <uli@cis.uni-muenchen.de>
  * 
+ * @addtogroup executables
+ * @{
+ * @copybrief vaamFilter.cxx
+ * }
+ *
  */
 int main(int argc, const char** argv ) {
 

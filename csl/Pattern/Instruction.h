@@ -8,7 +8,7 @@
 namespace csl {
 
     /**
-     * @brief Represents an instruction in the sense we use the word in connection with spelling variants.
+     * @brief Instruction is a std::vector< PosPattern>, and it's an instruction in the sense we use the word in connection with spelling variants.
      */
     class Instruction : public std::vector< PosPattern > {
     public:

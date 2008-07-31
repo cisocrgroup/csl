@@ -17,7 +17,7 @@
 namespace csl {
 
     /*
-     * Vaam - Variant-aware Approximate Matching
+     * Vaam - Variant-Aware Approximate Matching
      */
 
     /**
@@ -37,7 +37,7 @@ namespace csl {
      *
      * We define a so-called hypothetical dictionary @c hypotheticalDic that contains all spelling variants
      * which can be obtained by applying a sequence of up to @c maxNrOfPatterns variant patterns to any 
-     * word of @c baseDic. One entry of @c hypotheticalDic is a triple @c<word,baseWord,instruction> where
+     * word of @c baseDic. One entry of @c hypotheticalDic is a triple @c{<word,baseWord,instruction>} where
      * @c instruction is the above mentioned sequence to get the variant @c word from the original word 
      * @c baseWord from @c baseDic.
      * 
@@ -50,8 +50,13 @@ namespace csl {
      */
     class Vaam {
 
-    private:
+    public:
+	/**
+	 * @brief The type of MinDic used as dictionaries
+	 */
 	typedef MinDic<> MinDic_t;
+
+    private:
 
 	/**
 	 * A state of the MinDic
@@ -59,7 +64,19 @@ namespace csl {
 	typedef MinDic_t::State MDState_t;
 
     public:
+	/**
+	 * @brief A trivial construtor, taking the input ressources as arguments
+	 *
+	 * @param baseDic a reference to a MinDic_t that serves as @c baseDic
+	 * @param patternFile path to a file containing the spelling variant patterns 
+	          (see class description for some more details). 
+	 */
 	Vaam( const MinDic_t& baseDic, const char* patternFile );
+
+	/**
+	 * @name Configuration
+	 */
+	//@{
 
 	/**
 	 * @brief In addition to pattern applications, allow fuzzy search with distance up to @c d
@@ -72,13 +89,24 @@ namespace csl {
 	inline void setMaxNrOfPatterns( size_t n );
 
 	/**
+	 * @brief set a filter dictionary. This restricts output words to words NOT present in this filterDic.
+	 */
+	inline void setFilterDic( MinDic_t const& filterDic );
+	
+	// @}
+
+	/**
+	 * @name Usage/ Queries
+	 */
+	//@{
+	/**
 	 * @brief query a @c word to get possible interpretations as a variant.
+	 *
+	 * @todo Passing a std::vector* as answer container is probably not very elegant.
 	 */
 	inline bool query( std::wstring const& word, std::vector< Interpretation >* interpretations ) const;
 
-
-	inline void setFilterDic( MinDic<> const& filterDic );
-	
+	//@}
 
     private:
 	inline void query_rec( size_t depth ) const;

@@ -2,7 +2,14 @@
 #include "csl/Getopt/Getopt.h"
 #include<iostream>
 
-
+/**
+ * @brief Program used to compute a MinDic<> from a word list and dump the automaton to a file.
+ *
+ * @addtogroup executables
+ * @{
+ * @copybrief compileMD.cxx
+ * }
+ */
 int main(int argc, char** argv) {
     setlocale(LC_CTYPE, "de_DE.UTF-8");  /*Setzt das Default Encoding für das Programm */
     
