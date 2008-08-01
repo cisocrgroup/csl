@@ -41,8 +41,8 @@ namespace csl {
      * @c instruction is the above mentioned sequence to get the variant @c word from the original word 
      * @c baseWord from @c baseDic.
      * 
-     * For a query @c q the algorithm returns all such triples from @c hypotheticalDic where the standard 
-     * levenshtein distance between 
+     * For a query @c q the algorithm returns all such triples @c{<word,baseWord,instruction>} from @c hypotheticalDic
+     * where the standard levenshtein distance between @c word and @c q does not exceed 
      *
      * @see csl::Interpretation, csl::Instruction, csl::PosPattern, csl::Pattern
      *

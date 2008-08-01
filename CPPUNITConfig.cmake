@@ -4,8 +4,6 @@
 #  CPPUNIT_LIBRARIES, where to find the libraries
 #  CPPUNIT_FOUND, If false, do not try to use CPPUNIT.
 
-
-
 FIND_PATH(CPPUNIT_INCLUDE_DIR cppunit/Test.h
  /usr/local/include
  /usr/include
