@@ -12,7 +12,9 @@ namespace csl {
      */
     class DictSearch {
     public:
-	typedef MinDic<> MinDic_t;
+	typedef MinDic<> ExactDic_t;
+	typedef MinDic<> VaamDic_t;
+	typedef FBDic LevDic_t;
 	typedef Vaam<> Vaam_t;
 	typedef size_t DictID;
 
@@ -36,7 +38,7 @@ namespace csl {
 
 
 	class CandidateSet : public csl::LevFilter::CandidateReceiver,
-			     public csl::Vaam< MinDic_t >::iCandidateReceiver,
+			     public csl::Vaam< VaamDic_t >::iCandidateReceiver,
 			     std::vector< csl::DictSearch::Interpretation > {
 	public:
 	    void receive( const wchar_t* str, int levDistance, int annotation ) {
@@ -54,38 +56,53 @@ namespace csl {
 	}; // class CandidateSet
 
 
+	DictSearch();
 
 	DictID addDict_exact( char const* dictFile );
-	DictID addDict_exact( MinDic_t const& );
+	DictID addDict_exact( ExactDic_t const& );
 	DictID addDict_lev( char const* dictFile, size_t dlev );
-	DictID addDict_lev( MinDic_t const&, size_t dlev );
+	DictID addDict_lev( LevDic_t const&, size_t dlev );
 	DictID addDict_vaam( char const* dictFile, char const* patternFile, size_t dlev );
-	DictID addDict_vaam( MinDic_t const&, char const* patternFile, size_t dlev );
+	DictID addDict_vaam( VaamDic_t const&, char const* patternFile, size_t dlev );
 
 	void query();
 
     private:
 	struct ItemExact {
-	    ItemExact( MinDic_t const& dic__, bool doDelete__ ) :
+	    ItemExact( ExactDic_t const& dic__, bool deleteDic__, DictID id__ ) :
 		dic( dic__ ),
-		doDelete( doDelete__ ) {
+		deleteDic( deleteDic__ ),
+		id( id__ ) {
 	    }
-	    MinDic_t const& dic;
-	    bool doDelete;
+	    ExactDic_t const& dic;
+	    bool deleteDic;
+	    DictID id;
 	};
+
 	struct ItemLev {
-	    MinDic_t const& dic;
-	    bool doDelete;
+	    ItemLev( MSMatch< FW_BW > const& msMatch__, bool deleteDic__, DictID id__ ) :
+		dic( dic__ ),
+		deleteDic( deleteDic__ ),
+		id( id__ ) {
+	    }
+	    LevDic_t const& dic;
+	    MSMatch< FW_BW > const& msMatch;
+	    bool deleteDic;
+	    DictID id;
 	};
+
 	struct ItemVaam {
 	    Vaam_t const& vaam;
-	    bool doDelete;
+	    bool deleteDic;
 	    char const* patternFile;
+	    DictID id;
 	};
 
 	std::vector< ItemExact > dicts_exact_;
 	std::vector< ItemLev > dicts_lev_;
 	std::vector< ItemVaam > dicts_vaam_;
+
+	DictID lastDictID_;
 
     }; // class DictSearch
 

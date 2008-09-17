@@ -13,6 +13,7 @@ add_subdirectory(DictSearch)
 ADD_LIBRARY( csl SHARED csl.cxx )
 target_link_libraries( csl Alphabet )
 target_link_libraries( csl LevDEA )
+target_link_libraries( csl DictSearch )
 
 install( 
   TARGETS csl

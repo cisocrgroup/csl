@@ -2,14 +2,14 @@
 #include <cppunit/extensions/TestFactoryRegistry.h>
 #include <cppunit/ui/text/TestRunner.h>
 
-#include "./TestVaam.h"
+#include "./TestDictSearch.h"
 
 
 int main() {
 
     // Adds the test to the list of test to run
     CppUnit::TextUi::TestRunner runner;
-    runner.addTest( csl::TestVaam::suite() );
+    runner.addTest( csl::TestDictSearch::suite() );
     
 //     // Change the default outputter to a compiler error format outputter
 //     runner.setOutputter( new CppUnit::CompilerOutputter( &runner.result(),
