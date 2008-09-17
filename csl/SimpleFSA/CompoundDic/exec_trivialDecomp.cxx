@@ -16,11 +16,11 @@ int main( int argc, char** argv ) {
     while( std::getline( std::wcin, line ).good() ) {
 	if( ++count % 1000000 == 0 ) std::wcerr << "trivialDecomp: " <<count / 1000000 << "million tokens processed." << std::endl;
 	if( decomp.decomp( line ) ) {
-	    // std::wcout<<"YES"<<std::endl;
+	    std::wcout<<line<<std::endl;
 	}
 	else {
-	    std::wcout<<"NO: "<< line <<std::endl;
-	    return 1;
+	    //std::wcout<<"NO: "<< line <<std::endl;
+	    //return 1;
 	}
     }
 }

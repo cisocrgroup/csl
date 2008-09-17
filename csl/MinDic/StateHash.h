@@ -45,28 +45,28 @@ class StateHash {
     static const int HASHC1 = 257;
     static const int HASHC2 = 107;
 
-    static const size_t tableSize_ = (size_t)( 1ll<<26 ) - 1;
+    static const size_t tableSize_ = (size_t)( 1ll<<28 ) - 1;
 
+    template< typename TempState >
     int hashcode(const TempState& state) {
-		int h = (state.isFinal())? 0 : Global::maxNrOfChars;
-		if( state.isFinal() ) {
-		}
-		for( TempState::TransitionConstIterator it = state.transitionsBegin();
-		     it != state.transitionsEnd();
-		     h = h*HASHC1 + it->getLabel() + Global::maxNrOfChars * it->getTarget(), ++it ) {
+                int h = (state.isFinal())? 0 : Global::maxNrOfChars;
+        h += state.getAnnotation();
 
-		}
-		return (abs(h) % tableSize_);
+//      for(int j = 1; j <= alphSize_; h = h*HASHC1 + j + alphSize_ * state.getTransTarget(j), ++j);
+        for( typename TempState::ConstIterator it = state.getConstIterator();
+             it.isValid();
+             h = h*HASHC1 + it->getLabel() + Global::maxNrOfChars * it->getTarget(), ++it );
+                return (abs(h) % tableSize_);
     }
     
 public:
     StateHash(TransTable_t& trans) : trans_(trans) {
-	try {
-	    table_ = new ChainLink*[tableSize_];
-		memset( table_, 0, tableSize_ * sizeof(ChainLink*) );
-	} catch( std::bad_alloc exc ) {
-	    std::cout<<"csl::StateHash: Could not allocate hashtable: " <<  exc.what() << std::endl;
-	    throw exc;
+        try {
+            table_ = new ChainLink*[tableSize_];
+                memset( table_, 0, tableSize_ * sizeof(ChainLink*) );
+        } catch( std::bad_alloc exc ) {
+            std::cout<<"csl::StateHash: Could not allocate hashtable: " <<  exc.what() << std::endl;
+            throw exc;
 	}
     }
     
@@ -79,22 +79,23 @@ public:
 /* 		next = (*ch).next; */
 /* //		delete(ch); */
 /* 	    } */
-/* 	} */
+/*      } */
     }
 
+    template< typename TempState >
     void push(const TempState& state, StateId_t compId) {
-	size_t slot = hashcode(state);
-	ChainLink* newCL = new ChainLink();
+        size_t slot = hashcode(state);
+        ChainLink* newCL = new ChainLink();
 	(*newCL).value = compId;
 	(*newCL).next = table_[slot];
-	table_[slot] = newCL;
+        table_[slot] = newCL;
     }
 
+    template< typename TempState >
     size_t findState(const TempState& state) {
-		
-		ChainLink* ch = table_[hashcode(state)];
-		while( ch && !trans_.compareStates( state, ch->value ) ) {
-			ch = ch->next;
+                ChainLink* ch = table_[hashcode(state)];
+                while( ch && !trans_.compareStates( state, ch->value ) ) {
+                        ch = ch->next;
 		}
 		return ( ch )? ch->value : 0;
     }

@@ -58,7 +58,7 @@ namespace csl {
 	    dicPos2 = dictFW_.getRoot();
 	    for( wchar_t* c = wordCorrectDir; *c; ++c ) {
 		assert( dicPos2 ); // this is a logical conclusion, so it's an assert, not an exception
-		dicPos2 = dictFW_.walkPerfHash( dicPos2, *c, perfHashValue );
+		dicPos2 = dictFW_.walkPerfHash( dicPos2, *c, &perfHashValue );
 	    }
 
 	    // printf( "FOUND SECOND:%ls, dist of 2nd part is %d\n", word_, levDistanceSecond ); // DEBUG
@@ -337,7 +337,7 @@ namespace csl {
 		    static size_t perfHashValue; static uint_t dicPos2;
 		    perfHashValue = 0; dicPos2 = dictFW_.getRoot();
 		    for( wchar_t* cc = word_; *cc; ++cc ) {
-			dicPos2 = dictFW_.walkPerfHash( dicPos2, *cc, perfHashValue );
+			dicPos2 = dictFW_.walkPerfHash( dicPos2, *cc, &perfHashValue );
 		    }
 		    // USE DUMMY VALUE FOR LEVDISTANCE
 		    candReceiver_->receive( word_, 42, dictFW_.getAnnotation( perfHashValue ) );

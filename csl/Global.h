@@ -64,6 +64,7 @@ namespace csl {
 #ifdef CSL_ROOTDIR	
 	static const std::string cslRootDir( CSL_ROOTDIR );
 #endif
+
 	static const size_t maxNrOfChars = 65536;
 
 	// those lengths are the maximum size of bytes from the input stream

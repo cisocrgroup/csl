@@ -14,9 +14,12 @@ namespace csl {
      */
     class Interpretation {
     public:
+	enum Status { undef, modern, approved_historic, hypothetical };
+
 	Interpretation() :
 	    baseWordScore( -1 ),
-	    levDistance( 0 )
+	    levDistance( 0 ),
+	    status_( undef )
 	    {
 	    }
 
@@ -27,7 +30,7 @@ namespace csl {
 	    baseWordScore = -1;
 	    levDistance = 0;
 	    word.clear();
-	    baseWord.clear();
+	    baseWord_.clear();
 	    instruction.clear();
 	}
 
@@ -38,26 +41,44 @@ namespace csl {
 	    return word;
 	}
 
+	void setBaseWord( std::wstring const& w ) {
+	    baseWord_ = w;
+	}
+
 	/**
 	 * @brief returns the baseWord, usually a word from a dictionary that was changed into a variant
 	 */
 	std::wstring const& getBaseWord() const {
-	    return baseWord;
+	    return baseWord_;
 	}
 
 	/**
 	 * @brief returns the instruction that was used to turn @c baseWord into @c word 
 	 */
+	Instruction getInstruction() {
+	    return instruction;
+	}
+
+	/**
+	 * @brief const version of getInstruction
+	 */
 	Instruction const& getInstruction() const {
 	    return instruction;
 	}
 
+	void setStatus( Status const& st ) {
+	    status_ = st;
+	}
+
+	Status getStatus() const {
+	    return status_;
+	}
+
 	/// the suggested correction candidate
 	std::wstring word;
-	/// the underlying word in the modern dictionary
-	std::wstring baseWord;
 
-	/// the coresponding Instruction: word = baseWord + instruction
+
+	/// the corresponding Instruction: word = baseWord + instruction
 	Instruction instruction;
 
 	/**
@@ -78,11 +99,30 @@ namespace csl {
 	 * specified as argument.
 	 */
 	void print( std::wostream& os = std::wcout ) const {
-	    os<<word<<":"<<baseWord<<"+";
+	    os<<word<<":"<<baseWord_<<"+";
 	    instruction.print( os );
 	    os<<",dist="<<levDistance;
 	    os<<",baseWordScore="<<baseWordScore;
 	}
+
+	/**
+	 * @brief prints another useful format of the interpretation, more in the INL tradition
+	 */
+	void print_v2( std::wostream& os = std::wcout ) const {
+	    size_t begin = 0;
+	    for( csl::Instruction::const_iterator posPattern = instruction.begin(); posPattern != instruction.end(); ++posPattern ) {
+		os<<baseWord_.substr( begin, posPattern->getPosition() - begin ); // print unchanged substring left of the pattern
+		os<<"["<<posPattern->getLeft()<<"->"<<posPattern->getRight()<<"]"; // print pattern
+		begin = posPattern->getPosition() + posPattern->getLeft().length();
+	    }
+	    os<<baseWord_.substr( begin ); // print unchanged suffix of the baseWord
+	    
+	}
+    private:
+	Status status_;
+
+	/// the underlying word in the modern dictionary
+	std::wstring baseWord_;
 	    
     }; // class Interpretation
 

@@ -15,21 +15,23 @@ namespace csl {
 	 *
 	 */
 	class Simple2TransTable {
+	private:
+	    typedef TransTable< TT_STANDARD, uint16_t > TransTable_t;
+	    typedef TransTable_t::TempState_t TempState_t ;
 	public:
-	    void translate( Automaton const& sfsa, TransTable< TOKDIC >* transTable  );
+	    void translate( Automaton const& sfsa, TransTable_t* transTable  );
 
 	private:
-	    typedef TransTable< TOKDIC > TransTable_t;
-	    void translateState( State* simpleState, TempState* tempState );
+	    void translateState( State* simpleState, TempState_t* tempState );
 	    std::map< State const*, size_t > stateMap_;
 
 	};
 
 
-	void Simple2TransTable::translate( Automaton const& sfsa, TransTable< TOKDIC >* transTable ) {
+	void Simple2TransTable::translate( Automaton const& sfsa, TransTable_t* transTable ) {
 	    transTable->initConstruction();
 
-	    TempState tempState;
+	    TempState_t tempState;
 
 	    Stopwatch watch; watch.start();
 	    std::wcerr <<"Insert states to TransTable ... "<<std::endl;
@@ -58,10 +60,10 @@ namespace csl {
 
 	}
 
-	void Simple2TransTable::translateState( State* simpleState, TempState* tempState ) {
+	void Simple2TransTable::translateState( State* simpleState, TempState_t* tempState ) {
 	    tempState->reset();
 
-	    tempState->setFinal( simpleState->isFinal() );
+	    if( simpleState->isFinal() ) tempState->setFinal();
 	    for( State::const_trans_iterator trans = simpleState->trans_begin();
 		 trans != simpleState->trans_end(); 
 		 ++trans ) {

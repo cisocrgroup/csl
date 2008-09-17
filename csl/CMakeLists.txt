@@ -1,14 +1,18 @@
 INCLUDE(CPack)
 
+add_subdirectory(Alphabet)
 add_subdirectory(MinDic)
 add_subdirectory(FBDic)
+add_subdirectory(LevDEA)
 add_subdirectory(ErrDic)
 add_subdirectory(MinDicString)
-add_subdirectory(Trie)
 add_subdirectory(Vaam)
 add_subdirectory(SimpleFSA)
+add_subdirectory(DictSearch)
 
-ADD_LIBRARY(csl STATIC Alphabet/Alphabet.cxx LevDEA/LevDEA.cxx Trie/Trie.cxx)
+ADD_LIBRARY( csl SHARED csl.cxx )
+target_link_libraries( csl Alphabet )
+target_link_libraries( csl LevDEA )
 
 install( 
   TARGETS csl

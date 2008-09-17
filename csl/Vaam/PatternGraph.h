@@ -283,7 +283,7 @@ namespace csl {
 	    
 	    // *** add suffix ***
 	    // prevent the vector from re-allocating during the process
-	    states_.reserve( states_.size() + left.end() - c );
+	    states_.reserve( states_.size() + ( left.end() - c ) );
 	    
 	    State lastState = state;
 	    for( ;

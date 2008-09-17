@@ -21,9 +21,9 @@ namespace csl {
 	void setMinWordLength( size_t minLength );
 
     private:
-	Vaam vaam_;
+	Vaam<> vaam_;
 	size_t minWordLength_;
-	mutable std::vector< Interpretation > answers_;
+	mutable Vaam<>::CandidateReceiver answers_;
     };
 
     

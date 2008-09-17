@@ -22,10 +22,10 @@ namespace csl {
      * @author Uli Reffle<uli@cis.uni-muenchen.de>
      * @date 2007
      */
-    class ErrDic : public MinDic< std::pair< ssize_t, ssize_t > >,
+    class ErrDic : public MinDic< std::pair< unsigned int, unsigned int > >,
 		   public iErrDic {
     public:
-	typedef std::pair< ssize_t, ssize_t > MdAnnType;
+	typedef std::pair< unsigned int, unsigned int > MdAnnType;
 	typedef MinDic< MdAnnType > MinDic_t;
 
 	/**
@@ -176,7 +176,7 @@ namespace csl {
 	inline void doAnalysis() const;
 	
     private:
-	inline void printDic_rec( int pos, int depth, size_t perfHashValue ) const;
+	inline void printDic_rec( State const& pos, int depth ) const;
 
 
 	static const bits64 magicNumber_ = 2343572;
@@ -206,7 +206,7 @@ namespace csl {
 	    }
 
 //	private:
-	    static const bits64 magicNumber_ = 45893126;
+	    static const bits64 magicNumber_ = 45893152;
 	    bits64 sizeOfOriginals_;
 	    bits64 sizeOfErrorPatterns_;
 	}; // class Header

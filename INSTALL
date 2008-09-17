@@ -1,0 +1,25 @@
+*** csl installation ***
+
+To compile the csl library and all command line tools, you need th build
+program 'cmake', which is part of virtually any linux distribution.
+
+Unpack the source tarball and change into its root directory. Then type:
+
+cmake .
+make
+
+This shold build the library in ./lib and all executables in ./bin .
+
+You can also try 'make install', but I don't guarantee I haven't forgotten
+to specify one or the other binary to be installed. It does install the
+library to CMAKE_INSTALL_PREFIX/lib and the more important programs to
+CMAKE_INSTALL_PREFIX/bin . CMAKE_INSTALL_PREFIX defaults to "/usr/local/", but
+you can use 'ccmake' to change the prefix.
+Just do
+
+cmake .
+ccmake .  # if you want to change paths: just follow the help given in the program.
+make
+make install
+
+

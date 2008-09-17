@@ -69,9 +69,9 @@ namespace csl {
 	template< class AnnType_t >
 	inline void MinDic< AnnType_t >::initConstruction() {
 		TransTable_t::initConstruction();
-		tempStates_ =( TempState* ) malloc( Global::lengthOfStr * sizeof( TempState ) ); // allocate memory for all tempStates
+		tempStates_ =( TempState_t* ) malloc( Global::lengthOfStr * sizeof( TempState_t ) ); // allocate memory for all tempStates
 		for( size_t i = 0; i < Global::lengthOfStr; ++i ) {
-			new( &( tempStates_[i] ) ) TempState(); // call constructor for all tempStates
+			new( &( tempStates_[i] ) ) TempState_t(); // call constructor for all tempStates
 		}
 
 		hashtable_ = new StateHash( *this );
@@ -97,7 +97,7 @@ namespace csl {
 
 		// call destructors for tempStates and free the allocated memory
 		for( size_t i = 0; i < Global::lengthOfStr; ++i ) {
-			tempStates_[i].~TempState();
+			tempStates_[i].~TempState_t();
 		}
 		free( tempStates_ );
 		delete( hashtable_ );
@@ -206,7 +206,7 @@ namespace csl {
 		}
 
 		//////////////////// set final state of key
-		tempStates_[lengthOfKey].setFinal( true );
+		tempStates_[lengthOfKey].setFinal();
 
 		// store value
 		// first, see that annotation buffer is large enough
@@ -221,13 +221,16 @@ namespace csl {
 		++nrOfKeys_;
 
 		if( ! ( nrOfKeys_ %  100000 ) ) {
-		    fprintf( stderr, "%zdk tokens processed.  %zdk states. key was: %ls\n", nrOfKeys_ /1000, TransTable_t::getNrOfStates() / 1000, key );
+			std::wcerr	<< nrOfKeys_ /1000 << "k tokens processed. "
+						<< TransTable_t::getNrOfStates() / 1000 << "k states."
+						<< "key was: " << key 
+						<< std::endl;
 		}
 
 	} // method addToken()
 
 	template< class AnnType_t >
-	inline StateId_t MinDic< AnnType_t >::replaceOrRegister( TempState& state ) {
+	inline StateId_t MinDic< AnnType_t >::replaceOrRegister( TempState_t& state ) {
 		StateId_t storedState = 0;
 		if ( ( storedState = hashtable_->findState( state ) ) == 0 ) { // if equiv. state doesn't exist
 			storedState = storeTempState( state ); // store it
@@ -240,9 +243,9 @@ namespace csl {
 
 	template< class AnnType_t >
 	inline bool MinDic< AnnType_t >::lookup( const wchar_t* key, AnnType_t* annotation ) const {
-		size_t tokID = 0;
-		if( TransTable_t::getTokID( key, &tokID ) ) {
-			if( annotation ) *annotation = annotationsAt( tokID );
+		size_t tokIdx = 0;
+		if( TransTable_t::getTokenIndex( key, &tokIdx ) ) {
+			if( annotation ) *annotation = annotationsAt( tokIdx );
 			return true;
 		}
 		else {
@@ -291,8 +294,8 @@ namespace csl {
 
 		const wchar_t* transitions = getSusoString( pos );
 		while( *transitions ) {
-			newPerfHashValue = perfHashValue;;
-			if( ( newPos = walkPerfHash( pos, *transitions, newPerfHashValue ) ) ) {
+			newPerfHashValue = perfHashValue;
+			if( ( newPos = walkPerfHash( pos, *transitions, &newPerfHashValue ) ) ) {
 				w[depth] = *transitions;
 				if( isFinal( newPos ) ) {
 				    w[depth+1] = 0;

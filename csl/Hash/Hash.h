@@ -120,8 +120,7 @@ namespace csl {
     {
 	if( keyBuffer_ == 0 ) {
 	    if( lengthOfKeyBuffer_ != 0 ) {
-		printf( "Hash-Constructor: non-compatible buffer / size\n" );
-		exit(1);
+		throw exceptions::LogicalError( "Hash-Constructor: non-compatible buffer / size" );
 	    }
 	    reallocKeyBuffer( estimatedNrOfKeys * 10 );
 	}
@@ -222,8 +221,7 @@ namespace csl {
 	keyBuffer_ = (charType_t*) realloc( keyBuffer_, newSize * sizeof(charType_t) );
 	lengthOfKeyBuffer_ = newSize;
 	if( keyBuffer_ == 0 ) {
-	    std::cerr<<"Hash realloc: Out of memory. Couldn't resize to "<<newSize<<" wide characters\n"<<std::endl;
-	    exit( 1 );
+	    throw exceptions::cslException( "csl::Hash: Hash realloc: Out of memory." );
 	}
     }
 

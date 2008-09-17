@@ -15,39 +15,46 @@ namespace csl {
        @date 2005
     */
 
+    template< typename TransTable_t__ >
     class TempState {
     private:
+	typedef TransTable_t__ TransTable_t;
+	typedef typename TransTable_t__::InternalChar_t InternalChar_t;
+	typedef typename TransTable_t__::InternalSize_t InternalSize_t;
+
 	/**
 	 * Represents one transition of the TempState
 	 */
 	class Transition {
 	public:
-	    Transition( wchar_t label, uint_t target, size_t phNumber) {
+	    Transition( wchar_t label, InternalSize_t target, InternalSize_t phNumber) {
 		label_ = label;
 		target_ = target;
 		phNumber_ = phNumber;
 	    }
 	    wchar_t getLabel() const { return label_; }
 	    uint_t getTarget() const { return target_; }
-	    size_t getPhNumber() const { return phNumber_; }
+	    InternalSize_t getPhNumber() const { return phNumber_; }
 
 	    // we need this method whenever the state is marked as final
 	    void incPhNumber() { ++phNumber_; }
 	private:
 	    wchar_t label_;
-	    uint_t target_;
-	    size_t phNumber_;
+	    InternalSize_t target_;
+	    InternalSize_t phNumber_;
 	}; // class Transition
 
-	std::vector< Transition > transitions_;
+	std::vector<Transition> transitions_;
 
-	std::vector< wchar_t > susoString_;
+	std::vector<wchar_t> susoString_;
 
-	size_t phSum_;
+	InternalSize_t phSum_;
 
 	bool isFinal_;
 
-	std::vector< int > annotations_;
+	InternalSize_t annotation_;
+
+	typedef typename std::vector< Transition>::iterator TransIterator;
 
 	class Iterator {
 	public:
@@ -58,6 +65,7 @@ namespace csl {
 	    bool isValid() const {
 		return ( index_ < ( myTempState_.transitions_.size() ) );
 	    }
+
 	    Transition& operator*() {
 		return myTempState_.transitions_.at( index_ );
 	    }
@@ -74,19 +82,19 @@ namespace csl {
 
 	private:
 	    TempState& myTempState_;
-	    size_t index_;
+	    InternalSize_t index_;
 	}; // class Iterator
 
-	Iterator getIterator() {
-	    return Iterator( *this );
+	TransIterator transBegin() {
+	    return transitions_.begin();
+	}
+
+	TransIterator transEnd() {
+	    return transitions_.end();
 	}
 
     public:
-		typedef std::vector< Transition >::const_iterator TransitionConstIterator; 
-		
-	/**
-	* @deprecated Why did I ever introduce this kind of iterator ???
-	*/
+
 	class ConstIterator {
 	public:
 	    ConstIterator( const TempState& myTempState ) : myTempState_( myTempState ),
@@ -101,8 +109,7 @@ namespace csl {
 	    }
 
 	    const Transition* operator->() {
-			return &( myTempState_.transitions_[index_] );
-		//return &( myTempState_.transitions_.at( index_ ) );
+		return &( myTempState_.transitions_[index_] );
 	    }
 
 	    const Transition& operator++() {
@@ -112,22 +119,12 @@ namespace csl {
 
 	private:
 	    const TempState& myTempState_;
-	    size_t index_;
+	    InternalSize_t index_;
 	}; // class ConstIterator
 
-	/**
-	* @deprecated 
-	*/
+
 	ConstIterator getConstIterator() const {
 	    return ConstIterator( *this );
-	}
-
-	TransitionConstIterator transitionsBegin() const {
-	    return transitions_.begin();
-	}
-
-	TransitionConstIterator transitionsEnd() const {
-	    return transitions_.end();
 	}
 
 
@@ -141,7 +138,7 @@ namespace csl {
 	~TempState() {
 	}
 	
-	inline size_t getPhValue() const {
+	inline InternalSize_t getPhValue() const {
 	    return phSum_ + ( isFinal() ? 1 : 0 );
 	}
 
@@ -151,7 +148,7 @@ namespace csl {
 	 * @param label
 	 * @param target
 	 */
-	inline void addTransition( wchar_t label, uint_t target, size_t targetPhNumber ) {
+	inline void addTransition( wchar_t label, InternalSize_t target, InternalSize_t targetPhNumber ) {
 	    // assert that new labels are coming in alphabetical order
 	    // that's important for transStr_
 	    if( ( transitions_.size() > 0 ) &&
@@ -176,21 +173,17 @@ namespace csl {
 	    susoString_.clear();
 	    susoString_.push_back( 0 );
 	    
-	    annotations_.clear();
+	    annotation_ = 0;
 	    isFinal_ = false;
 	    phSum_ = 0;
 	}
 
-	inline void addAnnotation( int newAnn ) {
-	    annotations_.push_back( newAnn );
+	inline void setAnnotation( InternalSize_t annotation ) {
+	    annotation_ = annotation;
 	}
 
-	inline size_t getNrOfAnnotations() const {
-	    return annotations_.size();
-	}
-
-	inline int getAnnotation( size_t index ) const {
-	    return annotations_.at( index );
+	inline InternalSize_t getAnnotation() const {
+	    return annotation_;
 	}
 
 	inline const wchar_t* getSusoString() {
@@ -200,15 +193,14 @@ namespace csl {
 
 	/**
 	 * mark the state as final/ not final
-	 * @todo THIS SEEMS VERY VERY BUGGY
 	 */
-	void setFinal( bool b ) {
+	void setFinal() {
 	    if( ! isFinal_ ) {
-		for( Iterator it = getIterator(); it.isValid(); ++it ) {
+		for( TransIterator it = transBegin(); it != transEnd(); ++it ) {
 		    (*it).incPhNumber();
 		}
 	    }
-	    isFinal_ = b;
+	    isFinal_ = true;
 	}
 
 	/**
@@ -219,7 +211,7 @@ namespace csl {
 	    return isFinal_;
 	}
 
-    };
+    }; // class TempState
 
 } //eon
 

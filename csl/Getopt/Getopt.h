@@ -35,7 +35,7 @@ public:
 	    }
 	    else {
 		if( openFlag.empty() ) {
-		    arguments_.push_back( word );
+		    addArgument( word );
 		}
 		else {
 		    options_[openFlag] = word;
@@ -55,7 +55,14 @@ public:
 // 	}
     }
 
-    const std::string& getProgName() const {
+	void setOption( const std::string& key, const std::string& value ) {
+		options_[key] = value;
+    }
+	void addArgument( std::string value ) {
+		arguments_.push_back( value );
+	}
+
+	const std::string& getProgName() const {
 	return progName_;
     }
 

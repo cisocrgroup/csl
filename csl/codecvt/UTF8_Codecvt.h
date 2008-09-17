@@ -48,7 +48,6 @@ public:
 	
 	const unsigned int leadByteMasks[5] = {256, 256, 31, 15, 7};
 
-
 	while( from != fromEnd ) {
 	    // the ...Next variables remain on positions where complete characters are processed, i.e. no
 	    // special mbstate_t is needed in case of "partial" return
@@ -105,6 +104,9 @@ public:
     virtual result do_out( state_type& state, wchar_t const* from, wchar_t const* fromEnd, wchar_t const*& fromNext,
 		       char* to, char* toEnd, char*& toNext) const {
 
+	std::wcout<<"BLA"<<std::endl;
+
+
 	while(  from != fromEnd ) {
 	    if( to == toEnd ) {
 		std::wcerr<< "to-Buffer too small" <<std::endl;
@@ -131,7 +133,7 @@ public:
 		
 		to += 2;
 	    }
-	    else if( *from < 0x10000 ) { // 3 bytes
+	    else if( *from < 0x10000 ) { // 3 bytes		
 		if( to + 2 >= toEnd ) {
 		    // std::wcerr<< "to-Buffer too small" <<std::endl;  // DEBUG
 		    return partial;
@@ -164,8 +166,6 @@ public:
 
 	return ok;
     } // do_out
-
-private:
 
 }; // class
 

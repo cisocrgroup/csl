@@ -1,212 +1,330 @@
-<?xml version="1.0" encoding="Windows-1252"?>
+<?xml version="1.0" encoding = "Windows-1252"?>
 <VisualStudioProject
 	ProjectType="Visual C++"
-	Version="8,00"
+	Version="8.00"
 	Name="extractMD"
-	ProjectGUID="{F7DA9310-3BDE-44D6-8079-F5A3E6F5A2AA}"
-	RootNamespace="extractMD"
-	Keyword="Win32Proj"
-	>
+	ProjectGUID="{157D784B-FFAC-4555-9A14-2578040C8C88}"
+	SccProjectName=""
+	SccLocalPath=""
+	Keyword="Win32Proj">
 	<Platforms>
 		<Platform
-			Name="Win32"
-		/>
+			Name="Win32"/>
 	</Platforms>
-	<ToolFiles>
-	</ToolFiles>
 	<Configurations>
 		<Configuration
 			Name="Debug|Win32"
-			OutputDirectory="$(SolutionDir)$(ConfigurationName)"
-			IntermediateDirectory="$(ConfigurationName)"
+			OutputDirectory="Debug"
+			IntermediateDirectory="extractMD.dir\Debug"
 			ConfigurationType="1"
-			CharacterSet="1"
-			>
-			<Tool
-				Name="VCPreBuildEventTool"
-			/>
-			<Tool
-				Name="VCCustomBuildTool"
-			/>
-			<Tool
-				Name="VCXMLDataGeneratorTool"
-			/>
-			<Tool
-				Name="VCWebServiceProxyGeneratorTool"
-			/>
-			<Tool
-				Name="VCMIDLTool"
-			/>
+			UseOfMFC="0"
+			ATLMinimizesCRunTimeLibraryUsage="FALSE"
+			CharacterSet="2">
 			<Tool
 				Name="VCCLCompilerTool"
-				Optimization="0"
-				AdditionalIncludeDirectories="&quot;$(SolutionDir)&quot;"
-				PreprocessorDefinitions="WIN32;_DEBUG;_CONSOLE"
-				MinimalRebuild="true"
+				AdditionalOptions=" /Zm1000"
+				AdditionalIncludeDirectories="D:\winHome\implement\csl\trunk;"
 				BasicRuntimeChecks="3"
+				CompileAs="2"
+				DebugInformationFormat="3"
+				ExceptionHandling="1"
+				InlineFunctionExpansion="0"
+				Optimization="0"
 				RuntimeLibrary="3"
-				UsePrecompiledHeader="0"
+				RuntimeTypeInfo="TRUE"
 				WarningLevel="3"
-				Detect64BitPortabilityProblems="true"
-				DebugInformationFormat="4"
-			/>
+				PreprocessorDefinitions="WIN32,_WINDOWS,_DEBUG,&quot;CMAKE_INTDIR=\&quot;Debug\&quot;&quot;"
+				AssemblerListingLocation="Debug"
+				ObjectFile="$(IntDir)\"
+				ProgramDataBaseFileName="D:/winHome/implement/csl/trunk/bin/Debug/extractMD.pdb"
+/>
 			<Tool
-				Name="VCManagedResourceCompilerTool"
-			/>
+				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCResourceCompilerTool"
-			/>
+				AdditionalIncludeDirectories="D:\winHome\implement\csl\trunk;"
+				PreprocessorDefinitions="WIN32,_WINDOWS,_DEBUG,&quot;CMAKE_INTDIR=\&quot;Debug\&quot;&quot;"/>
 			<Tool
-				Name="VCPreLinkEventTool"
-			/>
-			<Tool
-				Name="VCLinkerTool"
-				AdditionalDependencies="kernel32.lib $(NoInherit) &quot;$(OutDir)/csl.lib&quot;"
-				LinkIncremental="2"
-				GenerateDebugInformation="true"
-				SubSystem="1"
-				TargetMachine="1"
-			/>
-			<Tool
-				Name="VCALinkTool"
-			/>
+				Name="VCMIDLTool"
+				PreprocessorDefinitions="WIN32,_WINDOWS,_DEBUG,&quot;CMAKE_INTDIR=\&quot;Debug\&quot;&quot;"
+				MkTypLibCompatible="FALSE"
+				TargetEnvironment="1"
+				GenerateStublessProxies="TRUE"
+				TypeLibraryName="$(InputName).tlb"
+				OutputDirectory="$(IntDir)"
+				HeaderFileName="$(InputName).h"
+				DLLDataFileName=""
+				InterfaceIdentifierFileName="$(InputName)_i.c"
+				ProxyFileName="$(InputName)_p.c"/>
 			<Tool
 				Name="VCManifestTool"
+				UseFAT32Workaround="true"
 			/>
 			<Tool
-				Name="VCXDCMakeTool"
-			/>
+				Name="VCPreBuildEventTool"/>
 			<Tool
-				Name="VCBscMakeTool"
-			/>
+				Name="VCPreLinkEventTool"/>
 			<Tool
-				Name="VCFxCopTool"
-			/>
+				Name="VCPostBuildEventTool"/>
 			<Tool
-				Name="VCAppVerifierTool"
-			/>
-			<Tool
-				Name="VCWebDeploymentTool"
-			/>
-			<Tool
-				Name="VCPostBuildEventTool"
-			/>
+				Name="VCLinkerTool"
+				AdditionalOptions=" /STACK:10000000 /machine:I386 /debug"
+				AdditionalDependencies="$(NOINHERIT) kernel32.lib user32.lib gdi32.lib winspool.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comdlg32.lib advapi32.lib  csl.lib "
+				OutputFile="D:\winHome\implement\csl\trunk\bin\Debug\extractMD.exe"
+				Version="0.0"
+				GenerateManifest="TRUE"
+				LinkIncremental="2"
+				AdditionalLibraryDirectories="..\..\csl\$(OutDir),..\..\csl,..\..\lib\$(OutDir),..\..\lib"
+				ProgramDataBaseFile="D:/winHome/implement/csl/trunk/bin/$(OutDir)\extractMD.pdb"
+				GenerateDebugInformation="TRUE"
+				SubSystem="1"
+				StackReserveSize="10000000"/>
 		</Configuration>
 		<Configuration
 			Name="Release|Win32"
-			OutputDirectory="$(SolutionDir)$(ConfigurationName)"
-			IntermediateDirectory="$(ConfigurationName)"
+			OutputDirectory="Release"
+			IntermediateDirectory="extractMD.dir\Release"
 			ConfigurationType="1"
-			CharacterSet="1"
-			WholeProgramOptimization="1"
-			>
-			<Tool
-				Name="VCPreBuildEventTool"
-			/>
-			<Tool
-				Name="VCCustomBuildTool"
-			/>
-			<Tool
-				Name="VCXMLDataGeneratorTool"
-			/>
-			<Tool
-				Name="VCWebServiceProxyGeneratorTool"
-			/>
-			<Tool
-				Name="VCMIDLTool"
-			/>
+			UseOfMFC="0"
+			ATLMinimizesCRunTimeLibraryUsage="FALSE"
+			CharacterSet="2">
 			<Tool
 				Name="VCCLCompilerTool"
-				AdditionalIncludeDirectories="&quot;$(SolutionDir)&quot;"
-				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE"
+				AdditionalOptions=" /Zm1000"
+				AdditionalIncludeDirectories="D:\winHome\implement\csl\trunk;"
+				CompileAs="2"
+				ExceptionHandling="1"
+				InlineFunctionExpansion="2"
+				Optimization="2"
 				RuntimeLibrary="2"
-				UsePrecompiledHeader="0"
+				RuntimeTypeInfo="TRUE"
 				WarningLevel="3"
-				Detect64BitPortabilityProblems="true"
-				DebugInformationFormat="3"
-			/>
+				PreprocessorDefinitions="WIN32,_WINDOWS,NDEBUG,&quot;CMAKE_INTDIR=\&quot;Release\&quot;&quot;"
+				AssemblerListingLocation="Release"
+				ObjectFile="$(IntDir)\"
+				ProgramDataBaseFileName="D:/winHome/implement/csl/trunk/bin/Release/extractMD.pdb"
+/>
 			<Tool
-				Name="VCManagedResourceCompilerTool"
-			/>
+				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCResourceCompilerTool"
-			/>
+				AdditionalIncludeDirectories="D:\winHome\implement\csl\trunk;"
+				PreprocessorDefinitions="WIN32,_WINDOWS,NDEBUG,&quot;CMAKE_INTDIR=\&quot;Release\&quot;&quot;"/>
 			<Tool
-				Name="VCPreLinkEventTool"
-			/>
-			<Tool
-				Name="VCLinkerTool"
-				AdditionalDependencies="kernel32.lib $(NoInherit) &quot;$(OutDir)/csl.lib&quot;"
-				LinkIncremental="1"
-				GenerateDebugInformation="true"
-				SubSystem="1"
-				OptimizeReferences="2"
-				EnableCOMDATFolding="2"
-				TargetMachine="1"
-			/>
-			<Tool
-				Name="VCALinkTool"
-			/>
+				Name="VCMIDLTool"
+				PreprocessorDefinitions="WIN32,_WINDOWS,NDEBUG,&quot;CMAKE_INTDIR=\&quot;Release\&quot;&quot;"
+				MkTypLibCompatible="FALSE"
+				TargetEnvironment="1"
+				GenerateStublessProxies="TRUE"
+				TypeLibraryName="$(InputName).tlb"
+				OutputDirectory="$(IntDir)"
+				HeaderFileName="$(InputName).h"
+				DLLDataFileName=""
+				InterfaceIdentifierFileName="$(InputName)_i.c"
+				ProxyFileName="$(InputName)_p.c"/>
 			<Tool
 				Name="VCManifestTool"
+				UseFAT32Workaround="true"
 			/>
 			<Tool
-				Name="VCXDCMakeTool"
+				Name="VCPreBuildEventTool"/>
+			<Tool
+				Name="VCPreLinkEventTool"/>
+			<Tool
+				Name="VCPostBuildEventTool"/>
+			<Tool
+				Name="VCLinkerTool"
+				AdditionalOptions=" /STACK:10000000 /machine:I386"
+				AdditionalDependencies="$(NOINHERIT) kernel32.lib user32.lib gdi32.lib winspool.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comdlg32.lib advapi32.lib  csl.lib "
+				OutputFile="D:\winHome\implement\csl\trunk\bin\Release\extractMD.exe"
+				Version="0.0"
+				GenerateManifest="TRUE"
+				LinkIncremental="1"
+				AdditionalLibraryDirectories="..\..\csl\$(OutDir),..\..\csl,..\..\lib\$(OutDir),..\..\lib"
+				ProgramDataBaseFile="D:/winHome/implement/csl/trunk/bin/$(OutDir)\extractMD.pdb"
+				SubSystem="1"
+				StackReserveSize="10000000"/>
+		</Configuration>
+		<Configuration
+			Name="MinSizeRel|Win32"
+			OutputDirectory="MinSizeRel"
+			IntermediateDirectory="extractMD.dir\MinSizeRel"
+			ConfigurationType="1"
+			UseOfMFC="0"
+			ATLMinimizesCRunTimeLibraryUsage="FALSE"
+			CharacterSet="2">
+			<Tool
+				Name="VCCLCompilerTool"
+				AdditionalOptions=" /Zm1000"
+				AdditionalIncludeDirectories="D:\winHome\implement\csl\trunk;"
+				CompileAs="2"
+				ExceptionHandling="1"
+				InlineFunctionExpansion="1"
+				Optimization="1"
+				RuntimeLibrary="2"
+				RuntimeTypeInfo="TRUE"
+				WarningLevel="3"
+				PreprocessorDefinitions="WIN32,_WINDOWS,NDEBUG,&quot;CMAKE_INTDIR=\&quot;MinSizeRel\&quot;&quot;"
+				AssemblerListingLocation="MinSizeRel"
+				ObjectFile="$(IntDir)\"
+				ProgramDataBaseFileName="D:/winHome/implement/csl/trunk/bin/MinSizeRel/extractMD.pdb"
+/>
+			<Tool
+				Name="VCCustomBuildTool"/>
+			<Tool
+				Name="VCResourceCompilerTool"
+				AdditionalIncludeDirectories="D:\winHome\implement\csl\trunk;"
+				PreprocessorDefinitions="WIN32,_WINDOWS,NDEBUG,&quot;CMAKE_INTDIR=\&quot;MinSizeRel\&quot;&quot;"/>
+			<Tool
+				Name="VCMIDLTool"
+				PreprocessorDefinitions="WIN32,_WINDOWS,NDEBUG,&quot;CMAKE_INTDIR=\&quot;MinSizeRel\&quot;&quot;"
+				MkTypLibCompatible="FALSE"
+				TargetEnvironment="1"
+				GenerateStublessProxies="TRUE"
+				TypeLibraryName="$(InputName).tlb"
+				OutputDirectory="$(IntDir)"
+				HeaderFileName="$(InputName).h"
+				DLLDataFileName=""
+				InterfaceIdentifierFileName="$(InputName)_i.c"
+				ProxyFileName="$(InputName)_p.c"/>
+			<Tool
+				Name="VCManifestTool"
+				UseFAT32Workaround="true"
 			/>
 			<Tool
-				Name="VCBscMakeTool"
+				Name="VCPreBuildEventTool"/>
+			<Tool
+				Name="VCPreLinkEventTool"/>
+			<Tool
+				Name="VCPostBuildEventTool"/>
+			<Tool
+				Name="VCLinkerTool"
+				AdditionalOptions=" /STACK:10000000 /machine:I386"
+				AdditionalDependencies="$(NOINHERIT) kernel32.lib user32.lib gdi32.lib winspool.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comdlg32.lib advapi32.lib  csl.lib "
+				OutputFile="D:\winHome\implement\csl\trunk\bin\MinSizeRel\extractMD.exe"
+				Version="0.0"
+				GenerateManifest="TRUE"
+				LinkIncremental="1"
+				AdditionalLibraryDirectories="..\..\csl\$(OutDir),..\..\csl,..\..\lib\$(OutDir),..\..\lib"
+				ProgramDataBaseFile="D:/winHome/implement/csl/trunk/bin/$(OutDir)\extractMD.pdb"
+				SubSystem="1"
+				StackReserveSize="10000000"/>
+		</Configuration>
+		<Configuration
+			Name="RelWithDebInfo|Win32"
+			OutputDirectory="RelWithDebInfo"
+			IntermediateDirectory="extractMD.dir\RelWithDebInfo"
+			ConfigurationType="1"
+			UseOfMFC="0"
+			ATLMinimizesCRunTimeLibraryUsage="FALSE"
+			CharacterSet="2">
+			<Tool
+				Name="VCCLCompilerTool"
+				AdditionalOptions=" /Zm1000"
+				AdditionalIncludeDirectories="D:\winHome\implement\csl\trunk;"
+				CompileAs="2"
+				DebugInformationFormat="3"
+				ExceptionHandling="1"
+				InlineFunctionExpansion="1"
+				Optimization="2"
+				RuntimeLibrary="2"
+				RuntimeTypeInfo="TRUE"
+				WarningLevel="3"
+				PreprocessorDefinitions="WIN32,_WINDOWS,NDEBUG,&quot;CMAKE_INTDIR=\&quot;RelWithDebInfo\&quot;&quot;"
+				AssemblerListingLocation="RelWithDebInfo"
+				ObjectFile="$(IntDir)\"
+				ProgramDataBaseFileName="D:/winHome/implement/csl/trunk/bin/RelWithDebInfo/extractMD.pdb"
+/>
+			<Tool
+				Name="VCCustomBuildTool"/>
+			<Tool
+				Name="VCResourceCompilerTool"
+				AdditionalIncludeDirectories="D:\winHome\implement\csl\trunk;"
+				PreprocessorDefinitions="WIN32,_WINDOWS,NDEBUG,&quot;CMAKE_INTDIR=\&quot;RelWithDebInfo\&quot;&quot;"/>
+			<Tool
+				Name="VCMIDLTool"
+				PreprocessorDefinitions="WIN32,_WINDOWS,NDEBUG,&quot;CMAKE_INTDIR=\&quot;RelWithDebInfo\&quot;&quot;"
+				MkTypLibCompatible="FALSE"
+				TargetEnvironment="1"
+				GenerateStublessProxies="TRUE"
+				TypeLibraryName="$(InputName).tlb"
+				OutputDirectory="$(IntDir)"
+				HeaderFileName="$(InputName).h"
+				DLLDataFileName=""
+				InterfaceIdentifierFileName="$(InputName)_i.c"
+				ProxyFileName="$(InputName)_p.c"/>
+			<Tool
+				Name="VCManifestTool"
+				UseFAT32Workaround="true"
 			/>
 			<Tool
-				Name="VCFxCopTool"
-			/>
+				Name="VCPreBuildEventTool"/>
 			<Tool
-				Name="VCAppVerifierTool"
-			/>
+				Name="VCPreLinkEventTool"/>
 			<Tool
-				Name="VCWebDeploymentTool"
-			/>
+				Name="VCPostBuildEventTool"/>
 			<Tool
-				Name="VCPostBuildEventTool"
-			/>
+				Name="VCLinkerTool"
+				AdditionalOptions=" /STACK:10000000 /machine:I386 /debug"
+				AdditionalDependencies="$(NOINHERIT) kernel32.lib user32.lib gdi32.lib winspool.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comdlg32.lib advapi32.lib  csl.lib "
+				OutputFile="D:\winHome\implement\csl\trunk\bin\RelWithDebInfo\extractMD.exe"
+				Version="0.0"
+				GenerateManifest="TRUE"
+				LinkIncremental="2"
+				AdditionalLibraryDirectories="..\..\csl\$(OutDir),..\..\csl,..\..\lib\$(OutDir),..\..\lib"
+				ProgramDataBaseFile="D:/winHome/implement/csl/trunk/bin/$(OutDir)\extractMD.pdb"
+				GenerateDebugInformation="TRUE"
+				SubSystem="1"
+				StackReserveSize="10000000"/>
 		</Configuration>
 	</Configurations>
-	<References>
-	</References>
 	<Files>
-		<Filter
-			Name="Quelldateien"
-			Filter="cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx"
-			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
-			>
 			<File
-				RelativePath=".\extractMD.cxx"
-				>
+				RelativePath="D:\winHome\implement\csl\trunk\tools\extractMD\CMakeLists.txt">
+				<FileConfiguration
+					Name="Debug|Win32">
+					<Tool
+					Name="VCCustomBuildTool"
+					Description="Building Custom Rule D:/winHome/implement/csl/trunk/tools/extractMD/CMakeLists.txt"
+					CommandLine="&quot;C:\Programme\CMake 2.4\bin\cmake.exe&quot; -HD:/winHome/implement/csl/trunk -BD:/winHome/implement/csl/trunk"
+					AdditionalDependencies="D:\winHome\implement\csl\trunk\tools\extractMD\CMakeLists.txt;&quot;C:\Programme\CMake 2.4\share\cmake-2.4\Templates\CMakeWindowsSystemConfig.cmake&quot;;D:\winHome\implement\csl\trunk\tools\extractMD\CMakeLists.txt;"
+					Outputs="extractMD.vcproj.cmake"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32">
+					<Tool
+					Name="VCCustomBuildTool"
+					Description="Building Custom Rule D:/winHome/implement/csl/trunk/tools/extractMD/CMakeLists.txt"
+					CommandLine="&quot;C:\Programme\CMake 2.4\bin\cmake.exe&quot; -HD:/winHome/implement/csl/trunk -BD:/winHome/implement/csl/trunk"
+					AdditionalDependencies="D:\winHome\implement\csl\trunk\tools\extractMD\CMakeLists.txt;&quot;C:\Programme\CMake 2.4\share\cmake-2.4\Templates\CMakeWindowsSystemConfig.cmake&quot;;D:\winHome\implement\csl\trunk\tools\extractMD\CMakeLists.txt;"
+					Outputs="extractMD.vcproj.cmake"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="MinSizeRel|Win32">
+					<Tool
+					Name="VCCustomBuildTool"
+					Description="Building Custom Rule D:/winHome/implement/csl/trunk/tools/extractMD/CMakeLists.txt"
+					CommandLine="&quot;C:\Programme\CMake 2.4\bin\cmake.exe&quot; -HD:/winHome/implement/csl/trunk -BD:/winHome/implement/csl/trunk"
+					AdditionalDependencies="D:\winHome\implement\csl\trunk\tools\extractMD\CMakeLists.txt;&quot;C:\Programme\CMake 2.4\share\cmake-2.4\Templates\CMakeWindowsSystemConfig.cmake&quot;;D:\winHome\implement\csl\trunk\tools\extractMD\CMakeLists.txt;"
+					Outputs="extractMD.vcproj.cmake"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="RelWithDebInfo|Win32">
+					<Tool
+					Name="VCCustomBuildTool"
+					Description="Building Custom Rule D:/winHome/implement/csl/trunk/tools/extractMD/CMakeLists.txt"
+					CommandLine="&quot;C:\Programme\CMake 2.4\bin\cmake.exe&quot; -HD:/winHome/implement/csl/trunk -BD:/winHome/implement/csl/trunk"
+					AdditionalDependencies="D:\winHome\implement\csl\trunk\tools\extractMD\CMakeLists.txt;&quot;C:\Programme\CMake 2.4\share\cmake-2.4\Templates\CMakeWindowsSystemConfig.cmake&quot;;D:\winHome\implement\csl\trunk\tools\extractMD\CMakeLists.txt;"
+					Outputs="extractMD.vcproj.cmake"/>
+				</FileConfiguration>
 			</File>
+		<Filter
+			Name="Source Files"
+			Filter="">
 			<File
-				RelativePath=".\stdafx.cpp"
-				>
+				RelativePath="D:\winHome\implement\csl\trunk\tools\extractMD\extractMD.cxx">
 			</File>
 		</Filter>
-		<Filter
-			Name="Headerdateien"
-			Filter="h;hpp;hxx;hm;inl;inc;xsd"
-			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
-			>
-			<File
-				RelativePath=".\stdafx.h"
-				>
-			</File>
-		</Filter>
-		<Filter
-			Name="Ressourcendateien"
-			Filter="rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav"
-			UniqueIdentifier="{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}"
-			>
-		</Filter>
-		<File
-			RelativePath=".\ReadMe.txt"
-			>
-		</File>
 	</Files>
 	<Globals>
 	</Globals>

@@ -20,9 +20,9 @@ namespace csl {
     }
 
     inline bool ErrDic::lookup( const wchar_t* key, Entry* entry ) const {
-	size_t tokID;
-	if( TransTable_t::getTokID( key, &tokID ) ) {
-	    *entry = Entry( *this, tokID );
+	size_t tokenIndex;
+	if( TransTable_t::getTokenIndex( key, &tokenIndex ) ) {
+	    *entry = Entry( *this, tokenIndex );
 	    return true;
 	}
 	else return false;
@@ -32,7 +32,8 @@ namespace csl {
 	Entry entry;
 	if( lookup( key.c_str(), &entry ) ) {
 	    answer->clear();
-	    answer->baseWord = entry.getOriginal();
+	    answer->word = key;
+	    answer->setBaseWord( entry.getOriginal() );
 
 	    std::wstring patString( entry.getErrorPattern() );
 	    size_t delimiter = patString.find_first_of( ' ' );
@@ -114,7 +115,7 @@ namespace csl {
 
     inline void ErrDic::compileDic( const char* lexFile ) {
 	
-	std::ifstream fileHandle( lexFile );
+	std::wifstream fileHandle( lexFile );
 	if( !fileHandle.good() ) {
 	    throw exceptions::badFileHandle( "Couldn't open file '" + 
 					     std::string( lexFile ) + 
@@ -122,70 +123,47 @@ namespace csl {
 	}
 
 	
-// 	struct stat f_stat;
-// 	stat( lexFile, &f_stat );
-// 	size_t estimatedNrOfKeys = f_stat.st_size / 30;
-// 	std::wcerr<<"Estimate about "<< estimatedNrOfKeys << " Keys."<< std::endl;
-	
 	initConstruction();
 
-
-	uchar bytesIn[Global::lengthOfLongStr];
-	// set the last byte to 0. So we can recognize when an overlong string was read by getline().
-	bytesIn[Global::lengthOfLongStr - 1] = 0; 
-
-	wchar_t wideIn[Global::lengthOfLongStr];
-	wchar_t* key = 0;
+	std::wstring line;
+	std::wstring key;
 	wchar_t* original = 0;
 	wchar_t* errorPattern = 0;
 
-	while( fileHandle.getline(( char* ) bytesIn, Global::lengthOfLongStr ) )  {
- 	    if ( bytesIn[Global::lengthOfLongStr-1] != 0 ) {
+	while( getline( fileHandle, line ) )  {
+ 	    if ( line.length()  > Global::lengthOfLongStr ) { // not sure if this is still necessary
 		throw exceptions::badInput( "csl::ErrDic::compileDic: Maximum length of input line violated (set by Global::lengthOfLongStr)" );
 	    }
 	    
-	    if( mbstowcs( wideIn, (const char*)bytesIn, Global::lengthOfLongStr ) == (size_t)-1 ) {
-		// continue;
-		throw exceptions::badInput( "csl::ErrDic::compileDic: Invalid utf-8 sequence" );
-	    }
 
 	    /////////////////// PARSE THE INPUT STRING
 	    wchar_t* c; // go through the string with this pointer
-	    wchar_t* restString = wideIn;
 
 	    // cut off the key
-	    c = wcschr( wideIn, keyValueDelimiter_ );
-	    if( c ) {
-		*c = 0;
-		key = restString;
-		restString = c + 1;
-	    }
-	    else throw exceptions::badInput( "csl::ErrDic::compileDic: Input format violated." );
+
+	    size_t endOfKey = line.find_first_of( Global::keyValueDelimiter );
+	    if( endOfKey == line.npos ) throw exceptions::badInput( "csl::ErrDic::compileDic: Input format violated." );
 
 	    // cut off the original
-	    c = wcschr( restString, L' ' );
-	    if( c ) {
-		*c = 0;
-		original = restString;
-		restString = c + 1;
-	    }
-	    else throw exceptions::badInput( "csl::ErrDic::compileDic: Input format violated." );
+	    size_t endOfOriginal = line.find_first_of( L' ', endOfKey + 1 );
+	    if( endOfOriginal == line.npos ) throw exceptions::badInput( "csl::ErrDic::compileDic: Input format violated." );
 
 	    // cut off the error pattern
-	    c = wcschr( restString, L' ' );
-	    if( ! c ) throw exceptions::badInput( "csl::ErrDic::compileDic: Input format violated." );
-	    ++c;
-	    c = wcschr( c, L' ' );
-	    if( c ) {
-		*c = 0;
-		errorPattern = restString;
-		++c;
-	    }
-	    else throw exceptions::badInput( "csl::ErrDic::compileDic: Input format violated." );
+	    size_t insideThePattern = line.find_first_of( L' ', endOfOriginal + 1 );
+	    if( insideThePattern == line.npos ) throw exceptions::badInput( "csl::ErrDic::compileDic: Input format violated." );
+	    size_t endOfPattern = line.find_first_of( L' ', insideThePattern + 1 );
+	    if( endOfPattern == line.npos ) throw exceptions::badInput( "csl::ErrDic::compileDic: Input format violated." );
 	    
-	    addToken( key, original, errorPattern );
+	    addToken( line.substr( 0, endOfKey ).c_str(),
+		      line.substr( endOfKey + 1, endOfOriginal - endOfKey - 1 ).c_str(),
+		      line.substr( endOfOriginal + 1, endOfPattern - endOfOriginal - 1 ).c_str()
+		);
 	    
 	}
+	if( errno == EILSEQ ) { // catch encoding error
+	    throw exceptions::badInput( "MinDic::compileDic: Encoding error in input sequence." );
+	}
+
 	fileHandle.close();
 
 	finishConstruction();
@@ -202,28 +180,29 @@ namespace csl {
 
     void ErrDic::printDic() const {
 	count_ = 0;
-	printDic_rec( getRoot(), 0, 0 );
+	printDic_rec( getRootState(), 0 );
     }
 
-    void ErrDic::printDic_rec( int pos, int depth, size_t perfHashValue ) const {
-	int newPos;
+    void ErrDic::printDic_rec( State const& pos, int depth ) const {
+	State newPos( *this );
 	static wchar_t w[Global::lengthOfStr];
 	size_t newPerfHashValue;
 	
-	const wchar_t* transitions = getSusoString( pos );
+	const wchar_t* transitions = pos.getSusoString();
 	while( *transitions ) {
-	    newPerfHashValue = perfHashValue;;
-	    if( ( newPos = walkPerfHash( pos, *transitions, newPerfHashValue ) ) ) {
+	    if( ( newPos = pos.getTransTarget( *transitions ) ).isValid() ) {
 		w[depth] = *transitions;
 		
-		if( isFinal( newPos ) ) {
+		if( newPos.isFinal() ) {
 		    w[depth+1] = 0;
-		    //printf( "%ls#%s\n", w, annStrings_ + getAnnotation( newPerfHashValue ) );
+		    assert( newPos.getAnnotation().second < sizeOfErrorPatterns_ );
+
+		    wprintf( L"%ls#%ls\n", w, errorPatterns_ + newPos.getAnnotation().second );
 		    //printf( "%ls#%d\n", w, newPerfHashValue );
-		    
+
 		    if( ( ++count_ % 100000 ) == 0 ) fprintf( stderr, "%d\n", (int)count_ );
 		} // if isFinal
-		printDic_rec( newPos, depth + 1, newPerfHashValue );
+		printDic_rec( newPos, depth + 1 );
 
 	    } // if couldWalk
 	    else {
@@ -246,4 +225,3 @@ namespace csl {
     }
 
 } // namespace csl
-

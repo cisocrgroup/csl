@@ -1,5 +1,5 @@
-#ifndef CSL_TEST_VAM_H
-#define CSL_TEST_VAM_H CSL_TEST_VAM_H
+#ifndef CSL_TEST_VAAM_H
+#define CSL_TEST_VAAM_H CSL_TEST_VAAM_H
 
 #include "../../Global.h"
 #include "../Vaam.h"
@@ -11,8 +11,8 @@ namespace csl {
     class TestVaam : public CppUnit::TestFixture  {
 
 	CPPUNIT_TEST_SUITE( TestVaam );
-	CPPUNIT_TEST( testBasics );
 	CPPUNIT_TEST( testPatternGraph );
+	CPPUNIT_TEST( testBasics );
 	CPPUNIT_TEST_SUITE_END();
     public:
 	TestVaam();
@@ -20,22 +20,23 @@ namespace csl {
 	void testPatternGraph();
 // 	void testConstructionDetails();
 // 	void lookupAllKeys();
-
-    private:
 	
+    private:
+	std::string path_;
+
     }; // class TestVaam
 
     CPPUNIT_TEST_SUITE_REGISTRATION( TestVaam );
 
     TestVaam::TestVaam() :
 	CppUnit::TestFixture() {
-	
+
     }
 
     void TestVaam::testPatternGraph() {
 
 	PatternGraph pg;
-	pg.loadPatterns( ( Global::cslRootDir + "csl/Vaam/Test/small.patterns.txt" ).c_str() );
+	pg.loadPatterns( "../csl/Vaam/Test/small.patterns.txt" );
 
 	// implicit copy constructor
 	PatternGraph::State st = pg.getRoot();
@@ -60,17 +61,27 @@ namespace csl {
      * test the basic methods for reading access like getRoot, walk, isFinal etc.
      */
     void TestVaam::testBasics() {
-	MinDic<> baseDic( ( Global::cslRootDir + "csl/Vaam/Test/small.base.mdic" ).c_str() );
-	MinDic<> filterDic( ( Global::cslRootDir + "csl/Vaam/Test/small.filter.mdic" ).c_str() );
-	Vaam vaam( baseDic, ( Global::cslRootDir + "csl/Vaam/Test/small.patterns.txt" ).c_str() );
-
-	std::vector< Interpretation > answers;
+ 	MinDic<> baseDic( "../csl/Vaam/Test/small.base.mdic" );
+	MinDic<> filterDic( "../csl/Vaam/Test/small.filter.mdic" );
+	Vaam<> vaam( baseDic,  "../csl/Vaam/Test/small.patterns.txt" );
+	
+	Vaam<>::CandidateReceiver answers;
 
 	// a standard variant
 	CPPUNIT_ASSERT( vaam.query( std::wstring( L"xachen" ), &answers ) );
 
+	std::wcout<<__FILE__<<":"<<__LINE__<<std::endl;
+
 	// without the filterDic_ this should be a variant
 	CPPUNIT_ASSERT( vaam.query( std::wstring( L"hanne" ), &answers ) );
+	CPPUNIT_ASSERT( answers.size() == 1 );
+	Interpretation& answer = answers.at( 0 ); 
+	CPPUNIT_ASSERT( answer.getBaseWord() == L"kanne" );
+	CPPUNIT_ASSERT( answer.instruction.size() == 1 );
+	CPPUNIT_ASSERT( answer.instruction.at( 0 ).getLeft() == L"k" );
+	CPPUNIT_ASSERT( answer.instruction.at( 0 ).getRight() == L"h" );
+
+	std::wcout<<__FILE__<<":"<<__LINE__<<std::endl;
 
 	// now it should be filtered
 	vaam.setFilterDic( filterDic );

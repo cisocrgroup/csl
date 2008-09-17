@@ -231,6 +231,14 @@ namespace csl {
 	// update nrOfUsedCells
 	sizeOfUsedCells_ = std::max( sizeOfUsedCells_, ( slot + Global::maxNrOfChars + 2 ) );
 
+	// the following lines are to prevent firstFreeCell_ to get stuck in a lower area, where none of the
+	// new states can never fit.
+	if( ( slot - firstFreeCell_ ) > searchWindow ) {
+	    // std::wcerr << "ffc hack: " << firstFreeCell_ << std::endl;
+	    firstFreeCell_ = slot - searchWindow; // a slot which is really empty is searched right below
+	}
+
+
 	//update firstFreeCell
 	for ( ;! ( cells_[firstFreeCell_].isEmpty() );++firstFreeCell_ );
 
@@ -275,7 +283,7 @@ namespace csl {
 	// the following lines are to prevent firstFreeCell_ to get stuck in a lower area, where none of the
 	// new states can never fit.
 	if( ( slot - firstFreeCell_ ) > searchWindow ) {
-//	    std::cerr << "ffc hack: " << firstFreeCell_ << std::endl;
+	    // std::wcerr << "ffc hack: " << firstFreeCell_ << std::endl;
 	    firstFreeCell_ = slot - searchWindow; // a slot which is really empty is searched right below
 	}
 

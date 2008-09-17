@@ -20,14 +20,14 @@ namespace csl {
 	/**
 	 * @brief Constructs an empty pattern with left == right == ""
 	 */
-	Pattern();
+	inline Pattern();
 
 	/**
 	 * @brief A very self-explaining constructor.
 	 */
-	Pattern( const std::wstring& left, const std::wstring& right );
+	inline Pattern( const std::wstring& left, const std::wstring& right );
 
-	bool operator< ( const Pattern& other ) const {
+	inline bool operator< ( const Pattern& other ) const {
 	    if( getLeft() < other.getLeft() ) {
 		return true;
 	    }
@@ -41,22 +41,22 @@ namespace csl {
 	 * @brief get the left side of the pattern
 	 * @return the left side of the pattern
 	 */
-	const std::wstring& getLeft() const;
+	inline const std::wstring& getLeft() const;
 
 	/**
 	 * @brief get the right side of the pattern
 	 * @return the right side of the pattern
 	 */
-	const std::wstring& getRight() const;
-
+	inline const std::wstring& getRight() const;
+	
 	/**
 	 * @brief returns if pattern is "empty"
 	 */
-	bool empty() const {
+	inline bool empty() const {
 	    return ( left_.empty() && right_.empty() );
 	}
 
-	void print( std::wostream& os = std::wcout ) const;
+	inline void print( std::wostream& os = std::wcout ) const;
 	
 	
 

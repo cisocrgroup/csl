@@ -30,9 +30,10 @@ namespace csl {
      *
      */
     template< class AnnType = int >
-    class MinDic : public TransTable< TOKDIC > {
+    class MinDic : public TransTable< TT_PERFHASH, uint16_t > {
     public:
-	typedef TransTable< TOKDIC > TransTable_t;
+	typedef TransTable< TT_PERFHASH, uint16_t > TransTable_t;
+
 	/**
 	 * @brief The datatype of the annotation that comes with each dictionary entry.
 	 * Note that \c AnnType_t, currently,  has to be a trivial datatype: if you store
@@ -74,7 +75,7 @@ namespace csl {
 
 	    State getTransTarget( wchar_t c ) const {
 		size_t tmpPHValue = perfHashValue_;
-		StateId_t newPos = minDic_->walkPerfHash( dicPos_, c, tmpPHValue );
+		StateId_t newPos = minDic_->walkPerfHash( dicPos_, c, &tmpPHValue );
 		return State( *minDic_, newPos, tmpPHValue );
 	    }
 
@@ -248,7 +249,7 @@ namespace csl {
 	mutable size_t count_; // is used for counting during printing
 
 	// Those vars are used for construction
-	TempState *tempStates_;
+	TempState_t *tempStates_;
 	StateHash* hashtable_;
 
 	wchar_t lastKey_[Global::lengthOfLongStr];
@@ -258,7 +259,7 @@ namespace csl {
 
 	size_t nrOfKeys_;
 
-	inline StateId_t replaceOrRegister( TempState& state );
+	inline StateId_t replaceOrRegister( TempState_t& state );
 
 	void printDic_rec( StateId_t pos, int depth, size_t perfHashValue ) const;
 
@@ -269,7 +270,7 @@ namespace csl {
 		return magicNumber_;
 	    }
 	    size_t getNrOfKeys() const {
-		return (size_t)nrOfKeys_;
+		return nrOfKeys_;
 	    }
 
 	    void set( const MinDic& minDic ) {

@@ -29,7 +29,7 @@ namespace csl {
 	fwDic_.initConstruction();
 
 	std::wifstream fileHandle( txtFile );
-	fileHandle.imbue( std::locale( "" ) ); // imbue the stream with the environment's standard locale
+	fileHandle.imbue( CSL_UTF8_LOCALE ); // imbue the stream with the environment's standard locale
 	if( !fileHandle.good() ) {
 	    throw exceptions::badFileHandle( "Couldn't open file '" + 
 					     std::string( txtFile ) + 

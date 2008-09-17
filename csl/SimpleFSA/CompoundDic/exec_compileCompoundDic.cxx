@@ -12,7 +12,7 @@ int main( int argc, char** argv ) {
 
     cd.getDic().analyze();
 
-    csl::TransTable< csl::TOKDIC > transTable;
+    csl::TransTable< csl::TT_STANDARD, uint16_t > transTable;
     csl::SimpleFSA::Simple2TransTable converter;
 
     converter.translate( cd.getDic(), &transTable );

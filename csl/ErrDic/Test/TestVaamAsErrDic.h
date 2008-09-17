@@ -33,18 +33,20 @@ namespace csl {
      * test the basic methods
      */
     void TestVaamAsErrDic::testBasics() {
+	std::string path = __FILE__;
+	path.resize( path.find_last_of( '/' ) + 1 );
 
-	MinDic<> baseDic( ( Global::cslRootDir + "csl/ErrDic/Test/small.base.mdic" ).c_str() );
-	MinDic<> filterDic( ( Global::cslRootDir + "csl/ErrDic/Test/small.filter.mdic" ).c_str() );
-	VaamAsErrDic vaamAsErrdic_( baseDic, ( Global::cslRootDir + "csl/ErrDic/Test/small.patterns.txt" ).c_str(), filterDic );
+ 	MinDic<> baseDic( ( path + "small.base.mdic" ).c_str() );
+ 	MinDic<> filterDic( ( path + "small.filter.mdic" ).c_str() );
+ 	VaamAsErrDic vaamAsErrdic_( baseDic, ( path + "small.patterns.txt" ).c_str(), filterDic );
 
-	Interpretation answer;
+ 	Interpretation answer;
 
-	// a classical error
-	CPPUNIT_ASSERT( vaamAsErrdic_.query( L"xachen", &answer ) );
+ 	// a classical error
+ 	CPPUNIT_ASSERT( vaamAsErrdic_.query( L"xachen", &answer ) );
 
-	// a false friend filtered by the filterDic
-	CPPUNIT_ASSERT( ! vaamAsErrdic_.query( L"hanne", &answer ) );
+ 	// a false friend filtered by the filterDic
+ 	CPPUNIT_ASSERT( ! vaamAsErrdic_.query( L"hanne", &answer ) );
     }
 
 } // namespace csl

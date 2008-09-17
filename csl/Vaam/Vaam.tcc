@@ -1,6 +1,7 @@
 namespace csl {
 
-    Vaam::Vaam( const MinDic_t& baseDic, const char* patternFile ) :
+    template< typename MinDicType >
+    Vaam< MinDicType >::Vaam( const MinDic_t& baseDic, const char* patternFile ) :
 	baseDic_( baseDic ),
 	filterDic_( 0 ),
 	levDEA_( 0 ), // Here the default levenshtein threshold is specified
@@ -10,18 +11,27 @@ namespace csl {
     }
 
     
-    void Vaam::setDistance( size_t d ) {
+    template< typename MinDicType >
+    void Vaam< MinDicType >::setDistance( size_t d ) {
 	levDEA_.setDistance( d );
     }
 
-    void Vaam::setMaxNrOfPatterns( size_t n ) {
+    template< typename MinDicType >
+    void Vaam< MinDicType >::setMinNrOfPatterns( size_t n ) {
+	minNrOfPatterns_ = n;
+    }
+
+    template< typename MinDicType >
+    void Vaam< MinDicType >::setMaxNrOfPatterns( size_t n ) {
 	maxNrOfPatterns_ = n;
     }
 
-    bool Vaam::query( const std::wstring& word, std::vector< Interpretation >* interpretations ) const {
+    template< typename MinDicType >
+    bool Vaam< MinDicType >::query( const std::wstring& word, iCandidateReceiver* interpretations ) const {
 	query_ = word;
 	interpretations_ = interpretations;
-	interpretations_->clear();
+	foundAnswers_ = false;
+	
 	levDEA_.loadPattern( query_.c_str() );
 	stack_.clear();
 	// create a first StackItem
@@ -33,15 +43,17 @@ namespace csl {
 
 	query_rec( 0 );
 
-	return ! interpretations_->empty();
+	return foundAnswers_;
     }
     
-    void Vaam::setFilterDic( MinDic_t const& filterDic ) {
+    template< typename MinDicType >
+    void Vaam< MinDicType >::setFilterDic( MinDic_t const& filterDic ) {
 	filterDic_ = &filterDic;
     }
 
 
-    void Vaam::query_rec( size_t depth ) const {
+    template< typename MinDicType >
+    void Vaam< MinDicType >::query_rec( size_t depth ) const {
 	
  	// std::wcout<<"query_rec( "<<depth<<" ):word="<<baseWord_<<std::endl; // DEBUG
 
@@ -63,7 +75,7 @@ namespace csl {
 		size_t count = 0;
 
 		// for all positions of the stackItem (tracked back leftside)
-	    	for( StackItem::iterator position = stack_.at( depth - patPos.getDepth() ).begin();
+	    	for( typename StackItem::iterator position = stack_.at( depth - patPos.getDepth() ).begin();
 		     position != stack_.at( depth - patPos.getDepth() ).end();
 		     ++position, ++count ) {
 		    if( position->getNrOfPatternsApplied() == maxNrOfPatterns_ )
@@ -101,7 +113,7 @@ namespace csl {
 	    ) {
 	    // for all positions
 	    size_t count = 0;
-	    for( StackItem::iterator position = stack_[depth].begin();
+	    for( typename StackItem::iterator position = stack_[depth].begin();
 		 position != stack_[depth].end();
 		 ++position ) {
 		if( levDEA_.isFinal( position->levPos_ ) ) {
@@ -123,7 +135,7 @@ namespace csl {
 	    // see which of the Positions can be moved with this *c
 	    // see also if the levDEA reaches a final state
 	    size_t count = 0;
-	    for( StackItem::iterator position = stack_[depth].begin();
+	    for( typename StackItem::iterator position = stack_[depth].begin();
 		 position != stack_[depth].end();
 		 ++position, ++count ) {
 		LevDEA::Pos newLevPos = levDEA_.walk( position->levPos_, *c );
@@ -154,10 +166,11 @@ namespace csl {
 	stack_.pop_back();
     } // query_rec
 
-    void Vaam::reportMatch( const Position* cur, int baseWordScore ) const {
+    template< typename MinDicType >
+    void Vaam< MinDicType >::reportMatch( const Position* cur, int baseWordScore ) const {
 	Interpretation interpretation;
 
-	interpretation.baseWord = baseWord_; 
+	interpretation.setBaseWord( baseWord_ ); 
 	reportMatch_rec( cur, &interpretation );
 	interpretation.levDistance = levDEA_.getDistance( cur->levPos_ );
 	interpretation.baseWordScore = baseWordScore;
@@ -169,11 +182,12 @@ namespace csl {
 	    return;
 	}
 
-
-	interpretations_->push_back( interpretation );
+	foundAnswers_ = true;
+	interpretations_->receive( interpretation );
     }
 
-    void Vaam::reportMatch_rec( const Position* cur, Interpretation* interpretation ) const {
+    template< typename MinDicType >
+    void Vaam< MinDicType >::reportMatch_rec( const Position* cur, Interpretation* interpretation ) const {
 	if( cur->mother_.first == -1 ) {
 	    return;
 	}

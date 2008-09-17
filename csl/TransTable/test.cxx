@@ -1,19 +1,37 @@
 #include<iostream>
-#include "TransTable.cxx"
+#include "TransTable.h"
 
 int main() {
-    typedef csl::TransTable< csl::TOKDIC > TransTable_t;
+    typedef csl::TransTable< csl::TT_PERFHASH, uint16_t > TransTable_t;
+
     TransTable_t t;
+    TransTable_t::TempState_t tempState;
 
-    csl::TempState state;
+    TransTable_t::StateId_t st;
 
-    state.addTransition( 2, 5, 0 );
-    t.storeTempState( state );
+    t.initConstruction();
 
-    state.reset();
-    state.addTransition( 2, 7, 0 );
-    state.setFinal( true );
-    t.storeTempState( state );
+    tempState.setFinal();
+    tempState.addTransition( L'a', 2, 0 );
+    tempState.addTransition( L'b', 3, 0 );
+    tempState.addTransition( L'c', 4, 0 );
+
+    st = t.storeTempState( tempState );
+
+
+    tempState.reset();
+    tempState.addTransition( L'x', st, 0 );
+    st = t.storeTempState( tempState );    
+
+    tempState.reset();
+    tempState.addTransition( L'y', st, 0 );
+    st = t.storeTempState( tempState );    
+
+    t.finishConstruction();
+
+    std::wcerr<<"fertig"<<std::endl;
+
+    t.toDot();
 
 
 

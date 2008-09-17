@@ -25,6 +25,9 @@ namespace csl {
      * spelling variants (defined with a set of rewrite patterns) and also spelling errors
      * (using levenshtein distance).
      *
+     * Besides this class reference, please read the @link vaam_manual Vaam Manual @endlink to get an idea of how to create a Vaam object,
+     * how to send queries and how to interpret Vaam's answer.
+     *
      * As input the tool needs 
      * - a wordList @c baseDic compiled as FSA (use the tool compileMD to get such an automaton from a word list. 
      * - a file containing a list of patterns, one per line. A line containing 't th' indicates that a 't' in 
@@ -48,20 +51,37 @@ namespace csl {
      *
      * @author Ulrich Reffle, 2008
      */
+    template< typename MinDicType = MinDic< int > >
     class Vaam {
 
     public:
 	/**
 	 * @brief The type of MinDic used as dictionaries
 	 */
-	typedef MinDic<> MinDic_t;
+	typedef MinDicType MinDic_t;
+
+	class iCandidateReceiver {
+	public:
+	    virtual void receive( Interpretation const& interpretation ) = 0;
+	};
+
+	/**
+	 * A straight-forward implementation of the interface above.
+	 * It inherits from std::vector, has all its features.
+	 */
+	class CandidateReceiver : public iCandidateReceiver,
+				  public std::vector< Interpretation > {
+	    void receive( csl::Interpretation const& interpretation ) {
+		push_back( interpretation );
+	    }
+	};
 
     private:
 
 	/**
 	 * A state of the MinDic
 	 */
-	typedef MinDic_t::State MDState_t;
+	typedef typename MinDic_t::State MDState_t;
 
     public:
 	/**
@@ -69,8 +89,8 @@ namespace csl {
 	 *
 	 * @param baseDic a reference to a MinDic_t that serves as @c baseDic
 	 * @param patternFile path to a file containing the spelling variant patterns 
-	          (see class description for some more details). 
-	 */
+	 (see class description for some more details). 
+	*/
 	Vaam( const MinDic_t& baseDic, const char* patternFile );
 
 	/**
@@ -82,6 +102,11 @@ namespace csl {
 	 * @brief In addition to pattern applications, allow fuzzy search with distance up to @c d
 	 */
 	inline void setDistance( size_t d );
+
+	/**
+	 * @brief restrict allowed number of pattern applications to greater or equal than @c n
+	 */
+	inline void setMinNrOfPatterns( size_t n );
 
 	/**
 	 * @brief restrict allowed number of pattern applications to less or equal than @c n
@@ -102,9 +127,11 @@ namespace csl {
 	/**
 	 * @brief query a @c word to get possible interpretations as a variant.
 	 *
-	 * @todo Passing a std::vector* as answer container is probably not very elegant.
+	 * You can write your own class that implements the interface iCandidateReceiver to receive all answers,
+	 * but you can also use Vaam's subclass CandidateReceiver.
+	 * 
 	 */
-	inline bool query( std::wstring const& word, std::vector< Interpretation >* interpretations ) const;
+	inline bool query( std::wstring const& word, iCandidateReceiver* interpretations ) const;
 
 	//@}
 
@@ -138,7 +165,7 @@ namespace csl {
 	     * (x,y) indicates that the mother is the y-th element at stackpos x (if I remember correctly)
 	     */ 
 	    std::pair< int, int > mother_;
-	};
+	}; // class Position
 
 	class StackItem : public std::vector< Position > {
 	public:
@@ -156,7 +183,7 @@ namespace csl {
 	    MDState_t dicPos_;
 	    PatternGraph::State patternPos_;
 	    size_t lookAheadDepth_;
-	};
+	}; // class StackItem
 	
 	class Stack : public std::vector< StackItem > {
 	public:
@@ -192,16 +219,20 @@ namespace csl {
 	
 	mutable LevDEA levDEA_;
 	mutable std::wstring query_;
-	mutable std::vector< Interpretation >* interpretations_;
+	mutable iCandidateReceiver* interpretations_;
+	mutable bool foundAnswers_;
 	mutable Stack stack_;
 	/**
 	 * The current string under construction
 	 */
 	mutable std::wstring baseWord_;
 
+	size_t minNrOfPatterns_;
 	size_t maxNrOfPatterns_;
 	
     }; // class Vaam
+
+    
     
 } // namespace csl
 
