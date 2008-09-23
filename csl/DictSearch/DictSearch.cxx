@@ -4,38 +4,67 @@
 #include "./DictSearch.h"
 namespace csl {
 
-    DictSearch::DictID DictSearch::DictSearch() :
-	lastDictID_( 0 ) {
+    DictSearch::DictSearch() :
+	modernDict_( 0 ),
+	disposeModernDict_( false ),
+	historicDict_( 0 ),
+	disposeHistoricDict_( false ),
+	vaam_( 0 ),
+    {
+    
     }
 
-    DictSearch::DictID DictSearch::addDict_exact( char const* dictFile ) {
-	return 0;
+    DictSearch::~DictSearch() {
+	if( modernDict_ && disposeModernDict_ ) delete( modernDict_ );
+	if( historicDict_ && disposeHistoricDict_ ) delete( historicDict_ );
     }
 
-
-    DictSearch::DictID DictSearch::addDict_exact( MinDic_t const& dic ) {
-	DictID id = ++lastDictID_;
-	dicts_exact_.push_back( ItemExact( dic, false, id ) );
-	return id;
+    void DictSearch::setModernDict( char const* dictFile ) {
+	modernDict_ = new ModernDict_t( dictFile );
+	disposeModernDict_ = true;
     }
 
-    DictSearch::DictID DictSearch::addDict_lev( char const* dictFile, size_t dlev ) {
-	return 0;
+    void DictSearch::setModernDict( ModernDict_t const& dic ) {
+	modernDict_ = &dic;
+	disposeModernDict_ = false;
     }
 
-    DictSearch::DictID DictSearch::addDict_lev( MinDic_t const& dic, size_t dlev ) {
-	return 0;
+    void DictSearch::setHistoricDict( char const* dictFile ) {
+	modernDict_ = new HistoricDict_t( dictFile );
+	disposeHistoricDict_ = true;
     }
 
-
-    DictSearch::DictID DictSearch::addDict_vaam( char const* dictFile, char const* patternFile, size_t dlev ) {
-	return 0;
+    void DictSearch::setHistoricDict( HistoricDict_t const& dic ) {
+	modernDict_ = &dic;
+	disposeHistoricDict_ = false;
     }
 
-
-    DictSearch::DictID DictSearch::addDict_vaam( MinDic_t const& dic, char const* patternFile, size_t dlev ) {
-	return 0;
+    void DictSearch::initHypothetic( char const* patternFile, size_t dlev ) {
+	if( vaam_ ) throw exceptions::LogicalError( "csl::DictSearch: Tried to initialise Vaam twice." );
+	vaam_ = new Vaam< ModernDict_t >( patternFile, dlev );
     }
+
+    void query( std::wstring const& query, CandidateReceiver& answers ) {
+	
+    }
+
+//     DictSearch::DictID DictSearch::addDict_lev( char const* dictFile, size_t dlev ) {
+// 	return 0;
+//     }
+
+//     DictSearch::DictID DictSearch::addDict_lev( MinDic_t const& dic, size_t dlev ) {
+// 	return 0;
+//     }
+
+
+//     DictSearch::DictID DictSearch::addDict_vaam( char const* dictFile, char const* patternFile, size_t dlev ) {
+// 	return 0;
+//     }
+
+
+//     DictSearch::DictID DictSearch::addDict_vaam( MinDic_t const& dic, char const* patternFile, size_t dlev ) {
+// 	return 0;
+//     }
     
 
 

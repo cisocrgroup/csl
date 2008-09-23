@@ -28,14 +28,14 @@ namespace csl {
 	/**
 	 * @brief 
 	 */
-	PatternSet();
+	inline PatternSet();
 
 
 	/**
 	 * @brief Returns a reference pointing to the \c i -th position of the
 	 * set
 	 */
-	Pattern const& at( size_t i ) const {
+	inline Pattern const& at( size_t i ) const {
 	    return patternList_.at( i );
 	}
 
@@ -45,14 +45,14 @@ namespace csl {
 	 *
 	 * Note that this is not the necessarily the first element of the internal container
 	 */
-	iterator begin() {
+	inline iterator begin() {
 	    return ++( patternList_.begin() );
 	}
 	
 	/**
 	 * @brief returns a classical past-the-end iterator
 	 */
-	iterator end() {
+	inline iterator end() {
 	    return patternList_.end();
 	}
 	
@@ -63,11 +63,11 @@ namespace csl {
 	 * The file is expected to contain one pattern per line, with a blank to
 	 * separate left from right side.
 	 */
-	void loadPatterns( const char* patternFile );
+	inline void loadPatterns( const char* patternFile );
 
     protected:
 
-	const PatternList_t& patternList() const {
+	inline const PatternList_t& patternList() const {
 	    return patternList_;
 	}
 

@@ -14,13 +14,13 @@ namespace csl {
 	/**
 	 * @brief creates an empty Pattern at position 0
 	 */
-	PosPattern();
+	inline PosPattern();
 	
-	PosPattern( const std::wstring& left, const std::wstring& right, size_t position );
+	inline PosPattern( const std::wstring& left, const std::wstring& right, size_t position );
 	
-	size_t getPosition() const;
+	inline size_t getPosition() const;
 	
-	void print( std::wostream& os = std::wcout ) const;
+	inline void print( std::wostream& os = std::wcout ) const;
 	
     private:
 	size_t position_;

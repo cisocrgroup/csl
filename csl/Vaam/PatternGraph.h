@@ -31,12 +31,12 @@ namespace csl {
 	public:
 	    typedef std::vector< std::pair< wchar_t, State > >::const_iterator iterator;  
 
-	    State( const PatternGraph& myGraph, size_t stateIndex ) :
+	    inline State( const PatternGraph& myGraph, size_t stateIndex ) :
 		myGraph_( &myGraph ),
 		stateIndex_( stateIndex ) {
 	    }
 	    
-	    bool operator==( const State& other ) {
+	    inline bool operator==( const State& other ) {
 		return( ( myGraph_ == other.myGraph_  ) && // compare pointers
 			( stateIndex_ == stateIndex_ ) );
 	    }
@@ -141,7 +141,7 @@ namespace csl {
 	}; // class InternalState
 	
 
-	PatternGraph();
+	inline PatternGraph();
 
 	inline void loadPatterns( const char* patternFile );
 

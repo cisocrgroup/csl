@@ -10,9 +10,9 @@ add_subdirectory(Vaam)
 add_subdirectory(SimpleFSA)
 add_subdirectory(DictSearch)
 
-ADD_LIBRARY( csl SHARED csl.cxx )
+ADD_LIBRARY( csl SHARED csl.cxx LevDEA/LevDEA.cxx )
 target_link_libraries( csl Alphabet )
-target_link_libraries( csl LevDEA )
+target_link_libraries( csl LevDEA ) # funzt nicht, warum ?????
 target_link_libraries( csl DictSearch )
 
 install( 

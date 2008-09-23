@@ -19,7 +19,7 @@ namespace csl {
 
 	    // add a dict for exact matching
 	    DictSearch ds;
-	    DictSearch::DictID dictID_1 = ds.addDict_exact( "dic1.mdic" );
+	    ds.setModernDict( "dic1.mdic" );
 	    CPPUNIT_ASSERT( false );
 	    
 	    
