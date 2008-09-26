@@ -4,29 +4,54 @@
 namespace csl {
 
     template<>
-    inline MSMatch< STANDARD >::MSMatch( size_t k, const char* compdicFile ) :
-	dictFW_( compdicFile ),
-	dictBW_( dictFW_ ), // only as dummy
+    inline MSMatch< STANDARD >::MSMatch( size_t k, const char* minDicFile ) :
+	fbDic_( 0 ),
+	dictFW_( 0 ),
+	dictBW_( 0 ),
 	caseMode_( asIs ),
 	k_( k )
     {
+	if( minDicFile ) {
+	    dictFW_ = new MinDic<>( minDicFile );
+	}
+
+	dictBW_ = 0;
+ 
 	levDEASecond_ = new LevDEA( k_ );
     }
 
     template<>
     inline MSMatch< FW_BW >::MSMatch( size_t k, const char* fbDicFile ) :
-	fbDic_( fbDicFile ),
-	dictFW_( fbDic_.getFWDic() ),
-	dictBW_( fbDic_.getBWDic() ),
+	fbDic_( 0 ),
+	dictFW_( 0 ),
+	dictBW_( 0 ),
 	caseMode_( asIs ),
 	k_( k )
     {
+	if( fbDicFile ) {
+	    fbDic_ = new FBDic<>( fbDicFile );
+	    dictFW_ =  &( fbDic_->getFWDic() );
+	    dictBW_ = &( fbDic_->getBWDic() );
+	}
+
 	levDEAFirst_ = new LevDEA( 0 );
 	levDEASecond_ = new LevDEA( 0 );
     }
     
     template< MSMatchMode Mode >
-    inline MSMatch< Mode >::~MSMatch() {}
+    inline MSMatch< Mode >::~MSMatch() {
+    }
+
+    template<>
+    inline void MSMatch< FW_BW>::setFBDic( FBDic<> const& fbDic ) {
+	fbDic_ = &fbDic;
+	dictFW_ =  &( fbDic_->getFWDic() );
+	dictBW_ = &( fbDic_->getBWDic() );
+    }
+
+
+
+
 
 
     template< MSMatchMode Mode >
@@ -55,10 +80,10 @@ namespace csl {
 	    uint_t dicPos2;
 	    LevDEA::Pos levPos2;
 	    perfHashValue = 0;
-	    dicPos2 = dictFW_.getRoot();
+	    dicPos2 = dictFW_->getRoot();
 	    for( wchar_t* c = wordCorrectDir; *c; ++c ) {
 		assert( dicPos2 ); // this is a logical conclusion, so it's an assert, not an exception
-		dicPos2 = dictFW_.walkPerfHash( dicPos2, *c, &perfHashValue );
+		dicPos2 = dictFW_->walkPerfHash( dicPos2, *c, &perfHashValue );
 	    }
 
 	    // printf( "FOUND SECOND:%ls, dist of 2nd part is %d\n", word_, levDistanceSecond ); // DEBUG
@@ -66,12 +91,12 @@ namespace csl {
 
 	    // push word and annotated value into the output list
 	    // USE DUMMY VALUE FOR LEVDISTANCE
-	    // candReceiver_->receive( wordCorrectDir, 42, dictFW_.getAnnotation( perfHashValue ) );
+	    // candReceiver_->receive( wordCorrectDir, 42, dictFW_->getAnnotation( perfHashValue ) );
 	    size_t levDistance = levDistanceFirst_ + levDistanceSecond;
 	    CandidateMap::iterator pos = results_.find( wordCorrectDir );
 	    if( pos == results_.end() ) {
 		// printf( "MATCH FIRST TIME :%ls, dist is %d\n", wordCorrectDir, levDistance ); // DEBUG
-		results_.insert( std::pair< std::wstring, std::pair< size_t, int > >( std::wstring( wordCorrectDir ), std::pair< size_t, int >( levDistance, dictFW_.getAnnotation( perfHashValue ) ) ) );
+		results_.insert( std::pair< std::wstring, std::pair< size_t, int > >( std::wstring( wordCorrectDir ), std::pair< size_t, int >( levDistance, dictFW_->getAnnotation( perfHashValue ) ) ) );
 	    }
 	    else {
 		// printf( "MATCH AGAIN:%ls, dist is %d\n", wordCorrectDir, levDistance ); // DEBUG
@@ -133,12 +158,20 @@ namespace csl {
     }
 
     template<>
+    inline void MSMatch< FW_BW >::queryCases_0() {
+	int ann = 0;
+	if( dictFW_->lookup( pattern_, &ann ) ) {
+	    results_.insert( std::pair< std::wstring, std::pair< size_t, int > >( std::wstring( pattern_ ), std::pair< size_t, int >( 0, ann ) ) );
+	}
+    }
+
+    template<>
     inline void MSMatch< FW_BW >::queryCases_1() {
 	uint_t pos = 0;
 
      	// 0 | 0,1 errors
  	reverse_ = false;
- 	curDict_ = &dictFW_;
+ 	curDict_ = dictFW_;
  	if( ( pos = curDict_->walkStr( curDict_->getRoot(), patLeft_ ) ) ) {
 	    levDistanceFirst_ = 0;
  	    wcscpy( word_, patLeft_ );
@@ -150,7 +183,7 @@ namespace csl {
 
      	// 1 | 0 errors
   	reverse_ = true;
- 	curDict_ = &dictBW_;
+ 	curDict_ = dictBW_;
  	if( ( pos = curDict_->walkStr( curDict_->getRoot(), patRightRev_ ) ) ) {
 	    levDistanceFirst_ = 0;
  	    wcscpy( word_, patRightRev_ );
@@ -168,7 +201,7 @@ namespace csl {
 //	printf( "0 | 0,1,2 errors\n" );
 	// 0 | 0,1,2 errors
  	reverse_ = false;
- 	curDict_ = &dictFW_;
+ 	curDict_ = dictFW_;
 	// load pattern outside the if-statement: we need it anyways in the next case
 	levDEASecond_->loadPattern( patRight_ );
  	if( ( pos = curDict_->walkStr( curDict_->getRoot(), patLeft_ ) ) ) {
@@ -182,7 +215,7 @@ namespace csl {
 //	printf( "1 | 0,1 errors\n" );
  	// 1 | 0,1 errors
  	reverse_ = false;
- 	curDict_ = &dictFW_;
+ 	curDict_ = dictFW_;
 	minDistFirst_ = 1;
 	levDEAFirst_->setDistance( 1 );
 	levDEAFirst_->loadPattern( patLeft_ );
@@ -194,7 +227,7 @@ namespace csl {
 //	printf( "2 | 0 errors\n" );
 	// 2 | 0 errors
  	reverse_ = true;
- 	curDict_ = &dictBW_;
+ 	curDict_ = dictBW_;
  	if( ( pos = curDict_->walkStr( curDict_->getRoot(), patRightRev_ ) ) ) {
 	    levDistanceFirst_ = 0;
  	    wcscpy( word_, patRightRev_ );
@@ -211,7 +244,7 @@ namespace csl {
 
      	// 0 | 0,1,2,3 errors
  	reverse_ = false;
- 	curDict_ = &dictFW_;
+ 	curDict_ = dictFW_;
 	// load pattern outside the if-statement: we need it anyways in the next case
 	levDEASecond_->loadPattern( patRight_ );
  	if( ( pos = curDict_->walkStr( curDict_->getRoot(), patLeft_ ) ) ) {
@@ -225,7 +258,7 @@ namespace csl {
 
  	// 1 | 0,1,2 errors
  	reverse_ = false;
- 	curDict_ = &dictFW_;
+ 	curDict_ = dictFW_;
 	levDEAFirst_->setDistance( 1 );
 	levDEAFirst_->loadPattern( patLeft_ );
 	minDistFirst_ = 1;
@@ -236,7 +269,7 @@ namespace csl {
 
 	// 2,3 | 0 errors
 	reverse_ = true;
-	curDict_ = &dictBW_;
+	curDict_ = dictBW_;
 	// load pattern outside the if-statement: we need it anyways in the next case
 	levDEASecond_->loadPattern( patLeftRev_ );
 	if ( ( pos = curDict_->walkStr( curDict_->getRoot(), patRightRev_ ) ) ) {
@@ -251,7 +284,7 @@ namespace csl {
 
 	// 2 | 1 errors
  	reverse_ = true;
- 	curDict_ = &dictBW_;
+ 	curDict_ = dictBW_;
 	levDEAFirst_->setDistance( 1 );
 	levDEAFirst_->loadPattern( patRightRev_ );
 	minDistFirst_ = 1;
@@ -262,8 +295,59 @@ namespace csl {
     }
 
 
+
+    
+
+    template<>
+    inline void MSMatch< STANDARD >::intersect( int dicPos, LevDEA::Pos levPos, int depth ) {
+	static int newDicPos;
+	static LevDEA::Pos newLevPos;
+
+	for( const wchar_t* c = dictFW_->getSusoString( dicPos ); *c; ++c ) {
+	    if( ( newDicPos = dictFW_->walk( dicPos, *c ) ) && ( newLevPos = curLevDEA_->walk( levPos, *c ) ).isValid() ) {
+		word_[depth] = *c;
+
+//  word[depth+1]=0;std::cout<<"word="<<word<<std::endl;
+
+		// print w if node is final in dic and lev;
+		if( dictFW_->isFinal( newDicPos ) && curLevDEA_->isFinal( newLevPos ) ) {
+		    word_[depth+1] = 0;
+		    
+		    // push word and annotated value into the output list
+		    // follow the word through the automaton once more to get the perfect hashing value
+		    static size_t perfHashValue; static uint_t dicPos2;
+		    perfHashValue = 0; dicPos2 = dictFW_->getRoot();
+		    for( wchar_t* cc = word_; *cc; ++cc ) {
+			dicPos2 = dictFW_->walkPerfHash( dicPos2, *cc, &perfHashValue );
+		    }
+		    // USE DUMMY VALUE FOR LEVDISTANCE
+		    candReceiver_->receive( word_, 42, dictFW_->getAnnotation( perfHashValue ) );
+		}
+		intersect( newDicPos, newLevPos, depth + 1 );
+	    }
+	}
+    }
+
+    template<>
+    inline void MSMatch< STANDARD >::query( const wchar_t* pattern, CandidateReceiver& candReceiver ) {
+	if( ! dictFW_ ) throw exceptions::LogicalError( "csl::MSMatch< STANDARD >::query: Method called without a dictionary being available" );
+
+	candReceiver_ = &candReceiver;
+	wcscpy( pattern_, pattern );
+	
+	
+	curLevDEA_ = levDEASecond_;
+	curLevDEA_->setDistance( k_ );
+	curLevDEA_->loadPattern( pattern );
+	
+	intersect( dictFW_->getRoot(), LevDEA::Pos( 0, 0 ), 0 );
+	
+    } // method query()
+
+
     template<>
     inline void MSMatch< FW_BW >::query( const wchar_t* pattern, CandidateReceiver& candReceiver ) {
+	if( ! ( dictFW_ && dictBW_ ) ) throw exceptions::LogicalError( "csl::MSMatch< STANDARD >::query: Method called without a dictionary being available" );
 	if( ! *pattern ) {
 	    throw( exceptions::badInput( "csl::MSMatch::query: Empty pattern string is forbidden" ) );
 	}
@@ -300,10 +384,11 @@ namespace csl {
 
 // 	printf("pattern=%ls\npatLeft=%ls\npatRight=%ls\npatLeftRev=%ls\npatRightRev=%ls\n", pattern_, patLeft_, patRight_, patLeftRev_, patRightRev_ ); // DEBUG
 
-	if( k_ == 1 ) queryCases_1();
+	if( k_ == 0 ) queryCases_0();
+	else if( k_ == 1 ) queryCases_1();
 	else if( k_ == 2 ) queryCases_2();
 	else if( k_ == 3 ) queryCases_3();
-	else throw exceptions::invalidLevDistance( "csl::MSMATCH::query: Unvalid levenshtein distance" );
+	else throw exceptions::invalidLevDistance( "csl::MSMATCH::query: invalid levenshtein distance" );
 
 	for( CandidateMap::iterator it = results_.begin(); it != results_.end(); ++it ) {
 	    if( ( caseMode_ == restoreCase ) && wasUpperCase ) {
@@ -315,52 +400,8 @@ namespace csl {
 	}
     }
 
-    
-
-    template<>
-    inline void MSMatch< STANDARD >::intersect( int dicPos, LevDEA::Pos levPos, int depth ) {
-	static int newDicPos;
-	static LevDEA::Pos newLevPos;
-
-	for( const wchar_t* c = dictFW_.getSusoString( dicPos ); *c; ++c ) {
-	    if( ( newDicPos = dictFW_.walk( dicPos, *c ) ) && ( newLevPos = curLevDEA_->walk( levPos, *c ) ).isValid() ) {
-		word_[depth] = *c;
-
-//  word[depth+1]=0;std::cout<<"word="<<word<<std::endl;
-
-		// print w if node is final in dic and lev;
-		if( dictFW_.isFinal( newDicPos ) && curLevDEA_->isFinal( newLevPos ) ) {
-		    word_[depth+1] = 0;
-		    
-		    // push word and annotated value into the output list
-		    // follow the word through the automaton once more to get the perfect hashing value
-		    static size_t perfHashValue; static uint_t dicPos2;
-		    perfHashValue = 0; dicPos2 = dictFW_.getRoot();
-		    for( wchar_t* cc = word_; *cc; ++cc ) {
-			dicPos2 = dictFW_.walkPerfHash( dicPos2, *cc, &perfHashValue );
-		    }
-		    // USE DUMMY VALUE FOR LEVDISTANCE
-		    candReceiver_->receive( word_, 42, dictFW_.getAnnotation( perfHashValue ) );
-		}
-		intersect( newDicPos, newLevPos, depth + 1 );
-	    }
-	}
-	}
 	
 
-    template<>
-    inline void MSMatch< STANDARD >::query( const wchar_t* pattern, CandidateReceiver& candReceiver ) {
-	candReceiver_ = &candReceiver;
-	wcscpy( pattern_, pattern );
-
-
-	curLevDEA_ = levDEASecond_;
-	curLevDEA_->setDistance( k_ );
-	curLevDEA_->loadPattern( pattern );
-
-	intersect( dictFW_.getRoot(), LevDEA::Pos( 0, 0 ), 0 );
-
-	} // method query()
 } // eon
 
 #endif

@@ -17,14 +17,21 @@ namespace csl {
 	
 	void testBasics() {
 
-	    // add a dict for exact matching
+	    // add a modern dict for exact matching, dlev==0
 	    DictSearch ds;
-	    ds.setModernDict( "dic1.mdic" );
-	    CPPUNIT_ASSERT( false );
+	    ds.setModernDict( "../csl/DictSearch/Test/dic1.fbdic", 0 );
 	    
 	    
-	    
+	    DictSearch::CandidateSet result;
+	    ds.query( L"komma", result );
 
+	    for( DictSearch::CandidateSet::const_iterator it = result.begin(); it != result.end(); ++it ) {
+		it->print();
+	    } 
+	    CPPUNIT_ASSERT( result.size() == 1 );
+	    CPPUNIT_ASSERT( result.at( 0 ).getWord() == L"komma"  );
+	    CPPUNIT_ASSERT( true );
+	    result.at( 0 ).getInstruction().empty();
 	}
 	
     private:

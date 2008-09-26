@@ -12,6 +12,14 @@ namespace csl {
      */
     class Instruction : public std::vector< PosPattern > {
     public:
+
+	/**
+	 * This is provided by std::vector anyway ...
+	 */
+ 	bool empty() const {
+ 	    return begin()==end();
+ 	}
+
 	/**
 	 * @brief prints a string-representation of the instruction to stdout or to another std::wstream 
 	 * specified as argument.

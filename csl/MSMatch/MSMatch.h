@@ -55,8 +55,15 @@ namespace csl {
 	 * @param k the levenshtein threshold: MSMatch will extract candidates with distance lower or equal to \c k
 	 * @param FBDicFile a path specifying a file with a compiled FBDic
 	 */
-	inline MSMatch( size_t k, const char* FBDicFile );
-	~MSMatch();
+	inline MSMatch( size_t k = 0, const char* FBDicFile = 0 );
+
+	inline ~MSMatch();
+
+	inline void setFBDic( FBDic<> const& fbDic );
+
+	inline void setDistance( size_t dist ) {
+	    k_ = dist;
+	}
 
 	/**
 	 * @brief compute candidates for the given query patterns; store the cands in the candReceiver object.
@@ -70,11 +77,12 @@ namespace csl {
 	 * (forward, in contrast to backward as is also used for the extraction)
 	 */
 	inline const MinDic_t& getFWDic() const {
-	    return dictFW_;
+	    if( ! dictFW_ ) throw exceptions::LogicalError( "csl::MSMatch::getFWDic: No dictionary loaded." );
+	    return *dictFW_;
 	}
 
 	/**
-	 * @brief Specify a case mode (one of CaseMode) to decide the treatment of uppercased input.
+	 * @brief Specify a case mode (one of CaseMode) to decide on the treatment of uppercased input.
 	 * @param caseMode
 	 */
 	inline void setCaseMode( CaseMode caseMode ) {
@@ -82,9 +90,11 @@ namespace csl {
 	}
 
     private:
-	FBDic<> fbDic_;
-	const MinDic_t& dictFW_;
-	const MinDic_t& dictBW_;
+	FBDic<> const* fbDic_;
+	bool disposeDic_;
+
+	MinDic_t const* dictFW_;
+	MinDic_t const* dictBW_;
 
 	LevDEA* levDEAFirst_;
 	LevDEA* levDEASecond_;
@@ -122,6 +132,7 @@ namespace csl {
 	inline void intersectFirst( int dicPos, LevDEA::Pos levPos, int depth );
 	inline void intersectSecond( int dicPos, LevDEA::Pos levPos, int depth );
 
+	inline void queryCases_0();
 	inline void queryCases_1();
 	inline void queryCases_2();
 	inline void queryCases_3();
