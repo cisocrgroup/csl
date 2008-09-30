@@ -12,13 +12,12 @@ namespace csl {
     /**
      *
      *
-     * Revision 333 looks a lot more complex. Then I cut it down to a much simpler structure. So look at this
+     * Revision 333 looked a lot more complex. Then I cut it down to a much simpler structure. So look at this
      * old version if e.g. support for more different dictionaries is needed.
      */
     class DictSearch {
     public:
-	typedef MinDic<> HistoricDict_t;
-	typedef FBDic<> ModernDict_t;
+	typedef FBDic<> Dict_t;
 	typedef MinDic<> VaamDict_t;
 
 	enum DictID { UNDEF, MODERN, HISTORIC };
@@ -62,7 +61,11 @@ namespace csl {
 
 	    void setCurrentDictID( DictID id ) { currentDictID_ = id; }
 
-	    void reset() { clear(); }
+	    void reset() {
+		clear();
+	    }
+
+	    
 
 	private:
 	    DictID currentDictID_;
@@ -82,25 +85,73 @@ namespace csl {
 	 */
 	//@{
 
-	void setModernDict( char const* dictFile, size_t dlev );
-	void setModernDict( ModernDict_t const&, size_t dlev );
+	/**
+	 * @brief set a modern dictionary and the levenshtein distance threshold for approximate lookup in it.
+	 *
+	 * @param dictFile a path to a binary file storing a csl::FBDic (produced wit hthe tool compileFBDic )
+	 * @param dlev a levenshtein distance threshold 0 \le dlev \le 3
+	 */
+	void setModern( char const* fbDictFile, size_t dlev );
+	/**
+	 * @brief set a modern dictionary and the levenshtein distance threshold for approximate lookup in it.
+	 *
+	 * @param dictFile a path to a binary file storing a csl::FBDic (produced with the tool compileFBDic )
+	 * @param dlev a levenshtein distance threshold between 0 and 3
+	 *
+	 * DictSearch keeps only a reference of the dictionary, so make sure that dict lives as long as you need it for DictSearch
+	 */
+	void setModern( Dict_t const& dict, size_t dlev );
 
+	/**
+	 * @brief set a levenshtein distance threshold for the modern dictionary approximate lookup
+	 */
+	void setModernDlev( size_t dlev );
+
+	/**
+	 * @brief determine the behaviour of the hypothetic dictionary.
+	 */
 	void initHypothetic( char const* patternFile, size_t dlev );
 
-	void setHistoricDict( char const* dictFile, size_t dlev );
-	void setHistoricDict( HistoricDict_t const& dictFile, size_t dlev );
+	
+	/**
+	 * @brief set a historical dictionary and the levenshtein distance threshold for approximate lookup in it.
+	 *
+	 * @param dictFile a path to a binary file storing a csl::FBDic (produced wit hthe tool compileFBDic )
+	 * @param dlev a levenshtein distance threshold 0 \le dlev \le 3
+	 */
+	void setHistoric( char const* dictFile, size_t dlev );
 
-	//@}
+	/**
+	 * @brief set a historical dictionary and the levenshtein distance threshold for approximate lookup in it.
+	 *
+	 * @param dictFile a path to a binary file storing a csl::FBDic (produced with the tool compileFBDic )
+	 * @param dlev a levenshtein distance threshold between 0 and 3
+	 *
+	 * DictSearch keeps only a reference of the dictionary, so make sure that dict lives as long as you need it for DictSearch
+	 */
+	void setHistoric( Dict_t const& dictFile, size_t dlev );
+
+	/**
+	 * @brief set a levenshtein distance threshold for the historic dictionary approximate lookup
+	 */
+	void setHistoricDlev( size_t dlev );
+
+	//@} // END Configuration methods
 
 	/**
 	 * @name Lookup
 	 */
 	//@{
+
+	/**
+	 *
+	 */
 	void query( std::wstring const& query, CandidateSet& answers );
-	//@}
+	
+	//@} // END Lookup methods
 
     private:
-	ModernDict_t const* modernDict_;
+	Dict_t const* modernDict_;
 	bool disposeModernDict_;
 	size_t dlev_modern_;
 
@@ -108,7 +159,7 @@ namespace csl {
 	
 	MSMatch< FW_BW > msMatch_;
 
-	HistoricDict_t const* historicDict_;
+	Dict_t const* historicDict_;
 	bool disposeHistoricDict_;
 	size_t dlev_historic_;
 

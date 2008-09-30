@@ -50,7 +50,7 @@ namespace csl {
 	}; 
 
 	/**
-	 * Create an MSMatch object with a levenshtein threshold \c k and a path specifying a file with a compiled FBDic.
+	 * @brief Create an MSMatch object with a levenshtein threshold \c k and a path specifying a file with a compiled FBDic.
 	 * 
 	 * @param k the levenshtein threshold: MSMatch will extract candidates with distance lower or equal to \c k
 	 * @param FBDicFile a path specifying a file with a compiled FBDic
@@ -58,6 +58,14 @@ namespace csl {
 	inline MSMatch( size_t k = 0, const char* FBDicFile = 0 );
 
 	inline ~MSMatch();
+
+	/**
+	 * @brief returns the highest threshold to be set. The setting of a higher distance (in the constructor or with setDidtance() ) will 
+	 * trigger an exception
+	 */
+	inline static size_t getMaximumDistance() const {
+	    return 3;
+	}
 
 	inline void setFBDic( FBDic<> const& fbDic );
 

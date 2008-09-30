@@ -55,7 +55,7 @@ namespace csl {
 	/**
 	 * @brief returns the instruction that was used to turn @c baseWord into @c word 
 	 */
-	Instruction getInstruction() {
+	Instruction const& getInstruction() {
 	    return instruction;
 	}
 

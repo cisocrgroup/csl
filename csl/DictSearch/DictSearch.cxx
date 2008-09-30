@@ -19,25 +19,33 @@ namespace csl {
 	if( historicDict_ && disposeHistoricDict_ ) delete( historicDict_ );
     }
 
-    void DictSearch::setModernDict( char const* dictFile, size_t dlev ) {
-	setModernDict( *( new ModernDict_t( dictFile ) ), dlev );
+    void DictSearch::setModern( char const* dictFile, size_t dlev ) {
+	setModern( *( new Dict_t( dictFile ) ), dlev );
 	disposeModernDict_ = true;
     }
 
-    void DictSearch::setModernDict( ModernDict_t const& dic, size_t dlev  ) {
+    void DictSearch::setModern( Dict_t const& dic, size_t dlev  ) {
 	modernDict_ = &dic;
 	disposeModernDict_ = false;
+	setModernDlev( dlev );
+    }
+    
+    void DictSearch::setModernDlev( size_t dlev ) {
 	dlev_modern_ = dlev;
     }
 
-    void DictSearch::setHistoricDict( char const* dictFile, size_t dlev  ) {
-	historicDict_ = new HistoricDict_t( dictFile );
+    void DictSearch::setHistoric( char const* dictFile, size_t dlev  ) {
+	historicDict_ = new Dict_t( dictFile );
 	disposeHistoricDict_ = true;
     }
 
-    void DictSearch::setHistoricDict( HistoricDict_t const& dic, size_t dlev  ) {
+    void DictSearch::setHistoric( Dict_t const& dic, size_t dlev  ) {
 	historicDict_ = &dic;
 	disposeHistoricDict_ = false;
+    }
+    
+    void DictSearch::setHistoricDlev( size_t dlev ) {
+	dlev_modern_ = dlev;
     }
 
     void DictSearch::initHypothetic( char const* patternFile, size_t dlev ) {
@@ -56,9 +64,6 @@ namespace csl {
 	    msMatch_.query( query.c_str(), answers );
 	}
     }
-
-
-
 
 } // namespace csl
 
