@@ -34,15 +34,32 @@ namespace csl {
 		{} 
 
 	    bool operator<( Interpretation const& other ) const {
-		size_t compareSumOfOperations = 
-		    ( getInstruction().size() + getLevDistance() ) - 
-		    ( other.getInstruction().size() + other.getLevDistance() );
+		// set up a comparison bases on the sum of levenshtein or pattern edits.
+		// Give the leevenshtein operations a marginally higher punishment, so that
+		// if the sums are equal, the one with less lev. operations and more pattern 
+		// operations will win.
+		float compareSumOfOperations = 
+		    ( getInstruction().size() + getLevDistance() * 1.01 ) - 
+		    ( other.getInstruction().size() + other.getLevDistance() * 1.01 );
 
-		    
+		if     ( compareSumOfOperations < 0 ) return true;
+		else if( compareSumOfOperations > 0 ) return false;
+		else return dictID_ < other.getDictID();
 	    }
 
 	    void setDictID( DictID dictID ) { dictID_ = dictID; }
 	    DictID getDictID() const { return dictID_; }
+	    std::wstring getDictID_string() const {
+		if( getDictID() == UNDEF ) return L"undef";
+		else if( getDictID() == MODERN ) return L"modern";
+		else if( getDictID() == HISTORIC ) return L"historic";
+	    }
+
+	    void print() const {
+		csl::Interpretation::print();
+		std::wcout << "(" << getDictID_string() << ")";
+	    }
+
 	private:
 	    DictID dictID_;
 	}; // class Interpretation
@@ -118,6 +135,16 @@ namespace csl {
 	 */
 	void initHypothetic( char const* patternFile, size_t dlev );
 
+	/**
+	 * @brief set a threshold for the number of pattern applications in the hypothetic dictionary
+	 */
+	void setHypotheticMaxNrOfPatterns( size_t max );
+
+	/**
+	 * @brief set a levenshtein distance threshold for the hypothetic dictionary approximate lookup
+	 */
+	void setHypotheticDlev( size_t dlev );
+
 	
 	/**
 	 * @brief set a historical dictionary and the levenshtein distance threshold for approximate lookup in it.
@@ -152,7 +179,7 @@ namespace csl {
 	/**
 	 *
 	 */
-	void query( std::wstring const& query, CandidateSet& answers );
+	void query( std::wstring const& query, CandidateSet* answers );
 	
 	//@} // END Lookup methods
 
@@ -162,7 +189,9 @@ namespace csl {
 	size_t dlev_modern_;
 
 	Vaam< VaamDict_t >* vaam_;
-	
+	size_t dlev_hypothetic_;
+	size_t dlev_maxNrOfPatterns_;
+
 	MSMatch< FW_BW > msMatch_;
 
 	Dict_t const* historicDict_;

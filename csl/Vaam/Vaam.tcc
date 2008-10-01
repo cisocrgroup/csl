@@ -5,7 +5,8 @@ namespace csl {
 	baseDic_( baseDic ),
 	filterDic_( 0 ),
 	levDEA_( 0 ), // Here the default levenshtein threshold is specified
-	maxNrOfPatterns_( 1000 )
+	minNrOfPatterns_( 0 ),
+	maxNrOfPatterns_( Vaam::INFINITE )
     {
 	patternGraph_.loadPatterns( patternFile );
     }
@@ -78,7 +79,9 @@ namespace csl {
 	    	for( typename StackItem::iterator position = stack_.at( depth - patPos.getDepth() ).begin();
 		     position != stack_.at( depth - patPos.getDepth() ).end();
 		     ++position, ++count ) {
-		    if( position->getNrOfPatternsApplied() == maxNrOfPatterns_ )
+
+		    // check if maxNrOfPatterns_ is reached already
+		    if( ( maxNrOfPatterns_ != Vaam::INFINITE ) && ( position->getNrOfPatternsApplied() == maxNrOfPatterns_ ) )
 			continue;
 
 		    // for all right sides fitting the current leftSide
@@ -180,7 +183,10 @@ namespace csl {
 	interpretation.getInstruction().applyTo( &word );
 	interpretation.setWord( word ); 
 
-	if( filterDic_ && filterDic_->lookup( interpretation.getWord() ) ) { // if there's a filterDic_ and interpretation.word is in it
+	if( ( filterDic_ && filterDic_->lookup( interpretation.getWord() ) )  || // if there's a filterDic_ and interpretation.word is in it or ..
+	    ( interpretation.getInstruction().size() < minNrOfPatterns_ )
+
+	    ) {
 	    return;
 	}
 

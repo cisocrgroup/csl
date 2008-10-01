@@ -69,19 +69,49 @@ namespace csl {
 
 	// a standard variant
 	CPPUNIT_ASSERT( vaam.query( std::wstring( L"xachen" ), &answers ) );
+	CPPUNIT_ASSERT( answers.size() == 1 );
+	Interpretation& answer = answers.at( 0 ); 
+	CPPUNIT_ASSERT( answer.getBaseWord() == L"aachen" );
+	CPPUNIT_ASSERT( answer.getInstruction().size() == 1 );
+	CPPUNIT_ASSERT( answer.getInstruction().at( 0 ).getLeft() == L"a" );
+	CPPUNIT_ASSERT( answer.getInstruction().at( 0 ).getRight() == L"x" );
 
-	std::wcout<<__FILE__<<":"<<__LINE__<<std::endl;
+	answers.clear();
+
+	///////////// MAX NR OF PATTERNS ///////////////////////
+	// with at most 0 variants, this should be no variant
+	vaam.setMaxNrOfPatterns( 0 );
+	CPPUNIT_ASSERT( ! vaam.query( std::wstring( L"xachen" ), &answers ) );
+	// with at most 1 variant, this should work again
+	vaam.setMaxNrOfPatterns( 1 );
+	CPPUNIT_ASSERT( vaam.query( std::wstring( L"xachen" ), &answers ) );
+	// but not a word with 2 patterns
+	CPPUNIT_ASSERT( ! vaam.query( std::wstring( L"kleintheyle" ), &answers ) );
+
+	// switch back to an infinite nr of patterns
+	vaam.setMaxNrOfPatterns( Vaam<>::INFINITE );
+	CPPUNIT_ASSERT( vaam.query( std::wstring( L"kleintheyle" ), &answers ) );
+
+
+	///////////// MIN NR OF PATTERNS ///////////////////////
+
+	// default should be 0
+	CPPUNIT_ASSERT( vaam.query( std::wstring( L"aachen" ), &answers ) );
+
+	vaam.setMinNrOfPatterns( 1 );
+	CPPUNIT_ASSERT( ! vaam.query( std::wstring( L"aachen" ), &answers ) );
+	
+	vaam.setMinNrOfPatterns( 2 );
+	CPPUNIT_ASSERT( ! vaam.query( std::wstring( L"xachen" ), &answers ) );
+	CPPUNIT_ASSERT( vaam.query( std::wstring( L"xxchen" ), &answers ) );
+	
+	vaam.setMinNrOfPatterns( 0 );
+
+
+	///////// FILTER DIC ///////////////////////////////
 
 	// without the filterDic_ this should be a variant
 	CPPUNIT_ASSERT( vaam.query( std::wstring( L"hanne" ), &answers ) );
-	CPPUNIT_ASSERT( answers.size() == 1 );
-	Interpretation& answer = answers.at( 0 ); 
-	CPPUNIT_ASSERT( answer.getBaseWord() == L"kanne" );
-	CPPUNIT_ASSERT( answer.getInstruction().size() == 1 );
-	CPPUNIT_ASSERT( answer.getInstruction().at( 0 ).getLeft() == L"k" );
-	CPPUNIT_ASSERT( answer.getInstruction().at( 0 ).getRight() == L"h" );
-
-	std::wcout<<__FILE__<<":"<<__LINE__<<std::endl;
 
 	// now it should be filtered
 	vaam.setFilterDic( filterDic );

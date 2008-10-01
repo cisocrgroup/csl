@@ -84,6 +84,9 @@ namespace csl {
 	typedef typename MinDic_t::State MDState_t;
 
     public:
+
+	static const size_t INFINITE = (size_t)-1;
+
 	/**
 	 * @brief A trivial construtor, taking the input ressources as arguments
 	 *

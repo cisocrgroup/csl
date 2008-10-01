@@ -6,9 +6,7 @@
 using namespace csl;
 
 int main( int argc, const char** argv ) {
-    // setlocale(LC_CTYPE, "de_DE.UTF-8");  /*Setzt das Default Encoding für das Programm */
-	std::locale::global( CSL_UTF8_LOCALE );
-	std::wcout.imbue(CSL_UTF8_LOCALE);
+    std::locale::global( std::locale("") ); // set the environment's default locale
 
     Getopt options( argc, argv );
 

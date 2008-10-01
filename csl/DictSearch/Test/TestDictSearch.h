@@ -25,31 +25,57 @@ namespace csl {
 	    DictSearch::CandidateSet result;
 
 	    // lookup in modern dict with dlev 0
-	    ds.setModern( "../csl/DictSearch/Test/dic1.fbdic", 0 );
-	    ds.query( L"komma", result );
+	    ds.setModern( "../csl/DictSearch/Test/small.modern.fbdic", 0 );
+	    ds.query( L"teile", &result );
 	    CPPUNIT_ASSERT( result.size() == 1 );
-	    CPPUNIT_ASSERT( result.at( 0 ).getWord() == L"komma"  );
+	    CPPUNIT_ASSERT( result.at( 0 ).getWord() == L"teile"  );
 	    CPPUNIT_ASSERT( result.at( 0 ).getInstruction().empty() );
 
 	    // change dlev to 1, 2
 	    result.clear();
 	    ds.setModernDlev( 1 );
-	    ds.query( L"komma", result );
+	    ds.query( L"teile", &result );
 	    CPPUNIT_ASSERT( result.size() == 2 );
 
 	    ds.setModernDlev( 2 );
 	    result.clear();
-	    ds.query( L"komma", result );
+	    ds.query( L"teile", &result );
+	    std::sort( result.begin(), result.end() );
 	    CPPUNIT_ASSERT( result.size() == 3 );
+	    CPPUNIT_ASSERT( result.at( 0 ).getWord() == L"teile"  );
+	    CPPUNIT_ASSERT( result.at( 1 ).getWord() == L"teilen"  );
+	    CPPUNIT_ASSERT( result.at( 2 ).getWord() == L"teller"  );
 
-	    // init the hpothetical dic, with dlev 0
+	    // init the hpothetic dic, with dlev 0
 	    ds.initHypothetic( "../csl/DictSearch/Test/small.patterns.txt", 0 );
 	    result.clear();
-	    ds.query( L"komma", result );
-	    CPPUNIT_ASSERT( result.size() == 3 );
+	    ds.query( L"theyle", &result );
+	    std::sort( result.begin(), result.end() );
+	    CPPUNIT_ASSERT( result.size() == 2 );
 
+	    // set dlev=2 for hpothetic dic
+	    ds.setHypotheticDlev( 2 );
+	    result.clear();
+	    ds.query( L"teile", &result );
+	    std::sort( result.begin(), result.end() );
+	    CPPUNIT_ASSERT( result.size() == 8 );
+	    std::wstring resultWords[8] = { 
+		L"teile",L"teilen",L"teyle",L"theile",L"teller",L"theilen",L"teylen",L"theyle"
+	    };
+	    
+	    size_t n = 0;
+	    for( DictSearch::CandidateSet::const_iterator it = result.begin(); it != result.end(); ++it, ++n ) {
+		CPPUNIT_ASSERT( it->getWord() == resultWords[ n ] );
+	    }
+	    
+	    //////////////  ADD A HISTORIC DIC ////////////////////////
+	    ds.setHistoric( "../csl/DictSearch/Test/small.historic.fbdic", 0 );
+	    result.clear();
+	    ds.query( L"theile", &result );
+	    std::sort( result.begin(), result.end() );
+	    CPPUNIT_ASSERT( result.size() == 9 );
 	    for( DictSearch::CandidateSet::const_iterator it = result.begin(); it != result.end(); ++it ) {
-		it->print();
+		it->print();std::wcout<<std::endl;
 	    }
 	    
 	    
