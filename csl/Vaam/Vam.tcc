@@ -163,17 +163,19 @@ namespace csl {
 
 	interpretation.setBaseWord( baseWord_ ); 
 	reportMatch_rec( cur, &interpretation );
-	interpretation.levDistance = 0;
-	interpretation.baseWordScore = baseWordScore;
+	interpretation.setLevDistance( 0 );
+	interpretation.setBaseWordScore( baseWordScore );
 
 	// find out what word we're talking about by applying the pattern to the baseWord
-	interpretation.word = baseWord_; interpretation.instruction.applyTo( &( interpretation.word ) );
+	std::wstring word = baseWord_;
+	interpretation.getInstruction().applyTo( &word );
+	interpretation.setWord( word ); 
 
-	if( filterDic_ && filterDic_->lookup( interpretation.word ) ) { // if there's a filterDic_ and interpretation.word is in it
+	if( filterDic_ && filterDic_->lookup( interpretation.getWord() ) ) { // if there's a filterDic_ and interpretation.word is in it
 	    return;
 	}
 
-	if( interpretation.instruction.size() < minNrOfPatterns_ ) { // if we have less than the minimal nr of patterns
+	if( interpretation.getInstruction().size() < minNrOfPatterns_ ) { // if we have less than the minimal nr of patterns
 	    return;
 	}
 
@@ -189,7 +191,7 @@ namespace csl {
 	}
 
 	if( ! cur->posPattern_.empty() ) {
-	    interpretation->instruction.push_back( cur->posPattern_ );
+	    interpretation->getInstruction().push_back( cur->posPattern_ );
 	}
     }
 

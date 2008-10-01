@@ -14,35 +14,26 @@ namespace csl {
      */
     class Interpretation {
     public:
-	enum Status { undef, modern, approved_historic, hypothetical };
+
+	// @{
+	// @name Constructors/ Destructors
 
 	Interpretation() :
-	    baseWordScore( -1 ),
-	    levDistance( 0 ),
-	    status_( undef )
+	    baseWordScore_( -1 ),
+	    levDistance_( 0 )
 	    {
 	    }
 
-	/**
-	 * @brief erase all values from the object and bring it into a state as if just created.
-	 */
-	void clear() {
-	    baseWordScore = -1;
-	    levDistance = 0;
-	    word.clear();
-	    baseWord_.clear();
-	    instruction.clear();
-	}
+	// @} // END Constructors/ Destructors
+
+	// @{
+	// @name Getters
 
 	/**
 	 * @brief returns the variant/error string
 	 */
 	std::wstring const& getWord() const {
-	    return word;
-	}
-
-	void setBaseWord( std::wstring const& w ) {
-	    baseWord_ = w;
+	    return word_;
 	}
 
 	/**
@@ -52,57 +43,73 @@ namespace csl {
 	    return baseWord_;
 	}
 
+	size_t getLevDistance() const {
+	    return levDistance_;
+	}
+
+	size_t getBaseWordScore() const {
+	    return baseWordScore_;
+	}
+
 	/**
 	 * @brief returns the instruction that was used to turn @c baseWord into @c word 
 	 */
-	Instruction const& getInstruction() {
-	    return instruction;
+	Instruction& getInstruction() {
+	    return instruction_;
 	}
 
 	/**
-	 * @brief const version of getInstruction
+	 * @brief const version of getInstruction()
 	 */
 	Instruction const& getInstruction() const {
-	    return instruction;
+	    return instruction_;
 	}
 
-	void setStatus( Status const& st ) {
-	    status_ = st;
+	// @} // END Getters
+
+	// @{
+	// @name Setters
+
+	void setWord( std::wstring const& w ) {
+	    word_ = w;
 	}
 
-	Status getStatus() const {
-	    return status_;
+	void setBaseWord( std::wstring const& w ) {
+	    baseWord_ = w;
 	}
 
-	/// the suggested correction candidate
-	std::wstring word;
+	void setLevDistance( size_t dist ) {
+	    levDistance_ = dist;
+	}
 
-
-	/// the corresponding Instruction: word = baseWord + instruction
-	Instruction instruction;
+	void setBaseWordScore( size_t score ) {
+	    baseWordScore_ = score;
+	}
 
 	/**
-	 * @brief A score for the baseWord as was annotated in the dictionary or some other resource
-	 *
-	 * Most likely this would be a frequency score.
+	 * @brief erase all values from the object and bring it into a state as if just created.
 	 */
-	int baseWordScore;
+	void clear() {
+	    word_.clear();
+	    baseWord_.clear();
+	    levDistance_ = 0;
+	    baseWordScore_ = -1;
+	    instruction_.clear();
+	}
+	// @} // END Setters
 
-	/**
-	 * @brief 
-	 *
-	 */
-	size_t levDistance;
 
+	// @{
+	// @name Pretty-Print
 	/**
 	 * @brief prints a string-representation of the interpretation to stdout or to another std::wstream 
 	 * specified as argument.
 	 */
 	void print( std::wostream& os = std::wcout ) const {
-	    os<<word<<":"<<baseWord_<<"+";
-	    instruction.print( os );
-	    os<<",dist="<<levDistance;
-	    os<<",baseWordScore="<<baseWordScore;
+	    os<<word_<<":"<<baseWord_<<"+";
+	    instruction_.print( os );
+	    os<<",dist="<<levDistance_;
+	    os<<",baseWordScore="<<baseWordScore_;
 	}
 
 	/**
@@ -110,7 +117,7 @@ namespace csl {
 	 */
 	void print_v2( std::wostream& os = std::wcout ) const {
 	    size_t begin = 0;
-	    for( csl::Instruction::const_iterator posPattern = instruction.begin(); posPattern != instruction.end(); ++posPattern ) {
+	    for( csl::Instruction::const_iterator posPattern = instruction_.begin(); posPattern != instruction_.end(); ++posPattern ) {
 		os<<baseWord_.substr( begin, posPattern->getPosition() - begin ); // print unchanged substring left of the pattern
 		os<<"["<<posPattern->getLeft()<<"->"<<posPattern->getRight()<<"]"; // print pattern
 		begin = posPattern->getPosition() + posPattern->getLeft().length();
@@ -118,11 +125,33 @@ namespace csl {
 	    os<<baseWord_.substr( begin ); // print unchanged suffix of the baseWord
 	    
 	}
+
+	// @} // END Pretty-Print
+
     private:
-	Status status_;
+	/// the suggested correction candidate
+	std::wstring word_;
 
 	/// the underlying word in the modern dictionary
 	std::wstring baseWord_;
+
+	/// the corresponding Instruction: word = baseWord + instruction
+	Instruction instruction_;
+
+	/**
+	 * @brief 
+	 *
+	 */
+	size_t levDistance_;
+
+	/**
+	 * @brief A score for the baseWord as was annotated in the dictionary or some other resource
+	 *
+	 * Most likely this would be a frequency score.
+	 */
+	int baseWordScore_;
+
+
 	    
     }; // class Interpretation
 

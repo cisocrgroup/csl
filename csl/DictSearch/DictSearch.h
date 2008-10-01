@@ -33,12 +33,20 @@ namespace csl {
 		dictID_( UNDEF )
 		{} 
 
+	    bool operator<( Interpretation const& other ) const {
+		size_t compareSumOfOperations = 
+		    ( getInstruction().size() + getLevDistance() ) - 
+		    ( other.getInstruction().size() + other.getLevDistance() );
+
+		    
+	    }
+
 	    void setDictID( DictID dictID ) { dictID_ = dictID; }
 	    DictID getDictID() const { return dictID_; }
 	private:
-	     DictID dictID_;
+	    DictID dictID_;
 	}; // class Interpretation
-
+	
 
 
 	class CandidateSet : public csl::LevFilter::CandidateReceiver,
@@ -47,10 +55,10 @@ namespace csl {
 	public:
 	    void receive( const wchar_t* str, int levDistance, int annotation ) {
 		csl::Interpretation cslInt;
-		cslInt.word = str;
+		cslInt.setWord( str );
 		cslInt.setBaseWord( str );
-		cslInt.baseWordScore = annotation;
-		cslInt.levDistance = levDistance;
+		cslInt.setBaseWordScore( annotation );
+		cslInt.setLevDistance( levDistance );
 		receive( cslInt );
 	    }
 	    
@@ -64,8 +72,6 @@ namespace csl {
 	    void reset() {
 		clear();
 	    }
-
-	    
 
 	private:
 	    DictID currentDictID_;

@@ -172,13 +172,15 @@ namespace csl {
 
 	interpretation.setBaseWord( baseWord_ ); 
 	reportMatch_rec( cur, &interpretation );
-	interpretation.levDistance = levDEA_.getDistance( cur->levPos_ );
-	interpretation.baseWordScore = baseWordScore;
+	interpretation.setLevDistance( levDEA_.getDistance( cur->levPos_ ) );
+	interpretation.setBaseWordScore( baseWordScore );
 
 	// find out what word we're talking about by applying the pattern to the baseWord
-	interpretation.word = baseWord_; interpretation.instruction.applyTo( &( interpretation.word ) );
+	std::wstring word = baseWord_;
+	interpretation.getInstruction().applyTo( &word );
+	interpretation.setWord( word ); 
 
-	if( filterDic_ && filterDic_->lookup( interpretation.word ) ) { // if there's a filterDic_ and interpretation.word is in it
+	if( filterDic_ && filterDic_->lookup( interpretation.getWord() ) ) { // if there's a filterDic_ and interpretation.word is in it
 	    return;
 	}
 
@@ -196,7 +198,7 @@ namespace csl {
 	}
 
 	if( ! cur->posPattern_.empty() ) {
-	    interpretation->instruction.push_back( cur->posPattern_ );
+	    interpretation->getInstruction().push_back( cur->posPattern_ );
 	}
     }
 

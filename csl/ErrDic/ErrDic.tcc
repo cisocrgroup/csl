@@ -32,7 +32,7 @@ namespace csl {
 	Entry entry;
 	if( lookup( key.c_str(), &entry ) ) {
 	    answer->clear();
-	    answer->word = key;
+	    answer->setWord( key );
 	    answer->setBaseWord( entry.getOriginal() );
 
 	    std::wstring patString( entry.getErrorPattern() );
@@ -40,7 +40,7 @@ namespace csl {
 	    if( delimiter == std::wstring::npos ) {
 		throw exceptions::cslException( "csl::ErrDic: Bad pattern format in ErrDic" );
 	    }
-	    answer->instruction.push_back( PosPattern( patString.substr( 0, delimiter ), patString.substr( delimiter + 1 ), 42 ) );
+	    answer->getInstruction().push_back( PosPattern( patString.substr( 0, delimiter ), patString.substr( delimiter + 1 ), 42 ) );
 
 	    return true;
 	}

@@ -50,13 +50,13 @@ namespace csl {
 	    if( answers_.size() == 1 ) {
 		*answer = answers_.at( 0 );
 	    }
-	    else { // disambiguate: choose the interpreatation with the best baseWordScore
+	    else { // disambiguate: choose the interpretation with the best baseWordScore
 		std::vector< Interpretation >::const_iterator it = answers_.begin();
 		*answer = *it;++it;
 		for( ;
 		     it != answers_.end();
 		     ++it ) {
-		    if( it->baseWordScore > answer->baseWordScore ) {
+		    if( it->getBaseWordScore() > answer->getBaseWordScore() ) {
 			// std::wcout<<"Replace: "<<answer->baseWord<<"-->"<<it->baseWord<<std::endl;
 			*answer = *it;
 		    }

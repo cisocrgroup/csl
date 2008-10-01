@@ -77,9 +77,9 @@ namespace csl {
 	CPPUNIT_ASSERT( answers.size() == 1 );
 	Interpretation& answer = answers.at( 0 ); 
 	CPPUNIT_ASSERT( answer.getBaseWord() == L"kanne" );
-	CPPUNIT_ASSERT( answer.instruction.size() == 1 );
-	CPPUNIT_ASSERT( answer.instruction.at( 0 ).getLeft() == L"k" );
-	CPPUNIT_ASSERT( answer.instruction.at( 0 ).getRight() == L"h" );
+	CPPUNIT_ASSERT( answer.getInstruction().size() == 1 );
+	CPPUNIT_ASSERT( answer.getInstruction().at( 0 ).getLeft() == L"k" );
+	CPPUNIT_ASSERT( answer.getInstruction().at( 0 ).getRight() == L"h" );
 
 	std::wcout<<__FILE__<<":"<<__LINE__<<std::endl;
 

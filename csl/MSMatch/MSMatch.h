@@ -63,7 +63,7 @@ namespace csl {
 	 * @brief returns the highest threshold to be set. The setting of a higher distance (in the constructor or with setDidtance() ) will 
 	 * trigger an exception
 	 */
-	inline static size_t getMaximumDistance() const {
+	inline static size_t getMaximumDistance() {
 	    return 3;
 	}
 
