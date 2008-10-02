@@ -18,7 +18,7 @@ int main( int argc, char** argv ) {
     if( argc == 3 && ! strcmp(argv[2],"-1") ) falseFriends = true;
     
     std::wstring line;
-    size_t count;
+    size_t count = 0;
     while( std::getline( std::wcin, line ).good() ) {
 	if( ! (++count % 100000) ) std::wcerr<<count / 1000 <<"k lines processed"<<std::endl;
 	size_t sep = line.find( ' ' );

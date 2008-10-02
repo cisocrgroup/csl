@@ -38,7 +38,7 @@ int main( int argc, char** argv ) {
 	    try {
 		matcher.query( query, list );
 	    } catch( exceptions::bufferOverflow exc ) {
-		fprintf( stderr, "%s: %d\n",exc.what(), list.getSize() );
+		fprintf( stderr, "%s: %lu\n",exc.what(), (unsigned long)list.getSize() );
 	    }
 
 // 	    std::cout<<list.getSize()<<" hits."<<std::endl;

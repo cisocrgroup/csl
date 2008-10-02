@@ -19,8 +19,8 @@ namespace csl {
 	// @name Constructors/ Destructors
 
 	Interpretation() :
-	    baseWordScore_( -1 ),
-	    levDistance_( 0 )
+	    levDistance_( 0 ),
+	    baseWordScore_( -1 )
 	    {
 	    }
 

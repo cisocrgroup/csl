@@ -19,7 +19,7 @@ namespace csl {
      * @todo trouble with signed/unsigned
      */
     void Alphabet::addChar( wchar_t c ) {
-	if( c >= Global::maxNrOfChars ) {
+	if( (size_t)c >= Global::maxNrOfChars ) {
 	    throw exceptions::outOfRange( "Alphabet::addChar: add requested for out-of-range codepoint." );
 	}
 	// printf( "csl::Alphabet::addChar: Add char %lc\n", c ); // DEBUG
@@ -30,7 +30,7 @@ namespace csl {
     }
 
     bool Alphabet::hasChar( wchar_t c ) const {
-	if( c >= Global::maxNrOfChars )
+	if( (size_t)c >= Global::maxNrOfChars )
 	    throw exceptions::outOfRange( "Alphabet::hasChar: lookup requested for out-of-range codepoint." );
 	return hasChar_[ c ];
     }

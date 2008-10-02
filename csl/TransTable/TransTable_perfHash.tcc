@@ -381,11 +381,11 @@ namespace csl {
 	    if ( cells_[i].isTransition() ) {
 		StateId_t base = i - cells_[i].getKey();
 
-		printf( "%d->%d[label=\"%lc (%d)\"] //DOTCODE\n", base, cells_[i].getValue(), cells_[i].getKey(), cells_[i].getThirdValue()  );
+		wprintf( L"%d->%d[label=\"%lc (%d)\"] //DOTCODE\n", base, cells_[i].getValue(), cells_[i].getKey(), cells_[i].getThirdValue()  );
 	    } else if ( cells_[i].isState() ) {
 		int peripheries = ( cells_[i].isFinalState() ) ? 2 : 1;
-		printf( "%d[peripheries=%d] //DOTCODE\n", i, peripheries );
-		printf( "%d->%d[label=\"%d,%d\"] //DOTCODE\n", i, i, cells_[i].getValue(),cells_[i].getThirdValue() ) ;
+		wprintf( L"%d[peripheries=%d] //DOTCODE\n", i, peripheries );
+		wprintf( L"%lu->%lu[label=\"%d,%d\"] //DOTCODE\n", (unsigned long)i, (unsigned long)i, cells_[i].getValue(),cells_[i].getThirdValue() ) ;
 		
 	    }
 	}

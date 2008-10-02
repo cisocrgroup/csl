@@ -1,6 +1,7 @@
 #ifndef CSL_DICTSEARCH_H
 #define CSL_DICTSEARCH_H CSL_DICTSEARCH_H
 
+#include<ostream>
 #include<csl/MinDic/MinDic.h>
 #include<csl/FBDic/FBDic.h>
 #include<csl/MSMatch/MSMatch.h>
@@ -22,6 +23,7 @@ namespace csl {
 
 	enum DictID { UNDEF, MODERN, HISTORIC };
 
+	static const size_t INFINITE = (size_t)-1;
 
 
 	class Interpretation : public csl::Interpretation {
@@ -44,7 +46,8 @@ namespace csl {
 
 		if     ( compareSumOfOperations < 0 ) return true;
 		else if( compareSumOfOperations > 0 ) return false;
-		else return dictID_ < other.getDictID();
+		else if( dictID_ != other.getDictID() ) return ( dictID_ < other.getDictID() );
+		else return ( getWord() < other.getWord() );
 	    }
 
 	    void setDictID( DictID dictID ) { dictID_ = dictID; }
@@ -53,11 +56,12 @@ namespace csl {
 		if( getDictID() == UNDEF ) return L"undef";
 		else if( getDictID() == MODERN ) return L"modern";
 		else if( getDictID() == HISTORIC ) return L"historic";
+		else return L"unknown";
 	    }
 
-	    void print() const {
-		csl::Interpretation::print();
-		std::wcout << "(" << getDictID_string() << ")";
+	    void print( std::wostream& os = std::wcout ) const {
+		csl::Interpretation::print( os );
+		os << "(" << getDictID_string() << ")";
 	    }
 
 	private:
@@ -95,6 +99,41 @@ namespace csl {
 	}; // class CandidateSet
 
 
+	class ConfigLookup {
+	    Dict_t const* dict_;
+	    bool disposeDict_;
+	    size_t dLevWordlengths_[4];
+	public:
+	    ConfigLookup() :
+		dict_( 0 ),
+		disposeDict_( false )
+		{
+		    setDLev( 0 );
+		}
+
+	    void setDict( Dict_t const& dict ) {
+		dict_ = &dict;
+		disposeDict_ = false;
+	    }
+
+	    void setDLev( size_t dLev ) {
+		if( dLev > 3 ) throw exceptions::LogicalError( "csl::DictSearch::ConfigLookup::setDLevStatic: choose a threshold in the range [0..3]" );
+		// set minWordLengths to 0 for all levDistances smaller or equal to dLev
+		for( size_t i = 0; i <= 3; ++i ) {
+		    dLevWordlengths_[i] = ( i <= dLev )? 0 : INFINITE;
+		}
+	    }
+
+	    void setDLevWordlengths( size_t wl0, size_t wl1 = DictSearch::INFINITE, size_t wl2 = DictSearch::INFINITE, size_t wl3 = DictSearch::INFINITE ) {
+		if( wl1 < wl0 || wl2 < wl1 || wl3 < wl2 ) throw exceptions::LogicalError( "csl::DictSearch::ConfigLookup::setDLevWordlengths: minimal wordlength for distance i must be greater than for distance i-1" );
+
+		dLevWordlengths_[0] = wl0;
+		dLevWordlengths_[1] = wl1;
+		dLevWordlengths_[2] = wl2;
+		dLevWordlengths_[3] = wl3;
+	    }
+	}; // class ConfigLookup
+
 	/**
 	 * @name Constructor/ Destructor
 	 */
@@ -107,6 +146,11 @@ namespace csl {
 	 * @name Configuration
 	 */
 	//@{
+
+
+	ConfigLookup& getConfigModern() {
+	    return configModern_;
+	}
 
 	/**
 	 * @brief set a modern dictionary and the levenshtein distance threshold for approximate lookup in it.
@@ -132,6 +176,10 @@ namespace csl {
 
 	/**
 	 * @brief determine the behaviour of the hypothetic dictionary.
+	 * @param patternFile 
+	 *
+	 * You can change the levenshtein threshold later. However, at the moment you can NOT change the pattern set afterwards.
+	 * Please notify the developers if you need such a feature.
 	 */
 	void initHypothetic( char const* patternFile, size_t dlev );
 
@@ -188,6 +236,9 @@ namespace csl {
 	bool disposeModernDict_;
 	size_t dlev_modern_;
 
+	ConfigLookup configModern_;
+
+	
 	Vaam< VaamDict_t >* vaam_;
 	size_t dlev_hypothetic_;
 	size_t dlev_maxNrOfPatterns_;
@@ -198,10 +249,24 @@ namespace csl {
 	bool disposeHistoricDict_;
 	size_t dlev_historic_;
 
+	class ConfigHistoric {
+	    Dict_t const* dict_;
+	    bool disposeDict_;
+	    size_t dlev_;
+	};
+
 
     }; // class DictSearch
 
 
 } // namespace csl
+
+namespace std {
+    inline wostream& operator<<( wostream& os, csl::DictSearch::Interpretation const& obj ) {
+	obj.print( os );
+	return os;
+    }
+}
+
 
 #endif

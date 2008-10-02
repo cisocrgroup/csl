@@ -62,6 +62,7 @@ namespace csl {
 
 	class iCandidateReceiver {
 	public:
+	    virtual ~iCandidateReceiver() {}
 	    virtual void receive( Interpretation const& interpretation ) = 0;
 	};
 

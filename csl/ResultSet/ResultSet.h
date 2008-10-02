@@ -44,7 +44,7 @@ namespace csl {
 		for( std::vector< Item >::iterator it = listBuffer_.begin(); it != listBuffer_.end(); ++it ) {
 		    list_.push_back( &( *it ) );
 		}
-		fprintf( stderr, "ResultSet realloc: capacity is now %d\n", listBuffer_.capacity() );
+		fprintf( stderr, "ResultSet realloc: capacity is now %lu\n", (unsigned long)listBuffer_.capacity() );
 	    }
 	    listBuffer_.push_back( Item( str, levDistance, annotation ) );
 	    list_.push_back( &( listBuffer_[listBuffer_.size() - 1] ) );

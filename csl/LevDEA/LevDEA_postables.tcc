@@ -118,7 +118,7 @@ namespace csl {
     void LevDEA::printTable() const {
 	size_t row, col;
 	for ( row = 0; row < z2k2; row++ ) {
-	    printf( "%d\t", row );
+	    printf( "%lu\t", (unsigned long)row );
 	    for ( col = 0; col < coresets; ++col ) {
 		printf( "(%d,%d)\t", table( row, col ).target, table( row, col ).move_pattern );
 	    }

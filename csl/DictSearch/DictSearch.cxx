@@ -6,12 +6,14 @@ namespace csl {
 
     DictSearch::DictSearch() :
 	modernDict_( 0 ),
-	dlev_modern_( 0 ),
 	disposeModernDict_( false ),
+	dlev_modern_( 0 ),
+	vaam_( 0 ),
+	dlev_hypothetic_( 0 ),
+	dlev_maxNrOfPatterns_( 0 ),
 	historicDict_( 0 ),
 	disposeHistoricDict_( false ),
-	dlev_historic_( 0 ),
-	vaam_( 0 )
+	dlev_historic_( 0 )
     {
     
     }
@@ -103,5 +105,6 @@ namespace csl {
     }
 
 } // namespace csl
+
 
 #endif

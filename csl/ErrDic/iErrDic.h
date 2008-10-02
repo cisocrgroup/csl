@@ -21,6 +21,8 @@ namespace csl {
     class iErrDic {
     public:
 
+	virtual ~iErrDic() {}
+
 	/**
 	 * @brief For instaces of a VariantRecognizer which returns only one interpretation
 	 *

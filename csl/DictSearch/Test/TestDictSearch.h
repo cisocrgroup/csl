@@ -60,11 +60,12 @@ namespace csl {
 	    std::sort( result.begin(), result.end() );
 	    CPPUNIT_ASSERT( result.size() == 8 );
 	    std::wstring resultWords[8] = { 
-		L"teile",L"teilen",L"teyle",L"theile",L"teller",L"theilen",L"teylen",L"theyle"
+		L"teile", L"teilen", L"teyle", L"theile", L"teller", L"teylen", L"theilen", L"theyle"
 	    };
 	    
 	    size_t n = 0;
 	    for( DictSearch::CandidateSet::const_iterator it = result.begin(); it != result.end(); ++it, ++n ) {
+//		it->print(); std::wcout << std::endl;
 		CPPUNIT_ASSERT( it->getWord() == resultWords[ n ] );
 	    }
 	    
@@ -74,11 +75,9 @@ namespace csl {
 	    ds.query( L"theile", &result );
 	    std::sort( result.begin(), result.end() );
 	    CPPUNIT_ASSERT( result.size() == 9 );
-	    for( DictSearch::CandidateSet::const_iterator it = result.begin(); it != result.end(); ++it ) {
-		it->print();std::wcout<<std::endl;
-	    }
-	    
-	    
+
+
+	    CPPUNIT_ASSERT( false );
 
 	}
 	
