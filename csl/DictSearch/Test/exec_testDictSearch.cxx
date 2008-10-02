@@ -7,6 +7,8 @@
 
 int main() {
 
+
+
     // Adds the test to the list of test to run
     CppUnit::TextUi::TestRunner runner;
     runner.addTest( csl::TestDictSearch::suite() );

@@ -100,9 +100,6 @@ namespace csl {
 
 
 	class ConfigLookup {
-	    Dict_t const* dict_;
-	    bool disposeDict_;
-	    size_t dLevWordlengths_[4];
 	public:
 	    ConfigLookup() :
 		dict_( 0 ),
@@ -111,28 +108,71 @@ namespace csl {
 		    setDLev( 0 );
 		}
 
+	    ~ConfigLookup() {
+		if( dict_ && disposeDict_ ) delete( dict_ );
+	    }
+
+
+	    Dict_t const* getDict() const {
+		return dict_;
+	    }
+
 	    void setDict( Dict_t const& dict ) {
 		dict_ = &dict;
 		disposeDict_ = false;
 	    }
 
+	    void setDict( char const* dictFile ) {
+		setDict( *( new Dict_t( dictFile ) ) );
+		disposeDict_ = true;
+	    }
+
 	    void setDLev( size_t dLev ) {
 		if( dLev > 3 ) throw exceptions::LogicalError( "csl::DictSearch::ConfigLookup::setDLevStatic: choose a threshold in the range [0..3]" );
 		// set minWordLengths to 0 for all levDistances smaller or equal to dLev
-		for( size_t i = 0; i <= 3; ++i ) {
-		    dLevWordlengths_[i] = ( i <= dLev )? 0 : INFINITE;
+		for( size_t i = 1; i <= 3; ++i ) {
+		    minWordlengths_[i] = ( i <= dLev )? 0 : INFINITE;
 		}
 	    }
 
-	    void setDLevWordlengths( size_t wl0, size_t wl1 = DictSearch::INFINITE, size_t wl2 = DictSearch::INFINITE, size_t wl3 = DictSearch::INFINITE ) {
-		if( wl1 < wl0 || wl2 < wl1 || wl3 < wl2 ) throw exceptions::LogicalError( "csl::DictSearch::ConfigLookup::setDLevWordlengths: minimal wordlength for distance i must be greater than for distance i-1" );
+	    void setDLevWordlengths( size_t wl1, size_t wl2 = DictSearch::INFINITE, size_t wl3 = DictSearch::INFINITE ) {
+		if( wl2 < wl1 || wl3 < wl2 ) throw exceptions::LogicalError( "csl::DictSearch::ConfigLookup::setDLevWordlengths: minimal wordlength for distance i must be greater than for distance i-1" );
 
-		dLevWordlengths_[0] = wl0;
-		dLevWordlengths_[1] = wl1;
-		dLevWordlengths_[2] = wl2;
-		dLevWordlengths_[3] = wl3;
+		minWordlengths_[1] = wl1;
+		minWordlengths_[2] = wl2;
+		minWordlengths_[3] = wl3;
 	    }
+	    
+	    size_t getDLevByWordlength( size_t wordLength ) const {
+		for( int i = 3; i >= 1; --i ) {
+		    if( ( minWordlengths_[i] != INFINITE ) && ( minWordlengths_[i] <= wordLength ) ) return i;
+		}
+		return 0;
+	    }
+
+	private:
+	    Dict_t const* dict_;
+	    bool disposeDict_;
+	    size_t minWordlengths_[4];
+
 	}; // class ConfigLookup
+
+	class ConfigHypothetic : public ConfigLookup {
+	public:
+	    ConfigHypothetic() :
+		maxNrOfPatterns_( 1 )
+		{
+	    }
+	    size_t getMaxNrOfPatterns() const {
+		return maxNrOfPatterns_;
+	    }
+	    void setMaxNrOfPatterns( size_t max ) {
+		maxNrOfPatterns_ = max;
+	    }
+	private:
+	    size_t maxNrOfPatterns_;
+	}; 
+
 
 	/**
 	 * @name Constructor/ Destructor
@@ -152,70 +192,24 @@ namespace csl {
 	    return configModern_;
 	}
 
-	/**
-	 * @brief set a modern dictionary and the levenshtein distance threshold for approximate lookup in it.
-	 *
-	 * @param dictFile a path to a binary file storing a csl::FBDic (produced wit hthe tool compileFBDic )
-	 * @param dlev a levenshtein distance threshold 0 \le dlev \le 3
-	 */
-	void setModern( char const* fbDictFile, size_t dlev );
-	/**
-	 * @brief set a modern dictionary and the levenshtein distance threshold for approximate lookup in it.
-	 *
-	 * @param dictFile a path to a binary file storing a csl::FBDic (produced with the tool compileFBDic )
-	 * @param dlev a levenshtein distance threshold between 0 and 3
-	 *
-	 * DictSearch keeps only a reference of the dictionary, so make sure that dict lives as long as you need it for DictSearch
-	 */
-	void setModern( Dict_t const& dict, size_t dlev );
+	ConfigLookup& getConfigHistoric() {
+	    return configHistoric_;
+	}
+
+	ConfigHypothetic& getConfigHypothetic() {
+	    return configHypothetic_;
+	}
 
 	/**
-	 * @brief set a levenshtein distance threshold for the modern dictionary approximate lookup
-	 */
-	void setModernDlev( size_t dlev );
-
-	/**
-	 * @brief determine the behaviour of the hypothetic dictionary.
-	 * @param patternFile 
+	 * @brief initialise the hypothetic dictionary.
+	 * @param patternFile A file containing a list of rewrite patterns. Consult csl::PatternSet for details
 	 *
-	 * You can change the levenshtein threshold later. However, at the moment you can NOT change the pattern set afterwards.
+	 * At the moment you can NOT change the pattern set afterwards.
 	 * Please notify the developers if you need such a feature.
 	 */
-	void initHypothetic( char const* patternFile, size_t dlev );
-
-	/**
-	 * @brief set a threshold for the number of pattern applications in the hypothetic dictionary
-	 */
-	void setHypotheticMaxNrOfPatterns( size_t max );
-
-	/**
-	 * @brief set a levenshtein distance threshold for the hypothetic dictionary approximate lookup
-	 */
-	void setHypotheticDlev( size_t dlev );
+	void initHypothetic( char const* patternFile );
 
 	
-	/**
-	 * @brief set a historical dictionary and the levenshtein distance threshold for approximate lookup in it.
-	 *
-	 * @param dictFile a path to a binary file storing a csl::FBDic (produced wit hthe tool compileFBDic )
-	 * @param dlev a levenshtein distance threshold 0 \le dlev \le 3
-	 */
-	void setHistoric( char const* dictFile, size_t dlev );
-
-	/**
-	 * @brief set a historical dictionary and the levenshtein distance threshold for approximate lookup in it.
-	 *
-	 * @param dictFile a path to a binary file storing a csl::FBDic (produced with the tool compileFBDic )
-	 * @param dlev a levenshtein distance threshold between 0 and 3
-	 *
-	 * DictSearch keeps only a reference of the dictionary, so make sure that dict lives as long as you need it for DictSearch
-	 */
-	void setHistoric( Dict_t const& dictFile, size_t dlev );
-
-	/**
-	 * @brief set a levenshtein distance threshold for the historic dictionary approximate lookup
-	 */
-	void setHistoricDlev( size_t dlev );
 
 	//@} // END Configuration methods
 
@@ -232,29 +226,16 @@ namespace csl {
 	//@} // END Lookup methods
 
     private:
-	Dict_t const* modernDict_;
-	bool disposeModernDict_;
-	size_t dlev_modern_;
 
 	ConfigLookup configModern_;
-
+	ConfigLookup configHistoric_;
+	ConfigHypothetic configHypothetic_;
 	
 	Vaam< VaamDict_t >* vaam_;
 	size_t dlev_hypothetic_;
 	size_t dlev_maxNrOfPatterns_;
 
 	MSMatch< FW_BW > msMatch_;
-
-	Dict_t const* historicDict_;
-	bool disposeHistoricDict_;
-	size_t dlev_historic_;
-
-	class ConfigHistoric {
-	    Dict_t const* dict_;
-	    bool disposeDict_;
-	    size_t dlev_;
-	};
-
 
     }; // class DictSearch
 
