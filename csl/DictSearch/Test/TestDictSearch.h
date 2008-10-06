@@ -27,6 +27,7 @@ namespace csl {
 
 	    // lookup in modern dict with dlev 0
 //	    ds.setModern( "../csl/DictSearch/Test/small.modern.fbdic", 0 );
+
 	    ds.getConfigModern().setDict( "../csl/DictSearch/Test/small.modern.fbdic" );
 	    ds.getConfigModern().setDLev( 0 );
 	    ds.query( L"teile", &result );
@@ -74,7 +75,7 @@ namespace csl {
 	    }
 	    
 	    //////////////  ADD A HISTORIC DIC ////////////////////////
-	    ds.getConfigHistoric().setDict( "../csl/DictSearch/Test/small.historic.fbdic" );
+	    ds.getConfigHistoric().setDict( "../csl/DictSearch/Test/small.historical.fbdic" );
 	    ds.getConfigHistoric().setDLev( 0 );
 	    result.clear();
 	    ds.query( L"theile", &result );
