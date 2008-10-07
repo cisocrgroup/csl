@@ -15,8 +15,10 @@ namespace csl {
     class Interpretation {
     public:
 
+	/**
+	 * @name Constructors/ Destructors
+	 */
 	// @{
-	// @name Constructors/ Destructors
 
 	Interpretation() :
 	    levDistance_( 0 ),
@@ -26,27 +28,38 @@ namespace csl {
 
 	// @} // END Constructors/ Destructors
 
-	// @{
-	// @name Getters
 
 	/**
-	 * @brief returns the variant/error string
+	 * @name Getters
+	 */
+	// @{
+
+	/**
+	 * @brief returns the plain string
 	 */
 	std::wstring const& getWord() const {
 	    return word_;
 	}
 
 	/**
-	 * @brief returns the baseWord, usually a word from a dictionary that was changed into a variant
+	 * @brief returns the so-called @c baseWord from the dictionary, that was changed into a variant with the given @c Instruction
+	 *
+	 * If the instruction is empty, then @c getWord() == @c getBaseWord()
 	 */
 	std::wstring const& getBaseWord() const {
 	    return baseWord_;
 	}
 
+	/**
+	 * @brief returns the levenshtein distance to the query
+	 */
 	size_t getLevDistance() const {
 	    return levDistance_;
 	}
 
+	/**
+	 * @brief returns the score that was annotated with the @c baseWord in the dictionary.
+	 */
 	size_t getBaseWordScore() const {
 	    return baseWordScore_;
 	}
@@ -67,8 +80,10 @@ namespace csl {
 
 	// @} // END Getters
 
+	/**
+	 * @name Setters
+	 */
 	// @{
-	// @name Setters
 
 	void setWord( std::wstring const& w ) {
 	    word_ = w;
@@ -99,8 +114,10 @@ namespace csl {
 	// @} // END Setters
 
 
+	/**
+	 * @name Pretty-print
+	 */
 	// @{
-	// @name Pretty-Print
 	/**
 	 * @brief prints a string-representation of the interpretation to stdout or to another std::wstream 
 	 * specified as argument.

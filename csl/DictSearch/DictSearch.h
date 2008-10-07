@@ -70,10 +70,16 @@ namespace csl {
 	
 
 
+	/**
+	 * 
+	 */
 	class CandidateSet : public csl::LevFilter::CandidateReceiver,
 			     public csl::Vaam< VaamDict_t >::iCandidateReceiver,
-			     public std::vector< csl::DictSearch::Interpretation > {
+			     std::vector< csl::DictSearch::Interpretation > {
 	public:
+	    typedef std::vector< csl::DictSearch::Interpretation >::iterator iterator;
+	    typedef std::vector< csl::DictSearch::Interpretation >::const_iterator const_iterator;
+
 	    void receive( const wchar_t* str, int levDistance, int annotation ) {
 		csl::Interpretation cslInt;
 		cslInt.setWord( str );
@@ -91,8 +97,58 @@ namespace csl {
 	    void setCurrentDictID( DictID id ) { currentDictID_ = id; }
 
 	    void reset() {
-		clear();
+		std::vector< csl::DictSearch::Interpretation >::clear();
 	    }
+
+	    /**
+	     * @brief method defined as usual for containers, e.g. in the std library
+	     */
+	    void clear() {
+		std::vector< csl::DictSearch::Interpretation >::clear();
+	    }
+
+	    /**
+	     * @brief method defined as usual for containers, e.g. in the std library
+	     */
+	    iterator begin() {
+		return std::vector< csl::DictSearch::Interpretation >::begin();
+	    }
+
+	    /**
+	     * @brief method defined as usual for containers, e.g. in the std library
+	     */
+	    const_iterator begin() const {
+		return std::vector< csl::DictSearch::Interpretation >::begin();
+	    }
+
+	    /**
+	     * @brief method defined as usual for containers, e.g. in the std library
+	     */
+	    iterator end() {
+		return std::vector< csl::DictSearch::Interpretation >::end();
+	    }
+
+	    /**
+	     * @brief method defined as usual for containers, e.g. in the std library
+	     */
+	    const_iterator end() const {
+		return std::vector< csl::DictSearch::Interpretation >::end();
+	    }
+
+	    /**
+	     * @brief method defined as usual for containers, e.g. in the std library
+	     */
+	    size_t size() const {
+		return std::vector< csl::DictSearch::Interpretation >::size();
+	    }
+
+	    /**
+	     * @brief method defined as usual for containers, e.g. in the std library
+	     */
+	    csl::DictSearch::Interpretation const& at( size_t i ) const {
+		return std::vector< csl::DictSearch::Interpretation >::at( i );
+	    }
+
 
 	private:
 	    DictID currentDictID_;
@@ -129,7 +185,7 @@ namespace csl {
 	    }
 
 	    /**
-	     * @brief connects te configuration to a certain dictionary
+	     * @brief connects the configuration to a certain dictionary
 	     * 
 	     * @param dict a const reference to an existing dictionary.
 	     */
@@ -165,7 +221,7 @@ namespace csl {
 	    }
 
 	    /**
-	     * @brief configures the approximate lookup in a way that the lev.-distance bound (see setDLev) depends on 
+	     * @brief configures the approximate lookup in a way that the lev-distance bound (see setDLev() ) depends on 
 	     * the word length of the query word.
 	     *
 	     * @param wordlength_1 minimal word length for a query to be searched for with distance bound 1
@@ -173,7 +229,7 @@ namespace csl {
 	     * @param wordlength_3 minimal word length for a query to be searched for with distance bound 3
 	     * 
 	     * A search with distance bound n naturally also returns candidates with distances smaller than n. For example, 
-	     * searching with distance two will in general return candidates with distance 0,1,2.
+	     * searching with distance 2 will in general return candidates with distance 0,1,2.
 	     * That's why it makes no sense to assign, e.g. wordlength_2=8 and wordlength_1=6. Whenever 
 	     * wordlength_i is smaller than wordlength_i-1 an exception is thrown.
 	     */
@@ -188,6 +244,11 @@ namespace csl {
 	    
 	    /**
 	     * @brief Sets sensible standard values for word-length dependent distance bounds for approximate search
+	     *
+	     * - lev. distance 1 for wordslengths 1-6
+	     * - lev. distance 2 for wordslengths 7-12
+	     * - lev. distance 3 for wordslengths > 13
+	     *
 	     * @see setDLevWordlengths( size_t wordlength_1, size_t wordlength_2, size_t wordlength_3 ), setDLev
 	     */
 	    void setDLevWordlengths() {
@@ -197,7 +258,7 @@ namespace csl {
 	    }
 
 	    /**
-	     * @brief get the lev.-distance threshold given a word length
+	     * @brief get the lev-distance threshold given a word length
 	     */
 	    size_t getDLevByWordlength( size_t wordLength ) const {
 		for( int i = 3; i >= 1; --i ) {
@@ -216,12 +277,20 @@ namespace csl {
 	class ConfigHypothetic : public ConfigLookup {
 	public:
 	    ConfigHypothetic() :
-		maxNrOfPatterns_( 1 )
+		maxNrOfPatterns_( Vaam<>::INFINITE )
 		{
 	    }
+
+	    /**
+	     * @brief returns the current setting for the upper bound of applied variant patterns
+	     */
 	    size_t getMaxNrOfPatterns() const {
 		return maxNrOfPatterns_;
 	    }
+
+	    /**
+	     * @brief sets a new value for the upper bound of applied variant patterns
+	     */
 	    void setMaxNrOfPatterns( size_t max ) {
 		maxNrOfPatterns_ = max;
 	    }
@@ -244,14 +313,23 @@ namespace csl {
 	//@{
 
 
+	/**
+	 * @brief returns the configuration object responsible for lookup in the modern dictionary
+	 */
 	ConfigLookup& getConfigModern() {
 	    return configModern_;
 	}
 
+	/**
+	 * @brief returns the configuration object responsible for lookup in the historical dictionary
+	 */
 	ConfigLookup& getConfigHistoric() {
 	    return configHistoric_;
 	}
 
+	/**
+	 * @brief returns the configuration object responsible for lookup in the hypothetic dictionary
+	 */
 	ConfigHypothetic& getConfigHypothetic() {
 	    return configHypothetic_;
 	}
@@ -266,7 +344,6 @@ namespace csl {
 	void initHypothetic( char const* patternFile );
 
 	
-
 	//@} // END Configuration methods
 
 	/**
@@ -276,6 +353,8 @@ namespace csl {
 
 	/**
 	 *
+	 * @param[in] query
+	 * @param[out] answers
 	 */
 	void query( std::wstring const& query, CandidateSet* answers );
 	

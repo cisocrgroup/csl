@@ -61,7 +61,12 @@ namespace csl {
 	 * @brief Reads a set of patterns from file \c patternFile.
 	 *
 	 * The file is expected to contain one pattern per line, with a blank to
-	 * separate left from right side.
+	 * separate left from right side. Example:
+	 * @code
+	 * t th
+	 * ei ey
+	 * u v
+	 * @endcode
 	 */
 	inline void loadPatterns( const char* patternFile );
 
