@@ -53,9 +53,11 @@ class StateHash {
         h += state.getAnnotation();
 
 //      for(int j = 1; j <= alphSize_; h = h*HASHC1 + j + alphSize_ * state.getTransTarget(j), ++j);
-        for( typename TempState::ConstIterator it = state.getConstIterator();
-             it.isValid();
-             h = h*HASHC1 + it->getLabel() + Global::maxNrOfChars * it->getTarget(), ++it );
+        for( typename TempState::const_TransIterator it = state.transBegin();
+             it != state.transEnd();
+			 ++it ) {
+			h = h*HASHC1 + it->getLabel() + Global::maxNrOfChars * it->getTarget();
+		}
                 return (abs(h) % tableSize_);
     }
     

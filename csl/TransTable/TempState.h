@@ -54,7 +54,6 @@ namespace csl {
 
 	InternalSize_t annotation_;
 
-	typedef typename std::vector< Transition>::iterator TransIterator;
 
 	class Iterator {
 	public:
@@ -85,6 +84,12 @@ namespace csl {
 	    InternalSize_t index_;
 	}; // class Iterator
 
+
+    public:
+
+	typedef typename std::vector< Transition >::iterator TransIterator;
+	typedef typename std::vector< Transition >::const_iterator const_TransIterator;
+
 	TransIterator transBegin() {
 	    return transitions_.begin();
 	}
@@ -93,38 +98,12 @@ namespace csl {
 	    return transitions_.end();
 	}
 
-    public:
+	const_TransIterator transBegin() const {
+	    return transitions_.begin();
+	}
 
-	class ConstIterator {
-	public:
-	    ConstIterator( const TempState& myTempState ) : myTempState_( myTempState ),
-						       index_( 0 ) {
-	    }
- 
-	    bool isValid() const {
-		return ( ( index_ ) < ( myTempState_.transitions_.size() ) );
-	    }
-	    const Transition& operator*() {
-		return myTempState_.transitions_[index_];
-	    }
-
-	    const Transition* operator->() {
-		return &( myTempState_.transitions_[index_] );
-	    }
-
-	    const Transition& operator++() {
-		++index_;
-		return myTempState_.transitions_[index_];
-	    }
-
-	private:
-	    const TempState& myTempState_;
-	    InternalSize_t index_;
-	}; // class ConstIterator
-
-
-	ConstIterator getConstIterator() const {
-	    return ConstIterator( *this );
+	const_TransIterator transEnd() const {
+	    return transitions_.end();
 	}
 
 

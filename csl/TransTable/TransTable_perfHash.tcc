@@ -179,7 +179,9 @@ namespace csl {
 
 	// insert all transitions
 	InternalChar_t label = 0;
-	for ( typename TempState< TransTable_t >::ConstIterator it = state.getConstIterator(); it.isValid() ; ++it ) {
+	for ( TempState< TransTable_t >::const_TransIterator it = state.transBegin(); 
+		  it != state.transEnd() ; 
+		  ++it ) {
 	    label = it->getLabel(); // we need this outside the loop
 	    cells_[slot + label].setTrans( label, it->getTarget(), it->getPhNumber() );
 	}
@@ -233,7 +235,9 @@ namespace csl {
 	    mightFit = true;
 
 	    // check if all required cells for transitions are available
-	    for ( typename TempState< TransTable_t >::ConstIterator it = state.getConstIterator(); it.isValid() ; ++it ) {
+	for ( TempState< TransTable_t >::const_TransIterator it = state.transBegin(); 
+		  it != state.transEnd() ; 
+		  ++it ) {
 		if ( !cells_[slot + it->getLabel()].isEmpty() ) {
 		    mightFit = false;
 		}
@@ -254,14 +258,14 @@ namespace csl {
 	if( temp.getAnnotation() != getStateAnnotation( comp ) ) return false; // values must be equal
 
 	const wchar_t* c_comp = getSusoString( comp );
-	typename TempState_t::ConstIterator tempIt = temp.getConstIterator();
-	while( tempIt.isValid() && *c_comp ) {
-	    if( tempIt->getLabel() != *c_comp ) return false; // both must have the same char as next label
-	    if ( tempIt->getTarget() != walk( comp, *c_comp ) ) return false; // both must point to the same state
-	    ++tempIt;
-	    ++c_comp;
+	TempState< TransTable_t >::const_TransIterator tempIt = temp.transBegin();
+	for ( ; 
+		 ( tempIt != temp.transEnd() ) && ( *c_comp != 0 ); 
+		  ++tempIt, ++c_comp ) {
+		if( tempIt->getLabel() != *c_comp ) return false; // both must have the same char as next label
+		if ( tempIt->getTarget() != walk( comp, *c_comp ) ) return false; // both must point to the same state
 	}
-	if( ( tempIt.isValid() ) || ( *c_comp != 0 )) return false; // both must be at the end simultaneously
+	if( ( tempIt != temp.transEnd() ) || ( *c_comp != 0 )) return false; // both must be at the end simultaneously
 	return true;
     }
 

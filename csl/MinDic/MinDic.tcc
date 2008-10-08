@@ -110,10 +110,9 @@ namespace csl {
 	template< class AnnType_t >
 	inline void MinDic< AnnType_t >::compileDic( const char* txtFile ) {
 		wchar_t* key = 0;
+		
 
-		std::wcout<<"Before initConstruction()"<<std::endl;
 		initConstruction();
-		std::wcout<<"After initConstruction()"<<std::endl;
 
 		std::wifstream fileHandle( txtFile );
 		fileHandle.imbue( CSL_UTF8_LOCALE ); // imbue the stream with csl's custom utf8 locale
@@ -231,6 +230,7 @@ namespace csl {
 
 	template< class AnnType_t >
 	inline StateId_t MinDic< AnnType_t >::replaceOrRegister( TempState_t& state ) {
+
 		StateId_t storedState = 0;
 		if ( ( storedState = hashtable_->findState( state ) ) == 0 ) { // if equiv. state doesn't exist
 			storedState = storeTempState( state ); // store it
