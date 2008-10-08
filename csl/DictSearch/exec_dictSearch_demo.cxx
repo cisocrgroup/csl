@@ -6,7 +6,7 @@ int main() {
 
     std::locale::global( std::locale( "" ) );
 
-    csl::DictSearch::DictSearch dictSearch;
+    csl::DictSearch dictSearch;
 
     dictSearch.getConfigModern().setDict( "../csl/DictSearch/Test/small.modern.fbdic" );
     dictSearch.getConfigHistoric().setDict( "../csl/DictSearch/Test/small.historical.fbdic" );
@@ -14,7 +14,7 @@ int main() {
 
     csl::DictSearch::CandidateSet candSet;
     dictSearch.query( L"theile", &candSet );
-    std::sort( candSet.begin(), it != candSet.end() );
+    std::sort( candSet.begin(), candSet.end() );
 
     for( csl::DictSearch::CandidateSet::const_iterator it = candSet.begin(); it != candSet.end(); ++it ) {
 	std::wcout <<  *it << std::endl;
