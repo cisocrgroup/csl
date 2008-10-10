@@ -12,12 +12,13 @@ int main( int argc, char** argv ) {
 
     cd.getDic().analyze();
 
-    csl::TransTable< csl::TT_STANDARD, uint16_t > transTable;
+    
+    csl::SimpleFSA::Simple2TransTable::TransTable_t transTable;
     csl::SimpleFSA::Simple2TransTable converter;
 
     converter.translate( cd.getDic(), &transTable );
-
-    transTable.createBinary( (char const*)"test.dic" );
+    
+    transTable.writeToFile( argv[2] );
 
 }
 

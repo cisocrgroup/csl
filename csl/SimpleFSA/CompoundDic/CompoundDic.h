@@ -49,23 +49,22 @@ namespace csl {
 
 
 	void CompoundDic::compute( char const* file ) {
+	    std::wcerr << "CompoundDic: Compute SimpleFSA::MinDic from textfile" << std::endl;
 	    computeMinDic( file );
 
+
+	    std::wcerr << "CompoundDic: Compute SimpleFSA version of Compound Dic" << std::endl;
+
 	    std::stack< JoinState* > stack;
-
 	    JoinState* root = new JoinState( compoundDic_.getRoot() );
-
 	    root->push_back( minDic_.getRoot() );
-
 	    setOfStates_ = new SetOfStates();
-
 
 	    // add root state to the set of JoinStates
 	    setOfStates_->insert( root ); 
 	    // add root state to the stack
 	    stack.push( root ); 
 
-	    
 	    while( ! stack.empty() ) {
 		JoinState& cur = *( stack.top() ); 
 		// cur.print();std::wcout<< std::endl;

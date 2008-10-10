@@ -52,5 +52,12 @@ namespace csl {
 
 } // eon
 
+namespace std {
+    inline wostream& operator<<( wostream& os, csl::Instruction const& obj ) {
+	obj.print( os );
+	return os;
+    }
+}
+
 
 #endif

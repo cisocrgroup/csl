@@ -64,6 +64,7 @@ namespace csl {
     ::walkStrPerfHash( StateId_t state, const wchar_t* str, size_t* phValue ) const {
 	while( *str && state ) {
 	    state = walkPerfHash( state, *str, phValue );
+	    std::wcout<<*str<<" - "<<state<<std::endl;
 	    ++str;
 	}
 	return state;
@@ -96,6 +97,7 @@ namespace csl {
     TransTable< TT_PERFHASH, InternalCharType__, SizeType__ >
     ::getTokenIndex( const wchar_t* key, size_t* tokID ) const {
 	*tokID = 0;
+
 	uint_t pos = walkStrPerfHash( getRoot(), key, tokID );
 	return ( ( pos != 0 ) && isFinal( pos ) );
     }
@@ -322,6 +324,13 @@ namespace csl {
     void 
     TransTable< TT_PERFHASH, InternalCharType__, SizeType__ >
     ::createBinary( char* compFile ) {
+	writeToFile( compFile );
+    }
+
+    template< typename InternalCharType__, typename SizeType__ >
+    void 
+    TransTable< TT_PERFHASH, InternalCharType__, SizeType__ >
+    ::writeToFile( char* compFile ) {
 	FILE * fo = fopen( compFile, "wb" );
 	if ( !fo ) {
 	    std::cerr << "Couldn't open " << compFile << std::endl;
@@ -380,7 +389,7 @@ namespace csl {
     void
     TransTable< TT_PERFHASH, InternalCharType__, SizeType__ >
     ::toDot() const {
-	printf( "Digraph TransTable_out { //DOTCODE\nrankdir=LR; //DOTCODE\n" );
+	wprintf( L"Digraph TransTable_out { //DOTCODE\nrankdir=LR; //DOTCODE\n" );
 	for ( size_t i = 1; i < sizeOfUsedCells_; ++i ) {
 	    if ( cells_[i].isTransition() ) {
 		StateId_t base = i - cells_[i].getKey();
@@ -393,7 +402,7 @@ namespace csl {
 		
 	    }
 	}
-	printf( "} //DOTCODE\n" );
+	wprintf( L"} //DOTCODE\n" );
     }
 
     template< typename InternalCharType__, typename SizeType__ >

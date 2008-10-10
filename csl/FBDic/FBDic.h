@@ -36,16 +36,41 @@ namespace csl {
 	 */
 	const MinDic_t& getBWDic() const;
 
+	/**
+	 * compiles an FBDic from a .lex file. Consult the @link fbDic_manual FDic Manual@endlink
+	 * for details on the format of the input file.
+	 */
 	void compileDic( const char* txtFile );
 
+	/**
+	 * @name Loading from /writing to hard disk
+	 */
+	//@{
+	/**
+	 * @brief Load a compiled FBDic from hard disk.
+	 * @param a file containing a compiled FBDic. (often: *.fbdic)
+	 */
 	inline void loadFromFile( const char* binFile );
 	
+	/**
+	 * @brief Load a compiled FBDic from an open file stream.
+	 * @param fi a c-style file pointer.
+	 */
 	inline void loadFromStream( FILE* fi );
 	
+	/**
+	 * @brief dump FBDic automaton to a file in binary form.
+	 * @param binFile File to write the automaton into.
+	 */
 	inline void writeToFile( char* binFile ) const;
 
+	/**
+	 * @brief dump FBDic automaton to an open file stream
+	 * @param fo a c-style file pointer.
+	 */
 	inline void writeToStream( FILE* fo ) const;
 
+	// @}
 
     private:
 	MinDic_t fwDic_;

@@ -3,6 +3,8 @@
 
 #include "./SimpleFSA.h"
 #include<csl/TransTable/TransTable.h>
+#include<csl/MinDic/MinDic.h>
+#include<csl/MinDic2/MinDic2.h>
 #include<csl/Stopwatch.h>
 
 
@@ -15,10 +17,9 @@ namespace csl {
 	 *
 	 */
 	class Simple2TransTable {
-	private:
-	    typedef TransTable< TT_STANDARD, uint16_t > TransTable_t;
-	    typedef TransTable_t::TempState_t TempState_t ;
 	public:
+	    typedef TransTable< TT_PERFHASH, uint16_t > TransTable_t;
+	    typedef TransTable_t::TempState_t TempState_t ;
 	    void translate( Automaton const& sfsa, TransTable_t* transTable  );
 
 	private:
@@ -29,6 +30,8 @@ namespace csl {
 
 
 	void Simple2TransTable::translate( Automaton const& sfsa, TransTable_t* transTable ) {
+	    std::wcerr << "Simple2TransTable::translate: start translation from SimpleFSA to sparse table" << std::endl;
+
 	    transTable->initConstruction();
 
 	    TempState_t tempState;
@@ -41,7 +44,6 @@ namespace csl {
 		stateMap_[*state] = transTable->storeTempState( tempState );
 		if( ++count % 100000 == 0 ) std::wcerr<<count/1000<<"k states processed"<<std::endl;
 	    }
-	    std::wcerr <<"done. "<< watch.readSeconds() << " seconds" << std::endl;
 	    transTable->setRoot( stateMap_[sfsa.getRoot()] );
 
 	    TransTable_t::Cell_t* cells = transTable->getCells();
@@ -55,8 +57,6 @@ namespace csl {
 	    std::wcerr <<"done. "<< watch.readSeconds() << " seconds" << std::endl;
 
 	    transTable->finishConstruction();
-
-	    
 
 	}
 

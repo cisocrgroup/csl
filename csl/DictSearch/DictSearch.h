@@ -11,10 +11,24 @@
 namespace csl {
     
     /**
+     * @brief csl::DictSearch is a combined interface for approximate dictionary lookup in the context of historical language.
      *
+     * A special @link dictSearch_manual DictSearch Manual@endlink page was prepared for this module. You might want
+     * to have a look at it before reading this class reference.
      *
-     * Revision 333 looked a lot more complex. Then I cut it down to a much simpler structure. So look at this
-     * old version if e.g. support for more different dictionaries is needed.
+     * csl::DictSearch is a combined interface for a number of modules of the package. The scenario is that the users
+     * specify a modern as well as a historical dictionary to perform exact or approximate dictionary lookups.
+     * A third component is what we call the "hypothetic dictionary", containing all orthographical variants that
+     * can possibly be derived from some word of the modern dictionary and the application of some "orthographical
+     * variant patterns". These patterns are simple rewrite rules and can be specified by the user.
+     * 
+     * For a query word @c w the users receive as answer a set of words, containing exact and approximate matches for 
+     * either of the three dictionaries. In the usual application this answer set is understood as set of correction
+     * candidates for a (probably garbled) token @c w. The task of ranking these candidates is explicitly out of the scope of 
+     * csl::DictSearch: To decide for a correction candidate, various other techniques for channel and language modelling have 
+     * to be taken into account.
+     *
+     * @author Ulrich Reffle<uli@cis.uni-muenchen.de>, 2008
      */
     class DictSearch {
     public:

@@ -2,7 +2,7 @@
 @page dictSearch_manual DictSearch Manual - \n Approximate Search in Dictionaries in the Context of Historical Language
 
 @section DictSearch_general General Notes
-csl::DictSearch is a combined interface for a number of modules of the package. The scenario is that the users
+csl::DictSearch is a combined interface for approximate dictionary lookup in the context of historical language. The scenario is that the users
 specify a modern as well as a historical dictionary to perform exact or approximate dictionary lookups.
 A third component is what we call the "hypothetic dictionary", containing all orthographical variants that
 can possibly be derived from some word of the modern dictionary and the application of some "orthographical
@@ -11,15 +11,16 @@ variant patterns". These patterns are simple rewrite rules and can be specified 
 For a query word @c w the users receive as answer a set of words, containing exact and approximate matches for 
 either of the three dictionaries. In the usual application this answer set is understood as set of correction
 candidates for a (probably garbled) token @c w. The task of ranking these candidates is explicitly out of the scope of 
-csl::DictSearch. To decide for a correction candidate, various other techniques for channel and language modelling have 
-to be taken into account. Nonetheless a simple order relation is pre-defined, based on the number of edit operations and
-orthographical variants.
+csl::DictSearch: To decide for a correction candidate, various other techniques for channel and language modelling have 
+to be taken into account.
 
-This manual at first concentrates on practical issues for the usage of the module. In the second part some technical details 
-on the used algorithms are explained.
+This manual is under construction. For now it concentrates on practical issues for the usage of the module. Some more details 
+about the algorithms that were used will be added.
 
 @section fbdic Dictionary Format: fbdic
-The dictionaries to be used must be compiled into a finite-state automaton. csl::FBDic is responsible for that.
+To use a dictionary with csl::DictSearch, it has to be compiled into a finite-state automaton. csl::FBDic is responsible for that.
+Please read in the @link fbDic_manual FBDic Manual@endlink how to get FBDic automata.
+
 There are multiple ways to connect a dictionary to DictSearch:
 - create binary files of the automata in an offline step using the tool compileFBDic (recommended for large dictionaries)
   - and then simply pass on the filename to the DictSearch configuration
@@ -43,6 +44,7 @@ For configuration of the lookup in modern and historical dictionaries, DictSearc
 following two methods:
 - csl::DictSearch::ConfigLookup& csl::DictSearch::getConfigModern()
 - csl::DictSearch::ConfigLookup& csl::DictSearch::getConfigHistoric()
+
 Please consult the class reference of csl::DictSearch::ConfigLookup or the demo program below for details on how to set
 the above mentioned parameters. 
 
@@ -96,47 +98,70 @@ csl::DictSearch::CandidateSet candSet;
 
 while( std::getline( std::wcin, query ).good() ) {
    candSet.clear(); // empty the CandidateSet
-   dictSearch.query( L"theile", &candSet ); // execute lookup
-   std::sort( candSet.begin(), it != candSet.end() ); // sort candidates following a very coarse, pre-defined order relation
-
+   dictSearch.query( query, &candSet ); // execute lookup
+   std::sort( candSet.begin(), candSet.end() ); // sort candidates following a very coarse order relation
+	
    for( csl::DictSearch::CandidateSet::const_iterator it = candSet.begin(); it != candSet.end(); ++it ) {
       std::wcout <<  it->getWord() << std::endl;
+      std::wcout <<  "  baseWord="  << it->getBaseWord() << std::endl;
+      std::wcout <<  "  intruction="  << it->getInstruction() << std::endl;
+      std::wcout <<  "  levDistance="  << it->getLevDistance() << std::endl;
+      std::wcout <<  "  dict="  << it->getDictID_string() << std::endl;
+      std::wcout << std::endl;
    }
 }
 @endcode
 
-@subsection Investigating single candidates (of type csl::DictSearch::Interpretation)
+@subsection interpretation Investigating single candidates (of type csl::DictSearch::Interpretation)
 csl::DictSearch::Interpretation and its base class csl::Interpretation provide lots of information about the candidate they describe.
-Here are the most useful ones:
+Here are the most useful ones (they are also used in the example above):
 - csl::Interpretation::getWord() returns the plain string form of the candidate
 - csl::Interpretation::getBaseWord() If the candidate is part of the hypothetical dictionary, here is the modern word it was derived from
+- csl::Interpretation::getInstruction() returns an object of type csl::Instruction, storing the applied variant patterns
 - csl::Interpretation::getLevDistance() returns the levenshtein distance to the query
+- csl::Interpretation::operator<() defines a very coarse order relation, so the candidates can be pre-sorted using std::sort. The user
+    can easily overrule this sorting order by passing a custom-made sort operator to std::sort.
+
+
 @section example Example 
 @code
-#include<locale>
-#include <csl/DictSearch/DictSearch.h>
-
-
 int main() {
 
     std::locale::global( std::locale( "" ) );
 
+    // create a DictSearch-object
     csl::DictSearch::DictSearch dictSearch;
+    // set a modern dictionary
     dictSearch.getConfigModern().setDict( "../csl/DictSearch/Test/small.modern.fbdic" );
+    // configure approx. search on modern dict. with distance bound 2
+    dictSearch.getConfigModern().setDLev( 2 );
+    
+    // set a historical dictionary
     dictSearch.getConfigHistoric().setDict( "../csl/DictSearch/Test/small.historical.fbdic" );
+    // configure approx. search on modern dict. to choose default distance bounds according to the word length
+    dictSearch.getConfigHistoric().setDLevWordlengths();
+    // initialise the hypothetic dict. with a file of patterns
     dictSearch.initHypothetic( "../csl/DictSearch/Test/small.patterns.txt" );
 
+    std::wstring query;
     csl::DictSearch::CandidateSet candSet;
-    dictSearch.query( L"theile", &candSet );
-    std::sort( candSet.begin(), it != candSet.end() );
 
-    for( csl::DictSearch::CandidateSet::const_iterator it = candSet.begin(); it != candSet.end(); ++it ) {
-	std::wcout <<  *it << std::endl;
+    while( std::getline( std::wcin, query ).good() ) {
+	candSet.clear(); // empty the CandidateSet
+	dictSearch.query( query, &candSet ); // execute lookup
+	std::sort( candSet.begin(), candSet.end() ); // sort candidates following a very coarse order relation
+	
+	for( csl::DictSearch::CandidateSet::const_iterator it = candSet.begin(); it != candSet.end(); ++it ) {
+	    std::wcout <<  it->getWord() << std::endl;
+	    std::wcout <<  "  baseWord="  << it->getBaseWord() << std::endl;
+	    std::wcout <<  "  intruction="  << it->getInstruction() << std::endl;
+	    std::wcout <<  "  levDistance="  << it->getLevDistance() << std::endl;
+	    std::wcout <<  "  dict="  << it->getDictID_string() << std::endl;
+	    std::wcout << std::endl;
+	}
     }
-
-    return 0;
+    
 }
-
 @endcode
 
 

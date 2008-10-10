@@ -19,6 +19,7 @@
  * @author Ulrich Reffle, <uli@cis.uni-muenchen.de>
  * 
  */
+typedef csl::Vaam< csl::TransTable< csl::TT_PERFHASH, uint16_t > > Vaam_t;
 int main(int argc, const char** argv ) {
 
 	try {
@@ -34,14 +35,14 @@ int main(int argc, const char** argv ) {
     csl::MinDic<> baseDic;
     baseDic.loadFromFile( opt.getArgument( 1 ).c_str() );
 
-    csl::Vaam<> vaam( baseDic, opt.getArgument( 2 ).c_str() );
+    Vaam_t vaam( baseDic, opt.getArgument( 2 ).c_str() );
 
     if( opt.hasOption( "maxNrOfPatterns" ) ) {
 	vaam.setMaxNrOfPatterns( atoi( opt.getOption( "maxNrOfPatterns" ).c_str() ) );
     }
 
 
-    csl::Vaam<>::CandidateReceiver answers;
+    Vaam_t::CandidateReceiver answers;
 
     std::wstring query;
 

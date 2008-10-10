@@ -1,5 +1,6 @@
+
 #include<cstdlib>
-#include "csl/TransTable/TransTable.h"
+#include <csl/TransTable/TransTable.h>
 
 using namespace csl;
 
@@ -14,7 +15,7 @@ int main( int argc, char** argv ) {
 	    exit(1);
 	}
 
-	TransTable< TOKDIC > tt;
+	TransTable< TT_PERFHASH, uint16_t > tt;
 	tt.loadFromFile( argv[1] );
 
 	
@@ -25,15 +26,15 @@ int main( int argc, char** argv ) {
 		throw exceptions::badInput( "csl::compileMD: Maximum length of input line violated (set by Global::lengthOfLongStr)" );
 	    }
 	    
-	    int ann = 0;
-	    if( tt.lookup( query.c_str(), &ann ) ) {
+	    size_t ann = 0;
+	    if( tt.getTokenIndex( query.c_str(), &ann ) ) {
 		std::wcout<<ann<<std::endl;
 	    }
 	    else std::wcout<<std::endl;
 	}
 	
     } catch( exceptions::cslException ex ) {
-	std::wcout<<"lookupMD: "<<ex.what()<<std::endl;
+	std::wcout<<"lookupTT: "<<ex.what()<<std::endl;
 	exit( 1 );
     }
     return 0;

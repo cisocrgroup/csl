@@ -46,6 +46,77 @@ namespace csl {
 	typedef TransTable< TT_PERFHASH, InternalChar_t, InternalSize_t > TransTable_t;
 	typedef Cell< TT_PERFHASH, InternalChar_t, InternalSize_t > Cell_t;
 	typedef TempState< TransTable_t > TempState_t;
+
+
+	/**
+	 * This class provides a much easier interface to the MinDic if the guts of the automaton
+	 * have to be explored state- and transition-wise.
+	 */
+	class State {
+	public:
+	    /**
+	     * @param a reference to the \c MinDic the \c State belongs to.
+	     */
+	    State( const TransTable_t& tt ) :
+		transTable_( &tt ),
+		dicPos_( transTable_->getRoot() ),
+		perfHashValue_( 0 ) {
+	    }
+	    
+	    /**
+	     * 
+	     */
+	    bool walk( wchar_t c ) {
+		dicPos_ = transTable_->walkPerfHash( dicPos_, c, perfHashValue_ );
+		return isValid();
+	    }
+
+	    bool isValid() {
+		return ( dicPos_ != 0 );
+	    }
+
+	    bool hasTransition( wchar_t c ) const {
+		return transTable_->walk( dicPos_, c );
+	    }
+
+	    State getTransTarget( wchar_t c ) const {
+		size_t tmpPHValue = perfHashValue_;
+		StateId_t newPos = transTable_->walkPerfHash( dicPos_, c, &tmpPHValue );
+		return State( *transTable_, newPos, tmpPHValue );
+	    }
+
+	    const wchar_t* getSusoString() const {
+		return transTable_->getSusoString( dicPos_ );
+	    }
+
+	    size_t getPerfHashValue() const {
+		return perfHashValue_;
+	    }
+
+	    StateId_t getStateID() const {
+		return dicPos_;
+	    }
+
+	    bool isFinal() const {
+		return transTable_->isFinal( dicPos_ );
+	    }
+	    
+	    int getAnnotation() {
+		return transTable_->getAnnotation( getPerfHashValue() );
+	    }
+
+	private:
+
+	    State( const TransTable_t& transTable, StateId_t dicPos, size_t perfHashValue ) :
+		transTable_( &transTable ),
+		dicPos_( dicPos ),
+		perfHashValue_( perfHashValue ) {
+	    }
+
+	    const TransTable_t* transTable_;
+	    StateId_t dicPos_;
+	    size_t perfHashValue_;
+	}; // class State
 	
 	
 	/******************** CONSTRUCTORS / DESTRUCTOR ********************/
@@ -116,9 +187,10 @@ namespace csl {
 	 * @param[in] key the key to look up
 	 * @param[out] tokID if key was found, this variable will hold the respective index. Otherwise, it gets an undefined value.
 	 * 
-	 * @return true 
+	 * @return true iff key was found
 	 */
 	inline bool getTokenIndex( const wchar_t* key, size_t* tokID ) const;
+
 
 	/**
 	 *
@@ -170,6 +242,8 @@ namespace csl {
 	 */
 	inline void createBinary( char* binFile );
 
+	inline void writeToFile( char* binFile );
+
 	/**
 	 * 
 	 */
@@ -188,7 +262,9 @@ namespace csl {
 	inline void doAnalysis() const;
 
 
-    protected:
+	inline Cell_t* getCells() {
+	    return cells_;
+	}
 	inline size_t getNrOfCells() const {
 	    return nrOfCells_;
 	}

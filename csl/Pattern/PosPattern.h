@@ -50,5 +50,11 @@ namespace csl {
 
 } // eon
 
+namespace std {
+    inline wostream& operator<<( wostream& os, csl::PosPattern const& obj ) {
+	obj.print( os );
+	return os;
+    }
+}
 
 #endif
