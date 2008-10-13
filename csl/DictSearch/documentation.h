@@ -14,8 +14,45 @@ candidates for a (probably garbled) token @c w. The task of ranking these candid
 csl::DictSearch: To decide for a correction candidate, various other techniques for channel and language modelling have 
 to be taken into account.
 
-This manual is under construction. For now it concentrates on practical issues for the usage of the module. Some more details 
+This manual is work in progress. For now it concentrates on practical issues for the usage of the module. Some more details 
 about the algorithms that were used will be added.
+
+@section example_io Example: Input/Output
+Let's start with an example, showing what the module offers. We load a very small modern dictionary with the following words and attached frequency scores:
+@code
+(feile#42, teile#84, teilen#101, teller#3, verteilen#18)
+@endcode
+We also configure csl::DictSearch to load a small historical dictionary (no frequency scores attached):
+@code
+(theil, theile, theller, theyl, theyle)
+@endcode
+The hypothetic dictionary shall contain all variants of words from the modern dictionary, using the following variant patterns:
+@code
+t->th, ei->ey. u->v
+@endcode
+Finally, let's allow approximate matching only for the modern dictionary, with distance threshold 2.
+
+Here's what DictSearch returns for the query "theile":
+@code
+Query: theile
+Output:
+theile:theile+[],dist=0,baseWordScore=0(historic)
+theile:teile+[(t_th,0)],dist=0,baseWordScore=84(modern)
+teile:teile+[],dist=1,baseWordScore=84(modern)
+theil:theil+[],dist=1,baseWordScore=0(historic)
+theyle:theyle+[],dist=1,baseWordScore=0(historic)
+feile:feile+[],dist=2,baseWordScore=42(modern)
+teilen:teilen+[],dist=2,baseWordScore=101(modern)
+@endcode
+The meaning of all components an best be seen when investigating the 2nd answer:
+@code
+theile:teile+[(t_th,0)],dist=0,baseWordScore=84(modern)
+@endcode
+- 'theile' is the candidate string itself.
+- It is derived from 'teile' using a variant pattern 't -> th' on position 0. This tells us the word is taken from the hypothetic dictionary.
+- The exact string was found in the dictionary, thus the levenshtein distance is 0.
+- The baseword (on which the variant pattern was applied) comes from the modern dictionary and had a score '84' attached.
+
 
 @section fbdic Dictionary Format: fbdic
 To use a dictionary with csl::DictSearch, it has to be compiled into a finite-state automaton. csl::FBDic is responsible for that.
@@ -55,7 +92,7 @@ The hypothetic dictionary uses a slightly extended object for configuration:
 Furthermore the hypothetic dictionary must be initialised separately, using the method csl::DictSearch::initHypothetic( char const* patternFile ).
 This method will activate the hypothetic dictionary, and its configuration can be changed as explained above.
 
-Here is an example @c patternFile, the first line specifies that 't' might be spelled 'th' in historic documents
+Here is an example @c patternFile, the first line specifies that 't' might be spelled 'th' in historic documents. Use a simple <SPACE> as delimiter.
 @code
 t th
 ei ey
@@ -66,7 +103,7 @@ This code-snippet shows a very simple way to initialise and configure a DictSear
 of this page.
 @code
     // create a DictSearch-object
-    csl::DictSearch::DictSearch dictSearch;
+    csl::DictSearch dictSearch;
     // set a modern dictionary
     dictSearch.getConfigModern().setDict( "path-to/some/modern.fbdic" );
     // configure approx. search on modern dict. with distance bound 2
@@ -123,14 +160,17 @@ Here are the most useful ones (they are also used in the example above):
     can easily overrule this sorting order by passing a custom-made sort operator to std::sort.
 
 
-@section example Example 
+@section example_program Example: Program Code
 @code
+/**
+ * This program code is part of the software package: csl/DictSearch/exec_dictSearch_demo.cxx
+ */
 int main() {
 
     std::locale::global( std::locale( "" ) );
 
     // create a DictSearch-object
-    csl::DictSearch::DictSearch dictSearch;
+    csl::DictSearch dictSearch;
     // set a modern dictionary
     dictSearch.getConfigModern().setDict( "../csl/DictSearch/Test/small.modern.fbdic" );
     // configure approx. search on modern dict. with distance bound 2

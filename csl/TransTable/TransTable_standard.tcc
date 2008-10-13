@@ -139,7 +139,7 @@ namespace csl {
 	    mightFit = true;
 
 	    // check if all required cells for transitions are available
-	for ( TempState< TransTable_t >::const_TransIterator it = state.transBegin(); 
+	    for ( typename TempState< TransTable_t >::const_TransIterator it = state.transBegin(); 
 		  it != state.transEnd() ; 
 		  ++it ) {
 		if ( !cells_[slot + it->getLabel()].isEmpty() ) {
@@ -175,7 +175,7 @@ namespace csl {
 	}
 
 	// insert all transitions
-	for ( TempState< TransTable_t >::const_TransIterator it = state.transBegin(); 
+	for ( typename TempState< TransTable_t >::const_TransIterator it = state.transBegin(); 
 		  it != state.transEnd() ; 
 		  ++it ) {
 	    cells_[slot + it->getLabel()].setTrans( it->getLabel(), it->getTarget() );
@@ -206,7 +206,7 @@ namespace csl {
 	if ( temp.getAnnotation() != cells_[comp].getValue() ) return false; // both must have the same annotation
 
 	const wchar_t* c_comp = getSusoString( comp );
-	TempState< TransTable_t >::const_TransIterator tempIt = temp.transBegin();
+	typename TempState< TransTable_t >::const_TransIterator tempIt = temp.transBegin();
 	for ( ; 
 		 ( tempIt != temp.transEnd() ) && ( *c_comp != 0 ); 
 		  ++tempIt, ++c_comp ) {

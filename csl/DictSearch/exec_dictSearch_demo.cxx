@@ -7,7 +7,7 @@ int main() {
     std::locale::global( std::locale( "" ) );
 
     // create a DictSearch-object
-    csl::DictSearch::DictSearch dictSearch;
+    csl::DictSearch dictSearch;
     // set a modern dictionary
     dictSearch.getConfigModern().setDict( "../csl/DictSearch/Test/small.modern.fbdic" );
     // configure approx. search on modern dict. with distance bound 2
@@ -29,6 +29,7 @@ int main() {
 	std::sort( candSet.begin(), candSet.end() ); // sort candidates following a very coarse order relation
 	
 	for( csl::DictSearch::CandidateSet::const_iterator it = candSet.begin(); it != candSet.end(); ++it ) {
+	    std::wcout << *it << std::endl; continue;
 	    std::wcout <<  it->getWord() << std::endl;
 	    std::wcout <<  "  baseWord="  << it->getBaseWord() << std::endl;
 	    std::wcout <<  "  intruction="  << it->getInstruction() << std::endl;
