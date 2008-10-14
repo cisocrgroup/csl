@@ -14,7 +14,8 @@ candidates for a (probably garbled) token @c w. The task of ranking these candid
 csl::DictSearch: To decide for a correction candidate, various other techniques for channel and language modelling have 
 to be taken into account.
 
-This manual is work in progress. For now it concentrates on practical issues for the usage of the module. Some more details 
+This module is under construction. Please do help to extend the 'Known Issues' section at the end of this page.
+Also, this manual is work in progress. For now it concentrates on practical issues for the usage of the module. Some more details 
 about the algorithms that were used will be added.
 
 @section example_io Example: Input/Output
@@ -166,9 +167,7 @@ Here are the most useful ones (they are also used in the example above):
 
 @section example_program Example: Program Code
 @code
-/**
- * This program code is part of the software package: csl/DictSearch/exec_dictSearch_demo.cxx
- */
+// This program code is part of the software package: csl/DictSearch/exec_dictSearch_demo.cxx
 int main() {
 
     std::locale::global( std::locale( "" ) );
@@ -208,5 +207,8 @@ int main() {
 }
 @endcode
 
+@section known_issues Known Bugs/Issues
+* On Windows we're working on a bug related to the decoding of utf-8 files. Programs will crash if you use anything but ascii characters. It works fine under linux, and soon it will work fine for Windows, too.
+* We're aware that Abbyy might be interested in a feature that is more tailor-made to those "fuzzy" word graphs used inside the Abbyy engine. We intend to put effort in that direction.
 
 */
