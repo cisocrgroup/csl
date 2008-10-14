@@ -58,6 +58,7 @@ theile:teile+[(t_th,0)],dist=0,baseWordScore=84(modern)
 @section installation Compilation/ Installation
 Please read the INSTALL file in the project root directory. The make command will compile a whole lot of things you don't need, but never mind.
 
+For Windows: cmake creates quite reliable Visual C++ project files. The project compiles, though with a lot of warnings. At the moment, there's a major bug when it comes to utf-8 input on Windows (see section Bugs/Known Issues)
 
 @section fbdic Dictionary Format: fbdic
 To use a dictionary with csl::DictSearch, it has to be compiled into a finite-state automaton. csl::FBDic is responsible for that.
@@ -166,8 +167,8 @@ Here are the most useful ones (they are also used in the example above):
 
 
 @section example_program Example: Program Code
+This program code is part of the software package: csl/DictSearch/exec_dictSearch_demo.cxx  . 'make dictSearch_demo' builds the executable.
 @code
-// This program code is part of the software package: csl/DictSearch/exec_dictSearch_demo.cxx
 int main() {
 
     std::locale::global( std::locale( "" ) );
@@ -208,7 +209,7 @@ int main() {
 @endcode
 
 @section known_issues Known Bugs/Issues
-* On Windows we're working on a bug related to the decoding of utf-8 files. Programs will crash if you use anything but ascii characters. It works fine under linux, and soon it will work fine for Windows, too.
-* We're aware that Abbyy might be interested in a feature that is more tailor-made to those "fuzzy" word graphs used inside the Abbyy engine. We intend to put effort in that direction.
+- On Windows we're working on a bug related to the decoding of utf-8 files. Programs will crash if you use anything but ascii characters. It works fine under linux, and soon it will work fine for Windows, too.
+- We're aware that Abbyy might be interested in a feature that is more tailor-made to those "fuzzy" word graphs used inside the Abbyy engine. We intend to put effort in that direction.
 
 */

@@ -30,7 +30,7 @@ namespace csl {
     }
 
 
-    inline void MinDicString::loadFromFile( char* dicFile ) {
+    inline void MinDicString::loadFromFile( char const* dicFile ) {
 	FILE* fi = fopen( dicFile, "rb" );
 	if ( !fi ) {
 	    throw exceptions::badFileHandle( "csl::MinDicString: Couldn't open file '" +
@@ -54,7 +54,7 @@ namespace csl {
 	
     }
 
-    inline void MinDicString::writeToFile( char* dicFile ) const {
+    inline void MinDicString::writeToFile( char const* dicFile ) const {
 	FILE* fo = fopen( dicFile, "wb" );
 	if ( !fo ) {
 	    throw exceptions::badFileHandle( "MinDicString: Couldn't open file '" +

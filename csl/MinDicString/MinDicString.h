@@ -28,10 +28,10 @@ namespace csl {
 	 */
 	inline const uchar* getAnnByPerfHashValue( size_t perfHashValue ) const;
 
-	inline void loadFromFile( char* dicFile );
+	inline void loadFromFile( char const* dicFile );
 	inline void loadFromStream( FILE* fi );
 
-	inline void writeToFile( char* dicFile ) const;
+	inline void writeToFile( char const* dicFile ) const;
 	inline void writeToStream( FILE* fo ) const;
 
 	inline void initConstruction();

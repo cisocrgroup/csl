@@ -1,5 +1,5 @@
-#include "../Global.h"
-#include "./MinDicString.h"
+#include <csl/Global.h>
+#include <csl/MinDicString/MinDicString.h>
 
 using namespace csl;
 
