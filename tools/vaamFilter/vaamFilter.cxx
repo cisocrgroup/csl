@@ -19,7 +19,8 @@
  * @author Ulrich Reffle, <uli@cis.uni-muenchen.de>
  * 
  */
-typedef csl::Vaam< csl::TransTable< csl::TT_PERFHASH, uint16_t > > Vaam_t;
+//typedef csl::Vaam< csl::TransTable< csl::TT_PERFHASH, uint16_t > > Vaam_t;
+typedef csl::Vaam< csl::MinDic<> > Vaam_t;
 int main(int argc, const char** argv ) {
 
 	try {

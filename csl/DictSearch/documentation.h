@@ -44,7 +44,7 @@ theyle:theyle+[],dist=1,baseWordScore=0(historic)
 feile:feile+[],dist=2,baseWordScore=42(modern)
 teilen:teilen+[],dist=2,baseWordScore=101(modern)
 @endcode
-The meaning of all components an best be seen when investigating the 2nd answer:
+The meaning of all components can be seen best when investigating the 2nd answer:
 @code
 theile:teile+[(t_th,0)],dist=0,baseWordScore=84(modern)
 @endcode
@@ -52,6 +52,10 @@ theile:teile+[(t_th,0)],dist=0,baseWordScore=84(modern)
 - It is derived from 'teile' using a variant pattern 't -> th' on position 0. This tells us the word is taken from the hypothetic dictionary.
 - The exact string was found in the dictionary, thus the levenshtein distance is 0.
 - The baseword (on which the variant pattern was applied) comes from the modern dictionary and had a score '84' attached.
+
+
+@section installation Compilation/ Installation
+Please read the INSTALL file in the project root directory. The make command will compile a whole lot of things you don't need, but never mind.
 
 
 @section fbdic Dictionary Format: fbdic
@@ -203,7 +207,6 @@ int main() {
     
 }
 @endcode
-
 
 
 */

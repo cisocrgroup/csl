@@ -64,7 +64,6 @@ namespace csl {
     ::walkStrPerfHash( StateId_t state, const wchar_t* str, size_t* phValue ) const {
 	while( *str && state ) {
 	    state = walkPerfHash( state, *str, phValue );
-	    std::wcout<<*str<<" - "<<state<<std::endl;
 	    ++str;
 	}
 	return state;
