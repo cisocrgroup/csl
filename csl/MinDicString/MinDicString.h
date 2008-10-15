@@ -75,12 +75,12 @@ namespace csl {
 	uchar* annStrings_;
 	size_t sizeOfAnnStrings_;
 
-	Hash<uchar>* annHash_;
+	Hash< uchar >* annHash_;
 
 	uchar keyValueDelimiter_;	
 
 	mutable size_t count_; // is used for counting during printing
-    };
+    }; // class MinDicString
 
 
 } // namespace csl
