@@ -318,7 +318,7 @@ namespace csl {
 	template< class AnnType_t >
 	inline void MinDic< AnnType_t >::doAnalysis() const {
 
-		float annotations_MB = (float)( nrOfKeys_ * sizeof( AnnType_t ) ) / 1000000;
+		float annotations_MB = (float)( nrOfKeys_ * sizeof( AnnType_t ) ) / 1048576;
 
 		TransTable_t::doAnalysis();
 		printf( "**********\nMinDic Analysis\n**********\nnr of keys:\t%zd\nannotation array: %.3f MB\n\n",

@@ -25,7 +25,7 @@ namespace csl {
 	 *
 	 * @param[in/out] keyBuffer a reference to a c-string, where the keys are stored. 
 	 * @param[in] estimatedNrOfKeys an estimation that helps to choose the right size of the hashtable
-	 * @param[in/out] sizeOfeyBuffer
+	 * @param[in/out] lengthOfKeyBuffer
 	 * @todo think about the heuristics concerning the buffer initialization size
 	 */
 	inline Hash( size_t estimatedNrOfKeys, charType_t*& keyBuffer, size_t& lengthOfKeyBuffer );
@@ -153,10 +153,10 @@ namespace csl {
 	    strncpyTemplate( ( keyBuffer_ + lengthOfKeyStrings_ ), key, lengthOfKey );
 	    table_.at( slot ) = lengthOfKeyStrings_;
 	    lengthOfKeyStrings_ += lengthOfKey + 1;
-//	    printf( "Create: %ls at slot %d, buf_offset %d\n", key, slot, table_.at( slot ) );
+	    // std::wcout << "Create: " << key << " at slot " << slot << ", buf_offset " << table_.at( slot ) << std::endl;
 	}
 	else {
-//	    printf( "Found: %ls at slot %d, buf_offset %d\n", key, slot, table_.at( slot ) );
+	    //std::wcout << "Found: " << key << " at slot " << slot << ", buf_offset " << table_.at( slot ) << std::endl;
 	}
 	return table_.at( slot );
     }

@@ -79,6 +79,9 @@ namespace csl {
 
     inline void MinDicString::finishConstruction() {
 	MinDic_t::finishConstruction();
+	sizeOfAnnStrings_ = annHash_->getLengthOfKeyStrings();
+	annStrings_ = (uchar*)realloc( annStrings_, sizeOfAnnStrings_ );
+	delete( annHash_ );
 	header_.set( *this );
     }
 
@@ -96,7 +99,7 @@ namespace csl {
 	struct stat f_stat;
 	stat( lexFile, &f_stat );
 	size_t estimatedNrOfKeys = f_stat.st_size / 10;
-	std::cerr<<"Estimate about "<< estimatedNrOfKeys << " Keys."<< std::endl;
+	std::wcerr<<"Estimate about "<< estimatedNrOfKeys << " Keys."<< std::endl;
 	
 	annHash_ = new Hash< uchar >( estimatedNrOfKeys, annStrings_, sizeOfAnnStrings_ );
 
@@ -159,7 +162,7 @@ namespace csl {
 		
 		if( isFinal( newPos ) ) {
 		    w[depth+1] = 0;
-		    printf( "%ls#%s\n", w, annStrings_ + getAnnotation( newPerfHashValue ) );
+		    wprintf( L"%ls#%s\n", w, annStrings_ + getAnnotation( newPerfHashValue ) );
 		    //printf( "%ls#%d\n", w, newPerfHashValue );
 		    
 		    if( ( ++count_ % 100000 ) == 0 ) fprintf( stderr, "%d\n", (int)count_ );
@@ -173,6 +176,15 @@ namespace csl {
 	    ++transitions;
 	} // while
     } // end of method
+
+    void MinDicString::doAnalysis() const {
+	MinDic_t::doAnalysis();
+	printf( "**********\nMinDicString Analysis\n**********\nannotation strings: %.3f MB\n\n",
+		(double)header_.getSizeOfAnnStrings() / 1048576
+	    );
+	
+    }
+
 }
 
 #endif

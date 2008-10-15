@@ -1,4 +1,5 @@
 add_subdirectory( extractMD )
+add_subdirectory( extractMDString )
 add_subdirectory( extractTT )
 add_subdirectory( compileMD )
 add_subdirectory( compileMD2 )

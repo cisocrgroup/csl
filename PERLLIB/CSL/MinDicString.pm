@@ -16,12 +16,9 @@ sub new {
 	return undef;
     }
 
-    my $lookupBinary = '/mounts/Users/student/uli/ARBEITSGRUPPE/software_svn/dict_tools/lookupMDString';
-    $lookupBinary .= '64' if ( $ENV{HOSTTYPE} eq 'x86_64' );
-
+    my $lookupBinary = 'lookupMDString';
     
-#    my $binary = "~/MA/Zerl_web/lex/csl/trunk/bin/lookupMDString $self->{alphFile} $self->{dicFile}";
-    my $binary = "$lookupBinary $self->{alphFile} $self->{dicFile}";
+    my $binary = "$lookupBinary $self->{dicFile}";
     
     open2( $self->{BINARY_OUT}, $self->{BINARY_IN}, $binary ) or die "Perl::MinDicString: $!";
     

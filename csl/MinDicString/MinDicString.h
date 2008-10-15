@@ -39,6 +39,8 @@ namespace csl {
 	inline void compileDic( const char* lexFile );
 	inline void printDic() const;
 
+	inline void doAnalysis() const;
+
     private:
 	inline void printDic_rec( int pos, int depth, size_t perfHashValue ) const;
 

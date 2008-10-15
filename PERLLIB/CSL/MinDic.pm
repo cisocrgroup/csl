@@ -15,7 +15,7 @@ sub new {
 	return undef;
     }
 
-    my $binary = "/mounts/Users/student/uli/implement/csl/branches/unicode/bin/lookupMD $self->{dicFile}";
+    my $binary = "lookupMD $self->{dicFile}";
 
     open2( $self->{BINARY_OUT}, $self->{BINARY_IN}, $binary ) or die "Perl::MinDic: $!";
 

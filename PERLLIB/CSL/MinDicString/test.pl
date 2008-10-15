@@ -2,18 +2,14 @@
 
 use strict;
 
-use lib "/mounts/Users/student/uli/implement/csl/trunk/MinDicString";
-use MinDicString;
+use CSL::MinDicString;
 
 use IPC::Open2;
 
-my $alphFile = shift;
 my $dicFile = shift;
 
 # Create a Cislex object.
-my $lex = new MinDicString( alphFile => $alphFile,
-		      dicFile => $dicFile
-		      );
+my $lex = new MinDicString( dicFile => $dicFile );
 
 if( !$lex ) {
     printf( "Obvioulsly the Cislex constructor has failed.\n");
@@ -22,7 +18,7 @@ if( !$lex ) {
 
 binmode(STDIN, "utf8:");
 
-while( my $key = <STDIN> ) {
+while( my $key = <> ) {
     chomp $key;
     my $output = $lex->lookup( $key );
 
