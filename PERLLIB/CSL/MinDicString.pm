@@ -2,7 +2,7 @@
 
 use strict;
 
-package MinDicString;
+package CSL::MinDicString;
 
 use IPC::Open2;
 
@@ -16,7 +16,7 @@ sub new {
 	return undef;
     }
 
-    my $lookupBinary = 'lookupMDString';
+    my $lookupBinary = "/mounts/data/proj/impact/software/uli/$ENV{HOSTNAME}/bin/lookupMDString";
     
     my $binary = "$lookupBinary $self->{dicFile}";
     

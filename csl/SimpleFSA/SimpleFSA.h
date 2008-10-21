@@ -269,6 +269,7 @@ namespace csl {
 	     */
 	    State* newState() {
 		State* newState = new State( nextFreeStateNumber_ );
+
 		states_.insert( newState );
 
 		++nextFreeStateNumber_;

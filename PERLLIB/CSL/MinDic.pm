@@ -2,7 +2,7 @@
 
 use strict;
 
-package MinDic;
+package CSL::MinDic;
 
 use IPC::Open2;
 
@@ -14,8 +14,8 @@ sub new {
 	print STDERR "MinDic: provide argument 'dicFile' as arguments for the constructor.\n";
 	return undef;
     }
-
-    my $binary = "lookupMD $self->{dicFile}";
+    
+    my $binary = "/mounts/data/proj/impact/software/uli/$ENV{HOSTNAME}/bin/lookupMD $self->{dicFile}";
 
     open2( $self->{BINARY_OUT}, $self->{BINARY_IN}, $binary ) or die "Perl::MinDic: $!";
 

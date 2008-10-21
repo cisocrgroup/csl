@@ -15,7 +15,7 @@ int main( int argc, char** argv ) {
 	    exit(1);
 	}
 
-	TransTable< TT_PERFHASH, uint16_t > tt;
+	TransTable< TT_PERFHASH, uint16_t, uint64_t > tt;
 	tt.loadFromFile( argv[1] );
 
 	

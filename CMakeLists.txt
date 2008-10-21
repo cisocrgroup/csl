@@ -28,6 +28,19 @@ SET(CPACK_SOURCE_GENERATOR "TGZ")
 # SET(CPACK_PACKAGE_EXECUTABLES "MyExecutable" "My Executable")
 INCLUDE(CPack)
 
+
+
+# use, i.e. don't skip the full RPATH for the build tree
+SET(CMAKE_SKIP_BUILD_RPATH  FALSE)
+
+# when building, don't use the install RPATH already
+# (but later on when installing)
+SET(CMAKE_BUILD_WITH_INSTALL_RPATH FALSE) 
+
+# the RPATH to be used when installing
+SET(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib")
+
+
 IF( CMAKE_COMPILER_IS_GNUCXX )
 SET(CMAKE_CXX_FLAGS " ${CMAKE_CXX_FLAGS} -Wall -Wno-unused " )
 SET(CMAKE_CXX_FLAGS " ${CMAKE_CXX_FLAGS} -O3 " )

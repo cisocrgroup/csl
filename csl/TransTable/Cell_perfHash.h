@@ -28,7 +28,7 @@ namespace csl {
 	typedef SizeType__ StateId_t;
 	typedef SizeType__ InternalSize_t;
 	typedef InternalCharType__ InternalChar_t;
-
+	
 	/* type is bit-coded: 
 	 * 0  = 00000000: empty
 	 * 1  = 00000001: transition
@@ -48,7 +48,7 @@ namespace csl {
 	void setKey( wchar_t key ) {
 	    assert(key_ == 0);
 	    if( key > std::numeric_limits< InternalChar_t >::max() ) {
-		throw exceptions::outOfRange( "Cell<TT_STANDARD>::setKey() : key is too big for chosen InternatChar_t" );
+		throw exceptions::outOfRange( "Cell<TT_PERFHASH>::setKey() : key is too big for chosen InternatChar_t" );
 	    }
 	    key_ = key;
 	}
@@ -60,12 +60,12 @@ namespace csl {
 	void setValue( InternalSize_t value ) {
 //	assert(value_ == 0); // can not be asserted when changeTransitionTarget() is used
 	    if( value > std::numeric_limits< InternalSize_t >::max() ) {
-		throw exceptions::outOfRange( "Cell<TT_STANDARD>::setValue() : value is too big for chosen InternalSize_t" );
+		throw exceptions::outOfRange( "Cell<TT_PERFHASH>::setValue() : value is too big for chosen InternalSize_t" );
 	    }
 	    value_ = value;
 	}
 
-	StateId_t getValue() const {
+	InternalSize_t getValue() const {
 	    return value_;
 	}
 
@@ -116,7 +116,7 @@ namespace csl {
 
 	void setThirdValue( InternalSize_t thirdValue ) {
 	    if( thirdValue > std::numeric_limits< InternalSize_t >::max() ) {
-		throw exceptions::outOfRange( "Cell<TT_STANDARD>::setThirdValue : value is too big for chosen InternalSize_t" );
+		throw exceptions::outOfRange( "Cell<TT_PERFHASH>::setThirdValue : value is too big for chosen InternalSize_t" );
 	    }
 	    thirdValue_ = thirdValue;
 	}

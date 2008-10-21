@@ -7,7 +7,7 @@ add_subdirectory(LevDEA)
 add_subdirectory(ErrDic)
 add_subdirectory(MinDicString)
 add_subdirectory(Vaam)
-#add_subdirectory(SimpleFSA)
+add_subdirectory(SimpleFSA)
 add_subdirectory(DictSearch)
 
 ADD_LIBRARY( csl SHARED csl.cxx LevDEA/LevDEA.cxx )
