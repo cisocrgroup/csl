@@ -11,6 +11,7 @@ int main( int argc, char** argv ) {
     cd.compute( argv[1] );
 
     cd.getDic().analyze();
+//    cd.getDic().toDot();
 
     
     csl::SimpleFSA::Simple2TransTable::TransTable_t transTable;
@@ -18,6 +19,7 @@ int main( int argc, char** argv ) {
 
     converter.translate( cd.getDic(), &transTable );
     
+//    transTable.toDot();
     transTable.writeToFile( argv[2] );
 
 }

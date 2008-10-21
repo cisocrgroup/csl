@@ -19,8 +19,10 @@
  * @author Ulrich Reffle, <uli@cis.uni-muenchen.de>
  * 
  */
-//typedef csl::Vaam< csl::TransTable< csl::TT_PERFHASH, uint16_t > > Vaam_t;
-typedef csl::Vaam< csl::MinDic<> > Vaam_t;
+typedef csl::Vaam< csl::TransTable< csl::TT_PERFHASH, uint16_t, uint32_t > > Vaam_t;
+
+//typedef csl::Vaam< csl::MinDic<> > Vaam_t;
+
 int main(int argc, const char** argv ) {
 
 	try {
@@ -33,7 +35,7 @@ int main(int argc, const char** argv ) {
 	exit( 1 );
     }
 
-    csl::MinDic<> baseDic;
+    Vaam_t::MinDic_t baseDic;
     baseDic.loadFromFile( opt.getArgument( 1 ).c_str() );
 
     Vaam_t vaam( baseDic, opt.getArgument( 2 ).c_str() );

@@ -67,7 +67,7 @@ namespace csl {
 	     * 
 	     */
 	    bool walk( wchar_t c ) {
-		dicPos_ = transTable_->walkPerfHash( dicPos_, c, perfHashValue_ );
+		dicPos_ = transTable_->walkPerfHash( dicPos_, c, &perfHashValue_ );
 		return isValid();
 	    }
 
@@ -97,14 +97,14 @@ namespace csl {
 		return dicPos_;
 	    }
 
+	    int getAnnotation() const {
+		return -1;
+	    }
+
 	    bool isFinal() const {
 		return transTable_->isFinal( dicPos_ );
 	    }
 	    
-	    int getAnnotation() {
-		return transTable_->getAnnotation( getPerfHashValue() );
-	    }
-
 	private:
 
 	    State( const TransTable_t& transTable, StateId_t dicPos, size_t perfHashValue ) :
@@ -117,7 +117,7 @@ namespace csl {
 	    StateId_t dicPos_;
 	    size_t perfHashValue_;
 	}; // class State
-	
+
 	
 	/******************** CONSTRUCTORS / DESTRUCTOR ********************/
 
@@ -170,6 +170,15 @@ namespace csl {
 	/// @brief returns the root
 	inline StateId_t getRoot() const;
 
+	/**
+	 * Get a State object of the automaton's root/ start state. 
+	 * @return a State object of the automaton's root/ start state. 
+	 * @see State
+	 */
+	inline State getRootState() const {
+	    return State( *this );
+	}
+	
 	/**
 	 * @brief returns true iff state is marked as final
 	 * @param state id of a state

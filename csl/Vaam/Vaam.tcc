@@ -48,7 +48,7 @@ namespace csl {
     }
     
     template< typename MinDicType >
-    void Vaam< MinDicType >::setFilterDic( MinDic_t const& filterDic ) {
+    void Vaam< MinDicType >::setFilterDic( MinDic<> const& filterDic ) {
 	filterDic_ = &filterDic;
     }
 

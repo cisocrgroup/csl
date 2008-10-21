@@ -17,15 +17,19 @@ namespace csl {
 	 *
 	 */
 	class Simple2TransTable {
+	private:
+	    typedef uint32_t TransTableValue_t;
 	public:
-	    typedef TransTable< TT_PERFHASH, uint16_t, uint64_t > TransTable_t;
+	    typedef TransTable< TT_PERFHASH, uint16_t, TransTableValue_t > TransTable_t;
 	    typedef TransTable_t::TempState_t TempState_t ;
 	    void translate( Automaton const& sfsa, TransTable_t* transTable  );
 
 	private:
 	    void translateState( State const* simpleState, TempState_t* tempState );
-	    std::map< State const*, size_t > stateMap_;
 
+	    // this is an incredible waste! But the whole thing is a hack anyway ...
+	    std::map< size_t, TransTableValue_t > number2Sparse_;
+	    
 	};
 
 
@@ -40,15 +44,19 @@ namespace csl {
 	    std::wcerr <<"Insert states to TransTable ... "<<std::endl;
 	    size_t count = 0;
 	    for( Automaton::const_state_iterator state = sfsa.states_begin(); state != sfsa.states_end(); ++state ) {
-		if( (size_t)*state > 0xffffffff00000000 ) {
-		    std::wcerr<<"Simple2TransTable.h: HA"<<std::endl;
+		
+		translateState( *state, &tempState );
+		number2Sparse_[(*state)->getNumber()] = transTable->storeTempState( tempState );
+		//std::wcout<<"number" << (*state)->getNumber() << " to sparse " << number2Sparse_[(*state)->getNumber()] << std::endl;
+
+		// this is more than unlikely, but in this program, nothing is impossible ...
+		if( (size_t)(*state)->getNumber() > std::numeric_limits< TransTableValue_t >::max() ) {
+		    throw csl::exceptions::cslException( "csl::SimpleFSA::Simple2TransTable: SimpleFSA state number does not fit into TransTable value." );
 		}
 
-		translateState( *state, &tempState );
-		stateMap_[*state] = transTable->storeTempState( tempState );
 		if( ++count % 100000 == 0 ) std::wcerr<<count/1000<<"k states processed"<<std::endl;
 	    }
-	    transTable->setRoot( stateMap_[sfsa.getRoot()] );
+	    transTable->setRoot( number2Sparse_[sfsa.getRoot()->getNumber()] );
 
 	    TransTable_t::Cell_t* cells = transTable->getCells();
 	    size_t nrOfCells = transTable->getNrOfCells();
@@ -56,8 +64,9 @@ namespace csl {
 	    watch.start();
 	    std::wcerr <<"Rewrite TransTable ... "<<std::flush;
 	    for( size_t i = 0; i < nrOfCells; ++i ) {
-		if( cells[i].isTransition() )
-		    cells[i].setValue( stateMap_[(State const*)cells[i].getValue()] );
+		if( cells[i].isTransition() ) {
+		    cells[i].setValue( number2Sparse_[cells[i].getValue()] );
+		}
 	    }
 	    std::wcerr <<"done. "<< watch.readSeconds() << " seconds" << std::endl;
 
@@ -67,15 +76,14 @@ namespace csl {
 	void Simple2TransTable::translateState( State const* simpleState, TempState_t* tempState ) {
 	    tempState->reset();
 
+	    if( simpleState->isFinal() ) tempState->setFinal();
 	    for( State::const_trans_iterator trans = simpleState->trans_begin();
 		 trans != simpleState->trans_end(); 
 		 ++trans ) {
 
-		tempState->addTransition( trans->first, (size_t)trans->second, 0 ); // 3rd arg ist the phValue ...
+		tempState->addTransition( trans->first, trans->second->getNumber(), 0 ); // 3rd arg ist the phValue ...
 	    }
-	    if( simpleState->isFinal() ) tempState->setFinal();
 	}
-
     }
 }
 

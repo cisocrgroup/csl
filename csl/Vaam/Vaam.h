@@ -56,7 +56,9 @@ namespace csl {
 
     public:
 	/**
-	 * @brief The type of MinDic used as dictionaries
+	 * @brief The type of MinDic used as base dictionary.
+	 *
+	 * Note that other dictionaries used here (e.g. the filterDic) are not necessarily of this type.
 	 */
 	typedef MinDicType MinDic_t;
 
@@ -120,7 +122,7 @@ namespace csl {
 	/**
 	 * @brief set a filter dictionary. This restricts output words to words NOT present in this filterDic.
 	 */
-	inline void setFilterDic( MinDic_t const& filterDic );
+	inline void setFilterDic( MinDic<> const& filterDic );
 	
 	// @}
 
@@ -215,7 +217,7 @@ namespace csl {
 	/////   DATA MEMBERS OF VAAM    //////////////////////
 
 	MinDic_t const& baseDic_;
-	MinDic_t const* filterDic_;
+	MinDic<> const* filterDic_;
 
 	PatternGraph patternGraph_;
 	std::vector< std::wstring > leftSidesList_;

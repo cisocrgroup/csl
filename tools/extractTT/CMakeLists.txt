@@ -4,3 +4,6 @@ link_directories (${csl_BINARY_DIR}/csl)
 add_executable(extractTT extractTT.cxx)
 target_link_libraries (extractTT csl)
 
+add_executable(dotPath dotPath.cxx)
+target_link_libraries (dotPath csl)
+

@@ -21,7 +21,7 @@ int main( int argc, const char** argv ) {
 	exit(1);
     }
     try {
-	TransTable< TT_PERFHASH, uint16_t, size_t > t;
+	TransTable< TT_PERFHASH, uint16_t, uint32_t > t;
 	t.loadFromFile( options.getArgument( 0 ).c_str() );
 
 	if( options.hasOption( "dot" ) ) {
