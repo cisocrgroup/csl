@@ -29,6 +29,21 @@ namespace csl {
 	// @} // END Constructors/ Destructors
 
 
+	bool operator<( Interpretation const& other ) const {
+	    // set up a comparison bases on the sum of levenshtein or pattern edits.
+	    // Give the leevenshtein operations a marginally higher punishment, so that
+	    // if the sums are equal, the one with less lev. operations and more pattern 
+	    // operations will win.
+	    float compareSumOfOperations = 
+		( getInstruction().size() + getLevDistance() * 1.01 ) - 
+		( other.getInstruction().size() + other.getLevDistance() * 1.01 );
+	    
+	    if     ( compareSumOfOperations < 0 ) return true;
+	    else if( compareSumOfOperations > 0 ) return false;
+	    else return ( getWord() < other.getWord() );
+	}
+	
+
 	/**
 	 * @name Getters
 	 */

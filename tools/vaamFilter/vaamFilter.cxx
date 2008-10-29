@@ -19,9 +19,14 @@
  * @author Ulrich Reffle, <uli@cis.uni-muenchen.de>
  * 
  */
-typedef csl::Vaam< csl::TransTable< csl::TT_PERFHASH, uint16_t, uint32_t > > Vaam_t;
 
-//typedef csl::Vaam< csl::MinDic<> > Vaam_t;
+
+#ifdef CSL_VAAMFILTER_USE_TRANSTABLE
+typedef csl::Vaam< csl::TransTable< csl::TT_PERFHASH, uint16_t, uint32_t > > Vaam_t;
+#else
+typedef csl::Vaam< csl::MinDic<> > Vaam_t;
+#endif
+
 
 int main(int argc, const char** argv ) {
 
@@ -57,6 +62,8 @@ int main(int argc, const char** argv ) {
 	watch.start();
 	answers.clear();
 	vaam.query( query, &answers );
+
+	std::sort( answers.begin(), answers.end() );
 
 	if( answers.empty() ) {
 #ifndef CSL_VAAMFILTER_PRINTNONE

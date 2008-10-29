@@ -15,8 +15,9 @@ int main( int argc, const char** argv ) {
 
     if( options.getArgumentCount() != 1 ) {
 	std::wcerr<<std::endl
-		 <<"Use like: dotPath <binDic>"<<std::endl
-		 <<std::endl<<std::endl;
+		  <<"Use like: dotPath <binDic>"<<std::endl
+		  <<"dotPath reads one word from stdin and prints dot code for all states which are on the path of that input word in the automaton."<<std::endl
+		  <<std::endl<<std::endl;
 
 	exit(1);
     }
