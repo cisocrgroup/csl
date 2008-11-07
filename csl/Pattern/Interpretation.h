@@ -141,7 +141,7 @@ namespace csl {
 	    os<<word_<<":"<<baseWord_<<"+";
 	    instruction_.print( os );
 	    os<<",dist="<<levDistance_;
-	    os<<",baseWordScore="<<baseWordScore_;
+	    //os<<",baseWordScore="<<baseWordScore_;
 	}
 
 	/**

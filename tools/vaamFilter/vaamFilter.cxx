@@ -36,7 +36,11 @@ int main(int argc, const char** argv ) {
     Getopt opt( argc, argv );
 
     if( opt.getArgumentCount() < 3 ) {
-	std::wcerr<<"Use like: vaamFilter <distance> <dictionary> <pattern-file>"<<std::endl;
+	std::wcerr<< "Use like: vaamFilter [options] <distance> <dictionary> <pattern-file>"<<std::endl
+		  << std::endl
+		  << "Options:" << std::endl
+		  << "--minNrOfPatterns=N       Allow only interpretations with N or more pattern applications. Defaults to 0." << std::endl
+		  << "--maxNrOfPatterns=N       Allow only interpretations with at most N pattern applications. Defaults to INFINITE." << std::endl;
 	exit( 1 );
     }
 
@@ -47,6 +51,10 @@ int main(int argc, const char** argv ) {
 
     if( opt.hasOption( "maxNrOfPatterns" ) ) {
 	vaam.setMaxNrOfPatterns( atoi( opt.getOption( "maxNrOfPatterns" ).c_str() ) );
+    }
+
+    if( opt.hasOption( "minNrOfPatterns" ) ) {
+	vaam.setMinNrOfPatterns( atoi( opt.getOption( "minNrOfPatterns" ).c_str() ) );
     }
 
 

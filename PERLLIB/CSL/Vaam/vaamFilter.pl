@@ -3,11 +3,8 @@
 use strict;
 use Data::Dumper;
 
-use lib '/mounts/data/proj/impact/software/Vaam/perl';
-use Vaam;
-
-use lib '/mounts/Users/student/annette/impl/libChecked';
-use komposita;
+use lib '/mounts/Users/student/uli/implement/csl/trunk/PERLLIB';
+use CSL::Vaam;
 
 if( @ARGV < 3 ) {
 
@@ -28,37 +25,16 @@ HELP
 my $vaam = new Vaam( distance => shift @ARGV,
 		     dicFile =>  shift @ARGV,
 		     patternFile =>  shift @ARGV,
-		     
+		     vaamBinary => '/mounts/Users/student/uli/implement/csl/trunk/build_platane/bin/vaamFilter'
     ) or die $!;
 
-$vaam->setSlimMode( 1 );
+#$vaam->setSlimMode( 1 );
 
-my $komposita = komposita->new();
 
 while ( my $word = <> ) {
     chomp $word;
     my $answer = $vaam->lookup( $word );
 
-#    print Dumper $answer;
+    print Dumper $answer;
 
-    if( $answer->{vaamString} =~ m/NONE/ ) {
-
-	# $word ist direkt im CISLEX
-	if( $komposita->simplex($word)){
-	    print "$word:$word+[],dist=0\n";
-	    warn "vaamFilter.pl: Looks like inconsistent lexicon data ($word)";
-	}
-	# $word kann als Kompositum zerlegt werden
-	elsif( $komposita->zerlege($word)){
-	    print "$word:$word+[],dist=0\n";
-	}
-	# $word ist komisch.
-	else{
-	    print $answer->{vaamString}, "\n";
-	}
-
-    }
-    else {
-	print $answer->{vaamString}, "\n";
-    }
 }

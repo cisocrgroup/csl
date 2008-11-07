@@ -50,13 +50,21 @@ path to a .mdic dictionary file
 
 path to a plaintext file defining a set of patterns with each line simply giving left and right side separated by a SPACE
 
-=item B<distance> => n
+=item B<distance> => N
 
-to allow up to n standard-levenshtein edit operations (apart from the variant patterns). Defaults to 0.
+to allow up to N standard-levenshtein edit operations (apart from the variant patterns). Defaults to 0.
 
 =item B<vaamBinary> => '/some/where/binary'
 
 to choose a binary path other than the one on the CIS installation
+
+=item B<minNrOfPatterns> => N
+
+Allow only interpretations with N or more pattern applications. Defaults to 0.
+
+=item B<maxNrOfPatterns> => N
+
+Allow only interpretations with at most N pattern applications. Defaults to infinite.
 
 =back
 
@@ -92,6 +100,9 @@ sub new {
     my $options ='';
     if( $self->{maxNrOfPatterns} ) {
 	$options .= " --maxNrOfPatterns=". $self->{maxNrOfPatterns};
+    }
+    if( $self->{minNrOfPatterns} ) {
+	$options .= " --minNrOfPatterns=". $self->{minNrOfPatterns};
     }
     my $binary = "$$self{vaamBinary} $options $self->{distance} $self->{dicFile} $self->{patternFile}";
     

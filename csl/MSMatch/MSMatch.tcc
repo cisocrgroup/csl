@@ -98,6 +98,7 @@ namespace csl {
 		// printf( "MATCH FIRST TIME :%ls, dist is %d\n", wordCorrectDir, levDistance ); // DEBUG
 		results_.insert( std::pair< std::wstring, std::pair< size_t, int > >( std::wstring( wordCorrectDir ), std::pair< size_t, int >( levDistance, dictFW_->getAnnotation( perfHashValue ) ) ) );
 	    }
+
 	    else {
 		// printf( "MATCH AGAIN:%ls, dist is %d\n", wordCorrectDir, levDistance ); // DEBUG
 		// (pos->second).first holds the lev.-distance of the candidate
