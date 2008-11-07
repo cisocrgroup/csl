@@ -57,8 +57,7 @@ theile:teile+[(t_th,0)],dist=0,baseWordScore=84(modern)
 
 @section installation Compilation/ Installation
 Please read the INSTALL file in the project root directory. The make command will compile a whole lot of things you don't need, but never mind.
-
-For Windows: cmake creates quite reliable Visual C++ project files. The project compiles, though with a lot of warnings. At the moment, there's a major bug when it comes to utf-8 input on Windows (see section Bugs/Known Issues)
+The open source program 'cmake' produces Makefiles for Linux and vcproj-files for MS Visual C++. On Windows, The project compiles, but with lots of warnings.  At the moment, there's a major bug with Visual Studio 2008 connected to utf8 input. The problem does not exist with Visual Studio 2005.
 
 @section fbdic Dictionary Format: fbdic
 To use a dictionary with csl::DictSearch, it has to be compiled into a finite-state automaton. csl::FBDic is responsible for that.
@@ -71,9 +70,7 @@ There are multiple ways to connect a dictionary to DictSearch:
 - To create the automata at runtime using csl::FBDic::compileDic()
 
 @subsection fbdic_size On the size of fbdics
-Unfortunately the resulting data structure is pretty large ( less than 100MB for a dictionary of 2.2 million 
-German words) - that's because the approximate matching algorithm actually needs two variants of the automaton
-simultaneously in the memory. A slower variant of the search algorithm gets along with dictionaries of half the size.
+Unfortunately the resulting data structure is pretty large ( less than 62MB for a German dictionary of 2.9 million words) - that's because the approximate matching algorithm actually needs two variants of the automaton simultaneously in the memory. A slower variant of the search algorithm gets along with dictionaries of half the size.
 
 
 @section configuration Configuration

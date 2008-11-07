@@ -3,7 +3,7 @@
 #include <csl/Getopt/Getopt.h>
 
 // uncomment this if you want so suppress output for the words
-#define CSL_DICTSEARCH_PRINTNONE 1;
+//#define CSL_DICTSEARCH_PRINTNONE 1;
 
 int main( int argc, char const** argv ) {
     std::locale::global( std::locale("") ); // set the environment's default locale
