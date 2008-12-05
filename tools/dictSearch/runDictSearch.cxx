@@ -33,7 +33,6 @@ int main( int argc, char const** argv ) {
     dictSearch.getConfigHistoric().setDLevWordlengths();
     // initialise the hypothetic dict. with a file of patterns
     dictSearch.initHypothetic( options.getArgument( 2 ).c_str() );
-    dictSearch.getConfigHypothetic().setMaxNrOfPatterns( 1 );
 
     std::wstring query;
     csl::DictSearch::CandidateSet candSet;

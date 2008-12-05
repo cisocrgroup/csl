@@ -159,6 +159,13 @@ namespace csl {
 	    /**
 	     * @brief method defined as usual for containers, e.g. in the std library
 	     */
+	    bool empty() const {
+		return std::vector< csl::DictSearch::Interpretation >::empty();
+	    }
+
+	    /**
+	     * @brief method defined as usual for containers, e.g. in the std library
+	     */
 	    csl::DictSearch::Interpretation const& at( size_t i ) const {
 		return std::vector< csl::DictSearch::Interpretation >::at( i );
 	    }

@@ -11,7 +11,7 @@ sub new {
     ( my $class, %$self ) = @_;
 
 
-    if( !$self->{dicFile} ) {
+    if( ! -r $self->{dicFile} ) {
 	print STDERR "MinDicString: provide 'dicFile' as argument for the constructor.\n";
 	return undef;
     }

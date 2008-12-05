@@ -18,11 +18,11 @@ namespace csl {
 	 * specified as argument.
 	 */
 	void print(  std::wostream& os = std::wcout ) const {
-	    std::wcout<<"[";
+	    os<<"[";
 	    for( const_iterator it = begin(); it != end(); ++it  ) {
-		it->print();
+		it->print( os );
 	    }
-	    std::wcout<<"]";
+	    os<<"]";
 	}
 	
 	/**
