@@ -287,6 +287,13 @@ namespace csl {
 		printDic_rec( getRoot(), 0, 0 );
 	}
 
+// 	template< class AnnType_t >
+// 	inline void MinDic< AnnType_t >::printDic() const {
+// 	    for( TokenIterator it = tokensBegin(); it != tokensEnd(); ++it ) {
+// 		std::wcout << *it << std::endl;
+// 	    }
+// 	}
+    
 	template< class AnnType_t >
 	inline void MinDic< AnnType_t >::printDic_rec( StateId_t pos, int depth, size_t perfHashValue ) const {
 		int newPos;

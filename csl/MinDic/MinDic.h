@@ -3,6 +3,7 @@
 
 #include <fstream>
 #include <vector>
+#include <stack>
 #include <errno.h>
 #include "../Global.h"
 #include "../codecvt/UTF8_Codecvt.h"
@@ -61,7 +62,7 @@ namespace csl {
 	     * 
 	     */
 	    bool walk( wchar_t c ) {
-		dicPos_ = minDic_->walkPerfHash( dicPos_, c, perfHashValue_ );
+		dicPos_ = minDic_->walkPerfHash( dicPos_, c, &perfHashValue_ );
 		return isValid();
 	    }
 
@@ -112,6 +113,83 @@ namespace csl {
 	    size_t perfHashValue_;
 	}; // class State
 
+	class TokenIterator {
+	private:
+	    typedef std::pair< State, size_t > StackItem_t;
+	public:
+	    /**
+	     * @brief creates an iterator that equals tokensEnd()
+	     *        because of its empty currentString_
+	     */
+	    TokenIterator() {
+	    }
+
+	    TokenIterator( State const& rootState ) {
+		if( ( rootState.getSusoString())[0] == 0 ) { // no transitions from root state
+		    return; // iterator now equals to tokensEnd()
+		}
+		stack_.push( std::make_pair( rootState, 0 ) );
+		State st = rootState;
+		while( st.isValid() && ! st.isFinal() ) {
+		    wchar_t nextChar = (st.getSusoString())[0]; // this might be \0
+		    st.walk( nextChar );
+		    ++( stack_.top().second ); // we used the first transition
+		    if( nextChar ) {
+			stack_.push( std::make_pair( st, 0 ) );
+			currentString_ += nextChar;
+		    }
+		}
+	    }
+
+	    bool operator==( TokenIterator const& other ) const {
+		return currentString_ == other.currentString_;
+	    }
+
+	    bool operator!=( TokenIterator const& other ) const {
+		return !( *this == other );
+	    }
+
+	    /**
+	     * @brief returns a reference to the current token. CAUTION: This reference becomes invalid
+	     *        as soon as the iterator is moved forward.
+	     */
+	    std::wstring const& operator*() const {
+		return currentString_;
+	    }
+
+	    TokenIterator& operator++() {
+		do {
+		    //std::wcout << "At: " << stack_.top().first.getStateID() << "," << stack_.top().second << std::endl;
+		    wchar_t nextChar = (stack_.top().first.getSusoString())[ stack_.top().second ];
+		    if( nextChar ) { // more paths to go from this state
+			++( stack_.top().second );
+			State st = stack_.top().first.getTransTarget( nextChar );
+			stack_.push( std::make_pair( st, 0 ) );
+			currentString_ += nextChar;
+			// std::wcout << "forward to " << stack_.top().first.getStateID() << std::endl;
+		    }
+		    else {
+			stack_.pop();
+			if( ! stack_.empty() ) {
+			    currentString_.resize( currentString_.size() - 1 );
+			    // std::wcout << "back to " << stack_.top().first.getStateID() << std::endl;
+			}
+		    }
+		} while( ! ( stack_.empty() || // quit if stack is empty or if final state is reached for the 1st time
+			     ( stack_.top().first.isFinal() && stack_.top().second == 0 ) 
+			     ) 
+		    );
+	    }
+
+	private:
+	    std::wstring currentString_;
+	    /**
+	     * @brief the std::pair holds (first) a state and (second) the index in this state's susoString that is due to be
+	     * processed nect
+	     */
+	    std::stack< StackItem_t > stack_;
+	};
+
 	/**
 	 * @brief Create a new MinDic. An optional file-path as argument invokes a call to loadFromFile.
 	 * @param a file containing a compiled MinDic. (optional; often: *.mdic)
@@ -153,6 +231,14 @@ namespace csl {
 	    return State( *this );
 	}
 
+	inline TokenIterator tokensBegin() const {
+	    return TokenIterator( getRootState() );
+	}
+
+	inline TokenIterator tokensEnd() const {
+	    return TokenIterator();
+	}
+	
 	//@}
 
 
