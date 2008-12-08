@@ -68,7 +68,7 @@ namespace csl {
 
 	template< class AnnType_t >
 	inline void MinDic< AnnType_t >::initConstruction() {
-	    std::wcerr<<"MinDic::initConstruction()"<<std::endl;
+	    // std::wcerr<<"MinDic::initConstruction()"<<std::endl;
 		TransTable_t::initConstruction();
 		tempStates_ =( TempState_t* ) malloc( Global::lengthOfStr * sizeof( TempState_t ) ); // allocate memory for all tempStates
 		for( size_t i = 0; i < Global::lengthOfStr; ++i ) {

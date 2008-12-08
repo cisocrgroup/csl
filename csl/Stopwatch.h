@@ -7,13 +7,18 @@
 
 class Stopwatch {
 public:
+    Stopwatch();
     inline void start();
     inline unsigned long long readSeconds() const;
     inline unsigned long long readMilliseconds() const;
-
+    
 private:
     timeb start_;
 };
+
+Stopwatch::Stopwatch() {
+    start();
+}
 
 void Stopwatch::start() {
     ftime( &start_ );

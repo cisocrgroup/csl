@@ -5,6 +5,7 @@
 #include<cstring>
 #include<string>
 #include<exception>
+#include<ios>
 #define debug(s) (std::cout<<"DEBUG: "<<s<<std::endl)
 
 
@@ -27,6 +28,8 @@ typedef unsigned __int16 uint16_t;
 typedef unsigned __int32 uint32_t;
 typedef unsigned __int64 uint64_t;
 #endif 
+
+
 
 /**
    This namespace covers a system of modules for string processing.

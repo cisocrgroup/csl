@@ -13,6 +13,7 @@ namespace csl {
 	cells_ = 0;
 	susoStrings_ = 0;
 	susoHash_ = 0;
+	ready_ = 0;
     }
 
     template< typename InternalCharType__, typename SizeType__ >
@@ -20,6 +21,22 @@ namespace csl {
     ::~TransTable() {
 	if( cells_ ) free( cells_ );
 	if( susoStrings_ ) free( susoStrings_ );
+    }
+
+
+    /******************                           **********************/
+    template< typename InternalCharType__, typename SizeType__ >
+    bool
+    TransTable< TT_PERFHASH, InternalCharType__, SizeType__ >
+    ::readyToRead() const {
+	return ready_ == 1;
+    }
+
+    template< typename InternalCharType__, typename SizeType__ >
+    bool
+    TransTable< TT_PERFHASH, InternalCharType__, SizeType__ >
+    ::readyToWrite() const {
+	return ready_ == 2;
     }
 
 
@@ -131,6 +148,7 @@ namespace csl {
 	lengthOfSusoStrings_ = 0;
 
 	susoHash_ = new Hash< wchar_t >( 100000, susoStrings_, lengthOfSusoStrings_ );
+	ready_ = 2;
     }
 
     template< typename InternalCharType__, typename SizeType__ >
@@ -143,6 +161,7 @@ namespace csl {
 	susoHash_ = 0;
 
 	header_.set( *this );
+	ready_ = 1;
     }
 
 
@@ -317,6 +336,7 @@ namespace csl {
 	fread( susoStrings_, sizeof( wchar_t ), lengthOfSusoStrings_, fi );
 	
 	sizeOfUsedCells_ = nrOfCells_;
+	ready_ = 1;
     }
     
 

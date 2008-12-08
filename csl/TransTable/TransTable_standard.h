@@ -42,6 +42,10 @@ namespace csl {
 	 */
 	inline ~TransTable();
 
+
+	virtual bool readyToRead() const;
+	virtual bool readyToWrite() const;
+
 	/**
 	 * Loads an automaton from a binary file. (usually .dic or .trie or similar)
 	 * @param binFile filename of the binary storing the automaton
@@ -174,6 +178,15 @@ namespace csl {
 
 	Cell_t* cells_;
 	size_t nrOfCells_;
+
+	/**
+	 * @brief indicate the object's state
+	 *
+	 * 0: nothing is initialised
+	 * 1: ready to read
+	 * 2: ready to write
+	 */
+	int ready_;
 
 	wchar_t* susoStrings_;
 

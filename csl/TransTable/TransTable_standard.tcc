@@ -25,6 +25,21 @@ namespace csl {
     }
 
     template< typename InternalCharType__, typename SizeType__ >
+    bool
+    TransTable< TT_STANDARD, InternalCharType__, SizeType__ >
+    ::readyToRead() const {
+	return ready_ = 1;
+    }
+
+    template< typename InternalCharType__, typename SizeType__ >
+    bool
+    TransTable< TT_STANDARD, InternalCharType__, SizeType__ >
+    ::readyToWrite() const {
+	return ready_ = 2;
+    }
+
+
+    template< typename InternalCharType__, typename SizeType__ >
     uint_t
     TransTable< TT_STANDARD, InternalCharType__, SizeType__ >
     ::walk( StateId_t state, char16 c ) const {
@@ -66,7 +81,7 @@ namespace csl {
 	sizeOfUsedCells_ = 1; // cells_[0] is the failure state
 
 	header_.set( *this );
-
+	ready_ = 2;
     }
 
     template< typename InternalCharType__, typename SizeType__ >
@@ -84,6 +99,7 @@ namespace csl {
 	susoIndex_ = 0;
 
 	header_.set( *this );
+	ready_ = 1;
     }
 
     /**

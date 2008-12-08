@@ -157,6 +157,10 @@ namespace csl {
 		return currentString_;
 	    }
 
+	    std::wstring const* operator->() const {
+		return &currentString_;
+	    }
+
 	    TokenIterator& operator++() {
 		do {
 		    //std::wcout << "At: " << stack_.top().first.getStateID() << "," << stack_.top().second << std::endl;
@@ -232,7 +236,12 @@ namespace csl {
 	}
 
 	inline TokenIterator tokensBegin() const {
-	    return TokenIterator( getRootState() );
+	    if( readyToRead() ) {
+		return TokenIterator( getRootState() );
+	    }
+	    else {
+		return tokensEnd();
+	    }
 	}
 
 	inline TokenIterator tokensEnd() const {

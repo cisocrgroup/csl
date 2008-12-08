@@ -132,6 +132,9 @@ namespace csl {
 	inline ~TransTable();
 
 
+	virtual bool readyToRead() const;
+	virtual bool readyToWrite() const;
+
 	/****************** BASIC ACCESS TO THE TRANSITION TABLE **********************/
 	
 	/**
@@ -296,6 +299,15 @@ namespace csl {
 	Cell_t* cells_;
 	size_t nrOfCells_;
 
+	/**
+	 * @brief indicate the object's state
+	 *
+	 * 0: nothing is initialised
+	 * 1: ready to read
+	 * 2: ready to write
+	 */
+	int ready_;
+
 	wchar_t* susoStrings_;
 
 	// this is the number of characters in susoStrings_ (not the size in bytes!)
@@ -303,6 +315,7 @@ namespace csl {
 	Hash< wchar_t >* susoHash_;
 
 	static const bits64 magicNumber_ = 345672461;
+
 
 	/**
 	 * This class represents the header information for a TransTable. An object of this kind
