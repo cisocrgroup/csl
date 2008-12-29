@@ -9,7 +9,9 @@ namespace csl {
 
     /**
      * @brief csl::MinDicFlexible is a wrapper for csl::MinDic dictionary automata which allows
-     *        much more flexible insertion of new entries at runtime
+     *        much more flexible insertion and deletion of new entries at runtime
+     *
+     * 
      *
      * @author Ulrich Reffle, 2008
      */
@@ -28,6 +30,9 @@ namespace csl {
 	    if( minDic_ ) delete( minDic_ );
 	}
 
+	/**
+	 * @returns 
+	 */
 	MinDic_t const& getMinDic() const {
 	    return *minDic_;
 	}

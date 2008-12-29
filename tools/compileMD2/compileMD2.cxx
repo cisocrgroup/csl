@@ -4,7 +4,7 @@
 #include<iostream>
 
 /**
- * @brief Program used to compute a MinDic<> from a word list and dump the automaton to a file.
+ * @brief Program used to compute a csl::MinDic2 from a word list and dump the automaton to a file.
  *
  */
 int main(int argc, char** argv) {
@@ -20,14 +20,14 @@ int main(int argc, char** argv) {
 
 
     try {
-		t.compileDic( argv[1] );
-
-		t.writeToFile( argv[2] );
-	} catch ( csl::exceptions::cslException ex ) {
-		std::wcout<<"compileMD failed: "<<ex.what()<<std::endl;
-		return(1);
+	t.compileDic( argv[1] );
+	
+	t.writeToFile( argv[2] );
+    } catch ( csl::exceptions::cslException ex ) {
+	std::wcout<<"compileMD failed: "<<ex.what()<<std::endl;
+	return(1);
     }
-
+    
     t.toDot();
     //t.printCells();
     //t.printDic();

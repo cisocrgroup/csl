@@ -1,5 +1,5 @@
-#ifndef STOPWATCH_H
-#define STOPWATCH_H STOPWATCH_H
+#ifndef CSL_STOPWATCH_H
+#define CSL_STOPWATCH_H CSL_STOPWATCH_H
 
 
 #include<sys/timeb.h>
@@ -16,21 +16,21 @@ private:
     timeb start_;
 };
 
-Stopwatch::Stopwatch() {
+inline Stopwatch::Stopwatch() {
     start();
 }
 
-void Stopwatch::start() {
+inline void Stopwatch::start() {
     ftime( &start_ );
 }
 
-unsigned long long Stopwatch::readSeconds() const {
+inline unsigned long long Stopwatch::readSeconds() const {
     timeb now;
     ftime( &now );
     return now.time - start_.time;
 }
 
-unsigned long long Stopwatch::readMilliseconds() const {
+inline unsigned long long Stopwatch::readMilliseconds() const {
     timeb now;
     ftime( &now );
     return ( now.time - start_.time ) * 1000 + ( now.millitm - start_.millitm );

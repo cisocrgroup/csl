@@ -189,4 +189,11 @@ namespace csl {
 
 }
 
+namespace std {
+    inline wostream& operator<<( wostream& os, csl::Interpretation const& obj ) {
+	obj.print( os );
+	return os;
+    }
+}
+
 #endif

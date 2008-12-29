@@ -28,14 +28,14 @@ namespace csl {
     bool
     TransTable< TT_STANDARD, InternalCharType__, SizeType__ >
     ::readyToRead() const {
-	return ready_ = 1;
+	return ( ready_ == 1 );
     }
 
     template< typename InternalCharType__, typename SizeType__ >
     bool
     TransTable< TT_STANDARD, InternalCharType__, SizeType__ >
     ::readyToWrite() const {
-	return ready_ = 2;
+	return ( ready_ == 2 );
     }
 
 

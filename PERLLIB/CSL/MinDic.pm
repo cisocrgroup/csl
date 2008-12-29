@@ -10,12 +10,12 @@ sub new {
     my $self = {};
     ( my $class, %$self ) = @_;
 
-    if( !$self->{dicFile} ) {
-	print STDERR "MinDic: provide argument 'dicFile' as arguments for the constructor.\n";
+    if( ! -f $self->{dicFile} ) {
+	warn "MinDic: provide argument 'dicFile' as arguments for the constructor.\n";
 	return undef;
     }
     
-    my $binary = "/mounts/data/proj/impact/software/uli/$ENV{HOSTNAME}/bin/lookupMD $self->{dicFile}";
+    my $binary = "/mounts/data/proj/impact/software/uli/$ENV{CPU}/bin/lookupMD $self->{dicFile}";
 
     open2( $self->{BINARY_OUT}, $self->{BINARY_IN}, $binary ) or die "Perl::MinDic: $!";
 
@@ -26,6 +26,7 @@ sub new {
 
 
     bless( $self, $class );
+
     return $self;
 }
 
@@ -42,6 +43,11 @@ sub lookup {
     my $output = readline( $self->{BINARY_OUT} );
     chomp $output;
     return( $output );
+}
+
+sub contains {
+    my($self, $key) = @_;
+    return ( $self->lookup( $key ) ne '' );
 }
 
 1;

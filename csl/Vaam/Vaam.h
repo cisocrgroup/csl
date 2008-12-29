@@ -32,7 +32,8 @@ namespace csl {
      * - a wordList @c baseDic compiled as FSA (use the tool compileMD to get such an automaton from a word list. 
      * - a file containing a list of patterns, one per line. A line containing 't th' indicates that a 't' in 
      *   @c baseDic could be transformed to 'th'.
-     * - a threshold @c maxNrOfPatterns specifying the maximum number of pattern applications in one word (default: 1000, which is near to infinite ).
+     * - a threshold @c maxNrOfPatterns specifying the maximum number of pattern applications in one word
+     *   (default: 1000, which is near to infinite ).
      * - a distance threshold @c distance specifying the maximum number of edit operations allowed on top of the
      *   application of variant patterns (default: 0, allow variant patterns only).
      *

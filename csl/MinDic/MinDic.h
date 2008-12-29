@@ -14,8 +14,9 @@ namespace csl {
 
 
     /**
-     * class MinDic performs the construction and usage of minimal acyclic 
+     * @brief class MinDic performs the construction and usage of minimal acyclic 
      * finite state automata for large finite dictionaries. 
+     *
      * It follows an algorithm described in 
      * Jan Daciuk et. al., Incremental Construction of Minimal Acyclic
      * Finite-State Automata, 2000.
@@ -199,8 +200,13 @@ namespace csl {
 	 * @param a file containing a compiled MinDic. (optional; often: *.mdic)
 	 */
 	MinDic( const char* dicFile = 0 );
-
-
+	
+	
+	/**
+	 * @brief The copy constructor is NOT IMPLEMENTED at the moment
+	 */
+	MinDic( MinDic< AnnType_t > const& other );
+	
 	/**
 	 * @name Lookup
 	 */
