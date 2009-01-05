@@ -232,6 +232,28 @@ namespace csl {
 	    return lookup( key.c_str(), annotation );
 	}
 
+	inline bool MinDic2::hasPrefix( std::wstring const& prefix ) const {
+		size_t state = getRoot();
+		for( std::wstring::const_iterator c = prefix.begin(); c != prefix.end() && (state != 0) ; ++c ) {
+			//std::wcout<<L"Walk with "<<(int)*c << std::endl;
+			if( *c >200 ) {
+				return false;
+				// state.walk( 0 );
+				//std::wcout << L"Walked "<< (int)*c << std::endl;
+			}
+			else state = walk( state, *c );
+			//std::wcout << L"Walked"<< std::endl;
+		}
+		if( state > 0 ) {
+			//std::wcout<<L"prefix"<<" is a prefix"<<std::endl;
+			return true;
+		}
+		else {
+			//std::wcout<<L"prefix"<<" is not a prefix"<<std::endl;
+			return false;
+		}
+	}
+
 	inline size_t MinDic2::getNrOfKeys() const {
 		return nrOfKeys_;
 	}

@@ -209,7 +209,7 @@ namespace csl {
 	
 	// update sizeOfUsedCells_
 	sizeOfUsedCells_ = std::max( sizeOfUsedCells_, (size_t)( slot + label + 10 ) ); // 10 is a cautious value here ...
-
+	// sizeOfUsedCells_ = ( sizeOfUsedCells_ > (size_t)( slot + label + 10 ) ) ? sizeOfUsedCells_ : (size_t)( slot + label + 10 );
 	// sizeOfUsedCells_ = std::max( sizeOfUsedCells_, ( slot + Global::maxNrOfChars + 2 ) ); // this is if, at runtime, we want to assure that each state cell is followed by at least Global::maxNrOfChars cells.
 
 

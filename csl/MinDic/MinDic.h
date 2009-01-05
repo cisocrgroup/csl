@@ -224,6 +224,10 @@ namespace csl {
 
 	inline bool lookup( std::wstring const& key, AnnType_t* annotation = 0 ) const;
 
+	inline bool hasPrefix( std::wstring const& prefix ) const;
+	
+
+
 	/**
 	 * @deprecacted this method is renamed to lookup()
 	 */

@@ -165,7 +165,7 @@ namespace csl {
 
 		key = key;
 
-		// printf("input: %ls -> %d\n", key, annotation );
+		//wprintf(L"input: %ls -> %d\n", key, annotation );
 
 
 		// remark: maybe this could be spared if we remember the length during widechar-conversion
@@ -223,7 +223,7 @@ namespace csl {
 		if( ! ( nrOfKeys_ %  100000 ) ) {
 			std::wcerr	<< nrOfKeys_ /1000 << "k tokens processed. "
 						<< TransTable_t::getNrOfStates() / 1000 << "k states."
-						<< "key was: " << key 
+						// << "key was: " << key 
 						<< std::endl;
 		}
 
@@ -258,7 +258,30 @@ namespace csl {
 	inline bool MinDic< AnnType_t >::lookup( std::wstring const& key, AnnType_t* annotation ) const {
 	    return lookup( key.c_str(), annotation );
 	}
-
+	
+	template< class AnnType_t >
+	inline bool MinDic< AnnType_t >::hasPrefix( std::wstring const& prefix ) const {
+		size_t state = getRoot();
+		for( std::wstring::const_iterator c = prefix.begin(); c != prefix.end() && (state != 0) ; ++c ) {
+			//std::wcout<<L"Walk with "<<(int)*c << std::endl;
+			if( *c >200 ) {
+				return false;
+				// state.walk( 0 );
+				//std::wcout << L"Walked "<< (int)*c << std::endl;
+			}
+			else state = walk( state, *c );
+			//std::wcout << L"Walked"<< std::endl;
+		}
+		if( state > 0 ) {
+			//std::wcout<<L"prefix"<<" is a prefix"<<std::endl;
+			return true;
+		}
+		else {
+			//std::wcout<<L"prefix"<<" is not a prefix"<<std::endl;
+			return false;
+		}
+	}
+	
 	template< class AnnType_t >
 	inline bool MinDic< AnnType_t >::getAnnotation( const wchar_t* key, AnnType_t* annotation ) const {
 		std::cerr<<"csl::MinDic::getAnnotation: This method is deprecated. Instead, use method lookup() with the same signature"<<std::endl;

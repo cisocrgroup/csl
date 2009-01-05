@@ -1,4 +1,5 @@
-
+#ifndef CSL_VAAM_H
+#define CSL_VAAM_H CSL_VAAM_H
 #include<iostream>
 
 #include<vector>
@@ -90,7 +91,6 @@ namespace csl {
     public:
 
 	static const size_t INFINITE = (size_t)-1;
-
 	/**
 	 * @brief A trivial construtor, taking the input ressources as arguments
 	 *
@@ -244,3 +244,4 @@ namespace csl {
 } // namespace csl
 
 #include "./Vaam.tcc"
+#endif

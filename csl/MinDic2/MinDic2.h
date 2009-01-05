@@ -67,7 +67,7 @@ namespace csl {
 	    }
 
 	    bool hasTransition( wchar_t c ) const {
-		return minDic_->walk( dicPos_, c );
+			return ( minDic_->walk( dicPos_, c ) != 0 );
 	    }
 
 	    State getTransTarget( wchar_t c ) const {
@@ -126,6 +126,9 @@ namespace csl {
 	inline bool lookup( const wchar_t* key, AnnType_t* annotation = 0 ) const;
 
 	inline bool lookup( std::wstring const& key, AnnType_t* annotation = 0 ) const;
+
+	inline bool hasPrefix( std::wstring const& prefix ) const;
+
 
 	/**
 	 * Get a State object of the automaton's root/ start state. 

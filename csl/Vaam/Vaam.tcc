@@ -1,3 +1,6 @@
+#ifndef CSL_VAAM_TCC
+#define CSL_VAAM_TCC CSL_VAAM_TCC
+
 namespace csl {
 
     template< typename MinDicType >
@@ -211,3 +214,4 @@ namespace csl {
 
     
 } // namespace csl
+#endif

@@ -60,7 +60,7 @@ namespace csl {
 	void setValue( InternalSize_t value ) {
 //	assert(value_ == 0); // can not be asserted when changeTransitionTarget() is used
 	    if( value > std::numeric_limits< InternalSize_t >::max() ) {
-		throw exceptions::outOfRange( "Cell<TT_PERFHASH>::setValue() : value is too big for chosen InternalSize_t" );
+		 throw exceptions::outOfRange( "Cell<TT_PERFHASH>::setValue() : value is too big for chosen InternalSize_t" );
 	    }
 	    value_ = value;
 	}
