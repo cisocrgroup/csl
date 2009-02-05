@@ -72,7 +72,7 @@ namespace csl {
 	    }
 
 	    bool hasTransition( wchar_t c ) const {
-		return minDic_->walk( dicPos_, c );
+		return ( minDic_->walk( dicPos_, c ) != 0 );
 	    }
 
 	    State getTransTarget( wchar_t c ) const {
@@ -375,7 +375,7 @@ namespace csl {
 		return magicNumber_;
 	    }
 	    size_t getNrOfKeys() const {
-		return nrOfKeys_;
+		return static_cast< size_t >( nrOfKeys_ );
 	    }
 
 	    void set( const MinDic& minDic ) {

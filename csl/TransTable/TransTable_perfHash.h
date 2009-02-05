@@ -337,14 +337,14 @@ namespace csl {
 	    }
 
 	    StateId_t getRoot() const {
-		return root_;
+		return static_cast< StateId_t >( root_ );
 	    }
 
 	    size_t getNrOfCells() const {
-		return nrOfCells_;
+		return static_cast< size_t >( nrOfCells_ );
 	    }
 	    size_t getLengthOfSusoStrings() const {
-		return lengthOfSusoStrings_;
+		return static_cast< size_t >( lengthOfSusoStrings_ );
 	    }
 
 	    void set( const TransTable_t& transTable ) {

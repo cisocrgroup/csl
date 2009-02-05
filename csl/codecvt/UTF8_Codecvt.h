@@ -118,7 +118,7 @@ public:
 	    }
 	    else if( *from < 0x80 ) { // 1 byte
 		// std::wcout<<"1-byte: "<<*from<<std::endl; // DEBUG
-		*to = *from;
+		*to = static_cast< char >( *from );
 		++to;
 	    }
 	    else if( *from < 0x800 ) { // 2 bytes
