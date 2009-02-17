@@ -98,7 +98,7 @@ namespace csl {
 	
 	struct stat f_stat;
 	stat( lexFile, &f_stat );
-	size_t estimatedNrOfKeys = f_stat.st_size / 10;
+	size_t estimatedNrOfKeys = f_stat.st_size / 100;
 	std::wcerr<<"Estimate about "<< estimatedNrOfKeys << " Keys."<< std::endl;
 	
 	annHash_ = new Hash< uchar >( estimatedNrOfKeys, annStrings_, sizeOfAnnStrings_ );

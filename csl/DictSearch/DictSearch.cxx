@@ -44,7 +44,6 @@ namespace csl {
 	    msMatch_.setDistance( configHistoric_.getDLevByWordlength( query.length() ) );
 	    msMatch_.query( query.c_str(), *answers );
 	}
-
     }
 
 } // namespace csl

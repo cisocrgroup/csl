@@ -12,7 +12,7 @@ namespace csl {
 
 	CPPUNIT_TEST_SUITE( TestVaam );
 	CPPUNIT_TEST( testPatternGraph );
-	CPPUNIT_TEST( testBasics );
+//	CPPUNIT_TEST( testBasics );
 	CPPUNIT_TEST_SUITE_END();
     public:
 	TestVaam();

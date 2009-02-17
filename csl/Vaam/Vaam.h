@@ -123,7 +123,7 @@ namespace csl {
 	/**
 	 * @brief set a filter dictionary. This restricts output words to words NOT present in this filterDic.
 	 */
-	inline void setFilterDic( MinDic<> const& filterDic );
+	inline void setFilterDic( iDictionary const& filterDic );
 	
 	// @}
 
@@ -218,7 +218,7 @@ namespace csl {
 	/////   DATA MEMBERS OF VAAM    //////////////////////
 
 	MinDic_t const& baseDic_;
-	MinDic<> const* filterDic_;
+	iDictionary const* filterDic_;
 
 	PatternGraph patternGraph_;
 	std::vector< std::wstring > leftSidesList_;

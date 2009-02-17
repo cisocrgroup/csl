@@ -6,6 +6,7 @@
 #include <stack>
 #include <errno.h>
 #include "../Global.h"
+#include <csl/iDictionary/iDictionary.h>
 #include "../codecvt/UTF8_Codecvt.h"
 #include "../TransTable/TransTable.h"
 #include "../Alphabet/Alphabet.h"
@@ -32,7 +33,8 @@ namespace csl {
      *
      */
     template< class AnnType = int >
-    class MinDic : public TransTable< TT_PERFHASH, uint16_t > {
+    class MinDic : public TransTable< TT_PERFHASH, uint16_t >,
+		   public iDictionary {
     public:
 	typedef TransTable< TT_PERFHASH, uint16_t > TransTable_t;
 

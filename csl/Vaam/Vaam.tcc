@@ -51,7 +51,7 @@ namespace csl {
     }
     
     template< typename MinDicType >
-    void Vaam< MinDicType >::setFilterDic( MinDic<> const& filterDic ) {
+    void Vaam< MinDicType >::setFilterDic( iDictionary const& filterDic ) {
 	filterDic_ = &filterDic;
     }
 
@@ -74,6 +74,7 @@ namespace csl {
 	if( stack_[depth].patternPos_.isFinal() ) {
 	    PatternGraph::State patPos = stack_[depth].patternPos_;
 	    
+	    
 	    do { // for all final states reachable via errorLinks
 		assert( patPos.isFinal() );
 		size_t count = 0;
@@ -82,7 +83,7 @@ namespace csl {
 	    	for( typename StackItem::iterator position = stack_.at( depth - patPos.getDepth() ).begin();
 		     position != stack_.at( depth - patPos.getDepth() ).end();
 		     ++position, ++count ) {
-
+		    
 		    // check if maxNrOfPatterns_ is reached already
 		    if( ( maxNrOfPatterns_ != Vaam::INFINITE ) && ( position->getNrOfPatternsApplied() == maxNrOfPatterns_ ) )
 			continue;
@@ -188,7 +189,7 @@ namespace csl {
 
 	if( ( filterDic_ && filterDic_->lookup( interpretation.getWord() ) )  || // if there's a filterDic_ and interpretation.word is in it or ..
 	    ( interpretation.getInstruction().size() < minNrOfPatterns_ )
-
+	    
 	    ) {
 	    return;
 	}

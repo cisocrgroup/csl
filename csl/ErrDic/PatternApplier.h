@@ -734,7 +734,7 @@ namespace csl {
 
 	    size_t delimPos = line.find( L' ' );
 	    if( delimPos == std::wstring::npos ) {
-		throw exceptions::badInput( "ErrDicConstructor: Invalid line in pattern file" );
+		throw exceptions::badInput( "PatternApplier: Invalid line in pattern file" );
 	    }
 	    patterns_.push_back( line.substr( delimPos + 1 ) + patternDelimiter_ + line.substr( 0, delimPos ) );
 	}
@@ -764,7 +764,7 @@ namespace csl {
 	    while( isGood() ) {
 		printCurrent( std::wcout );
 
-		if( ! ( ++nrOfTokens % 10000 ) ) {
+		if( ! ( ++nrOfTokens % 500000 ) ) {
 		    std::wcerr<<nrOfTokens / 1000<<"k. "<<watch.readMilliseconds()<<" ms"<< std::endl;
 		    watch.start();
 		    printCurrent( std::wcerr );

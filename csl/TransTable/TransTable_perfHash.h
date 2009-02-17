@@ -49,7 +49,7 @@ namespace csl {
 
 
 	/**
-	 * This class provides a much easier interface to the MinDic if the guts of the automaton
+	 * This class provides a much easier interface to the dic if the guts of the automaton
 	 * have to be explored state- and transition-wise.
 	 */
 	class State {

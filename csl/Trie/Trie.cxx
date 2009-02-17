@@ -6,7 +6,7 @@
 
 namespace csl {
 
-    Trie::Trie( char* binFile ) : TransTable< BASIC >() {
+    Trie::Trie( char* binFile ) : TransTable< TT_PERFHASH >() {
 	if( binFile ) loadFromFile( binFile );
 	annotateByteOffset_ = false;
     }

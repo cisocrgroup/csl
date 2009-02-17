@@ -107,9 +107,9 @@ namespace csl {
 		push_back( Interpretation( vaam_interpretation, currentDictID_ ) );
 		back().setDictID( currentDictID_ );
 	    }
-
+	    
 	    void setCurrentDictID( DictID id ) { currentDictID_ = id; }
-
+	    
 	    void reset() {
 		std::vector< csl::DictSearch::Interpretation >::clear();
 	    }
