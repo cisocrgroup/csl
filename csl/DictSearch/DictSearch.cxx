@@ -5,19 +5,19 @@
 namespace csl {
 
     DictSearch::DictSearch() :
-	vaam_( 0 ),
-	dlev_hypothetic_( 0 ),
-	dlev_maxNrOfPatterns_( 0 ) {
+	vaam_( 0 )
+    {
     }
 
 
-    DictSearch::~DictSearch() {}
+    DictSearch::~DictSearch() {
+    }
 
 
 
     void DictSearch::initHypothetic( char const* patternFile ) {
 	if ( vaam_ ) throw exceptions::LogicalError( "csl::DictSearch: Tried to initialise Vaam twice." );
-	vaam_ = new Vaam< VaamDict_t >( configModern_.getDict()->getFWDic(), patternFile );
+	vaam_ = new Vaam< VaamDict_t >( dummyDic, patternFile );
 
 	vaam_->setDistance( 0 );
 	// exclude all output that is provided by levenshtein matcher on modern dict by setting a minNrOfPatterns
@@ -25,27 +25,28 @@ namespace csl {
     }
 
 
-    void DictSearch::query( std::wstring const& query, CandidateSet* answers ) {
-	if ( configModern_.getDict() ) {
-	    answers->setCurrentDictID( MODERN );
-	    msMatch_.setFBDic( *( configModern_.getDict() ) );
-	    msMatch_.setDistance( configModern_.getDLevByWordlength( query.length() ) );
-	    msMatch_.query( query.c_str(), *answers );
+    DictSearch::DictModule& DictSearch::addDictModule( std::wstring name, std::string const& dicFile ) {
+	DictModule* newDM = new DictModule( *this, name, dicFile );
+	dictModules_.push_back( newDM );
+	return *newDM;
+    }
 
-	    ////////  CHECK THIS !!!!!!!!!!!!!!
-	    if ( vaam_ ) {
-		vaam_->setDistance( configHypothetic_.getDLevByWordlength( query.length() ) );
-		vaam_->query( query, answers );
-	    }
-	}
-	if ( configHistoric_.getDict() ) {
-	    answers->setCurrentDictID( HISTORIC );
-	    msMatch_.setFBDic( *( configHistoric_.getDict() ) );
-	    msMatch_.setDistance( configHistoric_.getDLevByWordlength( query.length() ) );
-	    msMatch_.query( query.c_str(), *answers );
+    DictSearch::DictModule& DictSearch::addDictModule( std::wstring name, Dict_t const& dicFile ) {
+	DictModule* newDM = new DictModule( *this, name, dicFile );
+	dictModules_.push_back( newDM );
+	return *newDM;
+    }
+
+    void DictSearch::query( std::wstring const& query, CandidateSet* answers ) {
+	for( std::vector< iDictModule* >::iterator dm = dictModules_.begin(); dm != dictModules_.end(); ++dm ) {
+	    (**dm).query( query, answers );
 	}
     }
 
+
+    
+
+    
 } // namespace csl
 
 

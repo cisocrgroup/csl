@@ -2,7 +2,7 @@
 
 use strict;
 use Getopt::Long;
-
+use encoding 'utf8';
 #####CONFIG###########
 # These are default values - most of them can be overwritten by command-line flags
 my $structured = 0;
@@ -84,8 +84,10 @@ open(DB,"<$db_file") or die $!;
 my @db = <DB>;
 close(DB);
 
+my $count = 0;
 for(1..$nr_of_queries) {
-    my $rand_index = int(rand($#db +1));
+    print STDERR "$count tokens produced\n" unless( ++$count % 10000 );
+    my $rand_index = int( rand( $#db + 1 ) );
 
     chomp $db[$rand_index];
     $db[$rand_index] =~ s/\#.*//g;

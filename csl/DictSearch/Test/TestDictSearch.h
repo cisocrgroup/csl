@@ -28,8 +28,7 @@ namespace csl {
 	    // lookup in modern dict with dlev 0
 //	    ds.setModern( "../csl/DictSearch/Test/small.modern.fbdic", 0 );
 
-	    ds.getConfigModern().setDict( "../csl/DictSearch/Test/small.modern.fbdic" );
-	    ds.getConfigModern().setDLev( 0 );
+	    ds.addDictModule( L"modern", std::string( "../csl/DictSearch/Test/small.modern.fbdic" ) );
 	    ds.query( L"teile", &result );
 	    CPPUNIT_ASSERT( result.size() == 1 );
 	    CPPUNIT_ASSERT( result.at( 0 ).getWord() == L"teile"  );

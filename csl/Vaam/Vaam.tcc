@@ -5,7 +5,7 @@ namespace csl {
 
     template< typename MinDicType >
     Vaam< MinDicType >::Vaam( const MinDic_t& baseDic, const char* patternFile ) :
-	baseDic_( baseDic ),
+	baseDic_( &baseDic ),
 	filterDic_( 0 ),
 	levDEA_( 0 ), // Here the default levenshtein threshold is specified
 	minNrOfPatterns_( 0 ),
@@ -36,6 +36,9 @@ namespace csl {
 	interpretations_ = interpretations;
 	foundAnswers_ = false;
 	
+	if( ! baseDic_ ) throw csl::exceptions::LogicalError( "csl::Vaam::query: No baseDic_ loaded." );
+	if( ! baseDic_->readyToRead() ) throw csl::exceptions::LogicalError( "csl::Vaam::query: baseDic_ not ready to read." );
+
 	levDEA_.loadPattern( query_.c_str() );
 	stack_.clear();
 	// create a first StackItem
@@ -53,6 +56,11 @@ namespace csl {
     template< typename MinDicType >
     void Vaam< MinDicType >::setFilterDic( iDictionary const& filterDic ) {
 	filterDic_ = &filterDic;
+    }
+
+    template< typename MinDicType >
+    void Vaam< MinDicType >::setBaseDic( MinDic_t const& filterDic ) {
+	baseDic_ = &filterDic;
     }
 
 

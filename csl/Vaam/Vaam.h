@@ -121,6 +121,11 @@ namespace csl {
 	inline void setMaxNrOfPatterns( size_t n );
 
 	/**
+	 * @brief set the base dictionary. This restricts output words to words NOT present in this filterDic.
+	 */
+	inline void setBaseDic( MinDic_t const& filterDic );
+	
+	/**
 	 * @brief set a filter dictionary. This restricts output words to words NOT present in this filterDic.
 	 */
 	inline void setFilterDic( iDictionary const& filterDic );
@@ -177,16 +182,16 @@ namespace csl {
 	class StackItem : public std::vector< Position > {
 	public:
 	    StackItem( const Vaam& myVaam ) :
-		dicPos_( myVaam.baseDic_ ),
+		dicPos_( *( myVaam.baseDic_ ) ),
 		patternPos_( myVaam.patternGraph_, 0 ),
 		lookAheadDepth_( 0 ) {
 	    }
-
+	    
 	    void clear() {
 		std::vector< Position >::clear();
 		// somehow reset dicPos_???
 	    }
-
+	    
 	    MDState_t dicPos_;
 	    PatternGraph::State patternPos_;
 	    size_t lookAheadDepth_;
@@ -217,7 +222,7 @@ namespace csl {
 
 	/////   DATA MEMBERS OF VAAM    //////////////////////
 
-	MinDic_t const& baseDic_;
+	MinDic_t const* baseDic_;
 	iDictionary const* filterDic_;
 
 	PatternGraph patternGraph_;

@@ -35,18 +35,20 @@ namespace csl {
 	typedef FBDic<> Dict_t;
 	typedef MinDic<> VaamDict_t;
 
-	enum DictID { UNDEF, MODERN, HISTORIC };
+//	enum DictID { UNDEF, MODERN, HISTORIC };
+	class DictModule; // forward declaration
+	typedef DictModule* DictID;
 
 	static const size_t INFINITE = (size_t)-1;
 
 
 	class Interpretation : public csl::Interpretation {
 	public:
-	    Interpretation() : dictID_( UNDEF ) {} 
+	    Interpretation() : dictID_( 0 ) {} 
 	    
 	    Interpretation( csl::Interpretation const& interpretation, DictID id ) : 
 		csl::Interpretation( interpretation ),
-		dictID_( UNDEF )
+		dictID_( 0 )
 		{} 
 
 	    bool operator<( Interpretation const& other ) const {
@@ -65,12 +67,11 @@ namespace csl {
 	    }
 
 	    void setDictID( DictID dictID ) { dictID_ = dictID; }
+
 	    DictID getDictID() const { return dictID_; }
-	    std::wstring getDictID_string() const {
-		if( getDictID() == UNDEF ) return L"undef";
-		else if( getDictID() == MODERN ) return L"modern";
-		else if( getDictID() == HISTORIC ) return L"historic";
-		else return L"unknown";
+
+	    std::wstring const& getDictID_string() const {
+		return dictID_->getName();
 	    }
 
 	    void print( std::wostream& os = std::wcout ) const {
@@ -176,25 +177,43 @@ namespace csl {
 	}; // class CandidateSet
 
 
+	class iDictModule {
+	public:
+	    virtual void query( std::wstring const& query, CandidateSet* answers ) = 0;
+	};
+
 	/**
 	 * @brief This class is designed to manage all configuration issues in connection with the dictionary lookups.
 	 *
-	 * class DictSearch creates two such objects, one for the lookup in the modern and one for the historic dictionary.
-	 * The hypothetical dictionary is configured by class ConfigHypothetic, see below.
 	 */
-	class ConfigLookup {
+	class DictModule : public iDictModule {
 	public:
 	    /**
 	     * @brief A standard constructor
 	     */
-	    ConfigLookup() :
+	    DictModule( DictSearch& myDictSearch, std::wstring const& name, std::string const& dicFile ) :
+		name_( name ),
+		myDictSearch_( myDictSearch ),
 		dict_( 0 ),
-		disposeDict_( false )
-		{
-		    setDLev( 0 );
-		}
+		disposeDict_( false ), // will perhaps be changed at setDict()
+		maxNrOfPatterns_() {
 
-	    ~ConfigLookup() {
+		setDict( dicFile.c_str() );
+		setDLev( 0 );
+	    }
+
+	    DictModule( DictSearch& myDictSearch, std::wstring const& name, Dict_t const& dicRef ) :
+		name_( name ),
+		myDictSearch_( myDictSearch ),
+		dict_( 0 ),
+		disposeDict_( false ),  // will perhaps be changed at setDict()
+		maxNrOfPatterns_() {
+
+		setDict( dicRef );
+		setDLev( 0 );
+	    }
+
+	    ~DictModule() {
 		if( dict_ && disposeDict_ ) delete( dict_ );
 	    }
 
@@ -288,20 +307,6 @@ namespace csl {
 		return 0;
 	    }
 
-	private:
-	    Dict_t const* dict_;
-	    bool disposeDict_;
-	    size_t minWordlengths_[4];
-
-	}; // class ConfigLookup
-
-	class ConfigHypothetic : public ConfigLookup {
-	public:
-	    ConfigHypothetic() :
-		maxNrOfPatterns_( Vaam<>::INFINITE )
-		{
-	    }
-
 	    /**
 	     * @brief returns the current setting for the upper bound of applied variant patterns
 	     */
@@ -315,9 +320,37 @@ namespace csl {
 	    void setMaxNrOfPatterns( size_t max ) {
 		maxNrOfPatterns_ = max;
 	    }
+
+	    
+	    std::wstring const& getName() const {
+		return name_;
+	    }
+	    
+	    void query( std::wstring const& query, CandidateSet* answers ) {
+		if( getDict() ) {
+		    answers->setCurrentDictID( this );
+		    myDictSearch_.msMatch_.setFBDic( *( getDict() ) );
+		    myDictSearch_.msMatch_.setDistance( getDLevByWordlength( query.length() ) );
+		    myDictSearch_.msMatch_.query( query.c_str(), *answers );
+		    
+		    ////////  CHECK THIS !!!!!!!!!!!!!!
+		    if( maxNrOfPatterns_ > 0 ) {
+			myDictSearch_.vaam_->setBaseDic( dict_->getFWDic() );
+			myDictSearch_.vaam_->setMaxNrOfPatterns( maxNrOfPatterns_ );
+			myDictSearch_.vaam_->setDistance( getDLevByWordlength( query.length() ) ); // leave that??
+			myDictSearch_.vaam_->query( query, answers );
+		    }
+		}
+	    }
+	    
 	private:
+	    std::wstring name_;
+	    DictSearch& myDictSearch_;
+	    Dict_t const* dict_;
+	    bool disposeDict_;
+	    size_t minWordlengths_[4];
 	    size_t maxNrOfPatterns_;
-	}; 
+	}; // class DictModule
 
 
 	/**
@@ -333,27 +366,7 @@ namespace csl {
 	 */
 	//@{
 
-
-	/**
-	 * @brief returns the configuration object responsible for lookup in the modern dictionary
-	 */
-	ConfigLookup& getConfigModern() {
-	    return configModern_;
-	}
-
-	/**
-	 * @brief returns the configuration object responsible for lookup in the historical dictionary
-	 */
-	ConfigLookup& getConfigHistoric() {
-	    return configHistoric_;
-	}
-
-	/**
-	 * @brief returns the configuration object responsible for lookup in the hypothetic dictionary
-	 */
-	ConfigHypothetic& getConfigHypothetic() {
-	    return configHypothetic_;
-	}
+	
 
 	/**
 	 * @brief initialise the hypothetic dictionary.
@@ -365,6 +378,9 @@ namespace csl {
 	void initHypothetic( char const* patternFile );
 
 	
+	DictModule& addDictModule( std::wstring name, std::string const& dicFile );
+	DictModule& addDictModule( std::wstring name, Dict_t const& dicFile );
+
 	//@} // END Configuration methods
 
 	/**
@@ -382,15 +398,12 @@ namespace csl {
 	//@} // END Lookup methods
 
     private:
-
-	ConfigLookup configModern_;
-	ConfigLookup configHistoric_;
-	ConfigHypothetic configHypothetic_;
-	
 	Vaam< VaamDict_t >* vaam_;
-	size_t dlev_hypothetic_;
-	size_t dlev_maxNrOfPatterns_;
 
+	std::vector< iDictModule* > dictModules_;
+
+
+	VaamDict_t dummyDic;
 	MSMatch< FW_BW > msMatch_;
 
     }; // class DictSearch

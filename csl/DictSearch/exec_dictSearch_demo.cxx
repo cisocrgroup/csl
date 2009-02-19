@@ -6,19 +6,25 @@ int main() {
 
     std::locale::global( std::locale( "" ) );
 
+    try {
+
     // create a DictSearch-object
     csl::DictSearch dictSearch;
     // set a modern dictionary
-    dictSearch.getConfigModern().setDict( "../csl/DictSearch/Test/small.modern.fbdic" );
+    csl::DictSearch::DictModule& modernDic = dictSearch.addDictModule( L"modern", std::string( "../csl/DictSearch/Test/small.modern.fbdic" ) );
     // configure approx. search on modern dict. with distance bound 2
-    dictSearch.getConfigModern().setDLev( 2 );
+    modernDic.setDLev( 2 );
     
     // set a historical dictionary
-    dictSearch.getConfigHistoric().setDict( "../csl/DictSearch/Test/small.historical.fbdic" );
-    // configure approx. search on modern dict. to choose default distance bounds according to the word length
-    dictSearch.getConfigHistoric().setDLevWordlengths();
+    csl::DictSearch::DictModule& histDic = dictSearch.addDictModule( L"historic", std::string( "../csl/DictSearch/Test/small.historical.fbdic" ) );
+    
+    // configure approx. search on historic dict. to choose default distance bounds according to the word length
+    histDic.setDLevWordlengths();
+
     // initialise the hypothetic dict. with a file of patterns
     dictSearch.initHypothetic( "../csl/DictSearch/Test/small.patterns.txt" );
+
+    modernDic.setMaxNrOfPatterns( 15 );
 
     std::wstring query;
     csl::DictSearch::CandidateSet candSet;
@@ -38,5 +44,9 @@ int main() {
 	    std::wcout << std::endl;
 	}
     }
-    
+
+    } catch( csl::exceptions::cslException exc ) {
+	std::wcerr<<"dictSearchDemo caught exception: " << exc.what() << std::endl;
+	exit( 1 );
+    }    
 }
