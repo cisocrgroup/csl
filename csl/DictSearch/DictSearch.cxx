@@ -11,6 +11,9 @@ namespace csl {
 
 
     DictSearch::~DictSearch() {
+	for( std::vector< iDictModule* >::iterator dm = dictModules_.begin(); dm != dictModules_.end(); ++dm ) {
+	    delete( *dm );
+	}
     }
 
 

@@ -35,20 +35,17 @@ namespace csl {
 	typedef FBDic<> Dict_t;
 	typedef MinDic<> VaamDict_t;
 
-//	enum DictID { UNDEF, MODERN, HISTORIC };
 	class DictModule; // forward declaration
-	typedef DictModule* DictID;
 
 	static const size_t INFINITE = (size_t)-1;
 
-
 	class Interpretation : public csl::Interpretation {
 	public:
-	    Interpretation() : dictID_( 0 ) {} 
+	    Interpretation() : dictModule_( 0 ) {} 
 	    
-	    Interpretation( csl::Interpretation const& interpretation, DictID id ) : 
+	    Interpretation( csl::Interpretation const& interpretation, DictModule const& dm ) : 
 		csl::Interpretation( interpretation ),
-		dictID_( 0 )
+		dictModule_( &dm )
 		{} 
 
 	    bool operator<( Interpretation const& other ) const {
@@ -62,27 +59,23 @@ namespace csl {
 
 		if     ( compareSumOfOperations < 0 ) return true;
 		else if( compareSumOfOperations > 0 ) return false;
-		else if( dictID_ != other.getDictID() ) return ( dictID_ < other.getDictID() );
+		else if( getDictModule().getPriority() != other.getDictModule().getPriority() )
+		    return ( getDictModule().getPriority() > other.getDictModule().getPriority() );
 		else return ( getWord() < other.getWord() );
 	    }
+	    
+	    void setDictModule( DictModule const& dictModule ) { dictModule_ = &dictModule; }
 
-	    void setDictID( DictID dictID ) { dictID_ = dictID; }
-
-	    DictID getDictID() const { return dictID_; }
-
-	    std::wstring const& getDictID_string() const {
-		return dictID_->getName();
-	    }
-
+	    DictModule const& getDictModule() const { return *dictModule_; }
+	    
 	    void print( std::wostream& os = std::wcout ) const {
 		csl::Interpretation::print( os );
-		os << "(" << getDictID_string() << ")";
+		os << "(" << getDictModule().getName() << ")";
 	    }
-
+	    
 	private:
-	    DictID dictID_;
+	    DictModule const* dictModule_;
 	}; // class Interpretation
-	
 
 
 	/**
@@ -105,11 +98,10 @@ namespace csl {
 	    }
 	    
 	    virtual void receive( csl::Interpretation const& vaam_interpretation ) {
-		push_back( Interpretation( vaam_interpretation, currentDictID_ ) );
-		back().setDictID( currentDictID_ );
+		push_back( Interpretation( vaam_interpretation, *currentDictModule_ ) );
 	    }
 	    
-	    void setCurrentDictID( DictID id ) { currentDictID_ = id; }
+	    void setCurrentDictModule( DictModule const& dm ) { currentDictModule_ = &dm; }
 	    
 	    void reset() {
 		std::vector< csl::DictSearch::Interpretation >::clear();
@@ -173,13 +165,14 @@ namespace csl {
 
 
 	private:
-	    DictID currentDictID_;
+	    DictModule const* currentDictModule_;
 	}; // class CandidateSet
 
 
 	class iDictModule {
 	public:
 	    virtual void query( std::wstring const& query, CandidateSet* answers ) = 0;
+	    virtual int getPriority() const = 0;
 	};
 
 	/**
@@ -196,7 +189,9 @@ namespace csl {
 		myDictSearch_( myDictSearch ),
 		dict_( 0 ),
 		disposeDict_( false ), // will perhaps be changed at setDict()
-		maxNrOfPatterns_() {
+		maxNrOfPatterns_(),
+		dlev_hypothetic_( 0 ),
+		priority_( 1 ) {
 
 		setDict( dicFile.c_str() );
 		setDLev( 0 );
@@ -207,7 +202,9 @@ namespace csl {
 		myDictSearch_( myDictSearch ),
 		dict_( 0 ),
 		disposeDict_( false ),  // will perhaps be changed at setDict()
-		maxNrOfPatterns_() {
+		maxNrOfPatterns_(),
+		dlev_hypothetic_( 0 ),
+		priority_( 1 ) {
 
 		setDict( dicRef );
 		setDLev( 0 );
@@ -216,6 +213,11 @@ namespace csl {
 	    ~DictModule() {
 		if( dict_ && disposeDict_ ) delete( dict_ );
 	    }
+
+	    /**
+	     * copy constructor is blocked!!!
+	     */
+	    DictModule( DictModule const& other );
 
 	    /**
 	     * @brief returns a pointer to the connected dictionary. (May be 0)
@@ -321,14 +323,32 @@ namespace csl {
 		maxNrOfPatterns_ = max;
 	    }
 
+
+	    /**
+	     * @brief sets a new value for the upper bound of applied variant patterns
+	     */
+	    void setDLevHypothetic( size_t dlev ) {
+		dlev_hypothetic_ = dlev;
+	    }
+
+
 	    
 	    std::wstring const& getName() const {
 		return name_;
 	    }
 	    
+	    void setPriority( int p ) {
+		if( ( p < 0 ) || ( p > 100 ) ) throw csl::exceptions::LogicalError( "csl::DictSearch::DictModule::setPriority: value ranges from 0 to 100" );
+		priority_ = p;
+	    }
+
+	    int getPriority() const {
+		return priority_;
+	    }
+	    
 	    void query( std::wstring const& query, CandidateSet* answers ) {
 		if( getDict() ) {
-		    answers->setCurrentDictID( this );
+		    answers->setCurrentDictModule( *this );
 		    myDictSearch_.msMatch_.setFBDic( *( getDict() ) );
 		    myDictSearch_.msMatch_.setDistance( getDLevByWordlength( query.length() ) );
 		    myDictSearch_.msMatch_.query( query.c_str(), *answers );
@@ -337,7 +357,7 @@ namespace csl {
 		    if( maxNrOfPatterns_ > 0 ) {
 			myDictSearch_.vaam_->setBaseDic( dict_->getFWDic() );
 			myDictSearch_.vaam_->setMaxNrOfPatterns( maxNrOfPatterns_ );
-			myDictSearch_.vaam_->setDistance( getDLevByWordlength( query.length() ) ); // leave that??
+			myDictSearch_.vaam_->setDistance( dlev_hypothetic_ ); // leave that??
 			myDictSearch_.vaam_->query( query, answers );
 		    }
 		}
@@ -350,6 +370,8 @@ namespace csl {
 	    bool disposeDict_;
 	    size_t minWordlengths_[4];
 	    size_t maxNrOfPatterns_;
+	    size_t dlev_hypothetic_;
+	    int priority_;
 	}; // class DictModule
 
 

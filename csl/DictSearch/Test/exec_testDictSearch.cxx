@@ -20,7 +20,7 @@ int main() {
     // Run the tests.
     bool wasSucessful = runner.run();
 
-    // Return error code 1 if the one of tests failed.
+    // Return error code 1 if one of the tests failed.
     return wasSucessful ? 0 : 1;    
 
 }

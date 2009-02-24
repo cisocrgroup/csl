@@ -11,18 +11,22 @@ int main() {
     // create a DictSearch-object
     csl::DictSearch dictSearch;
     // set a modern dictionary
-    csl::DictSearch::DictModule& modernDic = dictSearch.addDictModule( L"modern", std::string( "../csl/DictSearch/Test/small.modern.fbdic" ) );
+//    csl::DictSearch::DictModule& modernDic = dictSearch.addDictModule( L"modern", std::string( "../csl/DictSearch/Test/small.modern.fbdic" ) );
+    csl::DictSearch::DictModule& modernDic = dictSearch.addDictModule( L"modern", std::string( "/mounts/data/proj/impact/software/Vaam/cislexAll_plus_dCorrect_kompAbschl.fbdic" ) );
     // configure approx. search on modern dict. with distance bound 2
     modernDic.setDLev( 2 );
+    modernDic.setPriority( 2 );
     
     // set a historical dictionary
-    csl::DictSearch::DictModule& histDic = dictSearch.addDictModule( L"historic", std::string( "../csl/DictSearch/Test/small.historical.fbdic" ) );
-    
+//    csl::DictSearch::DictModule& histDic = dictSearch.addDictModule( L"hist", std::string( "../csl/DictSearch/Test/small.historical.fbdic" ) );
+    csl::DictSearch::DictModule& histDic = dictSearch.addDictModule( L"hist", std::string( "/mounts/Users/student/uli/implement/cxx/ocr_analysis/historic.fbdic" ) );
+    histDic.setPriority( 1 );
     // configure approx. search on historic dict. to choose default distance bounds according to the word length
     histDic.setDLevWordlengths();
 
     // initialise the hypothetic dict. with a file of patterns
-    dictSearch.initHypothetic( "../csl/DictSearch/Test/small.patterns.txt" );
+//    dictSearch.initHypothetic( "../csl/DictSearch/Test/small.patterns.txt" );
+    dictSearch.initHypothetic( "/mounts/data/proj/impact/software/Vaam/patterns.lexgui.txt" );
 
     modernDic.setMaxNrOfPatterns( 15 );
 
@@ -40,7 +44,7 @@ int main() {
 	    std::wcout <<  "  baseWord="  << it->getBaseWord() << std::endl;
 	    std::wcout <<  "  intruction="  << it->getInstruction() << std::endl;
 	    std::wcout <<  "  levDistance="  << it->getLevDistance() << std::endl;
-	    std::wcout <<  "  dict="  << it->getDictID_string() << std::endl;
+	    std::wcout <<  "  dict="  << it->getDictModule().getName() << std::endl;
 	    std::wcout << std::endl;
 	}
     }

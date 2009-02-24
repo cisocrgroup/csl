@@ -244,6 +244,10 @@ namespace csl {
 
 	template< class AnnType_t >
 	inline bool MinDic< AnnType_t >::lookup( const wchar_t* key, AnnType_t* annotation ) const {
+	    if( ! readyToRead() ) {
+		throw exceptions::cslException( "csl::MinDic::lookup: Dict not ready to read" );
+	    }
+	    std::wcout<<__FILE__<<":"<<__LINE__<<std::endl;
 		size_t tokIdx = 0;
 		if( TransTable_t::getTokenIndex( key, &tokIdx ) ) {
 			if( annotation ) *annotation = annotationsAt( tokIdx );
@@ -261,6 +265,9 @@ namespace csl {
 	
 	template< class AnnType_t >
 	inline bool MinDic< AnnType_t >::hasPrefix( std::wstring const& prefix ) const {
+	    if( ! readyToRead() ) {
+		throw exceptions::cslException( "csl::MinDic::lookup: Dict not ready to read" );
+	    }
 		size_t state = getRoot();
 		for( std::wstring::const_iterator c = prefix.begin(); c != prefix.end() && (state != 0) ; ++c ) {
 			//std::wcout<<L"Walk with "<<(int)*c << std::endl;

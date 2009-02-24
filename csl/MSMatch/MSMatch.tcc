@@ -165,7 +165,7 @@ namespace csl {
 	    results_.insert( std::pair< std::wstring, std::pair< size_t, int > >( std::wstring( pattern_ ), std::pair< size_t, int >( 0, ann ) ) );
 	}
     }
-
+    
     template<>
     inline void MSMatch< FW_BW >::queryCases_1() {
 	uint_t pos = 0;
@@ -335,7 +335,6 @@ namespace csl {
 
 	candReceiver_ = &candReceiver;
 	wcscpy( pattern_, pattern );
-	
 	
 	curLevDEA_ = levDEASecond_;
 	curLevDEA_->setDistance( k_ );
