@@ -31,7 +31,7 @@ namespace csl {
     }
 
     template< typename MinDicType >
-    bool Vaam< MinDicType >::query( const std::wstring& word, iCandidateReceiver* interpretations ) const {
+    bool Vaam< MinDicType >::query( const std::wstring& word, iVaamResultReceiver* interpretations ) const {
 	query_ = word;
 	interpretations_ = interpretations;
 	foundAnswers_ = false;

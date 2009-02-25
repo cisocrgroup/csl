@@ -39,11 +39,20 @@ namespace csl {
 
 	static const size_t INFINITE = (size_t)-1;
 
+	class CandidateSet; // forward declaration
+
+	class iDictModule {
+	public:
+	    virtual void query( std::wstring const& query, CandidateSet* answers ) = 0;
+	    virtual int getPriority() const = 0;
+	    virtual std::wstring const& getName() const = 0;
+	};
+
 	class Interpretation : public csl::Interpretation {
 	public:
 	    Interpretation() : dictModule_( 0 ) {} 
 	    
-	    Interpretation( csl::Interpretation const& interpretation, DictModule const& dm ) : 
+	    Interpretation( csl::Interpretation const& interpretation, iDictModule const& dm ) : 
 		csl::Interpretation( interpretation ),
 		dictModule_( &dm )
 		{} 
@@ -64,9 +73,9 @@ namespace csl {
 		else return ( getWord() < other.getWord() );
 	    }
 	    
-	    void setDictModule( DictModule const& dictModule ) { dictModule_ = &dictModule; }
+	    void setDictModule( iDictModule const& dictModule ) { dictModule_ = &dictModule; }
 
-	    DictModule const& getDictModule() const { return *dictModule_; }
+	    iDictModule const& getDictModule() const { return *dictModule_; }
 	    
 	    void print( std::wostream& os = std::wcout ) const {
 		csl::Interpretation::print( os );
@@ -74,15 +83,17 @@ namespace csl {
 	    }
 	    
 	private:
-	    DictModule const* dictModule_;
+	    iDictModule const* dictModule_;
 	}; // class Interpretation
+
+
 
 
 	/**
 	 * 
 	 */
 	class CandidateSet : public csl::LevFilter::CandidateReceiver,
-			     public csl::Vaam< VaamDict_t >::iCandidateReceiver,
+			     public csl::iVaamResultReceiver,
 			     std::vector< csl::DictSearch::Interpretation > {
 	public:
 	    typedef std::vector< csl::DictSearch::Interpretation >::iterator iterator;
@@ -101,7 +112,7 @@ namespace csl {
 		push_back( Interpretation( vaam_interpretation, *currentDictModule_ ) );
 	    }
 	    
-	    void setCurrentDictModule( DictModule const& dm ) { currentDictModule_ = &dm; }
+	    void setCurrentDictModule( iDictModule const& dm ) { currentDictModule_ = &dm; }
 	    
 	    void reset() {
 		std::vector< csl::DictSearch::Interpretation >::clear();
@@ -165,15 +176,10 @@ namespace csl {
 
 
 	private:
-	    DictModule const* currentDictModule_;
+	    iDictModule const* currentDictModule_;
 	}; // class CandidateSet
 
 
-	class iDictModule {
-	public:
-	    virtual void query( std::wstring const& query, CandidateSet* answers ) = 0;
-	    virtual int getPriority() const = 0;
-	};
 
 	/**
 	 * @brief This class is designed to manage all configuration issues in connection with the dictionary lookups.
@@ -348,7 +354,6 @@ namespace csl {
 	    
 	    void query( std::wstring const& query, CandidateSet* answers ) {
 		if( getDict() ) {
-		    answers->setCurrentDictModule( *this );
 		    myDictSearch_.msMatch_.setFBDic( *( getDict() ) );
 		    myDictSearch_.msMatch_.setDistance( getDLevByWordlength( query.length() ) );
 		    myDictSearch_.msMatch_.query( query.c_str(), *answers );
@@ -400,8 +405,10 @@ namespace csl {
 	void initHypothetic( char const* patternFile );
 
 	
-	DictModule& addDictModule( std::wstring name, std::string const& dicFile );
-	DictModule& addDictModule( std::wstring name, Dict_t const& dicFile );
+	DictModule& addDictModule( std::wstring const& name, std::string const& dicFile );
+	DictModule& addDictModule( std::wstring const& name, Dict_t const& dicRef );
+
+	void addExternalDictModule( iDictModule& extModule );
 
 	//@} // END Configuration methods
 
@@ -422,7 +429,8 @@ namespace csl {
     private:
 	Vaam< VaamDict_t >* vaam_;
 
-	std::vector< iDictModule* > dictModules_;
+	std::vector< DictModule* > dictModules_;
+	std::vector< iDictModule* > externalDictModules_;
 
 
 	VaamDict_t dummyDic;

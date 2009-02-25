@@ -11,7 +11,7 @@ namespace csl {
 
 
     DictSearch::~DictSearch() {
-	for( std::vector< iDictModule* >::iterator dm = dictModules_.begin(); dm != dictModules_.end(); ++dm ) {
+	for( std::vector< DictModule* >::iterator dm = dictModules_.begin(); dm != dictModules_.end(); ++dm ) {
 	    delete( *dm );
 	}
     }
@@ -28,20 +28,30 @@ namespace csl {
     }
 
 
-    DictSearch::DictModule& DictSearch::addDictModule( std::wstring name, std::string const& dicFile ) {
+    DictSearch::DictModule& DictSearch::addDictModule( std::wstring const& name, std::string const& dicFile ) {
 	DictModule* newDM = new DictModule( *this, name, dicFile );
 	dictModules_.push_back( newDM );
 	return *newDM;
     }
 
-    DictSearch::DictModule& DictSearch::addDictModule( std::wstring name, Dict_t const& dicFile ) {
-	DictModule* newDM = new DictModule( *this, name, dicFile );
+    DictSearch::DictModule& DictSearch::addDictModule( std::wstring const& name, Dict_t const& dicRef ) {
+	DictModule* newDM = new DictModule( *this, name, dicRef );
 	dictModules_.push_back( newDM );
 	return *newDM;
     }
+
+    void DictSearch::addExternalDictModule( iDictModule& extModule ) {
+	externalDictModules_.push_back( &extModule );
+    }
+
 
     void DictSearch::query( std::wstring const& query, CandidateSet* answers ) {
-	for( std::vector< iDictModule* >::iterator dm = dictModules_.begin(); dm != dictModules_.end(); ++dm ) {
+	for( std::vector< DictModule* >::iterator dm = dictModules_.begin(); dm != dictModules_.end(); ++dm ) {
+	    answers->setCurrentDictModule( **dm );
+	    (**dm).query( query, answers );
+	}
+	for( std::vector< iDictModule* >::iterator dm = externalDictModules_.begin(); dm != externalDictModules_.end(); ++dm ) {
+	    answers->setCurrentDictModule( **dm );
 	    (**dm).query( query, answers );
 	}
     }

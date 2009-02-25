@@ -17,6 +17,12 @@
 
 namespace csl {
 
+    class iVaamResultReceiver {
+    public:
+	virtual ~iVaamResultReceiver() {}
+	virtual void receive( Interpretation const& interpretation ) = 0;
+    };
+
     /*
      * Vaam - Variant-Aware Approximate Matching
      */
@@ -64,17 +70,12 @@ namespace csl {
 	 */
 	typedef MinDicType MinDic_t;
 
-	class iCandidateReceiver {
-	public:
-	    virtual ~iCandidateReceiver() {}
-	    virtual void receive( Interpretation const& interpretation ) = 0;
-	};
 
 	/**
 	 * A straight-forward implementation of the interface above.
 	 * It inherits from std::vector, has all its features.
 	 */
-	class CandidateReceiver : public iCandidateReceiver,
+	class CandidateReceiver : public iVaamResultReceiver,
 				  public std::vector< Interpretation > {
 	    void receive( csl::Interpretation const& interpretation ) {
 		push_back( interpretation );
@@ -143,7 +144,7 @@ namespace csl {
 	 * but you can also use Vaam's subclass CandidateReceiver.
 	 * 
 	 */
-	inline bool query( std::wstring const& word, iCandidateReceiver* interpretations ) const;
+	inline bool query( std::wstring const& word, iVaamResultReceiver* interpretations ) const;
 
 	//@}
 
@@ -231,7 +232,7 @@ namespace csl {
 	
 	mutable LevDEA levDEA_;
 	mutable std::wstring query_;
-	mutable iCandidateReceiver* interpretations_;
+	mutable iVaamResultReceiver* interpretations_;
 	mutable bool foundAnswers_;
 	mutable Stack stack_;
 	/**

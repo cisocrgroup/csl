@@ -247,7 +247,6 @@ namespace csl {
 	    if( ! readyToRead() ) {
 		throw exceptions::cslException( "csl::MinDic::lookup: Dict not ready to read" );
 	    }
-	    std::wcout<<__FILE__<<":"<<__LINE__<<std::endl;
 		size_t tokIdx = 0;
 		if( TransTable_t::getTokenIndex( key, &tokIdx ) ) {
 			if( annotation ) *annotation = annotationsAt( tokIdx );
