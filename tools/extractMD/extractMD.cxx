@@ -13,13 +13,13 @@ int main( int argc, const char** argv ) {
 
     if( options.getArgumentCount() != 1 ) {
 	std::wcerr<<std::endl
-		 <<"Use like: extractMD [options] <binDic> "<<std::endl
-		 <<"Options:"<<std::endl
-		 <<"--stat=1\tto print statistics of the MinDic"<<std::endl
-		 <<"--dot=1\tto print dotcode for the MinDic"
-		 <<std::endl<<std::endl;
-
-	exit(1);
+		  <<"Use like: extractMD [options] <binDic> "<<std::endl
+		  <<"Options:"<<std::endl
+		  <<"--stat=1\tto print statistics of the MinDic"<<std::endl
+		  <<"--dot=1\tto print dotcode for the MinDic"
+		  <<std::endl<<std::endl;
+	
+	exit( 1 );
     }
     try {
 	MinDic<> t;

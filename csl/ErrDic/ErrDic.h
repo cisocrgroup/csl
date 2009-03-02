@@ -82,6 +82,18 @@ namespace csl {
 	    size_t id_;
 	};
 
+
+	// implement the iDictionary interface
+	/**
+	 * @todo implement this method
+	 */
+	inline bool lookup( wchar_t const* str, int* annotation = 0 ) const;
+
+	/**
+	 * @todo implement this method
+	 */
+	inline bool lookup( std::wstring const& str, int* annotation = 0 ) const;
+
 	/**
 	 * @brief The basic lookup function. DEPRECATED, use query() instead
 	 * @param[in] a key
@@ -91,6 +103,7 @@ namespace csl {
 	 * @deprecated use query() instead
 	 */
 	inline bool lookup( const wchar_t* key, Entry* entry ) const;
+
 	
 
 	/**

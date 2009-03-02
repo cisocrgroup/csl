@@ -19,6 +19,15 @@ namespace csl {
 	if( errorPatterns_ ) delete( errorPatterns_ );
     }
 
+    inline bool ErrDic::lookup( wchar_t const* str, int* annotation ) const {
+	throw exceptions::cslException( "csl::ErrDic::lookup: Not yet implemented" );
+    }
+
+    inline bool ErrDic::lookup( std::wstring const& str, int* annotation ) const {
+	throw exceptions::cslException( "csl::ErrDic::lookup: Not yet implemented" );
+    }
+
+
     inline bool ErrDic::lookup( const wchar_t* key, Entry* entry ) const {
 	size_t tokenIndex;
 	if( TransTable_t::getTokenIndex( key, &tokenIndex ) ) {
