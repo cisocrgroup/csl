@@ -186,6 +186,7 @@ namespace csl {
 			     ( stack_.top().first.isFinal() && stack_.top().second == 0 ) 
 			     ) 
 		    );
+		return *this;
 	    }
 
 	private:

@@ -61,6 +61,8 @@ namespace csl {
 		transTable_( &tt ),
 		dicPos_( transTable_->getRoot() ),
 		perfHashValue_( 0 ) {
+
+		//std::wcerr << "Create state on Automaton " << &tt << (tt.readyToRead()?L"yo": L"no") <<  std::endl;
 	    }
 	    
 	    /**

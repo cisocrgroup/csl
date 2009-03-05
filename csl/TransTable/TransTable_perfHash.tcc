@@ -100,6 +100,7 @@ namespace csl {
     TransTable< TT_PERFHASH, InternalCharType__, SizeType__ >
     ::isFinal( StateId_t state ) const {
 	return cells_[state].isFinalState();
+	
     }
 
     template< typename InternalCharType__, typename SizeType__ >

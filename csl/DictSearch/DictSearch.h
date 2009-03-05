@@ -41,10 +41,30 @@ namespace csl {
 
 	class CandidateSet; // forward declaration
 
+	/**
+	 * @brief All classes that are supposed to contribute to the answer set of a DictSearch query
+	 * have to implement this interface.
+	 * The method DictSearch::addExternalDictModule() allows to add such objects to the process.
+	 *
+	 * One implementation of this interface is DictSearch's sub-class DictModule
+	 */
 	class iDictModule {
 	public:
+	    /**
+	     * @brief Allows to query the iDctModule with some string. The iDictModule is expected
+	     * to add all its answers/ interpretations to the CandidateSet that is passed.
+	     */
 	    virtual void query( std::wstring const& query, CandidateSet* answers ) = 0;
+
+	    /**
+	     * @brief returns a value between 0 and 100 to indicate the DictModule's priority as compared to others
+	     * This is used for a rough sorting order of all answers.
+	     */
 	    virtual int getPriority() const = 0;
+
+	    /**
+	     * @brief returns a stringto identify the DictModule
+	     */
 	    virtual std::wstring const& getName() const = 0;
 	};
 
