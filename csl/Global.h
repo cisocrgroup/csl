@@ -5,6 +5,7 @@
 #include<cstring>
 #include<string>
 #include<exception>
+#include<stdexcept>
 #include<ios>
 #define debug(s) (std::cout<<"DEBUG: "<<s<<std::endl)
 
