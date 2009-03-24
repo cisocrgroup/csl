@@ -156,6 +156,8 @@ namespace csl {
 	    bool isFinal_;
 	}; // class InternalState
 
+
+
 	class State {
 	public:
 	    typedef InternalState::TransIterator iterator;  
@@ -296,7 +298,7 @@ namespace csl {
 	if( ! isValid() ) {
 	    stateIndex_ = 1;
 	}
-	return isValid();
+	return isValid(); // btw, this should always be true
     }
 
     bool PatternGraph::State::walkStrict( wchar_t c ) {

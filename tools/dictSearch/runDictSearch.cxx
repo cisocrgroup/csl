@@ -22,21 +22,24 @@ int main( int argc, char const** argv ) {
     
     // create a DictSearch-object
     csl::DictSearch dictSearch;
-    // set a modern dictionary
-    dictSearch.getConfigModern().setDict( options.getArgument( 1 ).c_str() );
-    // configure approx. search on modern dict. with length-dependent distance bound
-    dictSearch.getConfigModern().setDLevWordlengths();
-    
-    // set a historical dictionary
-    dictSearch.getConfigHistoric().setDict( options.getArgument( 0 ).c_str() );
-    // configure approx. search on modern dict. to choose default distance bounds according to the word length
-    dictSearch.getConfigHistoric().setDLevWordlengths();
+
     // initialise the hypothetic dict. with a file of patterns
     dictSearch.initHypothetic( options.getArgument( 2 ).c_str() );
 
+    // set a modern dictionary
+    csl::DictSearch::DictModule& modernMod = dictSearch.addDictModule( L"modern", options.getArgument( 1 ) );
+    modernMod.setDLevWordlengths();
+    modernMod.setPriority( 100 );
+    modernMod.setMaxNrOfPatterns( 1000 );
+    
+    // set a historical dictionary
+    csl::DictSearch::DictModule& historicMod = dictSearch.addDictModule( L"historic", options.getArgument( 1 ) );
+    historicMod.setDLevWordlengths();
+    historicMod.setPriority( 90 );
+    
     std::wstring query;
     csl::DictSearch::CandidateSet candSet;
-
+    
     while( std::getline( std::wcin, query ).good() ) {
 	candSet.clear(); // empty the CandidateSet
 	dictSearch.query( query, &candSet ); // execute lookup
@@ -49,7 +52,7 @@ int main( int argc, char const** argv ) {
 	    std::wcout <<  "  baseWord="  << it->getBaseWord() << std::endl;
 	    std::wcout <<  "  intruction="  << it->getInstruction() << std::endl;
 	    std::wcout <<  "  levDistance="  << it->getLevDistance() << std::endl;
-	    std::wcout <<  "  dict="  << it->getDictID_string() << std::endl;
+	    std::wcout <<  "  dict="  << it->getDictModule().getName() << std::endl;
 	    std::wcout << std::endl;
 	}
 #endif

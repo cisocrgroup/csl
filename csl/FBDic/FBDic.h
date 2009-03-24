@@ -22,7 +22,7 @@ namespace csl {
 	typedef MinDic< AnnType_t > MinDic_t;
 
 
-	FBDic( const char* dicFile = 0 );
+	explicit FBDic( const char* dicFile = 0 );
     
 	/**
 	 * returns a reference to the forward dictionary

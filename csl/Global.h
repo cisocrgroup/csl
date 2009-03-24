@@ -7,6 +7,7 @@
 #include<exception>
 #include<stdexcept>
 #include<ios>
+#include<locale>
 #define debug(s) (std::cout<<"DEBUG: "<<s<<std::endl)
 
 
@@ -218,6 +219,18 @@ namespace csl {
 	};
 
     };
+
+
+    inline void string2wstring( std::string const& str, std::wstring& wstr ) {
+	std::locale loc( "" );
+	std::codecvt< wchar_t, char, std::mbstate_t > const& ccvt = std::use_facet< std::codecvt< wchar_t, char, std::mbstate_t > >( loc );
+
+	wstr.resize( str.size() * ccvt.max_length() );
+	std::codecvt< wchar_t, char, std::mbstate_t >::state_type state; 
+	char const* fromNext = 0;
+	wchar_t* toNext = 0;
+	ccvt.in( state, str.c_str(), str.c_str()+str.size(), fromNext, (wchar_t*)wstr.c_str(),(wchar_t*)wstr.c_str()+wstr.size(), toNext );
+    }
 
 
 
