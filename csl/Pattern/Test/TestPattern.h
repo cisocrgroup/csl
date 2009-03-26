@@ -4,6 +4,8 @@
 #include "../Pattern.h"
 #include "../PatternSet.h"
 #include "../PosPattern.h"
+#include "../PatternWeights.h"
+#include "../ComputeInstruction.h"
 
 #include <cppunit/extensions/HelperMacros.h>
 
@@ -19,13 +21,16 @@ namespace csl {
 	CPPUNIT_TEST( testPattern );
 	CPPUNIT_TEST( testPatternSet );
 	CPPUNIT_TEST( testPosPattern );
+	CPPUNIT_TEST( testPatternWeights );
+	CPPUNIT_TEST( testComputeInstruction );
 	CPPUNIT_TEST_SUITE_END();
     public:
 
 	void testPattern();
 	void testPatternSet();
 	void testPosPattern();
-
+	void testPatternWeights();
+	void testComputeInstruction();
 
     private:
 	
@@ -45,28 +50,73 @@ namespace csl {
 
     void TestPattern::testPatternSet() {
 	csl::PatternSet pSet;
-	pSet.loadPatterns( "./test.patterns.txt" );
+	//pSet.loadPatterns( "./test.patterns.txt" );
     }
 
-
     void TestPattern::testPosPattern() {
-	csl::Pattern p1( L"left", L"right" );
-
-	// construct PosPattern from existing Pattern
-	csl::PosPattern pp1( p1, 3 );
-	CPPUNIT_ASSERT( pp1.getLeft() == L"left" );
-	CPPUNIT_ASSERT( pp1.getRight() == L"right" );
-	CPPUNIT_ASSERT( pp1.getPosition() == 3 );
-
+	
 	// construct PosPattern from existing Pattern
 	csl::PosPattern pp2( L"left", L"right", 3 );
 	CPPUNIT_ASSERT( pp2.getLeft() == L"left" );
 	CPPUNIT_ASSERT( pp2.getRight() == L"right" );
 	CPPUNIT_ASSERT( pp2.getPosition() == 3 );
-	
-
     }
 
+    void TestPattern::testPatternWeights() {
+	PatternWeights pw;
+	CPPUNIT_ASSERT( pw.getWeight( Pattern( L"t", L"th" ) ) == PatternWeights::UNDEF );
+	pw.setWeight( Pattern( L"t", L"th" ), 0.35 );
+	CPPUNIT_ASSERT( pw.getWeight( Pattern( L"t", L"th" ) ) == static_cast< float >( 0.35 ) );
+
+	pw.setDefault( std::make_pair( 1, 2 ), 1.3 );
+
+	CPPUNIT_ASSERT( pw.getWeight( Pattern( L"t", L"th" ) ) == static_cast< float >( 0.35 ) ); // as before
+	CPPUNIT_ASSERT( pw.getWeight( Pattern( L"x", L"yz" ) ) == static_cast< float >( 1.3 ) ); // default value
+	CPPUNIT_ASSERT( pw.getWeight( Pattern( L"xy", L"z" ) ) == PatternWeights::UNDEF ); // as before
+    }
+
+
+    void TestPattern::testComputeInstruction() {
+	ComputeInstruction ci;
+	//ci.setDebug( 1 );
+	PatternWeights pw;
+	ci.connectPatternWeights( &pw );
+	
+	pw.setDefault( std::make_pair( 0, 1 ), 1 ); // standard ins
+	pw.setDefault( std::make_pair( 1, 0 ), 1 ); // standard del
+	pw.setDefault( std::make_pair( 1, 1 ), 1 ); // standard sub
+
+	CPPUNIT_ASSERT( ci.computeInstruction( L"muh", L"nruh" ) == 2 ); // 1 ins, 1 sub
+
+	CPPUNIT_ASSERT( ci.computeInstruction( L"murnau", L"mumau" ) == 2 ); // 1 del, 1 sub
+
+	pw.setWeight( Pattern( L"m", L"rn" ), 0.35 );
+	CPPUNIT_ASSERT( ci.computeInstruction( L"muh", L"rnuh" ) == static_cast< float >( 0.35 ) ); // 1 split
+
+	CPPUNIT_ASSERT( ci.computeInstruction( L"muh", L"rnuhx" ) == static_cast< float >( 1.35 ) ); // 1 split, 1 insertion
+
+	pw.setWeight( Pattern( L"m", L"n" ), 0.54 );
+	CPPUNIT_ASSERT( ci.computeInstruction( L"mumm", L"nurnm" ) == static_cast< float >( 0.89 ) ); // 1 sub 0.54, 1 split 0.35
+
+	pw.setWeight( Pattern( L"rn", L"m" ), 0.56 );
+	CPPUNIT_ASSERT( ci.computeInstruction( L"murnau", L"mumau" ) == static_cast< float >( 0.56 ) ); // 1 merge 0.56
+
+	std::wcout<<"HALLO:"<< ci.computeInstruction( L"murnau", L"mmau" ) << std::endl;
+	std::wcout<<"DIFF:"<< ci.computeInstruction( L"murnau", L"mmau" ) - static_cast< float >( 1.56 ) << std::endl;
+	CPPUNIT_ASSERT( ci.computeInstruction( L"murnau", L"mmau" ) == static_cast< float >( 1.56 ) ); // 1 del, 1 merge 0.56
+
+	//// THIS WORKS WITH 0.56, BUT NOT WITH 0.57! AAAAAAAAAAAAHHHHHHHHHH
+
+	pw.setWeight( Pattern( L"rn", L"m" ), 0.57 );
+	CPPUNIT_ASSERT( ci.computeInstruction( L"murnau", L"mumau" ) == static_cast< float >( 0.57 ) ); // 1 merge 0.57
+
+	std::wcout<<"HALLO:"<< ci.computeInstruction( L"murnau", L"mmau" ) << std::endl;
+	std::wcout<<"DIFF:"<< static_cast< float >(ci.computeInstruction( L"murnau", L"mmau" )) - static_cast< float >( 1.57 ) << std::endl;
+	CPPUNIT_ASSERT( ci.computeInstruction( L"murnau", L"mmau" ) == static_cast< float >( 1.57 ) ); // 1 del, 1 merge 0.57
+
+
+
+    }
 
 } // namespace csl
 

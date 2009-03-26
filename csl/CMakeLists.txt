@@ -11,11 +11,13 @@ add_subdirectory(Vaam)
 add_subdirectory(SimpleFSA)
 add_subdirectory(DictSearch)
 add_subdirectory(Trie)
+add_subdirectory(Pattern)
 
-ADD_LIBRARY( csl SHARED Alphabet/Alphabet.cxx LevDEA/LevDEA.cxx DictSearch/DictSearch.cxx  )
+ADD_LIBRARY( csl SHARED Alphabet/Alphabet.cxx LevDEA/LevDEA.cxx DictSearch/DictSearch.cxx Pattern/PatternWeights.cxx Pattern/ComputeInstruction.cxx )
 target_link_libraries( csl Alphabet )
 target_link_libraries( csl LevDEA ) # funzt nicht, warum ?????
 target_link_libraries( csl DictSearch )
+target_link_libraries( csl PatternWeights )
 
 install( 
   TARGETS csl
