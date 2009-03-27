@@ -10,23 +10,24 @@ namespace csl {
 	if( it != patternWeights_.end() )
 	    return it->second;
 	
-	return getDefault( std::make_pair( pattern.getLeft().size(), pattern.getRight().size() ) );
+	return getDefault( PatternType( pattern.getLeft().size(), pattern.getRight().size() ) );
     }
 
     void PatternWeights::setWeight( const csl::Pattern& pattern, float weight ) {
 	patternWeights_[ pattern ] = weight;
     }
 
-    float PatternWeights::getDefault( std::pair< size_t, size_t > const& patternType ) const {
+    float PatternWeights::getDefault( PatternType const& patternType ) const {
 	// look for a default setting suitable for the pattern's type (that is, for its ratio lefthand-size/righthand-size)
-	std::map< PatternType, float >::const_iterator defaultIt = defaultWeights_.find( std::make_pair( patternType.first, patternType.second ) );
-	if( defaultIt != defaultWeights_.end() )
+	std::map< PatternType, float >::const_iterator defaultIt = defaultWeights_.find( patternType );
+	if( ( defaultIt != defaultWeights_.end() ) ) {
 	    return defaultIt->second;
-	
+	}
+
 	return UNDEF;
     }
 
-    void PatternWeights::setDefault( std::pair< size_t, size_t > const& patternType, float weight ) {
+    void PatternWeights::setDefault( PatternType const& patternType, float weight ) {
 	defaultWeights_[ patternType ] = weight;
     }
 

@@ -17,6 +17,14 @@ namespace csl {
     public:
 	static const int UNDEF = -1;
 
+	class PatternType : public std::pair< size_t, size_t > {
+	public:
+	    PatternType( size_t l, size_t r ) {
+		first = l;
+		second = r;
+	    }
+	};
+
 	PatternWeights();
 
 	/**
@@ -31,10 +39,10 @@ namespace csl {
 
 
 
-	float getDefault( std::pair< size_t, size_t > const& patternType ) const;   
+	float getDefault( PatternType const& patternType ) const;   
 
 
-	void setDefault( std::pair< size_t, size_t > const& patternType, float weight );
+	void setDefault( PatternType const& patternType, float weight );
 
 	/**
 	 * @brief prints the pattern weights
@@ -43,7 +51,6 @@ namespace csl {
 	
 
 	private:
-	typedef std::pair< size_t, size_t > PatternType;
 
 	/**
 	 * @brief This data structure maps the known patterns to their weights
