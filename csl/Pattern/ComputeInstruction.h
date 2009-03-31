@@ -5,6 +5,7 @@
 #include<string>
 #include<limits>
 #include<string.h>
+#include<csl/Global.h>
 #include<csl/Pattern/Instruction.h>
 #include<csl/Pattern/PatternWeights.h>
 
@@ -91,8 +92,15 @@ namespace csl {
 	};
 
 	
+	void getInstructions( int x, int y, PatternTypeChain* patternType, size_t instructionIndex );
 	
-	
+	/** 
+	 * @todo Find a good, dynamic solution here!
+	 */
+	MatrixItem matrix_[500][500];
+	std::wstring wordCorr_;
+	std::wstring wordErr_;
+	std::vector< Instruction >* instructions_;
 
 	const PatternWeights* patternWeights_;
 	

@@ -3,7 +3,14 @@
 namespace csl {
     ComputeInstruction::ComputeInstruction() : 
 	patternWeights_( 0 ) {
+
 	debug_ = false;
+
+	/** 
+	 * @todo Find a good, dynamic solution here!
+	 */
+	memset( matrix_, 0, 500 * 500 * sizeof( MatrixItem ) );
+
     }
 	
     ComputeInstruction::~ComputeInstruction(){
@@ -13,11 +20,12 @@ namespace csl {
 	patternWeights_ = patternWeights;
     }
     
+
     float ComputeInstruction::computeInstruction( const std::wstring& wCorr, 
 						  const std::wstring& wErr, 
-						  std::vector< Instruction >* instruction ) {
+						  std::vector< Instruction >* instructions ) {
 	if( ! patternWeights_ ) {
-	    std::wcerr<<"THROW EXCEPTION HERE"<<std::endl;
+	    throw exceptions::LogicalError( "csl::ComputeInstruction::ComputeInstruction: No patternWeights loaded." );
 	    exit( 1 );
 	}
 	
@@ -25,32 +33,26 @@ namespace csl {
 	//levWeights_->printFreqCorrect();
 	//levWeights_->printPatternWeights();
 	
-	std::wstring wordCorr = L" " + wCorr;
-	std::wstring wordErr = L" " + wErr;
+	wordCorr_ = L" " + wCorr;
+	wordErr_ = L" " + wErr;
 	
-	int matrixW = wordCorr.length();
-	int matrixH = wordErr.length();
+	int matrixW = wordCorr_.length();
+	int matrixH = wordErr_.length();
 
-	/** 
-	 * @todo Find a good, dynamic solution here!
-	 */
-//	float matrix[matrixH][matrixW];
-	MatrixItem matrix[500][500];
-	memset( matrix, 0, 500 * 500 * sizeof( MatrixItem ) );
 		
 	//Set the values for the first row
 	for(int i=1; i < matrixW; i++){
-	    matrix[0][i].value = i;
-	    matrix[0][i].addPatternType( PatternWeights::PatternType( 1, 0 ) );
+	    matrix_[0][i].value = i;
+	    matrix_[0][i].addPatternType( PatternWeights::PatternType( 1, 0 ) );
 	}
 
 	//Set the values for the first column
 	for(int i=1; i < matrixH; i++){
-	    matrix[i][0].value = i;
-	    matrix[i][0].addPatternType( PatternWeights::PatternType( 0, 1 ) );
+	    matrix_[i][0].value = i;
+	    matrix_[i][0].addPatternType( PatternWeights::PatternType( 0, 1 ) );
 	}
 	
-	//Set the values of the matrix.
+	// Set the values of the matrix.
 	float del = 0;
 	float add = 0;
 	float sub = 0;
@@ -62,99 +64,99 @@ namespace csl {
 		
 		// Insert
 		if( ( patternWeights_->getDefault( PatternWeights::PatternType( 0, 1 ) ) != PatternWeights::UNDEF ) && 
-		    ( matrix[y-1][x].value != -1 ) ) {
-		    add = matrix[y-1][x].value+ 1;
+		    ( matrix_[y-1][x].value != -1 ) ) {
+		    add = matrix_[y-1][x].value+ 1;
 		    minValue = add;
-		    matrix[y][x].addPatternType( PatternWeights::PatternType( 0, 1 ) );
+		    matrix_[y][x].addPatternType( PatternWeights::PatternType( 0, 1 ) );
 		}
 		
 		// Delete
 		if( ( patternWeights_->getDefault( PatternWeights::PatternType( 1, 0 ) ) != PatternWeights::UNDEF ) &&
-		    ( matrix[y][x-1].value != -1 ) ) {
-		    del = matrix[y][x-1].value+1;
+		    ( matrix_[y][x-1].value != -1 ) ) {
+		    del = matrix_[y][x-1].value+1;
 		    if(del == minValue) {
-			matrix[y][x].addPatternType( PatternWeights::PatternType( 1, 0 ) );
+			matrix_[y][x].addPatternType( PatternWeights::PatternType( 1, 0 ) );
 		    }
 		    else if(del < minValue) {
 			minValue = del;
-			matrix[y][x].removePatternTypes();
-			matrix[y][x].addPatternType( PatternWeights::PatternType( 1, 0 ) );
+			matrix_[y][x].removePatternTypes();
+			matrix_[y][x].addPatternType( PatternWeights::PatternType( 1, 0 ) );
 		    }
 		}
 		
-		//std::wcout << "\"" << wordCorr[x]<< " "<< wordErr[y] << "\" | ";
+		//std::wcout << "\"" << wordCorr_[x]<< " "<< wordErr_[y] << "\" | ";
 		
 		//Merge
-		if( ( x >= 2 ) && ( matrix[y-1][x-2].value != -1 ) ) {
-		    merge = patternWeights_->getWeight( Pattern( wordCorr.substr( x-1, 2 ), wordErr.substr( y, 1 ) ) );
+		if( ( x >= 2 ) && ( matrix_[y-1][x-2].value != -1 ) ) {
+		    merge = patternWeights_->getWeight( Pattern( wordCorr_.substr( x-1, 2 ), wordErr_.substr( y, 1 ) ) );
 		    //std::wcout << "str : "<<  str << " | " << "merge : " << merge << " | ";
 		    if(merge != PatternWeights::UNDEF ) {
-			merge+=matrix[y-1][x-2].value;
+			merge+=matrix_[y-1][x-2].value;
 
 			if( merge == minValue) {
-			    matrix[y][x].addPatternType( PatternWeights::PatternType( 2, 1 ) );
+			    matrix_[y][x].addPatternType( PatternWeights::PatternType( 2, 1 ) );
 			}
 			else if(merge < minValue) {
 			    minValue = merge;
-			    matrix[y][x].removePatternTypes();
-			    matrix[y][x].addPatternType( PatternWeights::PatternType( 2, 1 ) );
+			    matrix_[y][x].removePatternTypes();
+			    matrix_[y][x].addPatternType( PatternWeights::PatternType( 2, 1 ) );
 			}
 		    }
 		}
 
 		//Split
-		if( ( y >= 2 ) && ( matrix[y-2][x-1].value != -1 ) ) {
+		if( ( y >= 2 ) && ( matrix_[y-2][x-1].value != -1 ) ) {
 		    std::wstring strLeft, strRight;
-		    strLeft = strLeft + wordCorr.at(x);
-		    strRight = strRight + wordErr.at(y-1) + wordErr.at(y);
+		    strLeft = strLeft + wordCorr_.at(x);
+		    strRight = strRight + wordErr_.at(y-1) + wordErr_.at(y);
 		    csl::Pattern pat(strLeft, strRight);
 		    
-		    split = patternWeights_->getWeight( Pattern( wordCorr.substr( x, 1 ), wordErr.substr( y-1, 2 ) ) );
+		    split = patternWeights_->getWeight( Pattern( wordCorr_.substr( x, 1 ), wordErr_.substr( y-1, 2 ) ) );
 		    //std::wcout << "str : "<< str << " | " << "split : " << split << " | ";
 		    if( split  != PatternWeights::UNDEF ) {
-			split += matrix[y-2][x-1].value;
+			split += matrix_[y-2][x-1].value;
 
 
 			if( split == minValue) {
-			    matrix[y][x].addPatternType( PatternWeights::PatternType( 1, 2 ) );
+			    matrix_[y][x].addPatternType( PatternWeights::PatternType( 1, 2 ) );
 			}
 			else if(split < minValue) {
 			    minValue = split;
-			    matrix[y][x].removePatternTypes();
-			    matrix[y][x].addPatternType( PatternWeights::PatternType( 1, 2 ) );
+			    matrix_[y][x].removePatternTypes();
+			    matrix_[y][x].addPatternType( PatternWeights::PatternType( 1, 2 ) );
 			}
 		    }
 		}
 				
 		// match, substitution
-		if( wordCorr.at(x) == wordErr.at(y) ) {
-		    sub = matrix[y-1][x-1].value;
+		if( wordCorr_.at(x) == wordErr_.at(y) ) {
+		    sub = matrix_[y-1][x-1].value;
 		    if( sub == minValue) {
-			matrix[y][x].addPatternType( PatternWeights::PatternType( 1, 1 ) );
+			matrix_[y][x].addPatternType( PatternWeights::PatternType( 1, 1 ) );
 		    }
 		    else if(sub < minValue) {
 			minValue = sub;
-			matrix[y][x].removePatternTypes();
-			matrix[y][x].addPatternType( PatternWeights::PatternType( 1, 1 ) );
+			matrix_[y][x].removePatternTypes();
+			matrix_[y][x].addPatternType( PatternWeights::PatternType( 1, 1 ) );
 		    }
 		}
 		else {
-		    sub = patternWeights_->getWeight( Pattern( wordCorr.substr( x, 1 ), wordErr.substr( y, 1 ) ) );
+		    sub = patternWeights_->getWeight( Pattern( wordCorr_.substr( x, 1 ), wordErr_.substr( y, 1 ) ) );
 		    
 		    if( sub != PatternWeights::UNDEF ) {
-			sub += matrix[y-1][x-1].value;
+			sub += matrix_[y-1][x-1].value;
 		    }
 		    if( sub == minValue) {
-			matrix[y][x].addPatternType( PatternWeights::PatternType( 1, 1 ) );
+			matrix_[y][x].addPatternType( PatternWeights::PatternType( 1, 1 ) );
 		    }
 		    else if(sub < minValue) {
 			minValue = sub;
-			matrix[y][x].removePatternTypes();
-			matrix[y][x].addPatternType( PatternWeights::PatternType( 1, 1 ) );
+			matrix_[y][x].removePatternTypes();
+			matrix_[y][x].addPatternType( PatternWeights::PatternType( 1, 1 ) );
 		    }
 		}
 		
-		matrix[y][x].value = minValue;				
+		matrix_[y][x].value = minValue;				
 		
 		
 		/*std::wcout << "sub : " << sub << " | ";
@@ -166,63 +168,109 @@ namespace csl {
 	}
 
 	if( debug_ ) {
-	    std::wcout << "wCorr (wstring&): " << "\'"<< wCorr << "\'"<< std::endl;
-	    std::wcout << "wErr (wstring&): " << "\'"<< wErr << "\'"<< std::endl;
-	    std::wcout << "wordCorr (wstring): " << "\'" << wordCorr << "\'"<< std::endl;
-	    std::wcout << "wordErr (wstring): " << "\'" << wordErr << "\'"<< std::endl;
-	    std::wcout << "matrixW (wordCorr.length()): " << matrixW << std::endl;
-	    std::wcout << "matrixH (wordErr.length()): " << matrixH << std::endl;
+	    //std::wcout << "wCorr (wstring&): " << "\'"<< wCorr << "\'"<< std::endl;
+	    //std::wcout << "wErr (wstring&): " << "\'"<< wErr << "\'"<< std::endl;
+	    std::wcout << "wordCorr_ (wstring): " << "\'" << wordCorr_ << "\'"<< std::endl;
+	    std::wcout << "wordErr_ (wstring): " << "\'" << wordErr_ << "\'"<< std::endl;
+	    std::wcout << "matrixW (wordCorr_.length()): " << matrixW << std::endl;
+	    std::wcout << "matrixH (wordErr_.length()): " << matrixH << std::endl;
 	    
 	    std::wcout << std::endl << "  |" ;
 	    for(int x=0; x<matrixW; x++){
-		std::wcout << " " << wordCorr[x] << " |";
+		std::wcout << " " << wordCorr_[x] << " |";
 	    }
 	    std::wcout << std::endl;
 	    
 	    for(int y=0; y<matrixH; y++){
-		std::wcout << wordErr[y] << " |";
-		for(int x=0; x<matrixW; x++){
-		    std::wcout << " " << matrix[y][x].value;
-		    if( matrix[y][x].patternTypes ) {
+		std::wcout << wordErr_[y] << " |";
+		for(int x = 0; x < matrixW; x++){
+		    std::wcout << " " << matrix_[y][x].value;
+		    if( matrix_[y][x].patternTypes ) {
 			std::wcout <<  "[" 
-				   << matrix[y][x].patternTypes->first << ","
-				   << matrix[y][x].patternTypes->second << "]";
+				   << matrix_[y][x].patternTypes->first << ","
+				   << matrix_[y][x].patternTypes->second << "]";
 		    }
 		    else std::wcout << "[   ]";
-
+		    
 		    std::wcout << " |";
-
+		    
 		}
 		std::wcout << std::endl;
 	    }
 	    std::wcout << std::endl;
-
+	    
 	    int x = matrixW - 1;
 	    int y = matrixH - 1;
-	    PatternTypeChain* patternType = matrix[y][x].patternTypes;
+	    PatternTypeChain* patternType = matrix_[y][x].patternTypes;
 	    while( patternType ) {
-		if( ( patternType->first == 1 ) && ( patternType->second == 1 ) && ( wordCorr.at( x ) == wordErr.at( y ) ) ) {
+		if( ( patternType->first == 1 ) && ( patternType->second == 1 ) && ( wordCorr_.at( x ) == wordErr_.at( y ) ) ) {
 		    x -= 1;
 		    y -= 1;
 		    // do nothing: match
 		}
 		else {
-		    std::wcout<< wordCorr.substr( x-patternType->first + 1, patternType->first ) << "->" << wordErr.substr( y - patternType->second + 1, patternType->second ) << " at pos " << x - patternType->second  << std::endl;
+		    std::wcout<< wordCorr_.substr( x-patternType->first + 1, patternType->first ) << "->" << wordErr_.substr( y - patternType->second + 1, patternType->second ) << " at pos " << x - patternType->first  << std::endl;
 		    x -= patternType->first;
 		    y -= patternType->second;
 		}
 		
-		patternType = matrix[y][x].patternTypes;
+		patternType = matrix_[y][x].patternTypes;
+	    }
+	    
+	} // if debug_
+
+	if( instructions_ ) { 
+	    instructions_ = instructions;
+	    if( ! instructions_->empty() ) {
+		throw csl::exceptions::cslException( "csl::ComputeInstruction::computeInstruction: answer object 'instructions' not empty." );
+	    }
+	    instructions_->push_back( Instruction() ); // create a first instruction to work on
+	
+	    getInstructions( matrixW-1, matrixH-1, matrix_[matrixW-1][matrixH-1].patternTypes, 0 );
+	}
+
+	float doReturn = matrix_[matrixH-1][matrixW-1].value;
+	for( int y=1; y < matrixH; y++ ) {
+	    for( int x = 1; x < matrixW; ++x ){
+		matrix_[y][x].reset();
+	    }
+	}
+	return doReturn;
+    }
+
+
+    void ComputeInstruction::getInstructions( int x, int y, PatternTypeChain* patternType, size_t instructionIndex ) {
+	while( ! ( x== 0 && y == 0 ) ) {
+	    if( ( patternType->first == 1 ) && ( patternType->second == 1 ) && ( wordCorr_.at( x ) == wordErr_.at( y ) ) ) {
+		x -= 1;
+		y -= 1;
+	    }
+	    else {
+		x -= patternType->first;
+		y -= patternType->second;
+
+		//std::wcout<< wordCorr_.substr( x-patternType->first + 1, patternType->first ) << "->" << wordErr_.substr( y - patternType->second + 1, patternType->second ) << " at pos " << x - patternType->first  << std::endl;
+		instructions_->at( instructionIndex ).push_back( PosPattern( 
+								     wordCorr_.substr( x-patternType->first + 1, patternType->first ),
+								     wordErr_.substr( y - patternType->second + 1, patternType->second ),
+								     x - patternType->first ) 
+		    );
+		if( patternType->next ) {
+		    instructions_->push_back( instructions_->at( instructionIndex ) ); // clone the instruction as built so far
+		    getInstructions( x, y, patternType->next, instructionIndex + 1 ); // recursive call: work on cloned instruction
+		}
+		
 	    }
 	    
 	}
-	return matrix[matrixH-1][matrixW-1].value;
     }
-
-    void ComputeInstruction::setDebug(bool d){
+    
+    
+    
+    
+    void ComputeInstruction::setDebug( bool d ) {
 	debug_ = d;
     }
     
-
 } // eon
 

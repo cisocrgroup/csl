@@ -81,10 +81,28 @@ namespace csl {
 	ci.setDebug( 1 );
 	PatternWeights pw;
 	ci.connectPatternWeights( &pw );
+
+	std::vector< Instruction > instructions;
 	
 	pw.setDefault( PatternWeights::PatternType( 0, 1 ), 1 ); // standard ins
 	pw.setDefault( PatternWeights::PatternType( 1, 0 ), 1 ); // standard del
 	pw.setDefault( PatternWeights::PatternType( 1, 1 ), 1 ); // standard sub
+
+	CPPUNIT_ASSERT( ci.computeInstruction( L"abcde", L"axbcde", &instructions ) == 1 ); // 1 ins
+	
+	instructions.at(0).print();
+
+	return;
+
+	CPPUNIT_ASSERT( ci.computeInstruction( L"abcde", L"acde" ) == 1 ); // 1 del
+	CPPUNIT_ASSERT( ci.computeInstruction( L"abcde", L"axcde" ) == 1 ); // 1 sub
+
+	pw.setDefault( PatternWeights::PatternType( 2, 1 ), 1 ); // standard merge
+	pw.setDefault( PatternWeights::PatternType( 1, 2 ), 1 ); // standard split
+	CPPUNIT_ASSERT( ci.computeInstruction( L"abcde", L"axycde" ) == 1 ); // 1 split
+	CPPUNIT_ASSERT( ci.computeInstruction( L"abcde", L"axde" ) == 1 ); // 1 merge
+
+	return;
 
 	CPPUNIT_ASSERT( ci.computeInstruction( L"muh", L"mxuh" ) == 1 ); // 1 ins
 
