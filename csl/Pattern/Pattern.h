@@ -27,6 +27,11 @@ namespace csl {
 	 */
 	inline Pattern( const std::wstring& left, const std::wstring& right );
 
+	inline bool operator== ( const Pattern& other ) const {
+	    return ( ( getLeft() == other.getLeft() ) &&
+		     ( getRight() == other.getRight() ) );
+	}
+
 	inline bool operator< ( const Pattern& other ) const {
 	    if( getLeft() < other.getLeft() ) {
 		return true;

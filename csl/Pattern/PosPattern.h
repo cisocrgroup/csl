@@ -18,6 +18,8 @@ namespace csl {
 	
 	inline PosPattern( const std::wstring& left, const std::wstring& right, size_t position );
 	
+	inline bool operator==( PosPattern const& other ) const;
+
 	inline size_t getPosition() const;
 	
 	inline void print( std::wostream& os = std::wcout ) const;
@@ -35,6 +37,11 @@ namespace csl {
  	Pattern( left, right ),
  	position_( position ) {
     }
+
+    bool PosPattern::operator==( PosPattern const& other ) const {
+	return ( Pattern::operator==( other ) && ( getPosition() == other.getPosition() ) );
+    }
+
     
     size_t PosPattern::getPosition() const {
 	return position_;

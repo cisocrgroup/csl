@@ -88,50 +88,117 @@ namespace csl {
 	pw.setDefault( PatternWeights::PatternType( 1, 0 ), 1 ); // standard del
 	pw.setDefault( PatternWeights::PatternType( 1, 1 ), 1 ); // standard sub
 
-	CPPUNIT_ASSERT( ci.computeInstruction( L"abcde", L"axbcde", &instructions ) == 1 ); // 1 ins
+
+// 	//////////////////////////////////////////////////////////////////////////////////////////////////7
+// 	pw.setDefault( PatternWeights::PatternType( 2, 1 ), 1 ); // standard merge
+// 	pw.setDefault( PatternWeights::PatternType( 1, 2 ), 1 ); // standard split
+// 	CPPUNIT_ASSERT( ci.computeInstruction( L"abcde", L"abxcde", &instructions ) == 1 );
+// 	for( std::vector< Instruction >::const_iterator it = instructions.begin(); it != instructions.end(); ++it ) {
+// 	    it->print();std::wcout<<std::endl;
+// 	}
+
+// 	instructions.clear();
+// 	CPPUNIT_ASSERT( ci.computeInstruction( L"abcde", L"axcdy", &instructions ) == 2 ); // 1 sub
+
+// 	for( std::vector< Instruction >::const_iterator it = instructions.begin(); it != instructions.end(); ++it ) {
+// 	    it->print();std::wcout<<std::endl;
+// 	}
+
+// 	instructions.clear();
+// 	CPPUNIT_ASSERT( ci.computeInstruction( L"abcdey", L"abxcdez", &instructions ) == 2 ); // 1 sub
 	
-	instructions.at(0).print();
-
-	return;
-
-	CPPUNIT_ASSERT( ci.computeInstruction( L"abcde", L"acde" ) == 1 ); // 1 del
-	CPPUNIT_ASSERT( ci.computeInstruction( L"abcde", L"axcde" ) == 1 ); // 1 sub
-
-	pw.setDefault( PatternWeights::PatternType( 2, 1 ), 1 ); // standard merge
-	pw.setDefault( PatternWeights::PatternType( 1, 2 ), 1 ); // standard split
-	CPPUNIT_ASSERT( ci.computeInstruction( L"abcde", L"axycde" ) == 1 ); // 1 split
-	CPPUNIT_ASSERT( ci.computeInstruction( L"abcde", L"axde" ) == 1 ); // 1 merge
-
-	return;
-
-	CPPUNIT_ASSERT( ci.computeInstruction( L"muh", L"mxuh" ) == 1 ); // 1 ins
-
-	CPPUNIT_ASSERT( ci.computeInstruction( L"muh", L"xmuh" ) == 1 ); // 1 ins at beginning of word
-
-	CPPUNIT_ASSERT( ci.computeInstruction( L"muh", L"mxh" ) == 1 ); // 1 sub
-
-	CPPUNIT_ASSERT( ci.computeInstruction( L"muh", L"xuh" ) == 1 ); // 1 sub at beginning of word
+	
+// 	return;
+// 	//////////////////////////////////////////////////////////////////////////////////////////////////7
 
 
-	CPPUNIT_ASSERT( ci.computeInstruction( L"muh", L"nruh" ) == 2 ); // 1 ins, 1 sub
+	CPPUNIT_ASSERT( ci.computeInstruction( L"muh", L"mxuh", &instructions ) == 1 ); // 1 ins
+	CPPUNIT_ASSERT( instructions.size() == 1 );
+	CPPUNIT_ASSERT( instructions.at( 0 ).size() == 1 );
+	CPPUNIT_ASSERT( instructions.at( 0 ).at( 0 ) == PosPattern( L"", L"x", 1 ) );
+	instructions.clear();
 
-	CPPUNIT_ASSERT( ci.computeInstruction( L"murnau", L"mumau" ) == 2 ); // 1 del, 1 sub
+
+	CPPUNIT_ASSERT( ci.computeInstruction( L"muh", L"xmuh", &instructions ) == 1 ); // 1 ins at beginning of word
+	CPPUNIT_ASSERT( instructions.size() == 1 );
+	CPPUNIT_ASSERT( instructions.at( 0 ).size() == 1 );
+	CPPUNIT_ASSERT( instructions.at( 0 ).at( 0 ) == PosPattern( L"", L"x", 0 ) );
+	instructions.clear();
+
+
+	CPPUNIT_ASSERT( ci.computeInstruction( L"muh", L"mxh", &instructions ) == 1 ); // 1 sub
+	CPPUNIT_ASSERT( instructions.size() == 1 );
+	CPPUNIT_ASSERT( instructions.at( 0 ).size() == 1 );
+	CPPUNIT_ASSERT( instructions.at( 0 ).at( 0 ) == PosPattern( L"u", L"x", 1 ) );
+	instructions.clear();
+
+	CPPUNIT_ASSERT( ci.computeInstruction( L"muh", L"xuh", &instructions ) == 1 ); // 1 sub at beginning of word
+	CPPUNIT_ASSERT( instructions.size() == 1 );
+	CPPUNIT_ASSERT( instructions.at( 0 ).size() == 1 );
+	CPPUNIT_ASSERT( instructions.at( 0 ).at( 0 ) == PosPattern( L"m", L"x", 0 ) );
+	instructions.clear();
+
+
+	CPPUNIT_ASSERT( ci.computeInstruction( L"milk", L"nrilk", &instructions ) == 2 ); // 1 ins, 1 sub
+	CPPUNIT_ASSERT( instructions.size() == 2 );
+	CPPUNIT_ASSERT( instructions.at( 0 ).size() == 2 );
+	CPPUNIT_ASSERT( instructions.at( 0 ).at( 0 ) == PosPattern( L"", L"n", 0 ) );
+	CPPUNIT_ASSERT( instructions.at( 0 ).at( 1 ) == PosPattern( L"m", L"r", 0 ) );
+	CPPUNIT_ASSERT( instructions.at( 1 ).at( 0 ) == PosPattern( L"m", L"n", 0 ) );
+	CPPUNIT_ASSERT( instructions.at( 1 ).at( 1 ) == PosPattern( L"", L"r", 1 ) );
+	instructions.clear();
+
+	CPPUNIT_ASSERT( ci.computeInstruction( L"murnau", L"mumau", &instructions ) == 2 ); // 1 del, 1 sub
+	CPPUNIT_ASSERT( instructions.size() == 2 );
+	CPPUNIT_ASSERT( instructions.at( 0 ).size() == 2 );
+	CPPUNIT_ASSERT( instructions.at( 0 ).at( 0 ) == PosPattern( L"r", L"", 2 ) );
+	CPPUNIT_ASSERT( instructions.at( 0 ).at( 1 ) == PosPattern( L"n", L"m", 3 ) );
+	CPPUNIT_ASSERT( instructions.at( 1 ).at( 0 ) == PosPattern( L"r", L"m", 2 ) );
+	CPPUNIT_ASSERT( instructions.at( 1 ).at( 1 ) == PosPattern( L"n", L"", 3 ) );
+	instructions.clear();
 
 	pw.setWeight( Pattern( L"m", L"rn" ), 0.35 );
-	CPPUNIT_ASSERT( ci.computeInstruction( L"muh", L"rnuh" ) == static_cast< float >( 0.35 ) ); // 1 split
+	CPPUNIT_ASSERT( ci.computeInstruction( L"milk", L"rnilk", &instructions ) == static_cast< float >( 0.35 ) ); // 1 split
+	CPPUNIT_ASSERT( instructions.size() == 1 );
+	CPPUNIT_ASSERT( instructions.at( 0 ).size() == 1 );
+	CPPUNIT_ASSERT( instructions.at( 0 ).at( 0 ) == PosPattern( L"m", L"rn", 0 ) );
+	instructions.clear();
 
-	CPPUNIT_ASSERT( ci.computeInstruction( L"muh", L"rnuhx" ) == static_cast< float >( 1.35 ) ); // 1 split, 1 insertion
+	CPPUNIT_ASSERT( ci.computeInstruction( L"milk", L"rnilkx", &instructions ) == static_cast< float >( 1.35 ) ); // 1 split, 1 insertion
+	CPPUNIT_ASSERT( instructions.size() == 1 );
+	CPPUNIT_ASSERT( instructions.at( 0 ).size() == 2 );
+	CPPUNIT_ASSERT( instructions.at( 0 ).at( 0 ) == PosPattern( L"m", L"rn", 0 ) );
+	CPPUNIT_ASSERT( instructions.at( 0 ).at( 1 ) == PosPattern( L"", L"x", 4 ) );
+	instructions.clear();
 
 	pw.setWeight( Pattern( L"m", L"n" ), 0.54 );
-	CPPUNIT_ASSERT( ci.computeInstruction( L"mumm", L"nurnm" ) == static_cast< float >( 0.89 ) ); // 1 sub 0.54, 1 split 0.35
+	CPPUNIT_ASSERT( ci.computeInstruction( L"milkman", L"nilkrnan", &instructions ) == static_cast< float >( 0.89 ) ); // 1 sub 0.54, 1 split 0.35
+	CPPUNIT_ASSERT( instructions.size() == 1 );
+	CPPUNIT_ASSERT( instructions.at( 0 ).size() == 2 );
+	CPPUNIT_ASSERT( instructions.at( 0 ).at( 0 ) == PosPattern( L"m", L"n", 0 ) );
+	CPPUNIT_ASSERT( instructions.at( 0 ).at( 1 ) == PosPattern( L"m", L"rn", 4 ) );
+	instructions.clear();
 
 	//// THIS WORKS WITH 0.56, BUT NOT WITH 0.57! AAAAAAAAAAAAHHHHHHHHHH
 	pw.setWeight( Pattern( L"rn", L"m" ), 0.56 );
-	CPPUNIT_ASSERT( ci.computeInstruction( L"murnau", L"mumau" ) == static_cast< float >( 0.56 ) ); // 1 merge 0.56
-	//std::wcout<<"HALLO:"<< ci.computeInstruction( L"murnau", L"mmau" ) << std::endl;
-	//std::wcout<<"DIFF:"<< ci.computeInstruction( L"murnau", L"mmau" ) - static_cast< float >( 1.56 ) << std::endl;
-	CPPUNIT_ASSERT( ci.computeInstruction( L"murnau", L"mmau" ) == static_cast< float >( 1.56 ) ); // 1 del, 1 merge 0.56
+	CPPUNIT_ASSERT( ci.computeInstruction( L"morning", L"moming", &instructions ) == static_cast< float >( 0.56 ) ); // 1 merge 0.56
+	CPPUNIT_ASSERT( instructions.size() == 1 );
+	CPPUNIT_ASSERT( instructions.at( 0 ).size() == 1 );
+	CPPUNIT_ASSERT( instructions.at( 0 ).at( 0 ) == PosPattern( L"rn", L"m", 2 ) );
+	instructions.clear();
 
+	CPPUNIT_ASSERT( ci.computeInstruction( L"morning", L"mming", &instructions ) == static_cast< float >( 1.56 ) ); // 1 del, 1 merge 0.56
+	CPPUNIT_ASSERT( instructions.size() == 1 );
+	CPPUNIT_ASSERT( instructions.at( 0 ).size() == 2 );
+	CPPUNIT_ASSERT( instructions.at( 0 ).at( 0 ) == PosPattern( L"o", L"", 1 ) );
+	CPPUNIT_ASSERT( instructions.at( 0 ).at( 1 ) == PosPattern( L"rn", L"m", 2 ) );
+	instructions.clear();
+
+	CPPUNIT_ASSERT( ci.computeInstruction( L"morning", L"moming", &instructions ) == static_cast< float >( 0.56 ) ); // 1 merge 0.56
+	CPPUNIT_ASSERT( instructions.size() == 1 );
+	CPPUNIT_ASSERT( instructions.at( 0 ).size() == 1 );
+	CPPUNIT_ASSERT( instructions.at( 0 ).at( 0 ) == PosPattern( L"rn", L"m", 2 ) );
+	instructions.clear();
 
 
     }

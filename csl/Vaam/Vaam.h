@@ -198,6 +198,7 @@ namespace csl {
 	    size_t lookAheadDepth_;
 	}; // class StackItem
 	
+
 	class Stack : public std::vector< StackItem > {
 	public:
 	    Stack() {

@@ -2,7 +2,8 @@
 
 namespace csl {
     ComputeInstruction::ComputeInstruction() : 
-	patternWeights_( 0 ) {
+	patternWeights_( 0 ),
+	instructions_( 0 ) {
 
 	debug_ = false;
 
@@ -219,47 +220,82 @@ namespace csl {
 	    
 	} // if debug_
 
+	instructions_ = instructions;
 	if( instructions_ ) { 
-	    instructions_ = instructions;
 	    if( ! instructions_->empty() ) {
 		throw csl::exceptions::cslException( "csl::ComputeInstruction::computeInstruction: answer object 'instructions' not empty." );
 	    }
 	    instructions_->push_back( Instruction() ); // create a first instruction to work on
 	
-	    getInstructions( matrixW-1, matrixH-1, matrix_[matrixW-1][matrixH-1].patternTypes, 0 );
+	    getInstructions( matrixW-1, matrixH-1, 0 );
 	}
 
 	float doReturn = matrix_[matrixH-1][matrixW-1].value;
-	for( int y=1; y < matrixH; y++ ) {
-	    for( int x = 1; x < matrixW; ++x ){
+	for( int y=0; y < matrixH; y++ ) {
+	    for( int x = 0; x < matrixW; ++x ){
 		matrix_[y][x].reset();
 	    }
 	}
 	return doReturn;
     }
 
-
-    void ComputeInstruction::getInstructions( int x, int y, PatternTypeChain* patternType, size_t instructionIndex ) {
-	while( ! ( x== 0 && y == 0 ) ) {
+    void ComputeInstruction::getInstructions( int x, int y, size_t instructionIndex ) {
+	if( ( x== 0 && y == 0 ) ) {
+	    // no recursive calls, we're at the end. Reverse all instructions
+// 	    for( std::vector< Instruction >::iterator it = instructions_->begin(); it != instructions_->end(); ++it ) {
+// 		std::reverse( it->begin(), it->end() );
+// 	    }
+	    std::reverse( instructions_->at( instructionIndex ).begin(), instructions_->at( instructionIndex ).end() );
+	}
+	else {
+	    PatternTypeChain* patternType = matrix_[y][x].patternTypes;
+	    
 	    if( ( patternType->first == 1 ) && ( patternType->second == 1 ) && ( wordCorr_.at( x ) == wordErr_.at( y ) ) ) {
-		x -= 1;
-		y -= 1;
+		getInstructions( x - 1, y - 1, 
+				 instructionIndex ); // recursive call: work on same instruction
 	    }
 	    else {
-		x -= patternType->first;
-		y -= patternType->second;
 
 		//std::wcout<< wordCorr_.substr( x-patternType->first + 1, patternType->first ) << "->" << wordErr_.substr( y - patternType->second + 1, patternType->second ) << " at pos " << x - patternType->first  << std::endl;
+
+
+
+		// continue on clones for all but the first patternType
+		PatternTypeChain* morePatternTypes = patternType->next;
+		while( morePatternTypes ) {
+		    std::wcout<<"CLONE AT x="<<x<<", y="<<y << std::endl;
+		    instructions_->push_back( instructions_->at( instructionIndex ) ); // clone the instruction as built so far
+
+		    // add pattern to instruction AFTER recursive call to get the right order
+		    instructions_->at( instructionIndex + 1 ).push_back( PosPattern( 
+									     wordCorr_.substr( x-morePatternTypes->first + 1, morePatternTypes->first ),
+									     wordErr_.substr( y - morePatternTypes->second + 1, morePatternTypes->second ),
+									     x - morePatternTypes->first ) 
+			);
+
+		    getInstructions(  x - morePatternTypes->first, y - morePatternTypes->second, 
+				      instructionIndex + 1 ); // recursive call: work on cloned instruction
+		    
+		    
+		    morePatternTypes = morePatternTypes->next;
+		}
+		
+
 		instructions_->at( instructionIndex ).push_back( PosPattern( 
 								     wordCorr_.substr( x-patternType->first + 1, patternType->first ),
 								     wordErr_.substr( y - patternType->second + 1, patternType->second ),
 								     x - patternType->first ) 
 		    );
-		if( patternType->next ) {
-		    instructions_->push_back( instructions_->at( instructionIndex ) ); // clone the instruction as built so far
-		    getInstructions( x, y, patternType->next, instructionIndex + 1 ); // recursive call: work on cloned instruction
-		}
+
+		// continue on the given instrcuction for the first patternType
+		getInstructions( x - patternType->first, y - patternType->second, 
+				 instructionIndex ); // recursive call: work on same instruction
 		
+
+		
+
+
+
 	    }
 	    
 	}

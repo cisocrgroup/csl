@@ -92,7 +92,7 @@ namespace csl {
 	};
 
 	
-	void getInstructions( int x, int y, PatternTypeChain* patternType, size_t instructionIndex );
+	void getInstructions( int x, int y, size_t instructionIndex );
 	
 	/** 
 	 * @todo Find a good, dynamic solution here!
@@ -100,9 +100,10 @@ namespace csl {
 	MatrixItem matrix_[500][500];
 	std::wstring wordCorr_;
 	std::wstring wordErr_;
+	const PatternWeights* patternWeights_;
+
 	std::vector< Instruction >* instructions_;
 
-	const PatternWeights* patternWeights_;
 	
     }; // class ComputeInstruction
 

@@ -170,6 +170,8 @@ namespace csl {
 	/// the corresponding Instruction: word = baseWord + instruction
 	Instruction instruction_;
 
+	Instruction instructionOCR_;
+
 	/**
 	 * @brief 
 	 *
