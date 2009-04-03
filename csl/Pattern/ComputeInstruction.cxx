@@ -17,8 +17,8 @@ namespace csl {
     ComputeInstruction::~ComputeInstruction(){
     }
 
-    void ComputeInstruction::connectPatternWeights( csl::PatternWeights* patternWeights ){
-	patternWeights_ = patternWeights;
+    void ComputeInstruction::connectPatternWeights( csl::PatternWeights const& patternWeights ){
+	patternWeights_ = &patternWeights;
     }
     
 
@@ -263,7 +263,7 @@ namespace csl {
 		// continue on clones for all but the first patternType
 		PatternTypeChain* morePatternTypes = patternType->next;
 		while( morePatternTypes ) {
-		    std::wcout<<"CLONE AT x="<<x<<", y="<<y << std::endl;
+//		    std::wcout<<"CLONE AT x="<<x<<", y="<<y << std::endl;
 		    instructions_->push_back( instructions_->at( instructionIndex ) ); // clone the instruction as built so far
 
 		    // add pattern to instruction AFTER recursive call to get the right order

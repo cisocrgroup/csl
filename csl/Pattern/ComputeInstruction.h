@@ -42,7 +42,7 @@ namespace csl {
 	/**
 	 * @brief Creates a connection to a LevenshteinWeights object
 	 */
-	void connectPatternWeights( PatternWeights* levW );
+	void connectPatternWeights( PatternWeights const& levW );
 	
 	/**
 	 * @brief Sets debug_ 

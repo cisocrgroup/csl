@@ -14,7 +14,10 @@ namespace csl {
     }
 
     void PatternWeights::setWeight( const csl::Pattern& pattern, float weight ) {
-	patternWeights_[ pattern ] = weight;
+	if( weight == UNDEF ) {
+	    patternWeights_.erase( pattern );
+	}
+	else patternWeights_[ pattern ] = weight;
     }
 
     float PatternWeights::getDefault( PatternType const& patternType ) const {
@@ -28,17 +31,20 @@ namespace csl {
     }
 
     void PatternWeights::setDefault( PatternType const& patternType, float weight ) {
-	defaultWeights_[ patternType ] = weight;
+	if( weight == UNDEF ) {
+	    defaultWeights_.erase( patternType );
+	}
+	else defaultWeights_[ patternType ] = weight;
     }
 
     
-    void PatternWeights::printPatternWeights() const{
+    void PatternWeights::printPatternWeights( std::wostream& str ) const{
 	for(std::map< csl::Pattern, float >::const_iterator it = patternWeights_.begin(); it != patternWeights_.end(); it++){
-	    std::wcout << it->first.getLeft() << '-' << it->first.getRight() << " : " << it->second << std::endl;
+	    str << it->first.getLeft() << '-' << it->first.getRight() << " : " << it->second << std::endl;
 	}
-	std::wcout << "Default settings:" << std::endl;
+	str << "Default settings:" << std::endl;
 	for(std::map< PatternType, float >::const_iterator defaultIt = defaultWeights_.begin(); defaultIt != defaultWeights_.end(); defaultIt++){
-	    std::wcout << "<" <<  defaultIt->first.first << ',' << defaultIt->first.second << " : " << defaultIt->second << std::endl;
+	    str << "<" <<  defaultIt->first.first << ',' << defaultIt->first.second << "> : " << defaultIt->second << std::endl;
 	}
     }
 

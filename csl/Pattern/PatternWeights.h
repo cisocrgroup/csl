@@ -47,7 +47,7 @@ namespace csl {
 	/**
 	 * @brief prints the pattern weights
 	 */
-	void printPatternWeights() const;
+	void printPatternWeights( std::wostream& str = std::wcout ) const;
 	
 
 	private:

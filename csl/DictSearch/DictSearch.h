@@ -39,34 +39,8 @@ namespace csl {
 
 	static const size_t INFINITE = (size_t)-1;
 
-	class CandidateSet; // forward declaration
-
-	/**
-	 * @brief All classes that are supposed to contribute to the answer set of a DictSearch query
-	 * have to implement this interface.
-	 * The method DictSearch::addExternalDictModule() allows to add such objects to the process.
-	 *
-	 * One implementation of this interface is DictSearch's sub-class DictModule
-	 */
-	class iDictModule {
-	public:
-	    /**
-	     * @brief Allows to query the iDctModule with some string. The iDictModule is expected
-	     * to add all its answers/ interpretations to the CandidateSet that is passed.
-	     */
-	    virtual void query( std::wstring const& query, CandidateSet* answers ) = 0;
-
-	    /**
-	     * @brief returns a value between 0 and 100 to indicate the DictModule's priority as compared to others
-	     * This is used for a rough sorting order of all answers.
-	     */
-	    virtual int getPriority() const = 0;
-
-	    /**
-	     * @brief returns a stringto identify the DictModule
-	     */
-	    virtual std::wstring const& getName() const = 0;
-	};
+	// forward declaration
+	class iDictModule;
 
 	class Interpretation : public csl::Interpretation {
 	public:
@@ -111,8 +85,6 @@ namespace csl {
 	}; // class Interpretation
 
 
-
-
 	/**
 	 * 
 	 */
@@ -120,8 +92,9 @@ namespace csl {
 			     public csl::iVaamResultReceiver,
 			     std::vector< csl::DictSearch::Interpretation > {
 	public:
-	    typedef std::vector< csl::DictSearch::Interpretation >::iterator iterator;
-	    typedef std::vector< csl::DictSearch::Interpretation >::const_iterator const_iterator;
+	    typedef csl::DictSearch::Interpretation Interpretation_t;
+	    typedef std::vector< Interpretation_t >::iterator iterator;
+	    typedef std::vector< Interpretation_t >::const_iterator const_iterator;
 
 	    void receive( const wchar_t* str, int levDistance, int annotation ) {
 		csl::Interpretation cslInt;
@@ -139,69 +112,102 @@ namespace csl {
 	    void setCurrentDictModule( iDictModule const& dm ) { currentDictModule_ = &dm; }
 	    
 	    void reset() {
-		std::vector< csl::DictSearch::Interpretation >::clear();
+		std::vector< Interpretation_t >::clear();
 	    }
 
 	    /**
 	     * @brief method defined as usual for containers, e.g. in the std library
 	     */
 	    void clear() {
-		std::vector< csl::DictSearch::Interpretation >::clear();
+		std::vector< Interpretation_t >::clear();
 	    }
 
 	    /**
 	     * @brief method defined as usual for containers, e.g. in the std library
 	     */
 	    iterator begin() {
-		return std::vector< csl::DictSearch::Interpretation >::begin();
+		return std::vector< Interpretation_t >::begin();
 	    }
 
 	    /**
 	     * @brief method defined as usual for containers, e.g. in the std library
 	     */
 	    const_iterator begin() const {
-		return std::vector< csl::DictSearch::Interpretation >::begin();
+		return std::vector< Interpretation_t >::begin();
 	    }
 
 	    /**
 	     * @brief method defined as usual for containers, e.g. in the std library
 	     */
 	    iterator end() {
-		return std::vector< csl::DictSearch::Interpretation >::end();
+		return std::vector< Interpretation_t >::end();
 	    }
 
 	    /**
 	     * @brief method defined as usual for containers, e.g. in the std library
 	     */
 	    const_iterator end() const {
-		return std::vector< csl::DictSearch::Interpretation >::end();
+		return std::vector< Interpretation_t >::end();
 	    }
 
 	    /**
 	     * @brief method defined as usual for containers, e.g. in the std library
 	     */
 	    size_t size() const {
-		return std::vector< csl::DictSearch::Interpretation >::size();
+		return std::vector< Interpretation_t >::size();
 	    }
 
 	    /**
 	     * @brief method defined as usual for containers, e.g. in the std library
 	     */
 	    bool empty() const {
-		return std::vector< csl::DictSearch::Interpretation >::empty();
+		return std::vector< Interpretation_t >::empty();
 	    }
 
 	    /**
 	     * @brief method defined as usual for containers, e.g. in the std library
 	     */
-	    csl::DictSearch::Interpretation const& at( size_t i ) const {
-		return std::vector< csl::DictSearch::Interpretation >::at( i );
+	    Interpretation_t const& at( size_t i ) const {
+		return std::vector< Interpretation_t >::at( i );
 	    }
 
 
 	private:
 	    iDictModule const* currentDictModule_;
 	}; // class CandidateSet
+
+
+	/**
+	 * @brief All classes that are supposed to contribute to the answer set of a DictSearch query
+	 * have to implement this interface.
+	 * The method DictSearch::addExternalDictModule() allows to add such objects to the process.
+	 *
+	 * One implementation of this interface is DictSearch's sub-class DictModule
+	 */
+	class iDictModule {
+	public:
+	    /**
+	     * @brief Allows to query the iDctModule with some string. The iDictModule is expected
+	     * to add all its answers/ interpretations to the CandidateSet that is passed.
+	     */
+	    virtual void query( std::wstring const& query, CandidateSet* answers ) = 0;
+
+	    /**
+	     * @brief returns a value between 0 and 100 to indicate the DictModule's priority as compared to others
+	     * This is used for a rough sorting order of all answers.
+	     */
+	    virtual int getPriority() const = 0;
+
+	    /**
+	     * @brief returns a stringto identify the DictModule
+	     */
+	    virtual std::wstring const& getName() const = 0;
+	};
+
+
+
+
+
 
 
 
