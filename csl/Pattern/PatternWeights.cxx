@@ -5,6 +5,11 @@ namespace csl {
     PatternWeights::PatternWeights() {
     }
 
+    void PatternWeights::reset() {
+	patternWeights_.clear();
+	defaultWeights_.clear();
+    }
+
     float PatternWeights::getWeight( const csl::Pattern& pattern ) const {
 	std::map< csl::Pattern, float >::const_iterator it = patternWeights_.find( pattern );
 	if( it != patternWeights_.end() )

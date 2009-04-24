@@ -59,16 +59,52 @@ namespace csl {
 	float sub = 0;
 	float merge = 0;
 	float split = 0;
-	float minValue =  std::numeric_limits< float >::max();
 	for( int y=1; y < matrixH; y++ ) {
 	    for( int x = 1; x < matrixW; ++x ){
+		float minValue =  std::numeric_limits< float >::max();
+		// match, substitution
+		if( wordCorr_.at(x) == wordErr_.at(y) ) {
+		    sub = matrix_[y-1][x-1].value;
+		    if( sub == minValue) {
+			matrix_[y][x].addPatternType( PatternWeights::PatternType( 1, 1 ) );
+		    }
+		    else if(sub < minValue) {
+			minValue = sub;
+			matrix_[y][x].removePatternTypes();
+			matrix_[y][x].addPatternType( PatternWeights::PatternType( 1, 1 ) );
+		    }
+		}
+		else {
+		    sub = patternWeights_->getWeight( Pattern( wordCorr_.substr( x, 1 ), wordErr_.substr( y, 1 ) ) );
+		    
+		    if( sub != PatternWeights::UNDEF ) {
+			sub += matrix_[y-1][x-1].value;
+		    }
+
+		    if( sub == minValue) {
+			matrix_[y][x].addPatternType( PatternWeights::PatternType( 1, 1 ) );
+		    }
+		    else if(sub < minValue) {
+			minValue = sub;
+			matrix_[y][x].removePatternTypes();
+			matrix_[y][x].addPatternType( PatternWeights::PatternType( 1, 1 ) );
+		    }
+		}
+
+		
 		
 		// Insert
 		if( ( patternWeights_->getDefault( PatternWeights::PatternType( 0, 1 ) ) != PatternWeights::UNDEF ) && 
 		    ( matrix_[y-1][x].value != -1 ) ) {
 		    add = matrix_[y-1][x].value+ 1;
-		    minValue = add;
-		    matrix_[y][x].addPatternType( PatternWeights::PatternType( 0, 1 ) );
+		    if( add == minValue ) {
+			matrix_[y][x].addPatternType( PatternWeights::PatternType( 0, 1 ) );
+		    }
+		    else if( add < minValue ) {
+			minValue = add;
+			matrix_[y][x].removePatternTypes();
+			matrix_[y][x].addPatternType( PatternWeights::PatternType( 0, 1 ) );
+		    }
 		}
 		
 		// Delete
@@ -116,7 +152,7 @@ namespace csl {
 		    //std::wcout << "str : "<< str << " | " << "split : " << split << " | ";
 		    if( split  != PatternWeights::UNDEF ) {
 			split += matrix_[y-2][x-1].value;
-
+			
 
 			if( split == minValue) {
 			    matrix_[y][x].addPatternType( PatternWeights::PatternType( 1, 2 ) );
@@ -129,33 +165,6 @@ namespace csl {
 		    }
 		}
 				
-		// match, substitution
-		if( wordCorr_.at(x) == wordErr_.at(y) ) {
-		    sub = matrix_[y-1][x-1].value;
-		    if( sub == minValue) {
-			matrix_[y][x].addPatternType( PatternWeights::PatternType( 1, 1 ) );
-		    }
-		    else if(sub < minValue) {
-			minValue = sub;
-			matrix_[y][x].removePatternTypes();
-			matrix_[y][x].addPatternType( PatternWeights::PatternType( 1, 1 ) );
-		    }
-		}
-		else {
-		    sub = patternWeights_->getWeight( Pattern( wordCorr_.substr( x, 1 ), wordErr_.substr( y, 1 ) ) );
-		    
-		    if( sub != PatternWeights::UNDEF ) {
-			sub += matrix_[y-1][x-1].value;
-		    }
-		    if( sub == minValue) {
-			matrix_[y][x].addPatternType( PatternWeights::PatternType( 1, 1 ) );
-		    }
-		    else if(sub < minValue) {
-			minValue = sub;
-			matrix_[y][x].removePatternTypes();
-			matrix_[y][x].addPatternType( PatternWeights::PatternType( 1, 1 ) );
-		    }
-		}
 		
 		matrix_[y][x].value = minValue;				
 		
@@ -250,16 +259,19 @@ namespace csl {
 	else {
 	    PatternTypeChain* patternType = matrix_[y][x].patternTypes;
 	    
+	    if( patternType == 0 ) {
+		throw std::runtime_error( "NULL!" );
+	    }
+	    
+	    // match
 	    if( ( patternType->first == 1 ) && ( patternType->second == 1 ) && ( wordCorr_.at( x ) == wordErr_.at( y ) ) ) {
 		getInstructions( x - 1, y - 1, 
 				 instructionIndex ); // recursive call: work on same instruction
 	    }
 	    else {
-
+		
 		//std::wcout<< wordCorr_.substr( x-patternType->first + 1, patternType->first ) << "->" << wordErr_.substr( y - patternType->second + 1, patternType->second ) << " at pos " << x - patternType->first  << std::endl;
-
-
-
+		
 		// continue on clones for all but the first patternType
 		PatternTypeChain* morePatternTypes = patternType->next;
 		while( morePatternTypes ) {
@@ -299,7 +311,7 @@ namespace csl {
 	    }
 	    
 	}
-    }
+    } // getInstructions()
     
     
     

@@ -27,6 +27,8 @@ namespace csl {
 
 	PatternWeights();
 
+	void reset();
+
 	/**
 	 * @return the weight for a given pattern, or PatternWeights::UNDEF if the pattern is not known
 	 */

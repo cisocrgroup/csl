@@ -414,7 +414,7 @@ namespace csl {
 	for ( size_t i = 1; i < sizeOfUsedCells_; ++i ) {
 	    if ( cells_[i].isTransition() ) {
 		StateId_t base = i - cells_[i].getKey();
-
+		
 		wprintf( L"%d->%d[label=\"%lc (%d)\"] //DOTCODE\n", base, cells_[i].getValue(), cells_[i].getKey(), cells_[i].getThirdValue()  );
 	    } else if ( cells_[i].isState() ) {
 		int peripheries = ( cells_[i].isFinalState() ) ? 2 : 1;
