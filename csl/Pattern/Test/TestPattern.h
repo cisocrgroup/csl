@@ -148,19 +148,19 @@ namespace csl {
 	CPPUNIT_ASSERT( ci.computeInstruction( L"milk", L"nrilk", &instructions ) == 2 ); // 1 ins, 1 sub
 	CPPUNIT_ASSERT( instructions.size() == 2 );
 	CPPUNIT_ASSERT( instructions.at( 0 ).size() == 2 );
-	CPPUNIT_ASSERT( instructions.at( 0 ).at( 0 ) == PosPattern( L"m", L"n", 0 ) );
-	CPPUNIT_ASSERT( instructions.at( 0 ).at( 1 ) == PosPattern( L"", L"r", 1 ) );
-	CPPUNIT_ASSERT( instructions.at( 1 ).at( 0 ) == PosPattern( L"", L"n", 0 ) );
-	CPPUNIT_ASSERT( instructions.at( 1 ).at( 1 ) == PosPattern( L"m", L"r", 0 ) );
+	CPPUNIT_ASSERT( instructions.at( 0 ).at( 0 ) == PosPattern( L"", L"n", 0 ) );
+	CPPUNIT_ASSERT( instructions.at( 0 ).at( 1 ) == PosPattern( L"m", L"r", 0 ) );
+	CPPUNIT_ASSERT( instructions.at( 1 ).at( 0 ) == PosPattern( L"m", L"n", 0 ) );
+	CPPUNIT_ASSERT( instructions.at( 1 ).at( 1 ) == PosPattern( L"", L"r", 1 ) );
 	instructions.clear();
 
 	CPPUNIT_ASSERT( ci.computeInstruction( L"murnau", L"mumau", &instructions ) == 2 ); // 1 del, 1 sub
 	CPPUNIT_ASSERT( instructions.size() == 2 );
 	CPPUNIT_ASSERT( instructions.at( 0 ).size() == 2 );
-	CPPUNIT_ASSERT( instructions.at( 0 ).at( 0 ) == PosPattern( L"r", L"m", 2 ) );
-	CPPUNIT_ASSERT( instructions.at( 0 ).at( 1 ) == PosPattern( L"n", L"", 3 ) );
-	CPPUNIT_ASSERT( instructions.at( 1 ).at( 0 ) == PosPattern( L"r", L"", 2 ) );
-	CPPUNIT_ASSERT( instructions.at( 1 ).at( 1 ) == PosPattern( L"n", L"m", 3 ) );
+	CPPUNIT_ASSERT( instructions.at( 0 ).at( 0 ) == PosPattern( L"r", L"", 2 ) );
+	CPPUNIT_ASSERT( instructions.at( 0 ).at( 1 ) == PosPattern( L"n", L"m", 3 ) );
+	CPPUNIT_ASSERT( instructions.at( 1 ).at( 0 ) == PosPattern( L"r", L"m", 2 ) );
+	CPPUNIT_ASSERT( instructions.at( 1 ).at( 1 ) == PosPattern( L"n", L"", 3 ) );
 	instructions.clear();
 
 	pw.setWeight( Pattern( L"m", L"rn" ), 0.35 );
@@ -222,19 +222,19 @@ namespace csl {
 
 	CPPUNIT_ASSERT( instructions.size() == 3 );
 	CPPUNIT_ASSERT( instructions.at( 0 ).size() == 1 );
-	CPPUNIT_ASSERT( instructions.at( 0 ).at( 0 ) == PosPattern( L"u", L"xu", 1 ) );
+	CPPUNIT_ASSERT( instructions.at( 0 ).at( 0 ) == PosPattern( L"", L"x", 1 ) );
 	CPPUNIT_ASSERT( instructions.at( 1 ).size() == 1 );
-	CPPUNIT_ASSERT( instructions.at( 1 ).at( 0 ) == PosPattern( L"m", L"mx", 1 ) );
+	CPPUNIT_ASSERT( instructions.at( 1 ).at( 0 ) == PosPattern( L"u", L"xu", 1 ) );
 	CPPUNIT_ASSERT( instructions.at( 2 ).size() == 1 );
-	CPPUNIT_ASSERT( instructions.at( 2 ).at( 0 ) == PosPattern( L"", L"x", 1 ) );
+	CPPUNIT_ASSERT( instructions.at( 2 ).at( 0 ) == PosPattern( L"m", L"mx", 0 ) );
 	instructions.clear();
 
 	CPPUNIT_ASSERT( ci.computeInstruction( L"muh", L"xmuh", &instructions ) == 1 ); // 1 ins at beginning
 	CPPUNIT_ASSERT( instructions.size() == 2 );
 	CPPUNIT_ASSERT( instructions.at( 0 ).size() == 1 );
-	CPPUNIT_ASSERT( instructions.at( 0 ).at( 0 ) == PosPattern( L"m", L"xm", 0 ) );
+	CPPUNIT_ASSERT( instructions.at( 0 ).at( 0 ) == PosPattern( L"", L"x", 0 ) );
 	CPPUNIT_ASSERT( instructions.at( 1 ).size() == 1 );
-	CPPUNIT_ASSERT( instructions.at( 1 ).at( 0 ) == PosPattern( L"", L"x", 0 ) );
+	CPPUNIT_ASSERT( instructions.at( 1 ).at( 0 ) == PosPattern( L"m", L"xm", 0 ) );
 	instructions.clear();
 
 
@@ -243,11 +243,13 @@ namespace csl {
  	for( std::vector< Instruction >::const_iterator it = instructions.begin(); it != instructions.end(); ++it ) {
  	    it->print();std::wcout<<std::endl;
  	}
-	CPPUNIT_ASSERT( instructions.size() == 2 );
+	CPPUNIT_ASSERT( instructions.size() == 3 );
 	CPPUNIT_ASSERT( instructions.at( 0 ).size() == 1 );
-	CPPUNIT_ASSERT( instructions.at( 0 ).at( 0 ) == PosPattern( L"m", L"xm", 0 ) );
+	CPPUNIT_ASSERT( instructions.at( 0 ).at( 0 ) == PosPattern( L"", L"x", 2 ) );
 	CPPUNIT_ASSERT( instructions.at( 1 ).size() == 1 );
-	CPPUNIT_ASSERT( instructions.at( 1 ).at( 0 ) == PosPattern( L"", L"x", 0 ) );
+	CPPUNIT_ASSERT( instructions.at( 1 ).at( 0 ) == PosPattern( L"l", L"xl", 2 ) );
+	CPPUNIT_ASSERT( instructions.at( 2 ).size() == 1 );
+	CPPUNIT_ASSERT( instructions.at( 2 ).at( 0 ) == PosPattern( L"e", L"ex", 1 ) );
 	instructions.clear();
 
     }

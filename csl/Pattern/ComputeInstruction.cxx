@@ -248,7 +248,11 @@ namespace csl {
 	return doReturn;
     }
 
+    /**
+     * @brief recursive method to find all best paths through the levenshtein-matrix and store the resulting csl::Instruction s
+     */
     void ComputeInstruction::getInstructions( int x, int y, size_t instructionIndex ) {
+	
 	if( ( x== 0 && y == 0 ) ) {
 	    // no recursive calls, we're at the end. Reverse the complete instruction
 	    std::reverse( instructions_->at( instructionIndex ).begin(), instructions_->at( instructionIndex ).end() );
@@ -260,53 +264,50 @@ namespace csl {
 		throw std::runtime_error( "NULL!" );
 	    }
 	    
-	    // match
-	    if( ( patternType->first == 1 ) && ( patternType->second == 1 ) && ( wordCorr_.at( x ) == wordErr_.at( y ) ) ) {
-		getInstructions( x - 1, y - 1, 
-				 instructionIndex ); // recursive call: work on same instruction
-	    }
-	    else {
+	    size_t countPatternTypes = 0;
+	    while( patternType ) {
+		size_t currentInstructionIndex = 0;
+
+		if( patternType->next == 0  ) { // no need to clone for the first patternType
+		    currentInstructionIndex = instructionIndex; 
+		    //std::wcerr<<"Do not clone: work on instr["<<instructionIndex<<"]"<<std::endl;
+		    //std::wcerr<<"instr.size() is "<<instructions_->size()<<std::endl;
+		}
+		else { // clone
+		    instructions_->push_back( instructions_->at( instructionIndex ) ); // clone the instruction as built so far
+		    currentInstructionIndex = instructions_->size() - 1;
+		    //std::wcerr<<"Clone instr["<<instructionIndex<<"] to instr["<<currentInstructionIndex<<"]"<<std::endl;
+		}
+
+		// match: continue
+		if( ( patternType->first == 1 ) && ( patternType->second == 1 ) && ( wordCorr_.at( x ) == wordErr_.at( y ) ) ) {
+		    getInstructions( x - 1, y - 1, 
+				     currentInstructionIndex ); // recursive call
+		}
+		else {
 		
 		//std::wcout<< wordCorr_.substr( x-patternType->first + 1, patternType->first ) << "->" << wordErr_.substr( y - patternType->second + 1, patternType->second ) << " at pos " << x - patternType->first  << std::endl;
 		
-		// continue on clones for all but the first patternType
-		PatternTypeChain* morePatternTypes = patternType->next;
-		while( morePatternTypes ) {
-//		    std::wcout<<"CLONE AT x="<<x<<", y="<<y << std::endl;
-
-		    instructions_->push_back( instructions_->at( instructionIndex ) ); // clone the instruction as built so far
-		    instructions_->at( instructionIndex + 1 ).push_back( PosPattern( 
-									     wordCorr_.substr( x-morePatternTypes->first + 1, morePatternTypes->first ),
-									     wordErr_.substr( y - morePatternTypes->second + 1, morePatternTypes->second ),
-									     x - morePatternTypes->first ) 
+		    
+		    instructions_->at( currentInstructionIndex ).push_back( 
+			PosPattern( 
+			    wordCorr_.substr( x-patternType->first + 1, patternType->first ),
+			    wordErr_.substr( y - patternType->second + 1, patternType->second ),
+			    x - patternType->first ) 
 			);
 		    
-		    getInstructions(  x - morePatternTypes->first, y - morePatternTypes->second, 
-				      instructionIndex + 1 ); // recursive call: work on cloned instruction
+		    getInstructions(  x - patternType->first, y - patternType->second, 
+				      currentInstructionIndex ); // recursive call
 		    
-
-		    morePatternTypes = morePatternTypes->next;
+		    
 		}
 		
-
-		instructions_->at( instructionIndex ).push_back( PosPattern( 
-								     wordCorr_.substr( x-patternType->first + 1, patternType->first ),
-								     wordErr_.substr( y - patternType->second + 1, patternType->second ),
-								     x - patternType->first ) 
-		    );
-
-		// continue on the given instruction for the first patternType
-		getInstructions( x - patternType->first, y - patternType->second, 
-				 instructionIndex ); // recursive call: work on same instruction
-		
-
-		
-
-
+		patternType = patternType->next;
+		++countPatternTypes;
 
 	    }
 	    
-	}
+	} // if not at the left upper corner od the matrix
     } // getInstructions()
     
     

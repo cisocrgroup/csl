@@ -2,9 +2,9 @@
 
 namespace csl {
     
-    PatternWeights::PatternWeights() {
+    PatternWeights::PatternWeights() : smartMerge_( false ) {
     }
-
+    
     void PatternWeights::reset() {
 	patternWeights_.clear();
 	defaultWeights_.clear();
@@ -14,6 +14,11 @@ namespace csl {
 	std::map< csl::Pattern, float >::const_iterator it = patternWeights_.find( pattern );
 	if( it != patternWeights_.end() )
 	    return it->second;
+
+	if( smartMerge_ ) {
+	    if( pattern.getLeft().size() > 0 && ( pattern.getRight().find( pattern.getLeft() ) != std::wstring::npos )  ) return UNDEF;
+	    if( pattern.getRight().size() > 0 && ( pattern.getLeft().find( pattern.getRight() ) != std::wstring::npos )  ) return UNDEF;
+	}
 	
 	return getDefault( PatternType( pattern.getLeft().size(), pattern.getRight().size() ) );
     }
@@ -42,7 +47,12 @@ namespace csl {
 	else defaultWeights_[ patternType ] = weight;
     }
 
+
+    void PatternWeights::setSmartMerge( bool t ) {
+	smartMerge_ = t;
+    }
     
+
     void PatternWeights::printPatternWeights( std::wostream& str ) const{
 	for(std::map< csl::Pattern, float >::const_iterator it = patternWeights_.begin(); it != patternWeights_.end(); it++){
 	    str << it->first.getLeft() << '-' << it->first.getRight() << " : " << it->second << std::endl;

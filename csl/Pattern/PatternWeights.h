@@ -46,12 +46,22 @@ namespace csl {
 
 	void setDefault( PatternType const& patternType, float weight );
 
+
+	/**
+	 * @brief If "smartMerge" is activated, it will override the default settings
+	 *        (set via setDefault()) and return the weight UNDEF for 
+	 *        all merges and splits of the form "xy <-> x" and "xy <-> y".
+	 *        It does NOT override the specific weights added via setWeight()
+	 * 
+	 */
+	void setSmartMerge( bool t = true );
+
+
 	/**
 	 * @brief prints the pattern weights
 	 */
 	void printPatternWeights( std::wostream& str = std::wcout ) const;
 	
-
 	private:
 
 	/**
@@ -63,6 +73,8 @@ namespace csl {
 	 *
 	 */
 	std::map< PatternType, float > defaultWeights_;
+
+	bool smartMerge_;
 
 
    }; // class PatternWeights
