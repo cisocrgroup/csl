@@ -250,10 +250,7 @@ namespace csl {
 
     void ComputeInstruction::getInstructions( int x, int y, size_t instructionIndex ) {
 	if( ( x== 0 && y == 0 ) ) {
-	    // no recursive calls, we're at the end. Reverse all instructions
-// 	    for( std::vector< Instruction >::iterator it = instructions_->begin(); it != instructions_->end(); ++it ) {
-// 		std::reverse( it->begin(), it->end() );
-// 	    }
+	    // no recursive calls, we're at the end. Reverse the complete instruction
 	    std::reverse( instructions_->at( instructionIndex ).begin(), instructions_->at( instructionIndex ).end() );
 	}
 	else {
@@ -276,19 +273,18 @@ namespace csl {
 		PatternTypeChain* morePatternTypes = patternType->next;
 		while( morePatternTypes ) {
 //		    std::wcout<<"CLONE AT x="<<x<<", y="<<y << std::endl;
-		    instructions_->push_back( instructions_->at( instructionIndex ) ); // clone the instruction as built so far
 
-		    // add pattern to instruction AFTER recursive call to get the right order
+		    instructions_->push_back( instructions_->at( instructionIndex ) ); // clone the instruction as built so far
 		    instructions_->at( instructionIndex + 1 ).push_back( PosPattern( 
 									     wordCorr_.substr( x-morePatternTypes->first + 1, morePatternTypes->first ),
 									     wordErr_.substr( y - morePatternTypes->second + 1, morePatternTypes->second ),
 									     x - morePatternTypes->first ) 
 			);
-
+		    
 		    getInstructions(  x - morePatternTypes->first, y - morePatternTypes->second, 
 				      instructionIndex + 1 ); // recursive call: work on cloned instruction
 		    
-		    
+
 		    morePatternTypes = morePatternTypes->next;
 		}
 		
@@ -299,7 +295,7 @@ namespace csl {
 								     x - patternType->first ) 
 		    );
 
-		// continue on the given instrcuction for the first patternType
+		// continue on the given instruction for the first patternType
 		getInstructions( x - patternType->first, y - patternType->second, 
 				 instructionIndex ); // recursive call: work on same instruction
 		

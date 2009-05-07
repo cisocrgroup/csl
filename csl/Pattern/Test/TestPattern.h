@@ -238,7 +238,17 @@ namespace csl {
 	instructions.clear();
 
 
-	
+	// This went wrong in an application
+	CPPUNIT_ASSERT( ci.computeInstruction( L"welt", L"wexlt", &instructions ) == 1 ); // 1 ins at beginning
+ 	for( std::vector< Instruction >::const_iterator it = instructions.begin(); it != instructions.end(); ++it ) {
+ 	    it->print();std::wcout<<std::endl;
+ 	}
+	CPPUNIT_ASSERT( instructions.size() == 2 );
+	CPPUNIT_ASSERT( instructions.at( 0 ).size() == 1 );
+	CPPUNIT_ASSERT( instructions.at( 0 ).at( 0 ) == PosPattern( L"m", L"xm", 0 ) );
+	CPPUNIT_ASSERT( instructions.at( 1 ).size() == 1 );
+	CPPUNIT_ASSERT( instructions.at( 1 ).at( 0 ) == PosPattern( L"", L"x", 0 ) );
+	instructions.clear();
 
     }
 
