@@ -40,7 +40,8 @@ int main(int argc, const char** argv ) {
 		  << std::endl
 		  << "Options:" << std::endl
 		  << "--minNrOfPatterns=N       Allow only interpretations with N or more pattern applications. Defaults to 0." << std::endl
-		  << "--maxNrOfPatterns=N       Allow only interpretations with at most N pattern applications. Defaults to INFINITE." << std::endl;
+		  << "--maxNrOfPatterns=N       Allow only interpretations with at most N pattern applications. Defaults to INFINITE." << std::endl
+		  << "--machineReadable=1       Print (even more) machine-readable output, i.e. all answers in one line, separated by '|'" << std::endl;
 	exit( 1 );
     }
 
@@ -57,6 +58,11 @@ int main(int argc, const char** argv ) {
 	vaam.setMinNrOfPatterns( atoi( opt.getOption( "minNrOfPatterns" ).c_str() ) );
     }
 
+    bool machineReadable = false;
+    if( opt.hasOption( "machineReadable" ) ) {
+	machineReadable = true;
+    }
+
 
     Vaam_t::CandidateReceiver answers;
 
@@ -65,6 +71,13 @@ int main(int argc, const char** argv ) {
     size_t maxDistance = atoi( opt.getArgument( 0 ).c_str() );
     vaam.setDistance( maxDistance );
     Stopwatch watch;
+
+    if( machineReadable ) {
+	std::wcout << "csl::Vaam: READY [machineReadable=true]" << std::endl;
+    }
+    else {
+	std::wcout << "csl::Vaam: READY [machineReadable=false]" << std::endl;
+    }
 
     while( std::wcin >> query ) {
 	watch.start();
@@ -78,10 +91,8 @@ int main(int argc, const char** argv ) {
 	    std::wcout<<query<<":NONE"<<std::endl;
 #endif
 	}
-	else if( maxDistance == 0 ) {
+	else if( machineReadable ) {
 	    // all interpretations of the query in one line
-	    if( maxDistance != 0 ) throw csl::exceptions::cslException( "This kind of output is suitable only for output 0" );
-	    
 #ifndef CSL_VAAMFILTER_PRINTNONE
 	    for( std::vector< csl::Interpretation >::const_iterator it = answers.begin(); it!= answers.end(); ++it ) {
 		it->print();

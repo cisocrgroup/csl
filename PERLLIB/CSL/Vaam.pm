@@ -3,8 +3,8 @@
 use strict;
 use encoding 'utf8';
 use Data::Dumper;
-
-
+use Errno;
+use IO::Handle;
 
 =head1 NAME
 
@@ -76,28 +76,24 @@ sub new {
 
     $self->{distance} = $self->{distance} || 0;
 
-    if( $self->{distance} != 0 ) {
-	die "Perl::Vaam: Sorry, the module is not yet prepared for distance > 0! ";
-    }
-
 
     if( ! $self->{vaamBinary} ) {
-	$self->{vaamBinary} = '/mounts/data/proj/impact/software/Vaam/bin/vaamFilter';
-	if( $ENV{HOSTNAME} =~ /(vector)|(butler)|(matrix)/) {
-	    $self->{vaamBinary} .= '_'.$ENV{HOSTNAME};
+	my $defaultBinary = "/mounts/data/proj/impact/software/uli/x86_64/bin/vaamFilter";
+	if( $ENV{CPU} ne "x86_64" || !-f $defaultBinary  ) {
+	    warn "Vaam.pm: default path to vaam executable seems not to fit here. Please specify 'vaamBinary' as option in the constructor";
+	    return undef;
 	}
-	else {
-	    $self->{vaamBinary} .= '_workstation';
-	}
+	$self->{vaamBinary} = $defaultBinary;
+
 	#print $self->{vaamBinary}, "\n"; exit;
     }
-
+    
     if( !$self->{dicFile} || !$self->{patternFile} ) {
-	$! = "Perl::Vaam: provide arguments 'dicFile' and 'patternFile' as arguments for the constructor.\n";
+	warn "Perl::Vaam: provide arguments 'dicFile' and 'patternFile' as arguments for the constructor.\n";
 	return undef;
     }
 
-    my $options ='';
+    my $options =' --machineReadable=1';
     if( $self->{maxNrOfPatterns} ) {
 	$options .= " --maxNrOfPatterns=". $self->{maxNrOfPatterns};
     }
@@ -105,7 +101,8 @@ sub new {
 	$options .= " --minNrOfPatterns=". $self->{minNrOfPatterns};
     }
     my $binary = "$$self{vaamBinary} $options $self->{distance} $self->{dicFile} $self->{patternFile}";
-    
+
+    print "$binary\n";
     open2( $self->{BINARY_OUT}, $self->{BINARY_IN}, $binary ) or die "Perl::Vaam: $!";
     
 
@@ -121,6 +118,21 @@ sub new {
     binmode( $self->{BINARY_OUT}, ':'.$self->{encoding} );
     binmode( $self->{BINARY_IN}, ':'.$self->{encoding} );
 
+    $self->{BINARY_OUT}->autoflush( 1 );
+    $self->{BINARY_IN}->autoflush( 1 );
+
+    my $statusMessage = readline( $self->{BINARY_OUT} );
+    chomp $statusMessage;
+
+    if( $statusMessage !~ m/csl::Vaam.+READY/ ) {
+	warn "Vaam.pm: Did not receive proper statusMessage from vaam executable";
+	return undef;
+    }
+    if( $statusMessage !~ m/machineReadable=true/ ) {
+	warn "Vaam.pm: vaam executable seems not to be initialised in machine-readable mode";
+	return undef;
+    }
+    
     bless( $self, $class );
     return $self;
 }
@@ -154,7 +166,6 @@ Returns a data-structure containing all found interpretations of $oldWord as a h
 
 sub lookup {
     my($self, $word) = @_;
-
 
     print { $self->{BINARY_IN} } ( "$word\n" );
 

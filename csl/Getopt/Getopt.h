@@ -4,6 +4,7 @@
 #include<iostream>
 #include<map>
 #include<vector>
+#include<stdexcept>
 
 /**
  * @brief A class for thet parsing of command line arguments.
@@ -71,6 +72,7 @@ public:
     }
 
     const std::string& getOption( const std::string& key ) {
+	if( ! hasOption( key ) ) throw std::runtime_error( "csl::Getopt::getOption: no such key defined");
 	return options_[key];
     }
 

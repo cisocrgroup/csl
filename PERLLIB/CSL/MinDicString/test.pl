@@ -2,6 +2,7 @@
 
 use strict;
 
+use lib '../../';
 use CSL::MinDicString;
 
 use IPC::Open2;
