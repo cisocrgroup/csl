@@ -2,6 +2,7 @@
 #include "csl/Vaam/Vaam.h"
 #include "csl/Getopt/Getopt.h"
 #include "csl/Stopwatch.h"
+#include "csl/FBDic/FBDic.h"
 
 //#define CSL_VAAMFILTER_PRINTNONE true
 
@@ -30,7 +31,7 @@ typedef csl::Vaam< csl::MinDic<> > Vaam_t;
 
 int main(int argc, const char** argv ) {
 
-	try {
+    try {
 
     std::locale::global( std::locale("") ); // set the environment's default locale
     Getopt opt( argc, argv );
@@ -45,10 +46,21 @@ int main(int argc, const char** argv ) {
 	exit( 1 );
     }
 
-    Vaam_t::MinDic_t baseDic;
-    baseDic.loadFromFile( opt.getArgument( 1 ).c_str() );
+    
+    Vaam_t::MinDic_t const* baseDic = 0;
+    csl::FBDic<> const* fbdic = 0;
 
-    Vaam_t vaam( baseDic, opt.getArgument( 2 ).c_str() );
+    // In case a .fbdic file is passed, open it and use the FWDic
+    if( opt.getArgument( 1 ).substr( opt.getArgument( 1 ).size() - 5 ) == "fbdic" ) {
+	fbdic= new csl::FBDic<>( opt.getArgument( 1 ).c_str() );
+	baseDic = &( fbdic->getFWDic() );
+    }
+    else {
+	baseDic = new Vaam_t::MinDic_t( opt.getArgument( 1 ).c_str() );
+    }
+
+
+    Vaam_t vaam( *baseDic, opt.getArgument( 2 ).c_str() );
 
     if( opt.hasOption( "maxNrOfPatterns" ) ) {
 	vaam.setMaxNrOfPatterns( atoi( opt.getOption( "maxNrOfPatterns" ).c_str() ) );
@@ -114,11 +126,23 @@ int main(int argc, const char** argv ) {
 	
 //	std::wcout<<watch.readMilliseconds()<<" ms"<<std::endl;
     }
-	
-	} catch( csl::exceptions::cslException ex ) {
-		std::wcout<<"Caught exception: "<<ex.what()<< std::endl;
-		return 0;
-	}
-		    
+
+    if( fbdic ) {
+	delete( fbdic );
+	fbdic = 0;
+	baseDic = 0;
+    }
+    
+    if( baseDic ) {
+	delete( baseDic );
+	baseDic = 0;
+    }
+    
+    } catch( csl::exceptions::cslException ex ) {
+	std::wcout<<"Caught exception: "<<ex.what()<< std::endl;
+    }
+    
+    
+
     return 0;
 }

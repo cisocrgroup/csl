@@ -64,12 +64,17 @@ namespace csl {
 	    result.clear();
 	    ds.query( L"teile", &result );
 	    std::sort( result.begin(), result.end() );
+	    size_t n = 0;
+// 	    for( DictSearch::CandidateSet::const_iterator it = result.begin(); it != result.end(); ++it, ++n ) {
+// 		it->print(); std::wcout << std::endl;
+// 	    }
+
 	    CPPUNIT_ASSERT( result.size() == 10 );
 	    std::wstring resultWords[10] = { 
 		L"teile", L"feile", L"teilen", L"teyle", L"theile", L"teller", L"feyle", L"teylen", L"theilen", L"theyle"
 	    };
 	    
-	    size_t n = 0;
+	    n = 0;
 	    for( DictSearch::CandidateSet::const_iterator it = result.begin(); it != result.end(); ++it, ++n ) {
 //		it->print(); std::wcout << std::endl;
 		CPPUNIT_ASSERT( it->getWord() == resultWords[ n ] );
@@ -94,6 +99,8 @@ namespace csl {
 
 
 	}
+
+	
 
 
 	void testDLev() {

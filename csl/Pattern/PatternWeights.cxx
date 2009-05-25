@@ -54,13 +54,28 @@ namespace csl {
     
 
     void PatternWeights::printPatternWeights( std::wostream& str ) const{
-	for(std::map< csl::Pattern, float >::const_iterator it = patternWeights_.begin(); it != patternWeights_.end(); it++){
-	    str << it->first.getLeft() << '-' << it->first.getRight() << " : " << it->second << std::endl;
-	}
-	str << "Default settings:" << std::endl;
-	for(std::map< PatternType, float >::const_iterator defaultIt = defaultWeights_.begin(); defaultIt != defaultWeights_.end(); defaultIt++){
-	    str << "<" <<  defaultIt->first.first << ',' << defaultIt->first.second << "> : " << defaultIt->second << std::endl;
-	}
+	str << "print function is deactivated! " << std::endl;
+// 	std::vector< std::pair< csl::Pattern, float > > histPatternCountSorted;
+// 	for(std::map< csl::Pattern, float >::const_iterator it = histPatternCount_.begin(); it != histPatternCount_.end(); ++it ) {
+// 	    histPatternCountSorted.push_back( *it );
+// 	    //outStream_ << it->first.getLeft() << '-' << it->first.getRight() << " : " << it->second << std::endl;
+// 	}
+// 	std::sort( histPatternCountSorted.begin(), histPatternCountSorted.end(), sortBySecond );
+// 	for( std::vector< std::pair< csl::Pattern, float > >::const_iterator it = histPatternCountSorted.begin();
+// 	     it != histPatternCountSorted.end();
+// 	     ++it ) {
+// 	    outStream_ << it->first.getLeft() << '-' << it->first.getRight() << " : " << it->second << std::endl;
+// 	    if( it - histPatternCountSorted.begin() > 30 )break;
+// 	}
+	
+// 	for(std::map< csl::Pattern, float >::const_iterator it = patternWeights_.begin(); it != patternWeights_.end(); it++){
+// 	    str << it->first.getLeft() << '-' << it->first.getRight() << " : " << it->second << std::endl;
+// 	}
+// 	str << "Default settings:" << std::endl;
+// 	for(std::map< PatternType, float >::const_iterator defaultIt = defaultWeights_.begin(); defaultIt != defaultWeights_.end(); defaultIt++){
+// 	    str << "<" <<  defaultIt->first.first << ',' << defaultIt->first.second << "> : " << defaultIt->second << std::endl;
+// 	}
+//     }
     }
 
 }

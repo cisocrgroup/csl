@@ -58,19 +58,21 @@ namespace csl {
 		    ++n;
 		}
 
-// 		n = 0;
-// 		for( std::vector< wchar_t >::iterator it = std2custom_.begin(); it != std2custom_.end(); ++it ) {
-// 		    std::wcout<<"std2custom_.at("<< n<<" ) = "<<(size_t)*it<<std::endl;
-// 		    ++n;
-// 		}
+		n = 0;
+		for( std::vector< wchar_t >::iterator it = std2custom_.begin(); it != std2custom_.end(); ++it ) {
+		    //std::wcout<<"std2custom_.at("<< n<<" ) = "<<(size_t)*it<<std::endl;
+		    ++n;
+		}
 	    }
 
 	    wchar_t encode( wchar_t c ) const {
-		return std2custom_.at( c );
+//		return std2custom_.at( c );
+		return ( std2custom_.size() > (size_t)c ) ? std2custom_.at( c ) : 0;
 	    }
 
 	    wchar_t decode( wchar_t c ) const {
-		return custom2std_.at( c );
+		return custom2std_.at( c ); // here we take the risky road
+		// return ( custom2std_.size() > (size_t)c ) ? custom2std_.at( c ) : 0;
 	    }
 
 	    size_t size() const {

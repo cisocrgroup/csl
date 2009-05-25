@@ -2,6 +2,7 @@
 #define CSL_PATTERNWEIGHTS_H CSL_PATTERNWEIGHTS_H
 
 #include<string>
+#include<vector>
 #include<map>
 #include<math.h>
 #include<csl/Pattern/Pattern.h>

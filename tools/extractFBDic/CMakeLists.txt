@@ -4,3 +4,9 @@ link_directories (${csl_BINARY_DIR}/csl)
 add_executable(extractFBDic extractFBDic.cxx)
 target_link_libraries (extractFBDic csl)
 
+
+install( 
+  TARGETS extractFBDic
+  DESTINATION bin
+  
+  )

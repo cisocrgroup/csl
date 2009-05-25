@@ -80,7 +80,7 @@ namespace csl {
 
 	// apply all patterns whose left sides end here 
 	if( stack_[depth].patternPos_.isFinal() ) {
-	    // a copy is needed here, because the state mus descend the errorlinks in order to find more matches (-->Aho-Corasick alg.)
+	    // a copy is needed here, because the state must descend the errorlinks in order to find more matches (-->Aho-Corasick alg.)
 	    PatternGraph::State patPos = stack_[depth].patternPos_;
 	    
 	    
@@ -125,7 +125,7 @@ namespace csl {
 
 	// report matches
 	if( ( stack_[depth].lookAheadDepth_ == 0 ) &&  // we are not in the lookahead-phase AND
-	    ( stack_[depth].dicPos_.isFinal() ) // arrived at a final state of the dic AND
+	    ( stack_[depth].dicPos_.isFinal() ) // arrived at a final state of the dic
 	    ) {
 	    // for all positions
 	    size_t count = 0;
