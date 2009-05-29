@@ -1,6 +1,7 @@
 #ifndef CSL_POS_PATTERN
 #define CSL_POS_PATTERN CSL_POS_PATTERN
 
+#include<sstream>
 #include "./Pattern.h"
 
 
@@ -23,6 +24,7 @@ namespace csl {
 	inline size_t getPosition() const;
 	
 	inline void print( std::wostream& os = std::wcout ) const;
+	inline std::wstring toString() const;
 	
     private:
 	size_t position_;
@@ -52,6 +54,14 @@ namespace csl {
 	Pattern::print( os );
 	os << "," << getPosition() << ")";
 
+    }
+
+    std::wstring PosPattern::toString() const {
+	//return std::wstring( L"(" ) + Pattern::toString() + L"," + swprintf( L"%ls", getPosition() ) + L")";
+	std::wostringstream oss;
+	print( oss );
+	oss.flush();
+	return oss.str();
     }
 
 

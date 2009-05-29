@@ -143,6 +143,15 @@ namespace csl {
 	    os<<",dist="<<levDistance_;
 	    //os<<",baseWordScore="<<baseWordScore_;
 	}
+	
+	std::wstring toString() const {
+	    //return word_ + L":" + baseWord_ + L"+" + instruction_.toString() + L",dist=" + levDistance_;
+	    std::wostringstream oss;
+	    print( oss );
+	    oss.flush();
+	    return oss.str();
+	}
+
 
 	/**
 	 * @brief prints another useful format of the interpretation, more in the INL tradition

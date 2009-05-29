@@ -62,6 +62,8 @@ namespace csl {
 	}
 
 	inline void print( std::wostream& os = std::wcout ) const;
+
+	inline std::wstring toString() const;
 	
 	
 
@@ -88,6 +90,10 @@ namespace csl {
     
     void Pattern::print( std::wostream& os ) const {
 	os << getLeft() << "_" << getRight();
+    }
+
+    std::wstring Pattern::toString() const {
+	return getLeft() + L"_" + getRight();
     }
 
 } // eon

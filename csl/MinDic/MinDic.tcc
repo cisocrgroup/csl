@@ -88,6 +88,9 @@ namespace csl {
 	inline void MinDic< AnnType_t >::finishConstruction() {
 		// store the very last word
 		int i = wcslen( lastKey_ ); // let this be an integer, because it has to get -1 to break the loop below
+		std::wcout<<"size of lastkey="<<i << std::endl;
+
+
 		StateId_t storedState = 0;
 		for(	 ; i >= 0; --i ) {
 			storedState = replaceOrRegister( tempStates_[i] );
@@ -160,6 +163,7 @@ namespace csl {
 
 	template< class AnnType_t >
 	inline void MinDic< AnnType_t >::addToken( const wchar_t* key, const AnnType_t& annotation ) {
+
 	    static size_t commonPrefix, lengthOfKey;
 		static StateId_t storedState;
 
@@ -232,13 +236,13 @@ namespace csl {
 	template< class AnnType_t >
 	inline StateId_t MinDic< AnnType_t >::replaceOrRegister( TempState_t& state ) {
 
-		StateId_t storedState = 0;
-		if ( ( storedState = hashtable_->findState( state ) ) == 0 ) { // if equiv. state doesn't exist
-			storedState = storeTempState( state ); // store it
-			hashtable_->push( state, storedState ); // add it to the hashtable
-		}
-
-		return storedState;
+	    StateId_t storedState = 0;
+	    if ( ( storedState = hashtable_->findState( state ) ) == 0 ) { // if equiv. state doesn't exist
+		storedState = storeTempState( state ); // store it
+		hashtable_->push( state, storedState ); // add it to the hashtable
+	    }
+	    
+	    return storedState;
 	}
 
 

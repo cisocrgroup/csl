@@ -1,7 +1,8 @@
 #include "./PatternWeights.h"
+#include<algorithm>
 
 namespace csl {
-    
+
     PatternWeights::PatternWeights() : smartMerge_( false ) {
     }
     
@@ -51,31 +52,81 @@ namespace csl {
     void PatternWeights::setSmartMerge( bool t ) {
 	smartMerge_ = t;
     }
-    
 
-    void PatternWeights::printPatternWeights( std::wostream& str ) const{
-	str << "print function is deactivated! " << std::endl;
-// 	std::vector< std::pair< csl::Pattern, float > > histPatternCountSorted;
-// 	for(std::map< csl::Pattern, float >::const_iterator it = histPatternCount_.begin(); it != histPatternCount_.end(); ++it ) {
-// 	    histPatternCountSorted.push_back( *it );
-// 	    //outStream_ << it->first.getLeft() << '-' << it->first.getRight() << " : " << it->second << std::endl;
-// 	}
-// 	std::sort( histPatternCountSorted.begin(), histPatternCountSorted.end(), sortBySecond );
-// 	for( std::vector< std::pair< csl::Pattern, float > >::const_iterator it = histPatternCountSorted.begin();
-// 	     it != histPatternCountSorted.end();
-// 	     ++it ) {
-// 	    outStream_ << it->first.getLeft() << '-' << it->first.getRight() << " : " << it->second << std::endl;
-// 	    if( it - histPatternCountSorted.begin() > 30 )break;
-// 	}
+    void PatternWeights::loadFromFile( const char* patternFile ) {
+	std::wifstream fi;
+	fi.imbue( CSL_UTF8_LOCALE );
+	fi.open( patternFile );
+	if( ! fi ) {
+	    throw exceptions::badFileHandle( "PatternSet::Could not open pattern file" );
+	}
 	
-// 	for(std::map< csl::Pattern, float >::const_iterator it = patternWeights_.begin(); it != patternWeights_.end(); it++){
-// 	    str << it->first.getLeft() << '-' << it->first.getRight() << " : " << it->second << std::endl;
-// 	}
-// 	str << "Default settings:" << std::endl;
-// 	for(std::map< PatternType, float >::const_iterator defaultIt = defaultWeights_.begin(); defaultIt != defaultWeights_.end(); defaultIt++){
-// 	    str << "<" <<  defaultIt->first.first << ',' << defaultIt->first.second << "> : " << defaultIt->second << std::endl;
-// 	}
-//     }
+	std::wstring line;
+	
+	size_t patternCount = 0;
+	while( getline( fi, line ).good() ) {
+	    size_t delimPos = line.find( L' ' );
+	    size_t weightDelimPos = line.find( L'#' );
+	    if( ( delimPos == std::wstring::npos  ) || ( weightDelimPos == std::wstring::npos  ) ) {
+		throw exceptions::badInput( "PatternWeights: Invalid line in pattern file" );
+	    }
+
+	    wchar_t* endOfWeight = 0;
+	    patternWeights_[ Pattern( line.substr( 0, delimPos ), 
+				      line.substr( delimPos + 1, weightDelimPos - delimPos + 1 ) ) ]
+		    
+		= wcstod( line.substr( weightDelimPos+1 ).c_str(), &endOfWeight );
+		    
+	}
+	if( errno == EILSEQ ) { // catch encoding error
+	    throw exceptions::badInput( "csl::PatternSet: Encoding error in input sequence." );
+	}
+	    
+    } // loadFromFile
+    
+    void PatternWeights::writeToFile( const char* patternFile ) const {
+	std::wofstream fo;
+//	fo.imbue( CSL_UTF8_LOCALE );
+	fo.open( patternFile );
+	if( ! fo ) {
+	    throw exceptions::badFileHandle( "csl::PatternWeights: Could not open pattern file for writing" );
+	}
+
+	std::vector< std::pair< csl::Pattern, float > > histPatternCountSorted;
+	for(std::map< csl::Pattern, float >::const_iterator it = patternWeights_.begin(); it != patternWeights_.end(); ++it ) {
+	    histPatternCountSorted.push_back( *it );
+	}
+	std::sort( histPatternCountSorted.begin(), histPatternCountSorted.end(), sortBySecond< std::pair< csl::Pattern, float > > );
+	for( std::vector< std::pair< csl::Pattern, float > >::const_iterator it = histPatternCountSorted.begin();
+	     it != histPatternCountSorted.end();
+	     ++it ) {
+	    fo << it->first.getLeft() << ' ' << it->first.getRight() << "#" << it->second << std::endl;
+	    std::wcout << it->first.getLeft() << ' ' << it->first.getRight() << "#" << it->second << std::endl;
+	}
+	fo.close();
     }
+    
+    
+    void PatternWeights::printPatternWeights( std::wostream& str ) const{
+	std::vector< std::pair< csl::Pattern, float > > histPatternCountSorted;
+	for(std::map< csl::Pattern, float >::const_iterator it = patternWeights_.begin(); it != patternWeights_.end(); ++it ) {
+	    histPatternCountSorted.push_back( *it );
+	    //outStream_ << it->first.getLeft() << '-' << it->first.getRight() << " : " << it->second << std::endl;
+	}
+	std::sort( histPatternCountSorted.begin(), histPatternCountSorted.end(), sortBySecond< std::pair< csl::Pattern, float > > );
+	for( std::vector< std::pair< csl::Pattern, float > >::const_iterator it = histPatternCountSorted.begin();
+	     it != histPatternCountSorted.end();
+	     ++it ) {
+	    str << it->first.getLeft() << '-' << it->first.getRight() << " : " << it->second << std::endl;
+	    if( it - histPatternCountSorted.begin() > 30 )break;
+	}
+	
+	str << "Default settings:" << std::endl;
+	for(std::map< PatternType, float >::const_iterator defaultIt = defaultWeights_.begin(); defaultIt != defaultWeights_.end(); defaultIt++){
+	    str << "<" <<  defaultIt->first.first << ',' << defaultIt->first.second << "> : " << defaultIt->second << std::endl;
+	}
+    }
+
+
 
 }

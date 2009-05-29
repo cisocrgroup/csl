@@ -79,6 +79,10 @@ namespace csl {
 		csl::Interpretation::print( os );
 		os << "(" << getDictModule().getName() << ")";
 	    }
+
+	    std::wstring toString() const {
+		return csl::Interpretation::toString() + L"(" + getDictModule().getName() + L")";
+	    }
 	    
 	private:
 	    iDictModule const* dictModule_;

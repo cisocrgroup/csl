@@ -17,7 +17,7 @@ ADD_LIBRARY( csl SHARED Alphabet/Alphabet.cxx LevDEA/LevDEA.cxx DictSearch/DictS
 target_link_libraries( csl Alphabet )
 target_link_libraries( csl LevDEA ) # funzt nicht, warum ?????
 target_link_libraries( csl DictSearch )
-target_link_libraries( csl PatternWeights )
+#target_link_libraries( csl PatternWeights )
 
 install( 
   TARGETS csl

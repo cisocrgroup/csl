@@ -2,9 +2,12 @@
 #define CSL_PATTERNWEIGHTS_H CSL_PATTERNWEIGHTS_H
 
 #include<string>
+#include<algorithm>
+#include<fstream>
 #include<vector>
 #include<map>
 #include<math.h>
+#include<csl/Global.h>
 #include<csl/Pattern/Pattern.h>
 
 namespace csl {
@@ -63,6 +66,10 @@ namespace csl {
 	 */
 	void printPatternWeights( std::wostream& str = std::wcout ) const;
 	
+
+	void loadFromFile( const char* patternFile );	
+	void writeToFile( const char* patternFile ) const;	
+
 	private:
 
 	/**
@@ -77,7 +84,14 @@ namespace csl {
 
 	bool smartMerge_;
 
-
+	/**
+	 * @brief sorts the std::pairs according to their second value
+	 */
+	template< typename pair_t >
+	static bool sortBySecond( pair_t const& a, pair_t const& b ) {
+	    return ( a.second > b.second ); // reverse ordering
+	}
+	
    }; // class PatternWeights
 
 

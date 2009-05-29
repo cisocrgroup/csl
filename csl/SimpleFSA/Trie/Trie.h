@@ -58,7 +58,6 @@ namespace csl {
 			  << Automaton::getNumberOfStates()
 			  << " states."<<std::endl;
 
-//	    toDot(); // DEBUG
 	    }
 
 	    /**

@@ -25,6 +25,16 @@ namespace csl {
 	    os<<"]";
 	}
 	
+	std::wstring toString() const {
+	    std::wstring ret = L"[";
+	    for( const_iterator it = begin(); it != end(); ++it  ) {
+		ret += it->toString();
+	    }
+	    ret += L"]";
+	    
+	    return ret;
+	}
+	
 	/**
 	 * @brief apply the instruction to the string passed as pointer argument
 	 * @param[in/out] str the string that is to be changed by the instruction
