@@ -104,7 +104,6 @@ public:
     virtual result do_out( state_type& state, wchar_t const* from, wchar_t const* fromEnd, wchar_t const*& fromNext,
 		       char* to, char* toEnd, char*& toNext) const {
 
-	std::wcout<<"BLA"<<std::endl;
 
 
 	while(  from != fromEnd ) {

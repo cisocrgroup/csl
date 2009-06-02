@@ -79,14 +79,14 @@ namespace csl {
 		    
 	}
 	if( errno == EILSEQ ) { // catch encoding error
-	    throw exceptions::badInput( "csl::PatternSet: Encoding error in input sequence." );
+//	    throw exceptions::badInput( "csl::PatternWeights: Encoding error in input sequence." );
 	}
 	    
     } // loadFromFile
     
     void PatternWeights::writeToFile( const char* patternFile ) const {
 	std::wofstream fo;
-//	fo.imbue( CSL_UTF8_LOCALE );
+	fo.imbue( std::locale( "" ) );
 	fo.open( patternFile );
 	if( ! fo ) {
 	    throw exceptions::badFileHandle( "csl::PatternWeights: Could not open pattern file for writing" );

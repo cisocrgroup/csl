@@ -88,7 +88,7 @@ namespace csl {
 	inline void MinDic< AnnType_t >::finishConstruction() {
 		// store the very last word
 		int i = wcslen( lastKey_ ); // let this be an integer, because it has to get -1 to break the loop below
-		std::wcout<<"size of lastkey="<<i << std::endl;
+		//std::wcout<<"size of lastkey="<<i << std::endl;
 
 
 		StateId_t storedState = 0;
