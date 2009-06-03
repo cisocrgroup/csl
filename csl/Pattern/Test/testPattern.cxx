@@ -3,9 +3,12 @@
 #include <cppunit/extensions/TestFactoryRegistry.h>
 #include <cppunit/ui/text/TestRunner.h>
 
-#include "./TestPattern.h"
+//#include "./TestPattern.h"
+#include "./TestPatternWeights.h"
 
 int main() {
+    std::locale::global( std::locale( "" ) );
+
 //     // Get the top level suite from the registry
      CppUnit::Test *suite = CppUnit::TestFactoryRegistry::getRegistry().makeTest();
 

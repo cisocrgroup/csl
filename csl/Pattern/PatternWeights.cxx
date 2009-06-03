@@ -72,15 +72,23 @@ namespace csl {
 	    }
 
 	    wchar_t* endOfWeight = 0;
+	    
+// 	    std::wcout << "left side is " << line.substr( 0, delimPos ) << std::endl;
+// 	    std::wcout << "right side is " << line.substr( delimPos + 1, weightDelimPos - delimPos -1 ) << std::endl;
+// 	    std::wcout << "weight is " << line.substr( weightDelimPos+1 ).c_str() << std::endl;
+
 	    patternWeights_[ Pattern( line.substr( 0, delimPos ), 
-				      line.substr( delimPos + 1, weightDelimPos - delimPos + 1 ) ) ]
+				      line.substr( delimPos + 1, weightDelimPos - delimPos - 1 ) ) ]
 		    
 		= wcstod( line.substr( weightDelimPos+1 ).c_str(), &endOfWeight );
 		    
+	    ++patternCount;
 	}
 	if( errno == EILSEQ ) { // catch encoding error
-//	    throw exceptions::badInput( "csl::PatternWeights: Encoding error in input sequence." );
+	    throw exceptions::badInput( "csl::PatternWeights: Encoding error in input sequence." );
 	}
+
+	//std::wcerr << "csl::PatternWeights: Loaded " << patternCount << L" patterns."<< std::endl;
 	    
     } // loadFromFile
     
@@ -100,14 +108,14 @@ namespace csl {
 	for( std::vector< std::pair< csl::Pattern, float > >::const_iterator it = histPatternCountSorted.begin();
 	     it != histPatternCountSorted.end();
 	     ++it ) {
-	    fo << it->first.getLeft() << ' ' << it->first.getRight() << "#" << it->second << std::endl;
-	    std::wcout << it->first.getLeft() << ' ' << it->first.getRight() << "#" << it->second << std::endl;
+	    fo         << it->first.getLeft() << ' ' << it->first.getRight() << "#" << it->second << std::endl;
+	    //std::wcout << it->first.getLeft() << ' ' << it->first.getRight() << "#" << it->second << std::endl;
 	}
 	fo.close();
     }
     
     
-    void PatternWeights::printPatternWeights( std::wostream& str ) const{
+    void PatternWeights::print( std::wostream& str ) const{
 	std::vector< std::pair< csl::Pattern, float > > histPatternCountSorted;
 	for(std::map< csl::Pattern, float >::const_iterator it = patternWeights_.begin(); it != patternWeights_.end(); ++it ) {
 	    histPatternCountSorted.push_back( *it );
@@ -118,7 +126,7 @@ namespace csl {
 	     it != histPatternCountSorted.end();
 	     ++it ) {
 	    str << it->first.getLeft() << '-' << it->first.getRight() << " : " << it->second << std::endl;
-	    if( it - histPatternCountSorted.begin() > 30 )break;
+//	    if( it - histPatternCountSorted.begin() > 30 )break;
 	}
 	
 	str << "Default settings:" << std::endl;
