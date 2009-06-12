@@ -71,8 +71,16 @@ namespace csl {
 		else return ( getWord() < other.getWord() );
 	    }
 	    
+	    /**
+	     * @brief specify the dictModule which the interpretation comes from
+	     * @see dictModule_
+	     */
 	    void setDictModule( iDictModule const& dictModule ) { dictModule_ = &dictModule; }
 
+	    /**
+	     * @brief get a pointer to the dictModule which the interpretation came from
+	     * @see dictModule_
+	     */
 	    iDictModule const& getDictModule() const { return *dictModule_; }
 	    
 	    void print( std::wostream& os = std::wcout ) const {
@@ -85,12 +93,17 @@ namespace csl {
 	    }
 	    
 	private:
+	    /**
+	     * @brief A pointer to the dictModule which the interpretation came from
+	     *
+	     */
 	    iDictModule const* dictModule_;
 	}; // class Interpretation
 
 
 	/**
-	 * 
+	 * @brief CandidateSet is a simple container to collect candidates/interpretations
+	 *        from either a Vaam or a csl::MSMatch object.
 	 */
 	class CandidateSet : public csl::LevFilter::CandidateReceiver,
 			     public csl::iVaamResultReceiver,
@@ -100,6 +113,9 @@ namespace csl {
 	    typedef std::vector< Interpretation_t >::iterator iterator;
 	    typedef std::vector< Interpretation_t >::const_iterator const_iterator;
 
+	    /**
+	     * @brief This is to fulfill the csl::LevFilter::CandidateReceiver interface
+	     */
 	    void receive( const wchar_t* str, int levDistance, int annotation ) {
 		csl::Interpretation cslInt;
 		cslInt.setWord( str );
@@ -109,12 +125,22 @@ namespace csl {
 		receive( cslInt );
 	    }
 	    
+	    /**
+	     * @brief This is to fulfill the csl::iVaamResultReceiver interface
+	     */
 	    virtual void receive( csl::Interpretation const& vaam_interpretation ) {
 		push_back( Interpretation( vaam_interpretation, *currentDictModule_ ) );
 	    }
 	    
+	    /**
+	     * @see currentDictModule_
+	     */
 	    void setCurrentDictModule( iDictModule const& dm ) { currentDictModule_ = &dm; }
 	    
+	    /**
+	     * @brief alias for clear()
+	     * @see clear()
+	     */
 	    void reset() {
 		std::vector< Interpretation_t >::clear();
 	    }
@@ -177,7 +203,14 @@ namespace csl {
 
 
 	private:
+	    /**
+	     * @brief All candidates that are added via one of the receive()-methods will get this
+	     *        dictModule_ as source.
+	     *
+	     * This is somewhat messy. Certainly it is not thread-safe!!!
+	     */
 	    iDictModule const* currentDictModule_;
+
 	}; // class CandidateSet
 
 
@@ -210,19 +243,17 @@ namespace csl {
 
 
 
-
-
-
-
-
 	/**
-	 * @brief This class is designed to manage all configuration issues in connection with the dictionary lookups.
+	 * @brief An object of this type handles one dictionary that is to be used with DictSearch, including
+	 *        all parameter settings like maximum levenshtein distance etc. 
 	 *
 	 */
 	class DictModule : public iDictModule {
 	public:
 	    /**
-	     * @brief A standard constructor
+	     * @brief A standard constructor using a filepath pointing to a dictionary.
+	     *
+	     * In this case, DictModule will load the dictionary and destroy it when the DictModule dies.
 	     */
 	    DictModule( DictSearch& myDictSearch, std::wstring const& name, std::string const& dicFile ) :
 		name_( name ),
@@ -237,6 +268,11 @@ namespace csl {
 		setDLev( 0 );
 	    }
 
+	    /**
+	     * @brief A standard constructor using a pointer to a dictionary-object in memory.
+	     *
+	     * Of course, in this case, DictModule will leave the dictionary-object alive when DictModule dies.
+	     */
 	    DictModule( DictSearch& myDictSearch, std::wstring const& name, Dict_t const& dicRef ) :
 		name_( name ),
 		myDictSearch_( myDictSearch ),
@@ -276,7 +312,7 @@ namespace csl {
 		dict_ = &dict;
 		disposeDict_ = false;
 	    }
-
+	    
 	    /**
 	     * @brief Loads a dictionary from the hard disk and connects it to the configuration 
 	     * 

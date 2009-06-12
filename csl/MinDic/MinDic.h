@@ -47,8 +47,13 @@ namespace csl {
 	typedef AnnType AnnType_t;
 
 	/**
-	 * This class provides a much easier interface to the MinDic if the guts of the automaton
+	 * @brief This class provides a much easier interface to the MinDic if the guts of the automaton
 	 * have to be explored state- and transition-wise.
+	 *
+	 * It is best to think of a State -object as a pawn in a board game. By using MinDic's getRootState()
+	 * you receive a pawn positioned at the automaton's root state. From there you can either move it along-side
+	 * a transition using walk() or request a new pawn using getTransitionTarget().
+	 * 
 	 */
 	class State {
 	public:
@@ -62,60 +67,111 @@ namespace csl {
 	    }
 	    
 	    /**
-	     * 
+	     * @param c
 	     */
 	    bool walk( wchar_t c ) {
 		dicPos_ = minDic_->walkPerfHash( dicPos_, c, &perfHashValue_ );
 		return isValid();
 	    }
-
+	    
+	    /*
+	     * @brief If the state-object is 'walked' using a character c although the current state has no such
+	     *        transition, the state becomes invalid. Some people like to introduce a "failure state" or "trap state",
+	     *        which is non-final and has no outgoing transitions. In this sense, isValid() returns true
+	     *        iff it refers to this trap state.
+	     *
+	     *        @see hasTransition
+	     */
 	    bool isValid() {
 		return ( dicPos_ != 0 );
 	    }
 
+	    /**
+	     * @brief returns true iff current state has a transition labelled with the given character.
+	     * @param c
+	     */
 	    bool hasTransition( wchar_t c ) const {
 		return ( minDic_->walk( dicPos_, c ) != 0 );
 	    }
 
+	    /**
+	     *
+	     */
 	    State getTransTarget( wchar_t c ) const {
 		size_t tmpPHValue = perfHashValue_;
 		StateId_t newPos = minDic_->walkPerfHash( dicPos_, c, &tmpPHValue );
 		return State( *minDic_, newPos, tmpPHValue );
 	    }
-
+	    
+	    /**
+	     * @brief returns a c-string containing all characters which are the label of a transition leaving
+	     *        the current state
+	     */
 	    const wchar_t* getSusoString() const {
 		return minDic_->getSusoString( dicPos_ );
 	    }
-
+	    
+	    /**
+	     * @see perfHashValue_
+	     */
 	    size_t getPerfHashValue() const {
 		return perfHashValue_;
 	    }
 
+	    /**
+	     * @brief returns the internal id number of the curent state
+	     */
 	    StateId_t getStateID() const {
 		return dicPos_;
 	    }
 
+	    /**
+	     * @brief returns true iff the current state is a final state
+	     */
 	    bool isFinal() const {
 		return minDic_->isFinal( dicPos_ );
 	    }
 	    
+	    /**
+	     *
+	     */
 	    const AnnType& getAnnotation() {
 		return minDic_->getAnnotation( getPerfHashValue() );
 	    }
 
 	private:
-
+	    
 	    State( const MinDic< AnnType >& minDic, StateId_t dicPos, size_t perfHashValue ) :
 		minDic_( &minDic ),
 		dicPos_( dicPos ),
 		perfHashValue_( perfHashValue ) {
 	    }
 
+	    /**
+	     * @brief A pointer to the MinDic we are using
+	     */
 	    const MinDic< AnnType >* minDic_;
+
+	    /**
+	     * @brief The internal id of the current state
+	     */
 	    StateId_t dicPos_;
+
+	    /**
+	     * @brief The perfect hashing value
+	     *
+	     * Note that this vale does not only depend on the current state but also on the path
+	     * from the root that was used to get there.
+	     */
 	    size_t perfHashValue_;
+
 	}; // class State
 
+
+	/**
+	 * This iterator allows to traverse through all words of the language the MinDic describes.
+	 * The words are travered in alphabetical order.
+	 */
 	class TokenIterator {
 	private:
 	    typedef std::pair< State, size_t > StackItem_t;
@@ -126,6 +182,7 @@ namespace csl {
 	     */
 	    TokenIterator() {
 	    }
+
 
 	    TokenIterator( State const& rootState ) {
 		if( ( rootState.getSusoString())[0] == 0 ) { // no transitions from root state
@@ -198,6 +255,7 @@ namespace csl {
 	    std::stack< StackItem_t > stack_;
 	};
 
+
 	/**
 	 * @brief Create a new MinDic. An optional file-path as argument invokes a call to loadFromFile.
 	 * @param a file containing a compiled MinDic. (optional; often: *.mdic)
@@ -210,6 +268,7 @@ namespace csl {
 	 */
 	MinDic( MinDic< AnnType_t > const& other );
 	
+
 	/**
 	 * @name Lookup
 	 */
