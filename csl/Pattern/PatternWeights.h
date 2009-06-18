@@ -21,6 +21,14 @@ namespace csl {
     public:
 	static const int UNDEF = -1;
 
+	typedef std::map< csl::Pattern, float >::iterator PatternIterator;
+
+	/**
+	 * @brief a PatternType describes the relation of the lengths of both pattern sides.
+	 *        E.g.: the pattern t->th would have the type 1:2
+	 *
+	 * Those types are used to specify standard weights for certain pattern types
+	 */
 	class PatternType : public std::pair< size_t, size_t > {
 	public:
 	    PatternType( size_t l, size_t r ) {
@@ -32,6 +40,8 @@ namespace csl {
 	PatternWeights();
 
 	void reset();
+
+	void clear();
 
 	/**
 	 * @return the weight for a given pattern, or PatternWeights::UNDEF if the pattern is not known
@@ -60,6 +70,15 @@ namespace csl {
 	 */
 	void setSmartMerge( bool t = true );
 
+
+	PatternIterator patternsBegin() {
+	    return patternWeights_.begin();
+	}
+	
+	PatternIterator patternsEnd() {
+	    return patternWeights_.end();
+	}
+	
 
 	/**
 	 * @brief prints the pattern weights

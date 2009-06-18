@@ -96,39 +96,40 @@ namespace csl {
 	pw.setDefault( PatternWeights::PatternType( 1, 1 ), 1 ); // standard sub
 
 
-// 	//////////////////////////////////////////////////////////////////////////////////////////////////7
-// 	pw.setDefault( PatternWeights::PatternType( 2, 1 ), 1 ); // standard merge
-// 	pw.setDefault( PatternWeights::PatternType( 1, 2 ), 1 ); // standard split
-// 	CPPUNIT_ASSERT( ci.computeInstruction( L"abcde", L"abxcde", &instructions ) == 1 );
-// 	for( std::vector< Instruction >::const_iterator it = instructions.begin(); it != instructions.end(); ++it ) {
-// 	    it->print();std::wcout<<std::endl;
-// 	}
+	pw.setDefault( PatternWeights::PatternType( 2, 1 ), 1 ); // standard merge
+	pw.setDefault( PatternWeights::PatternType( 1, 2 ), 1 ); // standard split
+	CPPUNIT_ASSERT( ci.computeInstruction( L"abcde", L"abxcde", &instructions ) == 1 );
+	instructions.clear();
+	CPPUNIT_ASSERT( ci.computeInstruction( L"abcde", L"axcdy", &instructions ) == 2 ); // 1 sub
 
-// 	instructions.clear();
-// 	CPPUNIT_ASSERT( ci.computeInstruction( L"abcde", L"axcdy", &instructions ) == 2 ); // 1 sub
 
-// 	for( std::vector< Instruction >::const_iterator it = instructions.begin(); it != instructions.end(); ++it ) {
-// 	    it->print();std::wcout<<std::endl;
-// 	}
-
-// 	instructions.clear();
-// 	CPPUNIT_ASSERT( ci.computeInstruction( L"abcdey", L"abxcdez", &instructions ) == 2 ); // 1 sub
+	instructions.clear();
+	CPPUNIT_ASSERT( ci.computeInstruction( L"abcdey", L"abxcdez", &instructions ) == 2 ); // 1 sub
 	
 	
-// 	return;
-// 	//////////////////////////////////////////////////////////////////////////////////////////////////7
 
+	instructions.clear();
 	CPPUNIT_ASSERT( ci.computeInstruction( L"muh", L"mxuh", &instructions ) == 1 ); // 1 ins
-	CPPUNIT_ASSERT( instructions.size() == 1 );
+	for( std::vector< Instruction >::const_iterator it = instructions.begin(); it != instructions.end(); ++it ) {
+	    it->print();std::wcout<<std::endl;
+	}
+	CPPUNIT_ASSERT( instructions.size() == 3 );
 	CPPUNIT_ASSERT( instructions.at( 0 ).size() == 1 );
 	CPPUNIT_ASSERT( instructions.at( 0 ).at( 0 ) == PosPattern( L"", L"x", 1 ) );
+	CPPUNIT_ASSERT( instructions.at( 1 ).size() == 1 );
+	CPPUNIT_ASSERT( instructions.at( 1 ).at( 0 ) == PosPattern( L"u", L"xu", 1 ) );
+	CPPUNIT_ASSERT( instructions.at( 2 ).size() == 1 );
+	CPPUNIT_ASSERT( instructions.at( 2 ).at( 0 ) == PosPattern( L"m", L"mx", 0 ) );
 	instructions.clear();
 
 
 	CPPUNIT_ASSERT( ci.computeInstruction( L"muh", L"xmuh", &instructions ) == 1 ); // 1 ins at beginning of word
-	CPPUNIT_ASSERT( instructions.size() == 1 );
+
+	CPPUNIT_ASSERT( instructions.size() == 2 );
 	CPPUNIT_ASSERT( instructions.at( 0 ).size() == 1 );
 	CPPUNIT_ASSERT( instructions.at( 0 ).at( 0 ) == PosPattern( L"", L"x", 0 ) );
+	CPPUNIT_ASSERT( instructions.at( 1 ).size() == 1 );
+	CPPUNIT_ASSERT( instructions.at( 1 ).at( 0 ) == PosPattern( L"m", L"xm", 0 ) );
 	instructions.clear();
 
 
@@ -144,6 +145,9 @@ namespace csl {
 	CPPUNIT_ASSERT( instructions.at( 0 ).at( 0 ) == PosPattern( L"m", L"x", 0 ) );
 	instructions.clear();
 
+	// deactivate the merges and splits again
+	pw.setDefault( PatternWeights::PatternType( 2, 1 ), PatternWeights::UNDEF ); // standard merge
+	pw.setDefault( PatternWeights::PatternType( 1, 2 ), PatternWeights::UNDEF ); // standard split
 
 	CPPUNIT_ASSERT( ci.computeInstruction( L"milk", L"nrilk", &instructions ) == 2 ); // 1 ins, 1 sub
 	CPPUNIT_ASSERT( instructions.size() == 2 );
@@ -237,7 +241,24 @@ namespace csl {
 	CPPUNIT_ASSERT( instructions.at( 1 ).at( 0 ) == PosPattern( L"m", L"xm", 0 ) );
 	instructions.clear();
 
+	////// smartMerge //////
+	// now those annoying pseudo-merges should disappear
+	pw.setSmartMerge( true );
 
+	CPPUNIT_ASSERT( ci.computeInstruction( L"muh", L"mxuh", &instructions ) == 1 ); // 1 ins inside the word
+	CPPUNIT_ASSERT( instructions.size() == 1 );
+	CPPUNIT_ASSERT( instructions.at( 0 ).size() == 1 );
+	CPPUNIT_ASSERT( instructions.at( 0 ).at( 0 ) == PosPattern( L"", L"x", 1 ) );
+	instructions.clear();
+
+	CPPUNIT_ASSERT( ci.computeInstruction( L"muh", L"xmuh", &instructions ) == 1 ); // 1 ins at beginning
+	CPPUNIT_ASSERT( instructions.size() == 1 );
+	CPPUNIT_ASSERT( instructions.at( 0 ).size() == 1 );
+	CPPUNIT_ASSERT( instructions.at( 0 ).at( 0 ) == PosPattern( L"", L"x", 0 ) );
+	instructions.clear();
+	
+
+	
 
 
     }

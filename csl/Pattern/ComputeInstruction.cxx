@@ -39,11 +39,11 @@ namespace csl {
 	
 	int matrixW = wordCorr_.length();
 	int matrixH = wordErr_.length();
-
-		
+	
 	//Set the values for the first row
-	for(int i=1; i < matrixW; i++){
-	    matrix_[0][i].value = i;
+	matrix_[0][0].value = 0;
+	for(int i=1; i < matrixW; ++i ) {
+	    matrix_[0][i].value = matrix_[0][i-1].value + patternWeights_->getWeight( Pattern( wordCorr_.substr( i, 1 ), L"" ) );
 	    matrix_[0][i].addPatternType( PatternWeights::PatternType( 1, 0 ) );
 	}
 

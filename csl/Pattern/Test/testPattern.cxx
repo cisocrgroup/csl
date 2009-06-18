@@ -3,7 +3,7 @@
 #include <cppunit/extensions/TestFactoryRegistry.h>
 #include <cppunit/ui/text/TestRunner.h>
 
-//#include "./TestPattern.h"
+#include "./TestPattern.h"
 #include "./TestPatternWeights.h"
 
 int main() {

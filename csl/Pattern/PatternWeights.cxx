@@ -7,6 +7,10 @@ namespace csl {
     }
     
     void PatternWeights::reset() {
+	clear();
+    }
+
+    void PatternWeights::clear() {
 	patternWeights_.clear();
 	defaultWeights_.clear();
     }
