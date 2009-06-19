@@ -64,13 +64,17 @@ namespace csl {
 
 	class MatrixItem {
 	public:
-	    MatrixItem() : patternTypes( 0 ) {}
+	    MatrixItem() : 
+		value( PatternWeights::UNDEF ),
+		patternTypes( 0 ) {
+	    }
+
 	    ~MatrixItem() {
 		// std::wcerr << "csl::ComputeInstruction::MatrixItem: destructor" << std::endl;
 		reset();
 	    }
 	    void reset() {
-		value = 0;
+		value = PatternWeights::UNDEF;
 		removePatternTypes();
 	    }
 

@@ -250,17 +250,35 @@ namespace csl {
 	CPPUNIT_ASSERT( instructions.at( 0 ).size() == 1 );
 	CPPUNIT_ASSERT( instructions.at( 0 ).at( 0 ) == PosPattern( L"", L"x", 1 ) );
 	instructions.clear();
-
+	
 	CPPUNIT_ASSERT( ci.computeInstruction( L"muh", L"xmuh", &instructions ) == 1 ); // 1 ins at beginning
 	CPPUNIT_ASSERT( instructions.size() == 1 );
 	CPPUNIT_ASSERT( instructions.at( 0 ).size() == 1 );
 	CPPUNIT_ASSERT( instructions.at( 0 ).at( 0 ) == PosPattern( L"", L"x", 0 ) );
 	instructions.clear();
 	
-
 	
+	// use only sub as default operations
+	pw.clear();
+	pw.setDefault( csl::PatternWeights::PatternType( 1, 1 ), 1 );
+	
+	CPPUNIT_ASSERT( ci.computeInstruction( L"muh", L"xmuh", &instructions ) == PatternWeights::UNDEF ); // ins (not allowed)
+	CPPUNIT_ASSERT( instructions.empty() );
 
+	instructions.clear();
+	
+	CPPUNIT_ASSERT( ci.computeInstruction( L"galich", L"lich", &instructions ) == PatternWeights::UNDEF ); // del (not allowed)
+	CPPUNIT_ASSERT( instructions.empty() );
+	
+	instructions.clear();
 
+	CPPUNIT_ASSERT( ci.computeInstruction( L"glich", L"galich", &instructions ) == PatternWeights::UNDEF ); // ins (not allowed)
+	CPPUNIT_ASSERT( instructions.empty() );
+
+	for( std::vector< Instruction >::const_iterator it = instructions.begin(); it != instructions.end(); ++it ) {
+	    it->print();std::wcout<<std::endl;
+	}
+	
     }
 
 } // namespace csl
