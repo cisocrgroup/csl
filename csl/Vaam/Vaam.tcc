@@ -150,23 +150,21 @@ namespace csl {
 
 	    // see which of the Positions can be moved with this *c
 	    // see also if the levDEA reaches a final state
-	    size_t count = 0;
+	    size_t positionIndex = 0;
 	    for( typename StackItem::iterator position = stack_[depth].begin();
 		 position != stack_[depth].end();
-		 ++position, ++count ) {
+		 ++position, ++positionIndex ) {
 		LevDEA::Pos newLevPos = levDEA_.walk( position->levPos_, *c );
 		if( newLevPos.isValid() ) {
-		    stack_[depth + 1].push_back( Position( newLevPos, position->getNrOfPatternsApplied(), std::make_pair( depth, count ) ) );
+		    stack_[depth + 1].push_back( Position( newLevPos, position->getNrOfPatternsApplied(), std::make_pair( depth, positionIndex ) ) );
 		}
 	    }
 	    
 	    // set lookAheadDepth_ for next stackItem: 
-	    if( ! stack_[depth + 1].empty() ) {
-		// set to 0 if new positions exist
+	    if( ! stack_[depth + 1].empty() ) { // set to 0 if new positions exist
 		stack_[depth + 1].lookAheadDepth_ = 0;
 	    }
-	    else {
-		// increment if no new positions exist
+	    else { // increment if no new positions exist
 		stack_[depth + 1].lookAheadDepth_ = stack_[depth].lookAheadDepth_ + 1;
 	    }
 

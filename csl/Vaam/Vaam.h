@@ -152,6 +152,10 @@ namespace csl {
 	inline void query_rec( size_t depth ) const;
 
 
+	////////////////////// CLASS POSITION /////////////////////////
+	/**
+	 * 
+	 */
 	class Position {
 	public:
 	    Position( const LevDEA::Pos& levPos, size_t nrOfPatternsApplied, const std::pair< int, int >& mother = std::make_pair( -1, -1 ) ) :
@@ -172,14 +176,20 @@ namespace csl {
 	    LevDEA::Pos levPos_;
 	    PosPattern posPattern_;
 
+	    /**
+	     * @brief Every Position-object reflects a certain interpretation of te currently processed prefix, and
+	     * this variable tells how many patterns this interpretation involves.
+	     */
 	    size_t nrOfPatternsApplied_;
 
 	    /**
-	     * (x,y) indicates that the mother is the y-th element at stackpos x (if I remember correctly)
+	     * (x,y) indicates that the mother is the y-th element at stackpos x
 	     */ 
 	    std::pair< int, int > mother_;
 	}; // class Position
 
+
+	////////////////////// CLASS STACKITEM /////////////////////////
 	class StackItem : public std::vector< Position > {
 	public:
 	    StackItem( const Vaam& myVaam ) :

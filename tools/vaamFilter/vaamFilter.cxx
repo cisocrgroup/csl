@@ -56,7 +56,13 @@ int main(int argc, const char** argv ) {
 	baseDic = &( fbdic->getFWDic() );
     }
     else {
-	baseDic = new Vaam_t::MinDic_t( opt.getArgument( 1 ).c_str() );
+	Vaam_t::MinDic_t* tmp = 0;
+
+	// this tmp-hack is because of the const-ness of baseDic
+	tmp = new Vaam_t::MinDic_t();
+	tmp->loadFromFile( opt.getArgument( 1 ).c_str() );
+	baseDic = tmp;
+	
     }
 
 

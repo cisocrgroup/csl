@@ -22,6 +22,7 @@ namespace csl {
 	static const int UNDEF = -1;
 
 	typedef std::map< csl::Pattern, float >::iterator PatternIterator;
+	typedef std::map< csl::Pattern, float >::const_iterator const_PatternIterator;
 
 	/**
 	 * @brief a PatternType describes the relation of the lengths of both pattern sides.
@@ -71,8 +72,16 @@ namespace csl {
 	void setSmartMerge( bool t = true );
 
 
+	const_PatternIterator patternsBegin() const {
+	    return patternWeights_.begin();
+	}
+	
 	PatternIterator patternsBegin() {
 	    return patternWeights_.begin();
+	}
+	
+	const_PatternIterator patternsEnd() const {
+	    return patternWeights_.end();
 	}
 	
 	PatternIterator patternsEnd() {

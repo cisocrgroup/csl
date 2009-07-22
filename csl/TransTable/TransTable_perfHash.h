@@ -246,7 +246,7 @@ namespace csl {
 	 * @param binFile filename of the binary storing the automaton
 	 * @throw exceptions::badFileHandle
 	 */
-	inline bool loadFromFile( const char* binFile );
+	inline bool loadFromFile( char const* binFile );
 
 	inline void loadFromStream( FILE* fi );
 

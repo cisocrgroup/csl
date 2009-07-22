@@ -12,6 +12,7 @@ add_subdirectory(SimpleFSA)
 add_subdirectory(DictSearch)
 add_subdirectory(Trie)
 add_subdirectory(Pattern)
+add_subdirectory(Locale)
 
 ADD_LIBRARY( csl SHARED Alphabet/Alphabet.cxx LevDEA/LevDEA.cxx DictSearch/DictSearch.cxx Pattern/PatternWeights.cxx Pattern/ComputeInstruction.cxx )
 target_link_libraries( csl Alphabet )
