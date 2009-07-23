@@ -71,7 +71,7 @@ namespace csl {
 
 
 	stack_.push_back( StackItem( *this ) );
-
+	
 	// this lets us use the []-operator for stack_ with a somewhat purer conscience
 	// But the at()-operator turned out to be a real bottleneck here ...
 	if( stack_.size() != depth + 2 ) {
