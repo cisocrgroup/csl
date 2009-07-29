@@ -365,7 +365,11 @@ namespace csl {
 	inline void compileDic( const char* txtFile );
 
 	/**
-	 * @todo add documentation
+	 * @brief This method parses an input line (provided as param str). If str has
+	 *        an annotation attached to the key, this annotation is clipped from str 
+	 *        and stored in the param annotation
+	 * @param[in/out] str
+	 * @param[out] annotation
 	 */
 	inline void parseAnnotation( std::wstring* str, AnnType_t* annotation ) const;
 

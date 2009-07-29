@@ -161,6 +161,7 @@ namespace csl {
 		else *annotation = 0;
 	}
 
+
 	template< class AnnType_t >
 	inline void MinDic< AnnType_t >::addToken( const wchar_t* key, const AnnType_t& annotation ) {
 
@@ -169,7 +170,7 @@ namespace csl {
 
 		key = key;
 
-		//wprintf(L"input: %ls -> %d\n", key, annotation );
+		// wprintf(L"input: %ls -> %d\n", key, annotation );
 
 
 		// remark: maybe this could be spared if we remember the length during widechar-conversion
@@ -177,13 +178,13 @@ namespace csl {
 
 
 		if( lengthOfKey == 0 ) {
-			throw exceptions::badInput( "csl::MinDic: Insertion of empty key " );
+		    throw exceptions::badInput( "csl::MinDic: Insertion of empty key " );
 		}
-
+		
 		if( lengthOfKey > Global::lengthOfStr - 1 ) {
-			throw exceptions::badInput( "MinDic: Global::string_length sets the maximum string length for an entry of a MinDic. Maximum violated" );
+		    throw exceptions::badInput( "MinDic: Global::string_length sets the maximum string length for an entry of a MinDic. Maximum violated" );
 		}
-
+		
 		// check alphabetical order
 		if( *lastKey_ && ( wcscmp( lastKey_, key ) >= 0 ) ) {
 			std::wcerr<<"Alphabetical order violated:"<<std::endl

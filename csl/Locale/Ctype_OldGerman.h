@@ -20,7 +20,7 @@ class Ctype_OldGerman : public std::ctype< wchar_t > {
 public:
     
     Ctype_OldGerman( std::locale const& loc ) :
-	builtInCtype_( std::use_facet< std::ctype< wchar_t > >( loc ) ) { // copy ctype-facet from given locale
+	builtInLocale_( loc ) { // copy given locale
 
 	char2index_.resize( maxChar, 0 );
 	
@@ -56,7 +56,7 @@ public:
 	    return ( masks_.at( char2index_.at( c ) ).mask_ & m ) != 0;
 	}
 	else {
-	    return builtInCtype_.is( m, c );
+	    return std::use_facet< std::ctype< wchar_t > >( builtInLocale_ ).is( m, c );
 	}
     }
 
@@ -68,7 +68,7 @@ public:
 	    else return c;
 	}
 	else {
-	    return builtInCtype_.toupper( c );
+	    return std::use_facet< std::ctype< wchar_t > >( builtInLocale_ ).toupper(  c );
 	}
     }
     
@@ -80,7 +80,7 @@ public:
 	    else return c;
 	}
 	else {
-	    return builtInCtype_.tolower( c );
+	    return std::use_facet< std::ctype< wchar_t > >( builtInLocale_ ).tolower(  c );
 	}
     }
     
@@ -100,7 +100,7 @@ private:
 	
     };
 
-    std::ctype< wchar_t > const& builtInCtype_;
+    std::locale builtInLocale_;
     static const size_t maxChar = 65535;
     std::vector< size_t > char2index_;
     std::vector< CharInfo > masks_;

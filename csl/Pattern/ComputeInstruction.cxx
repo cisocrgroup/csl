@@ -25,8 +25,8 @@ namespace csl {
     float ComputeInstruction::computeInstruction( const std::wstring& wCorr, 
 						  const std::wstring& wErr, 
 						  std::vector< Instruction >* instructions ) {
-
- 	// std::wcerr << "compare " << wCorr << ", " << wErr << std::endl;
+	
+ 	std::wcerr << "compare " << wCorr << ", " << wErr << std::endl;
 
 	if( ! patternWeights_ ) {
 	    throw exceptions::LogicalError( "csl::ComputeInstruction::ComputeInstruction: No patternWeights loaded." );
