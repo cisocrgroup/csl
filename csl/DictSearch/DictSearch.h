@@ -128,7 +128,7 @@ namespace csl {
 	    /**
 	     * @brief This is to fulfill the csl::iVaamResultReceiver interface
 	     */
-	    virtual void receive( csl::Interpretation const& vaam_interpretation ) {
+	    void receive( csl::Interpretation const& vaam_interpretation ) {
 		push_back( Interpretation( vaam_interpretation, *currentDictModule_ ) );
 	    }
 	    
@@ -223,6 +223,13 @@ namespace csl {
 	 */
 	class iDictModule {
 	public:
+
+	    /**
+	     * @brief virtual destructor, mostly to make the compiler feel good
+	     */
+	    virtual ~iDictModule() {
+	    }
+
 	    /**
 	     * @brief Allows to query the iDctModule with some string. The iDictModule is expected
 	     * to add all its answers/ interpretations to the CandidateSet that is passed.

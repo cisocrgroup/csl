@@ -5,6 +5,7 @@ namespace csl {
 
     class iDictionary {
     public:
+	virtual ~iDictionary() {}
 	virtual bool lookup( wchar_t const* str, int* annotation = 0 ) const = 0;
 	virtual bool lookup( std::wstring const& str, int* annotation = 0 ) const = 0;
 	
