@@ -32,7 +32,6 @@ int main( int argc, char** argv ) {
 		std::cout<<ret<<std::endl;
 	    }
 	    else std::cout<<std::endl;
-
 	}
 
     } catch( exceptions::cslException ex ) {

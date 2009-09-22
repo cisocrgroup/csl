@@ -26,7 +26,7 @@ namespace csl {
 						  const std::wstring& wErr, 
 						  std::vector< Instruction >* instructions ) {
 	
- 	std::wcerr << "compare " << wCorr << ", " << wErr << std::endl;
+ 	//std::wcerr << "compare " << wCorr << ", " << wErr << std::endl;
 
 	if( ! patternWeights_ ) {
 	    throw exceptions::LogicalError( "csl::ComputeInstruction::ComputeInstruction: No patternWeights loaded." );
@@ -47,7 +47,7 @@ namespace csl {
 	matrix_[0][0].value = 0;
 	for(int i=1; i < matrixW; ++i ) {
 	    float weight = patternWeights_->getWeight( Pattern( wordCorr_.substr( i, 1 ), L"" ) );
-	    if( ( matrix_[i-1][0].value != PatternWeights::UNDEF ) && ( weight != PatternWeights::UNDEF ) ) {
+	    if( ( matrix_[0][i-1].value != PatternWeights::UNDEF ) && ( weight != PatternWeights::UNDEF ) ) {
 		matrix_[0][i].value = matrix_[0][i-1].value + weight;
 		matrix_[0][i].addPatternType( PatternWeights::PatternType( 1, 0 ) );
 	    }

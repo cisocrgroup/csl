@@ -256,6 +256,11 @@ namespace csl {
 	CPPUNIT_ASSERT( instructions.at( 0 ).size() == 1 );
 	CPPUNIT_ASSERT( instructions.at( 0 ).at( 0 ) == PosPattern( L"", L"x", 0 ) );
 	instructions.clear();
+
+	
+	// What about spaces in words? Here's a real-world example
+	CPPUNIT_ASSERT( ci.computeInstruction( L"eure churfuerstliche", L"fuerstltche", &instructions ) == 9 ); // 1 ins at beginning
+	instructions.clear();
 	
 	
 	// use only sub as default operations
@@ -278,7 +283,7 @@ namespace csl {
 	for( std::vector< Instruction >::const_iterator it = instructions.begin(); it != instructions.end(); ++it ) {
 	    it->print();std::wcout<<std::endl;
 	}
-	
+
     }
 
 } // namespace csl

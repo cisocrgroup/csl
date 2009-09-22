@@ -119,7 +119,6 @@ namespace csl {
 
 		patPos.walkErrorLink();
 	    } while( patPos.isValid() && patPos.isFinal() && ( patPos.getDepth() >= stack_[depth].lookAheadDepth_ ) );
-
 	} // if found left pattern side
 
 
@@ -145,7 +144,7 @@ namespace csl {
 	     *c;
 	     ++c ) {
 	    stack_.at( depth + 1 ).clear();
-
+	    
 	    stack_[depth + 1].patternPos_ = stack_[depth].patternPos_.getTransTarget( *c );
 
 	    // see which of the Positions can be moved with this *c
@@ -167,19 +166,19 @@ namespace csl {
 	    else { // increment if no new positions exist
 		stack_[depth + 1].lookAheadDepth_ = stack_[depth].lookAheadDepth_ + 1;
 	    }
-
+	    
 	    if( stack_[depth + 1].lookAheadDepth_ <= stack_[depth + 1].patternPos_.getDepth() ) {
 		stack_[depth + 1].dicPos_ = stack_[depth].dicPos_.getTransTarget( *c );
 		baseWord_.resize( depth + 1 );
 		baseWord_.at( depth ) = *c;
-
+		
 		query_rec( depth + 1 );
 	    }
 	}
 	
 	stack_.pop_back();
     } // query_rec
-
+    
     template< typename MinDicType >
     void Vaam< MinDicType >::reportMatch( const Position* cur, int baseWordScore ) const {
 	Interpretation interpretation;

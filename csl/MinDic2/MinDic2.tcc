@@ -259,6 +259,8 @@ namespace csl {
 	}
 
 	inline void MinDic2::printDic() const {
+	    std::wcout << "csl::MinDic2::printDic not implemented!" << std::endl;
+	    exit( 1 );
 		count_ = 0;
 		printDic_rec( getRoot(), 0 );
 	}
@@ -292,12 +294,9 @@ namespace csl {
 
 	inline void MinDic2::doAnalysis() const {
 
-		float annotations_MB = (float)( nrOfKeys_ * sizeof( AnnType_t ) ) / 1000000;
-
 		TransTable_t::doAnalysis();
-		printf( "**********\nMinDic2 Analysis\n**********\nnr of keys:\t%zd\nannotation array: %.3f MB\n\n",
-			nrOfKeys_,
-			annotations_MB
+		printf( "**********\nMinDic2 Analysis\n**********\nnr of keys:\t%zd\n\n",
+			nrOfKeys_
 			);
 
 
