@@ -36,6 +36,10 @@ namespace csl {
 	 */
 	const MinDic_t& getBWDic() const;
 
+	void initConstruction();
+	void finishConstruction();
+	void addToken( std::wstring const&, AnnType_t const& );
+
 	/**
 	 * compiles an FBDic from a .lex file. Consult the @link fbDic_manual FDic Manual@endlink
 	 * for details on the format of the input file.
@@ -101,7 +105,10 @@ namespace csl {
 	    AnnType_t annotation_;
 	};
 
+	size_t nrOfTokens_;
 	std::vector< Entry > entries_;
+	std::wstring reversedKey_;
+
 
 	static const bits64 magicNumber_ = 345783116;
 	class Header {

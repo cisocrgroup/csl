@@ -24,37 +24,25 @@ namespace csl {
 	return bwDic_;
     }
 
+
     template< class AnnType_t >
-    void FBDic< AnnType_t >::compileDic( const char* txtFile ) {
-
+    void FBDic< AnnType_t >::initConstruction() {
+	nrOfTokens_ = 0;
 	fwDic_.initConstruction();
+	
+    }
 
-	std::wifstream fileHandle( txtFile );
-	fileHandle.imbue( CSL_UTF8_LOCALE ); // imbue the stream with the environment's standard locale
-	if( !fileHandle.good() ) {
-	    throw exceptions::badFileHandle( "Couldn't open file '" + 
-					     std::string( txtFile ) + 
-					     "' for reading." );
-	}
+    template< class AnnType_t >
+    void FBDic< AnnType_t >::addToken( std::wstring const& entry, AnnType_t const& annotation ) {
+	fwDic_.addToken( entry.c_str(), annotation );
+	++nrOfTokens_;
+	
+	Global::reverse( entry, &reversedKey_ );
+	entries_.push_back( Entry( std::wstring( reversedKey_ ), annotation ) );
+    }
 
-	std::wstring line;
-	std::wstring reversedKey;
-
-	size_t lineCount = 0;
-	while( std::getline( fileHandle, line ).good() )  {
-
-	    if ( line.length() > Global::lengthOfLongStr ) {
-		throw exceptions::badInput( "csl::MinDic::compileDic: Maximum length of input line violated (set by Global::lengthOfLongStr)" );
-	    }
-	    AnnType_t annotation;
-	    fwDic_.parseAnnotation( &line, &annotation );
-	    
-	    fwDic_.addToken( line.c_str(), annotation );
-	    ++lineCount;
-
-	    Global::reverse( line, &reversedKey );
-	    entries_.push_back( Entry( std::wstring( reversedKey ), annotation ) );
-	}
+    template< class AnnType_t >
+    void FBDic< AnnType_t >::finishConstruction() {
 	fwDic_.finishConstruction();
 
 	std::sort( entries_.begin(), entries_.end() );
@@ -68,6 +56,37 @@ namespace csl {
 	bwDic_.finishConstruction();
 
 	header_.set( *this );
+	
+    }
+
+
+    template< class AnnType_t >
+    void FBDic< AnnType_t >::compileDic( const char* txtFile ) {
+
+	initConstruction();
+
+	std::wifstream fileHandle( txtFile );
+	fileHandle.imbue( CSL_UTF8_LOCALE ); // imbue the stream with the environment's standard locale
+	if( !fileHandle.good() ) {
+	    throw exceptions::badFileHandle( "Couldn't open file '" + 
+					     std::string( txtFile ) + 
+					     "' for reading." );
+	}
+
+	std::wstring line;
+
+	size_t lineCount = 0;
+	while( std::getline( fileHandle, line ).good() )  {
+
+	    if ( line.length() > Global::lengthOfLongStr ) {
+		throw exceptions::badInput( "csl::MinDic::compileDic: Maximum length of input line violated (set by Global::lengthOfLongStr)" );
+	    }
+	    AnnType_t annotation;
+	    fwDic_.parseAnnotation( &line, &annotation );
+	    addToken( line, annotation );
+	}
+
+	finishConstruction();
     }
 
 
