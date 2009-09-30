@@ -45,7 +45,7 @@ class StateHash {
     static const int HASHC1 = 257;
     static const int HASHC2 = 107;
 
-    static const size_t tableSize_ = (size_t)( 1ll<<27 ) - 1;
+    static const size_t tableSize_ = (size_t)( 1ll<<22 ) - 1;
 
     template< typename TempState >
     int hashcode(const TempState& state) {

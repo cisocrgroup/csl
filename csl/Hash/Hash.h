@@ -147,10 +147,10 @@ namespace csl {
 	if( table_.at( slot ) == 0 ) { // key wasn't found
 	    size_t lengthOfKey = strlenTemplate( key );
 	    // resize keyBuffer_ if necessary
-	    while( ( lengthOfKeyStrings_ + lengthOfKey ) > lengthOfKeyBuffer_ ) {
+	    while( ( lengthOfKeyStrings_ + lengthOfKey + 1 ) > lengthOfKeyBuffer_ ) {
 		reallocKeyBuffer( (int) ( lengthOfKeyBuffer_ * 1.5 ) );
 	    }
-	    strncpyTemplate( ( keyBuffer_ + lengthOfKeyStrings_ ), key, lengthOfKey );
+	    strncpyTemplate( ( keyBuffer_ + lengthOfKeyStrings_ ), key, lengthOfKey + 1 );
 	    table_.at( slot ) = lengthOfKeyStrings_;
 	    lengthOfKeyStrings_ += lengthOfKey + 1;
 	    // std::wcout << "Create: " << key << " at slot " << slot << ", buf_offset " << table_.at( slot ) << std::endl;

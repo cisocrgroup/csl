@@ -33,18 +33,17 @@ namespace csl {
     }
 
     template< class AnnType_t >
-    void FBDic< AnnType_t >::addToken( std::wstring const& entry, AnnType_t const& annotation ) {
+    void FBDic< AnnType_t >::addToken( std::wstring const& entry, AnnType_t annotation ) {
 	fwDic_.addToken( entry.c_str(), annotation );
 	++nrOfTokens_;
 	
 	Global::reverse( entry, &reversedKey_ );
-	entries_.push_back( Entry( std::wstring( reversedKey_ ), annotation ) );
+	entries_.push_back( DictEntry( std::wstring( reversedKey_ ), annotation ) );
     }
 
     template< class AnnType_t >
     void FBDic< AnnType_t >::finishConstruction() {
 	fwDic_.finishConstruction();
-
 	std::sort( entries_.begin(), entries_.end() );
 
 	bwDic_.initConstruction();
@@ -53,12 +52,11 @@ namespace csl {
 	for( size_t i = 0; i <  entries_.size(); ++i ) {
 	    bwDic_.addToken( entries_.at( i ).getKey().c_str(), entries_.at( i ).getAnnotation() );
 	}
+
 	bwDic_.finishConstruction();
 
 	header_.set( *this );
-	
     }
-
 
     template< class AnnType_t >
     void FBDic< AnnType_t >::compileDic( const char* txtFile ) {
@@ -85,7 +83,7 @@ namespace csl {
 	    fwDic_.parseAnnotation( &line, &annotation );
 	    addToken( line, annotation );
 	}
-
+	
 	finishConstruction();
     }
 
@@ -122,7 +120,7 @@ namespace csl {
 
 
     template< class AnnType_t >
-    inline void FBDic< AnnType_t >::writeToFile( char* binFile ) const {
+    inline void FBDic< AnnType_t >::writeToFile( char const* binFile ) const {
 	FILE* fo = fopen( binFile, "wb" );
 	if( ! fo ) {
 	    throw exceptions::badFileHandle( "FBDic: Couldn't open file '" +

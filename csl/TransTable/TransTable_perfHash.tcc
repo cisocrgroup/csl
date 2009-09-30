@@ -419,7 +419,8 @@ namespace csl {
 	    } else if ( cells_[i].isState() ) {
 		int peripheries = ( cells_[i].isFinalState() ) ? 2 : 1;
 		wprintf( L"%d[peripheries=%d] //DOTCODE\n", i, peripheries );
-		wprintf( L"%lu->%lu[label=\"%d,%d\"] //DOTCODE\n", (unsigned long)i, (unsigned long)i, cells_[i].getValue(),cells_[i].getThirdValue() ) ;
+		wprintf( L"%lu->%lu[label=\"%d,%d\"] //DOTCODE\n", 
+			 (unsigned long)i, (unsigned long)i, cells_[i].getValue(), cells_[i].getThirdValue() ) ;
 		
 	    }
 	}

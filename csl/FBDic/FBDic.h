@@ -38,7 +38,7 @@ namespace csl {
 
 	void initConstruction();
 	void finishConstruction();
-	void addToken( std::wstring const&, AnnType_t const& );
+	void addToken( std::wstring const&, AnnType_t );
 
 	/**
 	 * compiles an FBDic from a .lex file. Consult the @link fbDic_manual FDic Manual@endlink
@@ -66,7 +66,7 @@ namespace csl {
 	 * @brief dump FBDic automaton to a file in binary form.
 	 * @param binFile File to write the automaton into.
 	 */
-	inline void writeToFile( char* binFile ) const;
+	inline void writeToFile( char const* binFile ) const;
 
 	/**
 	 * @brief dump FBDic automaton to an open file stream
@@ -83,9 +83,9 @@ namespace csl {
 	/**
 	 * During construction, used to represent one entry of the dictionary
 	 */
-	class Entry {
+	class DictEntry {
 	public:
-	    Entry( const std::wstring& key, const AnnType_t& annotation ) :
+	    DictEntry( const std::wstring& key, const AnnType_t& annotation ) :
 		key_( key ),
 		annotation_( annotation ) {
 	    }
@@ -96,7 +96,7 @@ namespace csl {
 		return annotation_;
 	    }
 
-	    bool operator<( const Entry& other ) const {
+	    bool operator<( const DictEntry& other ) const {
 		return this->getKey() < other.getKey();
 	    }
 
@@ -106,7 +106,7 @@ namespace csl {
 	};
 
 	size_t nrOfTokens_;
-	std::vector< Entry > entries_;
+	std::vector< DictEntry > entries_;
 	std::wstring reversedKey_;
 
 
