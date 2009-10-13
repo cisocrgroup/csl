@@ -2,7 +2,7 @@
 
 namespace csl {
     ComputeInstruction::ComputeInstruction() : 
-	patternWeights_( 0 ),
+	patternProbabilities_( 0 ),
 	instructions_( 0 ) {
 
 	debug_ = false;
@@ -17,25 +17,25 @@ namespace csl {
     ComputeInstruction::~ComputeInstruction(){
     }
 
-    void ComputeInstruction::connectPatternWeights( csl::PatternWeights const& patternWeights ){
-	patternWeights_ = &patternWeights;
+    void ComputeInstruction::connectPatternProbabilities( csl::PatternProbabilities const& patternProbabilities ){
+	patternProbabilities_ = &patternProbabilities;
     }
     
 
-    float ComputeInstruction::computeInstruction( const std::wstring& wCorr, 
-						  const std::wstring& wErr, 
-						  std::vector< Instruction >* instructions ) {
+    bool ComputeInstruction::computeInstruction( std::wstring const& wCorr, 
+						 std::wstring const& wErr, 
+						 std::vector< Instruction >* instructions ) {
 	
  	//std::wcerr << "compare " << wCorr << ", " << wErr << std::endl;
 
-	if( ! patternWeights_ ) {
-	    throw exceptions::LogicalError( "csl::ComputeInstruction::ComputeInstruction: No patternWeights loaded." );
+	if( ! patternProbabilities_ ) {
+	    throw exceptions::LogicalError( "csl::ComputeInstruction::ComputeInstruction: No patternProbabilities loaded." );
 	    exit( 1 );
 	}
 	
-	//levWeights_->printFreqPattern();
-	//levWeights_->printFreqCorrect();
-	//levWeights_->printPatternWeights();
+	//levProbabilities_->printFreqPattern();
+	//levProbabilities_->printFreqCorrect();
+	//levProbabilities_->printPatternProbabilities();
 	
 	wordCorr_ = L" " + wCorr;
 	wordErr_ = L" " + wErr;
@@ -46,71 +46,68 @@ namespace csl {
 	//Set the values for the first row
 	matrix_[0][0].value = 0;
 	for(int i=1; i < matrixW; ++i ) {
-	    float weight = patternWeights_->getWeight( Pattern( wordCorr_.substr( i, 1 ), L"" ) );
-	    if( ( matrix_[0][i-1].value != PatternWeights::UNDEF ) && ( weight != PatternWeights::UNDEF ) ) {
-		matrix_[0][i].value = matrix_[0][i-1].value + weight;
-		matrix_[0][i].addPatternType( PatternWeights::PatternType( 1, 0 ) );
+	    float prob = patternProbabilities_->getWeight( Pattern( wordCorr_.substr( i, 1 ), L"" ) );
+	    if( ( matrix_[0][i-1].value != PatternProbabilities::UNDEF ) && ( prob != PatternProbabilities::UNDEF ) ) {
+		matrix_[0][i].value = matrix_[0][i-1].value + ( -log( prob ) );
+		matrix_[0][i].addPatternType( PatternProbabilities::PatternType( 1, 0 ) );
 	    }
 	    else {
-		matrix_[0][i].value = PatternWeights::UNDEF;
+		matrix_[0][i].value = PatternProbabilities::UNDEF;
 		matrix_[0][i].removePatternTypes();
 	    }
 	}
 	
 	//Set the values for the first column
 	for(int i=1; i < matrixH; ++i ) {
-	    float weight = patternWeights_->getWeight( Pattern( wordErr_.substr( i, 1 ), L"" ) );
-	    if( ( matrix_[i-1][0].value != PatternWeights::UNDEF) && ( weight != PatternWeights::UNDEF ) ) {
-		matrix_[i][0].value = matrix_[i-1][0].value + weight;
-		matrix_[i][0].addPatternType( PatternWeights::PatternType( 0, 1 ) );
+	    float prob = patternProbabilities_->getWeight( Pattern( wordErr_.substr( i, 1 ), L"" ) );
+	    if( ( matrix_[i-1][0].value != PatternProbabilities::UNDEF) && ( prob != PatternProbabilities::UNDEF ) ) {
+		matrix_[i][0].value = matrix_[i-1][0].value + ( -log( prob ) );
+		matrix_[i][0].addPatternType( PatternProbabilities::PatternType( 0, 1 ) );
 	    }
 	    else {
-		matrix_[i][0].value = PatternWeights::UNDEF;
+		matrix_[i][0].value = PatternProbabilities::UNDEF;
 		matrix_[i][0].removePatternTypes();
 	    }
 	}
 
 	
 	// Set the values of the matrix.
-	float del = 0;
-	float add = 0;
-	float sub = 0;
-	float merge = 0;
-	float split = 0;
+	float prob = 0;
+
 	for( int y=1; y < matrixH; y++ ) {
 	    for( int x = 1; x < matrixW; ++x ){
-		// float minValue =  std::numeric_limits< float >::max();
-		float minValue =  PatternWeights::UNDEF;
+		float minValue =  PatternProbabilities::UNDEF;
+		float newValue = 0;
 
 		// match, substitution
-		if( matrix_[y-1][x-1].value == PatternWeights::UNDEF ) {
+		if( matrix_[y-1][x-1].value == PatternProbabilities::UNDEF ) {
 		    // do nothing
 		}
 		else if( wordCorr_.at(x) == wordErr_.at(y) ) {
-		    sub = matrix_[y-1][x-1].value;
+		    newValue = matrix_[y-1][x-1].value;
 		    
-		    if( ( minValue == PatternWeights::UNDEF ) || ( sub < minValue ) ) {
-			minValue = sub;
+		    if( ( minValue == PatternProbabilities::UNDEF ) || ( newValue < minValue ) ) {
+			minValue = newValue;
 			matrix_[y][x].removePatternTypes();
-			matrix_[y][x].addPatternType( PatternWeights::PatternType( 1, 1 ) );
+			matrix_[y][x].addPatternType( PatternProbabilities::PatternType( 1, 1 ) );
 		    }
-		    else if( sub == minValue) {
-			matrix_[y][x].addPatternType( PatternWeights::PatternType( 1, 1 ) );
+		    else if( newValue == minValue) {
+			matrix_[y][x].addPatternType( PatternProbabilities::PatternType( 1, 1 ) );
 		    }
 		}
 		else {
-		    sub = patternWeights_->getWeight( Pattern( wordCorr_.substr( x, 1 ), wordErr_.substr( y, 1 ) ) );
+		    prob = patternProbabilities_->getWeight( Pattern( wordCorr_.substr( x, 1 ), wordErr_.substr( y, 1 ) ) );
+
+		    if( ( prob != PatternProbabilities::UNDEF ) ) {
+			newValue = matrix_[y-1][x-1].value + ( -log( prob ) );
 		    
-		    if( ( sub != PatternWeights::UNDEF ) ) {
-			sub += matrix_[y-1][x-1].value;
-			
-			if( ( minValue == PatternWeights::UNDEF ) || ( sub < minValue ) ) {
-			    minValue = sub;
+			if( ( minValue == PatternProbabilities::UNDEF ) || ( newValue < minValue ) ) {
+			    minValue = newValue;
 			    matrix_[y][x].removePatternTypes();
-			    matrix_[y][x].addPatternType( PatternWeights::PatternType( 1, 1 ) );
+			    matrix_[y][x].addPatternType( PatternProbabilities::PatternType( 1, 1 ) );
 			}
-			else if( sub == minValue ) {
-			    matrix_[y][x].addPatternType( PatternWeights::PatternType( 1, 1 ) );
+			else if( newValue == minValue ) {
+			    matrix_[y][x].addPatternType( PatternProbabilities::PatternType( 1, 1 ) );
 			}
 		    }
 		}
@@ -118,75 +115,79 @@ namespace csl {
 		
 		
 		// Insert
-		if( ( patternWeights_->getDefault( PatternWeights::PatternType( 0, 1 ) ) != PatternWeights::UNDEF ) && 
-		    ( matrix_[y-1][x].value != PatternWeights::UNDEF ) ) {
-		    add = matrix_[y-1][x].value+ 1;
+		if( ( matrix_[y-1][x].value != PatternProbabilities::UNDEF ) ) {
+		    prob = patternProbabilities_->getWeight( Pattern( L"", wordErr_.substr( y, 1 ) ) );
+		    if( ( prob != PatternProbabilities::UNDEF ) ) {
+			newValue = matrix_[y-1][x].value + ( -log( prob ) );
 
-		    if( ( minValue == PatternWeights::UNDEF ) || ( add < minValue ) ) {
-			minValue = add;
-			matrix_[y][x].removePatternTypes();
-			matrix_[y][x].addPatternType( PatternWeights::PatternType( 0, 1 ) );
-		    }
-		    else if( add == minValue ) {
-			matrix_[y][x].addPatternType( PatternWeights::PatternType( 0, 1 ) );
+			if( ( minValue == PatternProbabilities::UNDEF ) || ( newValue < minValue ) ) {
+			    minValue = newValue;
+			    matrix_[y][x].removePatternTypes();
+			    matrix_[y][x].addPatternType( PatternProbabilities::PatternType( 0, 1 ) );
+			}
+			else if( newValue == minValue ) {
+			    matrix_[y][x].addPatternType( PatternProbabilities::PatternType( 0, 1 ) );
+			}
 		    }
 		}
 		
 		// Delete
-		if( ( patternWeights_->getDefault( PatternWeights::PatternType( 1, 0 ) ) != PatternWeights::UNDEF ) &&
-		    ( matrix_[y][x-1].value != -1 ) ) {
-		    del = matrix_[y][x-1].value+1;
-		    if( ( minValue == PatternWeights::UNDEF ) || ( del < minValue ) ) {
-			minValue = del;
-			matrix_[y][x].removePatternTypes();
-			matrix_[y][x].addPatternType( PatternWeights::PatternType( 1, 0 ) );
-		    }
-		    else if(del == minValue) {
-			matrix_[y][x].addPatternType( PatternWeights::PatternType( 1, 0 ) );
+		if( ( matrix_[y][x-1].value != PatternProbabilities::UNDEF ) ) {
+		    prob = patternProbabilities_->getWeight( Pattern( wordCorr_.substr( x, 1 ), L"" ) );
+		    if( ( prob != PatternProbabilities::UNDEF ) ) {
+			newValue = matrix_[y][x-1].value + ( -log( prob ) );
+			
+			if( ( minValue == PatternProbabilities::UNDEF ) || ( newValue < minValue ) ) {
+			    minValue = newValue;
+			    matrix_[y][x].removePatternTypes();
+			    matrix_[y][x].addPatternType( PatternProbabilities::PatternType( 1, 0 ) );
+			}
+			else if(newValue == minValue) {
+			    matrix_[y][x].addPatternType( PatternProbabilities::PatternType( 1, 0 ) );
+			}
 		    }
 		}
 		
 		//std::wcout << "\"" << wordCorr_[x]<< " "<< wordErr_[y] << "\" | ";
 		
 		//Merge
-		if( ( x >= 2 ) && ( matrix_[y-1][x-2].value != -1 ) ) {
-		    merge = patternWeights_->getWeight( Pattern( wordCorr_.substr( x-1, 2 ), wordErr_.substr( y, 1 ) ) );
-		    //std::wcout << "str : "<<  str << " | " << "merge : " << merge << " | ";
-		    if(merge != PatternWeights::UNDEF ) {
-			merge+=matrix_[y-1][x-2].value;
+		if( ( x >= 2 ) && ( matrix_[y-1][x-2].value != PatternProbabilities::UNDEF ) ) {
+		    prob = patternProbabilities_->getWeight( Pattern( wordCorr_.substr( x-1, 2 ), wordErr_.substr( y, 1 ) ) );
+		    if( prob != PatternProbabilities::UNDEF ) {
+			newValue = matrix_[y-1][x-2].value + ( -log( prob ) );
 
-			if( ( minValue == PatternWeights::UNDEF ) || (merge < minValue ) ) {
-			    minValue = merge;
+			if( ( minValue == PatternProbabilities::UNDEF ) || (newValue < minValue ) ) {
+			    minValue = newValue;
 			    matrix_[y][x].removePatternTypes();
-			    matrix_[y][x].addPatternType( PatternWeights::PatternType( 2, 1 ) );
+			    matrix_[y][x].addPatternType( PatternProbabilities::PatternType( 2, 1 ) );
 			}
-			else if(merge == minValue) {
-			    matrix_[y][x].addPatternType( PatternWeights::PatternType( 2, 1 ) );
+			else if( newValue == minValue ) {
+			    matrix_[y][x].addPatternType( PatternProbabilities::PatternType( 2, 1 ) );
 			}
 		    }
 		}
 
 		//Split
-		if( ( y >= 2 ) && ( matrix_[y-2][x-1].value != -1 ) ) {
-		    std::wstring strLeft, strRight;
-		    strLeft = strLeft + wordCorr_.at(x);
-		    strRight = strRight + wordErr_.at(y-1) + wordErr_.at(y);
-		    csl::Pattern pat(strLeft, strRight);
+		if( ( y >= 2 ) && ( matrix_[y-2][x-1].value != PatternProbabilities::UNDEF ) ) {
+		    prob = patternProbabilities_->getWeight( Pattern( wordCorr_.substr( x, 1 ), wordErr_.substr( y-1, 2 ) ) );
+
 		    
-		    split = patternWeights_->getWeight( Pattern( wordCorr_.substr( x, 1 ), wordErr_.substr( y-1, 2 ) ) );
-		    //std::wcout << "str : "<< str << " | " << "split : " << split << " | ";
-		    if( split  != PatternWeights::UNDEF ) {
-			split += matrix_[y-2][x-1].value;
+		    prob = patternProbabilities_->getWeight( Pattern( wordCorr_.substr( x, 1 ), wordErr_.substr( y-1, 2 ) ) );
+		    if( prob != PatternProbabilities::UNDEF ) {
+			newValue = matrix_[y-2][x-1].value + ( -log( prob ) );
 			
 
-			if( ( minValue == PatternWeights::UNDEF ) || ( split < minValue ) ) {
-			    minValue = split;
+			if( ( minValue == PatternProbabilities::UNDEF ) || ( newValue < minValue ) ) {
+			    minValue = newValue;
 			    matrix_[y][x].removePatternTypes();
-			    matrix_[y][x].addPatternType( PatternWeights::PatternType( 1, 2 ) );
+			    matrix_[y][x].addPatternType( PatternProbabilities::PatternType( 1, 2 ) );
 			}
-			else if(split == minValue) {
-			    matrix_[y][x].addPatternType( PatternWeights::PatternType( 1, 2 ) );
+			else if( newValue == minValue ) {
+			    matrix_[y][x].addPatternType( PatternProbabilities::PatternType( 1, 2 ) );
 			}
+			else {
+			}
+			
 		    }
 		} // split
 				
@@ -252,7 +253,7 @@ namespace csl {
 	    
 	} // if debug_
 
-	float doReturn = matrix_[matrixH-1][matrixW-1].value;
+	bool doReturn = ( matrix_[matrixH-1][matrixW-1].value != PatternProbabilities::UNDEF );
 	
 	instructions_ = instructions;
 	
@@ -261,7 +262,7 @@ namespace csl {
 		throw csl::exceptions::cslException( "csl::ComputeInstruction::computeInstruction: answer object 'instructions' not empty." );
 	    }
 
-	    if( doReturn != PatternWeights::UNDEF ) {
+	    if( doReturn == 1 ) {
 		instructions_->push_back( Instruction() ); // create a first instruction to work on
 		getInstructions( matrixW-1, matrixH-1, 0 );
 	    }

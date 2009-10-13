@@ -7,7 +7,7 @@
 #include<string.h>
 #include<csl/Global.h>
 #include<csl/Pattern/Instruction.h>
-#include<csl/Pattern/PatternWeights.h>
+#include<csl/Pattern/PatternProbabilities.h>
 
 namespace csl {
 
@@ -36,13 +36,13 @@ namespace csl {
 	 * @param wErr The incorrect word 
 	 * @param[out] instructions is a pointer to a vector of instructions, which is filled with all (equally) best ways to transform the strings.
 	 */
-	float computeInstruction(const std::wstring& wCorr, const std::wstring& wErr, std::vector< Instruction >* instruction = 0 );
+	bool computeInstruction( std::wstring const& wCorr, std::wstring const& wErr, std::vector< Instruction >* instruction = 0 );
 	
 	
 	/**
-	 * @brief Creates a connection to a LevenshteinWeights object
+	 * @brief Creates a connection to a LevenshteinProbabilities object
 	 */
-	void connectPatternWeights( PatternWeights const& levW );
+	void connectPatternProbabilities( PatternProbabilities const& levW );
 	
 	/**
 	 * @brief Sets debug_ 
@@ -52,9 +52,9 @@ namespace csl {
     private:
 	bool debug_;
 
-	class PatternTypeChain : public PatternWeights::PatternType {
+	class PatternTypeChain : public PatternProbabilities::PatternType {
 	public:
-	    PatternTypeChain( PatternWeights::PatternType const& patternType, PatternTypeChain* n ) : 
+	    PatternTypeChain( PatternProbabilities::PatternType const& patternType, PatternTypeChain* n ) : 
 		PatternType( patternType ),
 		next( n ) {
 	    }
@@ -65,7 +65,7 @@ namespace csl {
 	class MatrixItem {
 	public:
 	    MatrixItem() : 
-		value( PatternWeights::UNDEF ),
+		value( PatternProbabilities::UNDEF ),
 		patternTypes( 0 ) {
 	    }
 
@@ -74,7 +74,7 @@ namespace csl {
 		reset();
 	    }
 	    void reset() {
-		value = PatternWeights::UNDEF;
+		value = PatternProbabilities::UNDEF;
 		removePatternTypes();
 	    }
 
@@ -87,7 +87,7 @@ namespace csl {
 		}
 	    }
 
-	    void addPatternType( PatternWeights::PatternType const& patternType ) {
+	    void addPatternType( PatternProbabilities::PatternType const& patternType ) {
 		patternTypes = new PatternTypeChain( patternType, patternTypes );
 	    }
 
@@ -104,7 +104,7 @@ namespace csl {
 	MatrixItem matrix_[500][500];
 	std::wstring wordCorr_;
 	std::wstring wordErr_;
-	const PatternWeights* patternWeights_;
+	const PatternProbabilities* patternProbabilities_;
 
 	std::vector< Instruction >* instructions_;
 

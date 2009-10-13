@@ -4,7 +4,7 @@
 #include "../Pattern.h"
 #include "../PatternSet.h"
 #include "../PosPattern.h"
-#include "../PatternWeights.h"
+#include "../PatternProbabilities.h"
 #include "../ComputeInstruction.h"
 
 #include <cppunit/extensions/HelperMacros.h>
@@ -21,7 +21,7 @@ namespace csl {
 	CPPUNIT_TEST( testPattern );
 	CPPUNIT_TEST( testPatternSet );
 	CPPUNIT_TEST( testPosPattern );
-	CPPUNIT_TEST( testPatternWeights );
+	CPPUNIT_TEST( testPatternProbabilities );
 	CPPUNIT_TEST( testComputeInstruction );
 	CPPUNIT_TEST_SUITE_END();
     public:
@@ -29,7 +29,7 @@ namespace csl {
 	void testPattern();
 	void testPatternSet();
 	void testPosPattern();
-	void testPatternWeights();
+	void testPatternProbabilities();
 	void testComputeInstruction();
 
     private:
@@ -62,22 +62,22 @@ namespace csl {
 	CPPUNIT_ASSERT( pp2.getPosition() == 3 );
     }
 
-    void TestPattern::testPatternWeights() {
-	PatternWeights pw;
-	CPPUNIT_ASSERT( pw.getWeight( Pattern( L"t", L"th" ) ) == PatternWeights::UNDEF );
-	pw.setWeight( Pattern( L"t", L"th" ), 0.35 );
-	CPPUNIT_ASSERT( pw.getWeight( Pattern( L"t", L"th" ) ) == static_cast< float >( 0.35 ) );
+    void TestPattern::testPatternProbabilities() {
+	PatternProbabilities pp;
+	CPPUNIT_ASSERT( pp.getWeight( Pattern( L"t", L"th" ) ) == PatternProbabilities::UNDEF );
+	pp.setWeight( Pattern( L"t", L"th" ), 0.35 );
+	CPPUNIT_ASSERT( pp.getWeight( Pattern( L"t", L"th" ) ) == static_cast< float >( 0.35 ) );
 	
-	pw.setDefault( PatternWeights::PatternType( 1, 2 ), 1.3 );
+	pp.setDefault( PatternProbabilities::PatternType( 1, 2 ), 1.3 );
 	
-	CPPUNIT_ASSERT( pw.getWeight( Pattern( L"t", L"th" ) ) == static_cast< float >( 0.35 ) ); // as before
-	CPPUNIT_ASSERT( pw.getWeight( Pattern( L"x", L"yz" ) ) == static_cast< float >( 1.3 ) ); // default value
-	CPPUNIT_ASSERT( pw.getWeight( Pattern( L"xy", L"z" ) ) == PatternWeights::UNDEF ); // as before
+	CPPUNIT_ASSERT( pp.getWeight( Pattern( L"t", L"th" ) ) == static_cast< float >( 0.35 ) ); // as before
+	CPPUNIT_ASSERT( pp.getWeight( Pattern( L"x", L"yz" ) ) == static_cast< float >( 1.3 ) ); // default value
+	CPPUNIT_ASSERT( pp.getWeight( Pattern( L"xy", L"z" ) ) == PatternProbabilities::UNDEF ); // as before
 
-	pw.reset();
-	CPPUNIT_ASSERT( pw.getWeight( Pattern( L"t", L"th" ) ) == PatternWeights::UNDEF );
-	CPPUNIT_ASSERT( pw.getWeight( Pattern( L"x", L"yz" ) ) == PatternWeights::UNDEF );
-	CPPUNIT_ASSERT( pw.getWeight( Pattern( L"xy", L"z" ) ) == PatternWeights::UNDEF );
+	pp.reset();
+	CPPUNIT_ASSERT( pp.getWeight( Pattern( L"t", L"th" ) ) == PatternProbabilities::UNDEF );
+	CPPUNIT_ASSERT( pp.getWeight( Pattern( L"x", L"yz" ) ) == PatternProbabilities::UNDEF );
+	CPPUNIT_ASSERT( pp.getWeight( Pattern( L"xy", L"z" ) ) == PatternProbabilities::UNDEF );
 
 
     }
@@ -86,30 +86,78 @@ namespace csl {
     void TestPattern::testComputeInstruction() {
 	ComputeInstruction ci;
 	ci.setDebug( 1 );
-	PatternWeights pw;
-	ci.connectPatternWeights( pw );
+	PatternProbabilities pp;
+	ci.connectPatternProbabilities( pp );
 
 	std::vector< Instruction > instructions;
 	
-	pw.setDefault( PatternWeights::PatternType( 0, 1 ), 1 ); // standard ins
-	pw.setDefault( PatternWeights::PatternType( 1, 0 ), 1 ); // standard del
-	pw.setDefault( PatternWeights::PatternType( 1, 1 ), 1 ); // standard sub
+
+	// all operations are tested separately
 
 
-	pw.setDefault( PatternWeights::PatternType( 2, 1 ), 1 ); // standard merge
-	pw.setDefault( PatternWeights::PatternType( 1, 2 ), 1 ); // standard split
-	CPPUNIT_ASSERT( ci.computeInstruction( L"abcde", L"abxcde", &instructions ) == 1 );
+	// sub
+	pp.reset();
+	pp.setWeight( csl::Pattern( L"x", L"y" ), 0.0001 );
+	CPPUNIT_ASSERT( ci.computeInstruction( L"abxcd", L"abycd", &instructions ) ); // 1 sub
+	CPPUNIT_ASSERT( instructions.size() == 1 );
+	CPPUNIT_ASSERT( instructions.at( 0 ).size() == 1 );
+	CPPUNIT_ASSERT( instructions.at( 0 ).at( 0 ) == PosPattern( L"x", L"y", 2 ) );
+
+
+	// insert
+	pp.reset();
 	instructions.clear();
-	CPPUNIT_ASSERT( ci.computeInstruction( L"abcde", L"axcdy", &instructions ) == 2 ); // 1 sub
+	pp.setWeight( csl::Pattern( L"", L"x" ), 0.0001 );
+	CPPUNIT_ASSERT( ci.computeInstruction( L"muh", L"mxuh", &instructions ) ); // 1 ins
+	CPPUNIT_ASSERT( instructions.size() == 1 );
+	CPPUNIT_ASSERT( instructions.at( 0 ).size() == 1 );
+	CPPUNIT_ASSERT( instructions.at( 0 ).at( 0 ) == PosPattern( L"", L"x", 1 ) );
 
-
+	// delete
+	pp.reset();
 	instructions.clear();
-	CPPUNIT_ASSERT( ci.computeInstruction( L"abcdey", L"abxcdez", &instructions ) == 2 ); // 1 sub
+	pp.setWeight( csl::Pattern( L"x", L"" ), 0.0001 );
+	CPPUNIT_ASSERT( ci.computeInstruction( L"mxuh", L"muh", &instructions ) ); // 1 del
+	CPPUNIT_ASSERT( instructions.size() == 1 );
+	CPPUNIT_ASSERT( instructions.at( 0 ).size() == 1 );
+	CPPUNIT_ASSERT( instructions.at( 0 ).at( 0 ) == PosPattern( L"x", L"", 1 ) );
+
+	// merge
+	pp.reset();
+	instructions.clear();
+	pp.setWeight( csl::Pattern( L"xy", L"z" ), 0.0001 );
+	CPPUNIT_ASSERT( ci.computeInstruction( L"mxyuh", L"mzuh", &instructions ) ); // 1 del
+	CPPUNIT_ASSERT( instructions.size() == 1 );
+	CPPUNIT_ASSERT( instructions.at( 0 ).size() == 1 );
+	CPPUNIT_ASSERT( instructions.at( 0 ).at( 0 ) == PosPattern( L"xy", L"z", 1 ) );
+
+	// split
+	pp.reset();
+	instructions.clear();
+	pp.setWeight( csl::Pattern( L"x", L"yz" ), 0.0001 );
+	CPPUNIT_ASSERT( ci.computeInstruction( L"mxuh", L"myzuh", &instructions ) ); // 1 del
+	CPPUNIT_ASSERT( instructions.size() == 1 );
+	CPPUNIT_ASSERT( instructions.at( 0 ).size() == 1 );
+	CPPUNIT_ASSERT( instructions.at( 0 ).at( 0 ) == PosPattern( L"x", L"yz", 1 ) );
+
 	
+	pp.reset();
+	pp.setDefault( PatternProbabilities::PatternType( 0, 1 ), 0.00001 ); // standard ins
+	pp.setDefault( PatternProbabilities::PatternType( 1, 0 ), 0.00001 ); // standard del
+	pp.setDefault( PatternProbabilities::PatternType( 1, 1 ), 0.00001 ); // standard sub
+
+	pp.setDefault( PatternProbabilities::PatternType( 2, 1 ), 0.00001 ); // standard merge
+	pp.setDefault( PatternProbabilities::PatternType( 1, 2 ), 0.00001 ); // standard split
 	
+	instructions.clear();
+	CPPUNIT_ASSERT( ci.computeInstruction( L"abcde", L"abxcde", &instructions ) );
 
 	instructions.clear();
-	CPPUNIT_ASSERT( ci.computeInstruction( L"muh", L"mxuh", &instructions ) == 1 ); // 1 ins
+	CPPUNIT_ASSERT( ci.computeInstruction( L"abcde", L"axcdy", &instructions ) ); // 2 sub
+
+
+	instructions.clear();
+	CPPUNIT_ASSERT( ci.computeInstruction( L"muh", L"mxuh", &instructions ) ); // 1 ins
 	for( std::vector< Instruction >::const_iterator it = instructions.begin(); it != instructions.end(); ++it ) {
 	    it->print();std::wcout<<std::endl;
 	}
@@ -123,7 +171,7 @@ namespace csl {
 	instructions.clear();
 
 
-	CPPUNIT_ASSERT( ci.computeInstruction( L"muh", L"xmuh", &instructions ) == 1 ); // 1 ins at beginning of word
+	CPPUNIT_ASSERT( ci.computeInstruction( L"muh", L"xmuh", &instructions ) ); // 1 ins at beginning of word
 
 	CPPUNIT_ASSERT( instructions.size() == 2 );
 	CPPUNIT_ASSERT( instructions.at( 0 ).size() == 1 );
@@ -133,23 +181,23 @@ namespace csl {
 	instructions.clear();
 
 
-	CPPUNIT_ASSERT( ci.computeInstruction( L"muh", L"mxh", &instructions ) == 1 ); // 1 sub
+	CPPUNIT_ASSERT( ci.computeInstruction( L"muh", L"mxh", &instructions ) ); // 1 sub
 	CPPUNIT_ASSERT( instructions.size() == 1 );
 	CPPUNIT_ASSERT( instructions.at( 0 ).size() == 1 );
 	CPPUNIT_ASSERT( instructions.at( 0 ).at( 0 ) == PosPattern( L"u", L"x", 1 ) );
 	instructions.clear();
 
-	CPPUNIT_ASSERT( ci.computeInstruction( L"muh", L"xuh", &instructions ) == 1 ); // 1 sub at beginning of word
+	CPPUNIT_ASSERT( ci.computeInstruction( L"muh", L"xuh", &instructions ) ); // 1 sub at beginning of word
 	CPPUNIT_ASSERT( instructions.size() == 1 );
 	CPPUNIT_ASSERT( instructions.at( 0 ).size() == 1 );
 	CPPUNIT_ASSERT( instructions.at( 0 ).at( 0 ) == PosPattern( L"m", L"x", 0 ) );
 	instructions.clear();
 
 	// deactivate the merges and splits again
-	pw.setDefault( PatternWeights::PatternType( 2, 1 ), PatternWeights::UNDEF ); // standard merge
-	pw.setDefault( PatternWeights::PatternType( 1, 2 ), PatternWeights::UNDEF ); // standard split
+	pp.setDefault( PatternProbabilities::PatternType( 2, 1 ), PatternProbabilities::UNDEF ); // standard merge
+	pp.setDefault( PatternProbabilities::PatternType( 1, 2 ), PatternProbabilities::UNDEF ); // standard split
 
-	CPPUNIT_ASSERT( ci.computeInstruction( L"milk", L"nrilk", &instructions ) == 2 ); // 1 ins, 1 sub
+	CPPUNIT_ASSERT( ci.computeInstruction( L"milk", L"nrilk", &instructions ) ); // 1 ins, 1 sub
 	CPPUNIT_ASSERT( instructions.size() == 2 );
 	CPPUNIT_ASSERT( instructions.at( 0 ).size() == 2 );
 	CPPUNIT_ASSERT( instructions.at( 0 ).at( 0 ) == PosPattern( L"", L"n", 0 ) );
@@ -158,7 +206,7 @@ namespace csl {
 	CPPUNIT_ASSERT( instructions.at( 1 ).at( 1 ) == PosPattern( L"", L"r", 1 ) );
 	instructions.clear();
 
-	CPPUNIT_ASSERT( ci.computeInstruction( L"murnau", L"mumau", &instructions ) == 2 ); // 1 del, 1 sub
+	CPPUNIT_ASSERT( ci.computeInstruction( L"murnau", L"mumau", &instructions )  ); // 1 del, 1 sub
 	CPPUNIT_ASSERT( instructions.size() == 2 );
 	CPPUNIT_ASSERT( instructions.at( 0 ).size() == 2 );
 	CPPUNIT_ASSERT( instructions.at( 0 ).at( 0 ) == PosPattern( L"r", L"", 2 ) );
@@ -167,59 +215,42 @@ namespace csl {
 	CPPUNIT_ASSERT( instructions.at( 1 ).at( 1 ) == PosPattern( L"n", L"", 3 ) );
 	instructions.clear();
 
-	pw.setWeight( Pattern( L"m", L"rn" ), 0.35 );
-	CPPUNIT_ASSERT( ci.computeInstruction( L"milk", L"rnilk", &instructions ) == static_cast< float >( 0.35 ) ); // 1 split
+	pp.setWeight( Pattern( L"m", L"rn" ), 0.35 );
+	CPPUNIT_ASSERT( ci.computeInstruction( L"milk", L"rnilk", &instructions ) ); // 1 split
 	CPPUNIT_ASSERT( instructions.size() == 1 );
 	CPPUNIT_ASSERT( instructions.at( 0 ).size() == 1 );
 	CPPUNIT_ASSERT( instructions.at( 0 ).at( 0 ) == PosPattern( L"m", L"rn", 0 ) );
 	instructions.clear();
 
-	CPPUNIT_ASSERT( ci.computeInstruction( L"milk", L"rnilkx", &instructions ) == static_cast< float >( 1.35 ) ); // 1 split, 1 insertion
+	CPPUNIT_ASSERT( ci.computeInstruction( L"milk", L"rnilkx", &instructions ) ); // 1 split, 1 insertion
 	CPPUNIT_ASSERT( instructions.size() == 1 );
 	CPPUNIT_ASSERT( instructions.at( 0 ).size() == 2 );
 	CPPUNIT_ASSERT( instructions.at( 0 ).at( 0 ) == PosPattern( L"m", L"rn", 0 ) );
 	CPPUNIT_ASSERT( instructions.at( 0 ).at( 1 ) == PosPattern( L"", L"x", 4 ) );
 	instructions.clear();
 
-	pw.setWeight( Pattern( L"m", L"n" ), 0.54 );
-	CPPUNIT_ASSERT( ci.computeInstruction( L"milkman", L"nilkrnan", &instructions ) == static_cast< float >( 0.89 ) ); // 1 sub 0.54, 1 split 0.35
+	pp.setWeight( Pattern( L"m", L"n" ), 0.54 );
+	CPPUNIT_ASSERT( ci.computeInstruction( L"milkman", L"nilkrnan", &instructions ) ); // 1 sub 0.54, 1 split 0.35
 	CPPUNIT_ASSERT( instructions.size() == 1 );
 	CPPUNIT_ASSERT( instructions.at( 0 ).size() == 2 );
 	CPPUNIT_ASSERT( instructions.at( 0 ).at( 0 ) == PosPattern( L"m", L"n", 0 ) );
 	CPPUNIT_ASSERT( instructions.at( 0 ).at( 1 ) == PosPattern( L"m", L"rn", 4 ) );
-	instructions.clear();
 
-	//// THIS WORKS WITH 0.56, BUT NOT WITH 0.57! AAAAAAAAAAAAHHHHHHHHHH
-	pw.setWeight( Pattern( L"rn", L"m" ), 0.56 );
-	CPPUNIT_ASSERT( ci.computeInstruction( L"morning", L"moming", &instructions ) == static_cast< float >( 0.56 ) ); // 1 merge 0.56
-	CPPUNIT_ASSERT( instructions.size() == 1 );
-	CPPUNIT_ASSERT( instructions.at( 0 ).size() == 1 );
-	CPPUNIT_ASSERT( instructions.at( 0 ).at( 0 ) == PosPattern( L"rn", L"m", 2 ) );
-	instructions.clear();
-
-	CPPUNIT_ASSERT( ci.computeInstruction( L"morning", L"mming", &instructions ) == static_cast< float >( 1.56 ) ); // 1 del, 1 merge 0.56
-	CPPUNIT_ASSERT( instructions.size() == 1 );
-	CPPUNIT_ASSERT( instructions.at( 0 ).size() == 2 );
-	CPPUNIT_ASSERT( instructions.at( 0 ).at( 0 ) == PosPattern( L"o", L"", 1 ) );
-	CPPUNIT_ASSERT( instructions.at( 0 ).at( 1 ) == PosPattern( L"rn", L"m", 2 ) );
-	instructions.clear();
-
-	CPPUNIT_ASSERT( ci.computeInstruction( L"morning", L"moming", &instructions ) == static_cast< float >( 0.56 ) ); // 1 merge 0.56
-	CPPUNIT_ASSERT( instructions.size() == 1 );
-	CPPUNIT_ASSERT( instructions.at( 0 ).size() == 1 );
-	CPPUNIT_ASSERT( instructions.at( 0 ).at( 0 ) == PosPattern( L"rn", L"m", 2 ) );
-	instructions.clear();
 
 	// this is a setup that is used for the Profiler, for instance
 	/// obviously the merges and splits give additional trouble
-	pw.reset();
-	pw.setDefault( csl::PatternWeights::PatternType( 1, 1 ), 1 );
-	pw.setDefault( csl::PatternWeights::PatternType( 1, 0 ), 1 );
-	pw.setDefault( csl::PatternWeights::PatternType( 0, 1 ), 1 );
-	pw.setDefault( csl::PatternWeights::PatternType( 2, 1 ), 1 );
-	pw.setDefault( csl::PatternWeights::PatternType( 1, 2 ), 1 );
+	pp.reset();
+	pp.setDefault( csl::PatternProbabilities::PatternType( 1, 1 ), 0.00001 );
+	pp.setDefault( csl::PatternProbabilities::PatternType( 1, 0 ), 0.00001 );
+	pp.setDefault( csl::PatternProbabilities::PatternType( 0, 1 ), 0.00001 );
+	pp.setDefault( csl::PatternProbabilities::PatternType( 2, 1 ), 0.00001 );
+	pp.setDefault( csl::PatternProbabilities::PatternType( 1, 2 ), 0.00001 );
 	
-	CPPUNIT_ASSERT( ci.computeInstruction( L"muh", L"mxuh", &instructions ) == 1 ); // 1 ins inside the word
+	instructions.clear();
+	CPPUNIT_ASSERT( ci.computeInstruction( L"muh", L"mxuh", &instructions ) ); // 1 ins inside the word
+
+	std::wcout << "size is "<< instructions.size() << std::endl;
+
  	for( std::vector< Instruction >::const_iterator it = instructions.begin(); it != instructions.end(); ++it ) {
  	    it->print();std::wcout<<std::endl;
  	}
@@ -233,7 +264,7 @@ namespace csl {
 	CPPUNIT_ASSERT( instructions.at( 2 ).at( 0 ) == PosPattern( L"m", L"mx", 0 ) );
 	instructions.clear();
 
-	CPPUNIT_ASSERT( ci.computeInstruction( L"muh", L"xmuh", &instructions ) == 1 ); // 1 ins at beginning
+	CPPUNIT_ASSERT( ci.computeInstruction( L"muh", L"xmuh", &instructions ) ); // 1 ins at beginning
 	CPPUNIT_ASSERT( instructions.size() == 2 );
 	CPPUNIT_ASSERT( instructions.at( 0 ).size() == 1 );
 	CPPUNIT_ASSERT( instructions.at( 0 ).at( 0 ) == PosPattern( L"", L"x", 0 ) );
@@ -243,15 +274,15 @@ namespace csl {
 
 	////// smartMerge //////
 	// now those annoying pseudo-merges should disappear
-	pw.setSmartMerge( true );
+	pp.setSmartMerge( true );
 
-	CPPUNIT_ASSERT( ci.computeInstruction( L"muh", L"mxuh", &instructions ) == 1 ); // 1 ins inside the word
+	CPPUNIT_ASSERT( ci.computeInstruction( L"muh", L"mxuh", &instructions ) ); // 1 ins inside the word
 	CPPUNIT_ASSERT( instructions.size() == 1 );
 	CPPUNIT_ASSERT( instructions.at( 0 ).size() == 1 );
 	CPPUNIT_ASSERT( instructions.at( 0 ).at( 0 ) == PosPattern( L"", L"x", 1 ) );
 	instructions.clear();
 	
-	CPPUNIT_ASSERT( ci.computeInstruction( L"muh", L"xmuh", &instructions ) == 1 ); // 1 ins at beginning
+	CPPUNIT_ASSERT( ci.computeInstruction( L"muh", L"xmuh", &instructions ) ); // 1 ins at beginning
 	CPPUNIT_ASSERT( instructions.size() == 1 );
 	CPPUNIT_ASSERT( instructions.at( 0 ).size() == 1 );
 	CPPUNIT_ASSERT( instructions.at( 0 ).at( 0 ) == PosPattern( L"", L"x", 0 ) );
@@ -259,30 +290,27 @@ namespace csl {
 
 	
 	// What about spaces in words? Here's a real-world example
-	CPPUNIT_ASSERT( ci.computeInstruction( L"eure churfuerstliche", L"fuerstltche", &instructions ) == 9 ); // 1 ins at beginning
+	CPPUNIT_ASSERT( ci.computeInstruction( L"eure churfuerstliche", L"fuerstltche", &instructions ) );
 	instructions.clear();
 	
 	
 	// use only sub as default operations
-	pw.clear();
-	pw.setDefault( csl::PatternWeights::PatternType( 1, 1 ), 1 );
+	pp.clear();
+	pp.setDefault( csl::PatternProbabilities::PatternType( 1, 1 ), 1 );
 	
-	CPPUNIT_ASSERT( ci.computeInstruction( L"muh", L"xmuh", &instructions ) == PatternWeights::UNDEF ); // ins (not allowed)
+	CPPUNIT_ASSERT( ! ci.computeInstruction( L"muh", L"xmuh", &instructions ) ); // ins (not allowed)
 	CPPUNIT_ASSERT( instructions.empty() );
 
 	instructions.clear();
 	
-	CPPUNIT_ASSERT( ci.computeInstruction( L"galich", L"lich", &instructions ) == PatternWeights::UNDEF ); // del (not allowed)
+	CPPUNIT_ASSERT( ! ci.computeInstruction( L"galich", L"lich", &instructions )  ); // del (not allowed)
 	CPPUNIT_ASSERT( instructions.empty() );
 	
 	instructions.clear();
 
-	CPPUNIT_ASSERT( ci.computeInstruction( L"glich", L"galich", &instructions ) == PatternWeights::UNDEF ); // ins (not allowed)
+	CPPUNIT_ASSERT( ! ci.computeInstruction( L"glich", L"galich", &instructions ) ); // ins (not allowed)
 	CPPUNIT_ASSERT( instructions.empty() );
 
-	for( std::vector< Instruction >::const_iterator it = instructions.begin(); it != instructions.end(); ++it ) {
-	    it->print();std::wcout<<std::endl;
-	}
 
     }
 
