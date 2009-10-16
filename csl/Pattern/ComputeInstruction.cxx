@@ -21,7 +21,7 @@ namespace csl {
 	patternProbabilities_ = &patternProbabilities;
     }
     
-
+    
     bool ComputeInstruction::computeInstruction( std::wstring const& wCorr, 
 						 std::wstring const& wErr, 
 						 std::vector< Instruction >* instructions ) {

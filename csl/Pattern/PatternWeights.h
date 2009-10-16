@@ -40,8 +40,14 @@ namespace csl {
 
 	PatternWeights();
 
+	/**
+	 * @brief Removes all the weights and defaults. Does NOT change the setting of the smartMerge mode.
+	 */
 	void reset();
 
+	/**
+	 * @brief an alias for reset()
+	 */
 	void clear();
 
 	/**
