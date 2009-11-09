@@ -33,8 +33,9 @@ namespace csl {
      *
      */
     template< class AnnType = int >
-    class MinDic : public TransTable< TT_PERFHASH, uint16_t >,
-		   public iDictionary {
+    class MinDic : public TransTable< TT_PERFHASH, uint16_t >
+		 , public iDictionary< AnnType > 
+    {
     public:
 	typedef TransTable< TT_PERFHASH, uint16_t > TransTable_t;
 

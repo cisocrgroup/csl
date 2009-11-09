@@ -17,21 +17,40 @@ int main( int argc, const char** argv ) {
 		  <<"Options:"<<std::endl
 		  <<"--stat=1\tto print statistics of the MinDic"<<std::endl
 		  <<"--dot=1\tto print dotcode for the MinDic"
+		  <<"--annType=float\tto indicate that the MinDic has annotations of type 'float' (instead of default 'int')"
 		  <<std::endl<<std::endl;
 	
 	exit( 1 );
     }
     try {
-	MinDic<> t;
-	t.loadFromFile( options.getArgument( 0 ).c_str() );
 
-	if( options.hasOption( "dot" ) ) {
-	    t.toDot();
+	// this is some nasty code duplication here !!!!!!!!!
+	if( options.hasOption( "annType" ) && ( options.getOption( "annType" ) == "float" ) ) {
+	    MinDic< float > t;
+	    t.loadFromFile( options.getArgument( 0 ).c_str() );
+	    
+	    if( options.hasOption( "dot" ) ) {
+		t.toDot();
+	    }
+	    else if( options.hasOption( "stat" ) ) {
+		t.doAnalysis();
+	    }
+	    else t.printDic();
 	}
-	else if( options.hasOption( "stat" ) ) {
-	    t.doAnalysis();
+	else {
+	    MinDic<> t;
+	    t.loadFromFile( options.getArgument( 0 ).c_str() );
+	    
+	    if( options.hasOption( "dot" ) ) {
+		t.toDot();
+	    }
+	    else if( options.hasOption( "stat" ) ) {
+		t.doAnalysis();
+	    }
+	    else t.printDic();
 	}
-	else t.printDic();
+
+
 
 	return 0;
     } catch ( exceptions::cslException ex ) {

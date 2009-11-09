@@ -54,7 +54,7 @@ namespace csl {
     }
     
     template< typename MinDicType >
-    void Vaam< MinDicType >::setFilterDic( iDictionary const& filterDic ) {
+    void Vaam< MinDicType >::setFilterDic( iDictionary< int > const& filterDic ) {
 	filterDic_ = &filterDic;
     }
 

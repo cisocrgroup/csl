@@ -36,7 +36,7 @@ int main(int argc, char const** argv) {
 		t.addToken( line.c_str(), annotation );
 	    }
 	    if( errno == EILSEQ ) { // catch encoding error
-		throw exceptions::badInput( "MinDic::compileDic: Encoding error in input sequence." );
+		throw csl::exceptions::badInput( "MinDic::compileDic: Encoding error in input sequence." );
 	    }
 
 	    t.finishConstruction();

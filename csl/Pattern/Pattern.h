@@ -42,6 +42,11 @@ namespace csl {
 	    else return ( getRight() < other.getRight() );
 	}
 
+	inline void clear() {
+	    left_.clear();
+	    right_.clear();
+	}
+
 	/**
 	 * @brief get the left side of the pattern
 	 * @return the left side of the pattern
@@ -61,10 +66,13 @@ namespace csl {
 	    return ( left_.empty() && right_.empty() );
 	}
 
+	inline void setLeft( std::wstring const& left );
+
+	inline void setRight( std::wstring const& right );
+
 	inline void print( std::wostream& os = std::wcout ) const;
 
 	inline std::wstring toString() const;
-	
 	
 
     private:
@@ -88,6 +96,14 @@ namespace csl {
 	return right_;
     }
     
+    inline void Pattern::setLeft( std::wstring const& left ) {
+	left_ = left;
+    }
+
+    inline void Pattern::setRight( std::wstring const& right ) {
+	right_ = right;
+    }
+
     void Pattern::print( std::wostream& os ) const {
 	os << getLeft() << "_" << getRight();
     }
@@ -95,6 +111,8 @@ namespace csl {
     std::wstring Pattern::toString() const {
 	return getLeft() + L"_" + getRight();
     }
+    
+
 
 } // eon
 

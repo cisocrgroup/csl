@@ -1,7 +1,8 @@
-#ifndef CSL_POS_PATTERN
-#define CSL_POS_PATTERN CSL_POS_PATTERN
+#ifndef CSL_POSPATTERN
+#define CSL_POSPATTERN CSL_POSPATTERN
 
 #include<sstream>
+#include<csl/Global.h>
 #include "./Pattern.h"
 
 
@@ -21,10 +22,24 @@ namespace csl {
 	
 	inline bool operator==( PosPattern const& other ) const;
 
+	inline void clear();
+
 	inline size_t getPosition() const;
+
+	inline void setPosition( size_t p );
 	
 	inline void print( std::wostream& os = std::wcout ) const;
+
 	inline std::wstring toString() const;
+
+	/**
+	 * @brief reads Pattern data structure from the given string.
+	 * @param offset start at this position of the string. Default is 0
+	 * @return A new offset pointing to the first character not used for the parse
+	 */
+	inline size_t parseFromString( std::wstring const& str, size_t offset = 0 );
+	
+
 	
     private:
 	size_t position_;
@@ -44,9 +59,17 @@ namespace csl {
 	return ( Pattern::operator==( other ) && ( getPosition() == other.getPosition() ) );
     }
 
+    void PosPattern::clear() {
+	Pattern::clear();
+	position_ = 0;
+    }
     
     size_t PosPattern::getPosition() const {
 	return position_;
+    }
+
+    void PosPattern::setPosition( size_t p ) {
+	position_ = p;
     }
 
     void PosPattern::print( std::wostream& os ) const {
@@ -62,6 +85,31 @@ namespace csl {
 	print( oss );
 	oss.flush();
 	return oss.str();
+    }
+
+    inline size_t PosPattern::parseFromString( std::wstring const& str, size_t offset ) {
+	size_t leftBracket = offset;
+	if( str.at( leftBracket ) != '(' ) throw exceptions::badInput( "csl::PosPattern::parseFromString: Found no opening bracket" );
+	offset += 1;
+
+	size_t underscore = str.find( '_', offset );
+	if( underscore == str.npos ) throw exceptions::badInput( "csl::Pattern::parseFromString: Found no underscore" );
+
+	offset = underscore  + 1;
+	size_t comma = str.find( ',', offset );
+	if( underscore == str.npos ) throw exceptions::badInput( "csl::Pattern::parseFromString: Found no comma" );
+
+	offset = comma  + 1;
+	size_t rightBracket = str.find( ')', offset );
+	if( underscore == str.npos ) throw exceptions::badInput( "csl::Pattern::parseFromString: Found no closing bracket" );
+
+
+	setLeft( str.substr( leftBracket + 1, underscore - leftBracket - 1 ) );
+	setRight( str.substr( underscore + 1, comma - underscore - 1 ) );
+	wchar_t* dummy = 0;
+	setPosition( wcstol( str.substr( comma + 1, rightBracket - comma - 1 ).c_str(), &dummy, 10 ) );
+
+	return rightBracket + 1;
     }
 
 

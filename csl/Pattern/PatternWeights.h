@@ -104,6 +104,12 @@ namespace csl {
 	void loadFromFile( const char* patternFile );	
 	void writeToFile( const char* patternFile ) const;	
 
+	void writeToXML( std::wostream& os ) const;
+	void writeToXML( const char* xmlFile ) const;
+
+
+	void sortToVector( std::vector< std::pair< csl::Pattern, float > >* vec ) const;
+
 	private:
 
 	/**

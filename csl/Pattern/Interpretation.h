@@ -20,11 +20,7 @@ namespace csl {
 	 */
 	// @{
 
-	Interpretation() :
-	    levDistance_( 0 ),
-	    baseWordScore_( -1 )
-	    {
-	    }
+	Interpretation();
 
 	// @} // END Constructors/ Destructors
 
@@ -36,21 +32,7 @@ namespace csl {
 	 * if the sums are equal, the one with less lev. operations and more pattern 
 	 * operations will win.
 	 */
-	bool operator<( Interpretation const& other ) const {
-	    float compare = 
-		( getInstruction().size() + getLevDistance() * 1.01 ) - 
-		( other.getInstruction().size() + other.getLevDistance() * 1.01 );
-	    
-	    if     ( compare < 0 ) return true;
-	    else if( compare > 0 ) return false;
-
-	    compare = wcscmp( getWord().c_str(), other.getWord().c_str() );
-	    if( compare != 0 ) return ( compare >= 0 );
-	    
-	    // otherwise: do it the very un-efficient way:
-	    return ( wcscmp( toString().c_str(), other.toString().c_str() ) > 0 );
-	}
-
+	bool operator<( Interpretation const& other ) const;
 
 	/**
 	 * @name Getters
@@ -60,46 +42,46 @@ namespace csl {
 	/**
 	 * @brief returns the plain string
 	 */
-	std::wstring const& getWord() const {
-	    return word_;
-	}
+	std::wstring const& getWord() const;
 
 	/**
 	 * @brief returns the so-called @c baseWord from the dictionary, that was changed into a variant with the given @c Instruction
 	 *
 	 * If the instruction is empty, then @c getWord() == @c getBaseWord()
 	 */
-	std::wstring const& getBaseWord() const {
-	    return baseWord_;
-	}
+	std::wstring const& getBaseWord() const;
 
 	/**
 	 * @brief returns the levenshtein distance to the query
 	 */
-	size_t getLevDistance() const {
-	    return levDistance_;
-	}
+	size_t getLevDistance() const;
 
 	/**
 	 * @brief returns the score that was annotated with the @c baseWord in the dictionary.
 	 */
-	size_t getBaseWordScore() const {
-	    return baseWordScore_;
-	}
+	size_t getBaseWordScore() const;
 
 	/**
 	 * @brief returns the instruction that was used to turn @c baseWord into @c word 
+	 * @deprecated Use getHistInstruction instead!
 	 */
-	Instruction& getInstruction() {
-	    return instruction_;
-	}
+	Instruction& getInstruction();
+
+	/**
+	 * @brief const version of getInstruction()
+	 * @deprecated Use getHistInstruction instead!
+	 */
+	Instruction const& getInstruction() const;
+
+	/**
+	 * @brief More verbose name for getInstruction().
+	 */
+	Instruction& getHistInstruction();
 
 	/**
 	 * @brief const version of getInstruction()
 	 */
-	Instruction const& getInstruction() const {
-	    return instruction_;
-	}
+	Instruction const& getHistInstruction() const;
 
 	// @} // END Getters
 
@@ -108,34 +90,22 @@ namespace csl {
 	 */
 	// @{
 
-	void setWord( std::wstring const& w ) {
-	    word_ = w;
-	}
+	void setWord( std::wstring const& w );
 
-	void setBaseWord( std::wstring const& w ) {
-	    baseWord_ = w;
-	}
+	void setBaseWord( std::wstring const& w );
 
-	void setLevDistance( size_t dist ) {
-	    levDistance_ = dist;
-	}
+	void setLevDistance( size_t dist );
 
-	void setBaseWordScore( size_t score ) {
-	    baseWordScore_ = score;
-	}
+	void setBaseWordScore( size_t score );
 
 	/**
 	 * @brief erase all values from the object and bring it into a state as if just created.
 	 */
-	void clear() {
-	    word_.clear();
-	    baseWord_.clear();
-	    levDistance_ = 0;
-	    baseWordScore_ = -1;
-	    instruction_.clear();
-	}
+	void clear();
+
 	// @} // END Setters
 
+	size_t parseFromString( std::wstring const& str, size_t offset = 0 );
 
 	/**
 	 * @name Pretty-print
@@ -145,37 +115,17 @@ namespace csl {
 	 * @brief prints a string-representation of the interpretation to stdout or to another std::wstream 
 	 * specified as argument.
 	 */
-	void print( std::wostream& os = std::wcout ) const {
-	    os<<word_<<":"<<baseWord_<<"+";
-	    instruction_.print( os );
-	    os<<",dist="<<levDistance_;
-	    //os<<",baseWordScore="<<baseWordScore_;
-	}
+	void print( std::wostream& os = std::wcout ) const;
 	
-	std::wstring toString() const {
-	    //return word_ + L":" + baseWord_ + L"+" + instruction_.toString() + L",dist=" + levDistance_;
-	    std::wostringstream oss;
-	    print( oss );
-	    oss.flush();
-	    return oss.str();
-	}
-
+	std::wstring toString() const;
 
 	/**
 	 * @brief prints another useful format of the interpretation, more in the INL tradition
 	 */
-	void print_v2( std::wostream& os = std::wcout ) const {
-	    size_t begin = 0;
-	    for( csl::Instruction::const_iterator posPattern = instruction_.begin(); posPattern != instruction_.end(); ++posPattern ) {
-		os<<baseWord_.substr( begin, posPattern->getPosition() - begin ); // print unchanged substring left of the pattern
-		os<<"["<<posPattern->getLeft()<<"->"<<posPattern->getRight()<<"]"; // print pattern
-		begin = posPattern->getPosition() + posPattern->getLeft().length();
-	    }
-	    os<<baseWord_.substr( begin ); // print unchanged suffix of the baseWord
-	    
-	}
+	void print_v2( std::wostream& os = std::wcout ) const;
 
 	// @} // END Pretty-Print
+
 
     private:
 	/// the suggested correction candidate
@@ -205,6 +155,7 @@ namespace csl {
 
 	    
     }; // class Interpretation
+
 
 }
 

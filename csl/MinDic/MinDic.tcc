@@ -339,20 +339,23 @@ namespace csl {
 		const wchar_t* transitions = getSusoString( pos );
 		while( *transitions ) {
 			newPerfHashValue = perfHashValue;
+
+
+
+			
 			if( ( newPos = walkPerfHash( pos, *transitions, &newPerfHashValue ) ) ) {
 				w[depth] = *transitions;
 				if( isFinal( newPos ) ) {
 				    w[depth+1] = 0;
 				    std::wcout<< w <<"#"<<getAnnotation( newPerfHashValue )<<std::endl;
-
-					if( ( ++count_ % 100000 ) == 0 ) fprintf( stderr, "%d\n", (int)count_ );
+				    
+				    if( ( ++count_ % 100000 ) == 0 ) fprintf( stderr, "%d\n", (int)count_ );
 				} // if isFinal
 				printDic_rec( newPos, depth + 1, newPerfHashValue );
 
 			} // if couldWalk
 			else {
-			    
-				throw exceptions::badDictFile( "suso-string seems to be corrupted." ); 
+			    throw exceptions::badDictFile( "suso-string seems to be corrupted." ); 
 			}
 			++transitions;
 		} // while
