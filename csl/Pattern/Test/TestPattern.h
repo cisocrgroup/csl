@@ -143,6 +143,11 @@ namespace csl {
 	CPPUNIT_ASSERT( instr2.at( 1 ).getLeft() == L"le" );
 	CPPUNIT_ASSERT( instr2.at( 1 ).getRight() == L"ri" );
 	CPPUNIT_ASSERT( instr2.at( 1 ).getPosition() == 42 );
+
+	// parse empty instruction
+	Instruction instr3;
+	instr3.parseFromString( L"[]", 0 );
+	CPPUNIT_ASSERT( instr3.size() == 0 );
 	
     }
 

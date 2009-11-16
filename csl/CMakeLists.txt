@@ -10,15 +10,25 @@ add_subdirectory(MinDicFlexible)
 add_subdirectory(Vaam)
 add_subdirectory(SimpleFSA)
 add_subdirectory(DictSearch)
-add_subdirectory(Trie)
+#add_subdirectory(Trie)
 add_subdirectory(Pattern)
 add_subdirectory(Locale)
 
-ADD_LIBRARY( csl SHARED Alphabet/Alphabet.cxx )
-TARGET_LINK_LIBRARIES( csl Alphabet )
-TARGET_LINK_LIBRARIES( csl LevDEA )
-TARGET_LINK_LIBRARIES( csl DictSearch )
-target_link_libraries( csl Pattern )
+ADD_LIBRARY( csl SHARED 
+  Alphabet/Alphabet.cxx 
+  LevDEA/LevDEA.cxx
+  DictSearch/DictSearch.cxx
+  Pattern/ComputeInstruction.cxx
+  Pattern/Instruction.cxx
+  Pattern/Interpretation.cxx
+  Pattern/PatternWeights.cxx
+  )
+
+#TARGET_LINK_LIBRARIES( csl Alphabet )
+#TARGET_LINK_LIBRARIES( csl LevDEA )
+#TARGET_LINK_LIBRARIES( csl DictSearch )
+#TARGET_LINK_LIBRARIES( csl Pattern )
+#TARGET_LINK_LIBRARIES( csl DictSearch )
 
 install( 
   TARGETS csl
