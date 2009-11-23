@@ -125,14 +125,14 @@ namespace csl {
 	   << "<created_at>" << asctime(localtime(&t)) << "</created_at>" << std::endl
 	   << "</head>" << std::endl;
 	    
-	    for( csl::PatternWeights::const_PatternIterator it = patternsBegin(); it != patternsEnd(); ++it ) {
+	for( csl::PatternWeights::const_PatternIterator it = patternsBegin(); it != patternsEnd(); ++it ) {
 	    os << "<pattern left=\"" << it->first.getLeft() << "\" right=\"" << it->first.getRight() 
 	       << "\" prob=\"" << it->second << "\"/>" << std::endl;
 	}
 	
 	os << "</patternWeights>" << std::endl;
     }
-
+    
     void PatternWeights::writeToXML( char const* xmlFile ) const {
 	std::wofstream fo;
 	fo.imbue( std::locale( "" ) );
@@ -160,7 +160,7 @@ namespace csl {
 	for( std::vector< std::pair< csl::Pattern, float > >::const_iterator it = histPatternCountSorted.begin();
 	     it != histPatternCountSorted.end();
 	     ++it ) {
-	    str << it->first.getLeft() << '-' << it->first.getRight() << " : " << it->second << std::endl;
+	    str << it->first.getLeft() << '_' << it->first.getRight() << "#" << it->second << std::endl;
 //	    if( it - histPatternCountSorted.begin() > 30 )break;
 	}
 	
@@ -169,7 +169,4 @@ namespace csl {
 	    str << "<" <<  defaultIt->first.first << ',' << defaultIt->first.second << "> : " << defaultIt->second << std::endl;
 	}
     }
-
-
-
 }
