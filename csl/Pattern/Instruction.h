@@ -15,6 +15,12 @@ namespace csl {
     public:
 
 	/**
+	 * @brief Equality of instructions is quite obvious: two instructions are equal if both have the same size and all
+	 *        PosPatterns are equal.
+	 */
+	bool operator==( Instruction const& other ) const;
+
+	/**
 	 * @brief prints a string-representation of the instruction to stdout or to another std::wstream 
 	 * specified as argument.
 	 */
@@ -22,6 +28,9 @@ namespace csl {
 
 	std::wstring toString() const;
 
+	/**
+	 * @brief Converts a string as produced by {@link toString()} back into the data structure 
+	 */
 	size_t parseFromString( std::wstring const& str, size_t offset = 0 );
 
 	
@@ -37,6 +46,13 @@ namespace csl {
 	 * @todo make this method more secure, at least handle the exception that are maybe thrown by std::wstring::replace
 	 */
 	void applyTo( std::wstring* str ) const;
+
+	/**
+	 * @brief return true if the Instruction contains the given pattern.
+	 * In the current implementation this needs a linear run through the instruction.
+	 */
+	bool containsPattern( Pattern const& pat ) const;
+
 
     private:
 

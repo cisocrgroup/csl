@@ -4,6 +4,18 @@
 #include "./Instruction.h"
 namespace csl {
 
+    bool Instruction::operator==( Instruction const& other ) const {
+	if( size() != other.size() ) return false;
+
+	const_iterator this_it = begin();
+	const_iterator other_it = other.begin();
+	for( ; this_it != end(); ++this_it, other_it ) {
+	    if( ! ( *this_it == *other_it ) ) return false;
+	}
+	
+	return true;
+    }
+
     void Instruction::print(  std::wostream& os ) const {
 	os<<"[";
 	for( const_iterator it = begin(); it != end(); ++it  ) {
@@ -47,6 +59,13 @@ namespace csl {
 	    // std::wcout<<"pos="<< rit->getPosition()<<"left="<<rit->getLeft()<<",llength="<< rit->getLeft().length()<<", right="<< rit->getRight()<<std::endl; // DEBUG
 	    str->replace( rit->getPosition(), rit->getLeft().length(), rit->getRight() );
 	}
+    }
+
+    bool Instruction::containsPattern( Pattern const& pat ) const {
+	for( const_iterator it = begin(); it != end(); ++it  ) {
+	    if( pat == *it ) return true;
+	}
+	return false;
     }
     
 

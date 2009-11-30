@@ -8,9 +8,7 @@
 
 use strict;
 use Getopt::Long;
-use open "IN" => ":bytes",
-    "OUT" =>":utf8";
-
+use encoding 'utf8';
 
 my $delimiter = '';
 GetOptions( 'delimiter=s' => \$delimiter,);
