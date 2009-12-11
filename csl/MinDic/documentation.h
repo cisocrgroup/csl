@@ -6,7 +6,10 @@ In the directory INSTALL_PREFIX/bin you find a program @c compileMD. Use it like
 
 @code
 compileMD foo.lex foo.mdic
+./program_that_prints_lex_to_stdout | compileMD --stdin=1 foo.mdic
 @endcode
+In the following, whatever is said about "the .lex file" (especially about encoding and sorting), of course, also applies 
+to data that is piped to compileMD via stdin. 
 
 A .lex file is a text file of the form:
 @code
@@ -24,5 +27,6 @@ LC_ALL=C sort -t'#' -k1,1 foo.unsorted > foo.lex
 @endcode
 
 The resulting .mdic file is a binary representation of the dictionary automaton and can now be used with other csl tools.
+
 
 */

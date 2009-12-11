@@ -31,9 +31,8 @@ Though running quite stable in many tests, the library is constantly under const
 For the time being, We distribute this whole library, because it's the easiest
 way to get the whole thing running. Please note that only a small part of this
 library is IMPACT foreground. For the moment, csl::DictSearch is the only
-deliverable for IMPACT, together with its "helper classes". csl::Vaam is
+part constituting IMPACT foreground, together with its "helper classes". csl::Vaam is
 a product of IMPACT work, but csl::MSMatch (used by Vaam and DictSearch) is background.
-
 
 
 @author Ulrich Reffle

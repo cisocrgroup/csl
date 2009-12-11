@@ -33,7 +33,7 @@ namespace csl {
 	    CPPUNIT_ASSERT( result.size() == 1 );
 	    CPPUNIT_ASSERT( result.at( 0 ).getWord() == L"teile"  );
 	    CPPUNIT_ASSERT( result.at( 0 ).getInstruction().empty() );
-
+	    
 
 	    // change dlev to 1, 2
 	    result.clear();

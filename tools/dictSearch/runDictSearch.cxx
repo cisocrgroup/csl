@@ -10,16 +10,15 @@ int main( int argc, char const** argv ) {
 
     Getopt options( argc, argv );
 
-    if( options.hasOption( "help" ) ) {
-	std::wcerr<<std::endl
+    if( options.hasOption( "help" ) || !options.hasOption( "patternFile" ) ) {
+	std::wcerr<< std::endl
 		  << "Use like: runDictSearch"<<std::endl
 		  << "--modernDict=<dictFile>       Modern vocabulary (obligatory)" << std::endl
 		  << "--patternFile=<patternFile>   Patternset to use (obligatory)"<< std::endl
 		  << "--histDict=<dictFile>         Vocabulary from a historical corpus" << std::endl
 		  << "--NEDict=<dictFile>           Named-entities" << std::endl
 		  << "--machineReadable=1           Print (even more) machine-readable output, i.e. all answers in one line, separated by '|'" << std::endl
-		  <<std::endl<<std::endl;
-	
+		  << std::endl<<std::endl;
 	exit(1);
     }
     
@@ -27,13 +26,7 @@ int main( int argc, char const** argv ) {
     csl::DictSearch dictSearch;
 
     // initialise the hypothetic dict. with a file of patterns
-    if( options.hasOption( "modernDict" ) ) {
-	dictSearch.initHypothetic( options.getOption( "patternFile" ).c_str() );
-    }
-    else {
-	throw std::runtime_error( "Please specify a pattern file as command line option (--patternFile=some_patterns.txt)" );
-    }
-
+    dictSearch.initHypothetic( options.getOption( "patternFile" ).c_str() );
 
     // set a modern dictionary
     if( options.hasOption( "modernDict" ) ) {

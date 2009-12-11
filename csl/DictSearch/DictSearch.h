@@ -413,18 +413,26 @@ namespace csl {
 	    void setDLevHypothetic( size_t dlev ) {
 		dlev_hypothetic_ = dlev;
 	    }
-
-
 	    
+	    /**
+	     * @brief returns the DictModule's  name
+	     */
 	    std::wstring const& getName() const {
 		return name_;
 	    }
 	    
+	    /**
+	     * @brief Set a value in the range [0;100]. This value decides which candidate to rank higher if the other
+	     *        criteria (nr of hist/ocr patterns) are equal.
+	     */
 	    void setPriority( int p ) {
 		if( ( p < 0 ) || ( p > 100 ) ) throw csl::exceptions::LogicalError( "csl::DictSearch::DictModule::setPriority: value ranges from 0 to 100" );
 		priority_ = p;
 	    }
 
+	    /**
+	     * @brief see setPriority
+	     */
 	    int getPriority() const {
 		return priority_;
 	    }
@@ -435,11 +443,10 @@ namespace csl {
 		    myDictSearch_.msMatch_.setDistance( getDLevByWordlength( query.length() ) );
 		    myDictSearch_.msMatch_.query( query.c_str(), *answers );
 		    
-		    ////////  CHECK THIS !!!!!!!!!!!!!!
 		    if( maxNrOfPatterns_ > 0 ) {
 			myDictSearch_.vaam_->setBaseDic( dict_->getFWDic() );
 			myDictSearch_.vaam_->setMaxNrOfPatterns( maxNrOfPatterns_ );
-			myDictSearch_.vaam_->setDistance( dlev_hypothetic_ ); // leave that??
+			myDictSearch_.vaam_->setDistance( dlev_hypothetic_ );
 			myDictSearch_.vaam_->query( query, answers );
 		    }
 		}
@@ -486,6 +493,7 @@ namespace csl {
 	DictModule& addDictModule( std::wstring const& name, Dict_t const& dicRef );
 
 	void addExternalDictModule( iDictModule& extModule );
+
 
 	//@} // END Configuration methods
 
