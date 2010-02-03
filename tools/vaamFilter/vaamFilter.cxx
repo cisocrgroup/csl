@@ -97,7 +97,7 @@ int main(int argc, const char** argv ) {
 	std::wcout << "csl::Vaam: READY [machineReadable=false]" << std::endl;
     }
 
-    while( std::wcin >> query ) {
+    while( std::getline( std::wcin, query ).good() ) {
 	watch.start();
 	answers.clear();
 	vaam.query( query, &answers );
@@ -128,10 +128,14 @@ int main(int argc, const char** argv ) {
 	    }
 #endif
 	}
-
+	if( errno == EILSEQ ) {
+	    throw csl::exceptions::badInput( "csl::lookupMD: Input encodig error" );
+	}
+	
 	
 //	std::wcout<<watch.readMilliseconds()<<" ms"<<std::endl;
-    }
+    } // for all input
+    
 
     if( fbdic ) {
 	delete( fbdic );

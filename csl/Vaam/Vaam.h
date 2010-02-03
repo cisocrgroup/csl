@@ -174,22 +174,35 @@ namespace csl {
 	    }
 
 	    LevDEA::Pos levPos_;
+
+	    /**
+	     * @brief Each Position holds one posPattern - this may be an "empty" ord dummy pattern. 
+	     * @see mother_
+	     */
 	    PosPattern posPattern_;
 
 	    /**
-	     * @brief Every Position-object reflects a certain interpretation of te currently processed prefix, and
+	     * @brief Every Position-object reflects a certain interpretation of the currently processed prefix, and
 	     * this variable tells how many patterns this interpretation involves.
+	     *
+	     * Remember that the complete Instruction that goes with the current Position is not explicitly stored in
+	     * a vector or something - instead it must be collected using the posPattern_ and mother_ members.
 	     */
 	    size_t nrOfPatternsApplied_;
 
 	    /**
 	     * (x,y) indicates that the mother is the y-th element at stackpos x
+	     * Every Position was created as the successor ("child") of another position.
+	     * We need this information to trace back the whole instruction looking at the
+	     * distinct posPattern_ s stored with each Position.
 	     */ 
 	    std::pair< int, int > mother_;
+
 	}; // class Position
 
 
 	////////////////////// CLASS STACKITEM /////////////////////////
+	
 	class StackItem : public std::vector< Position > {
 	public:
 	    StackItem( const Vaam& myVaam ) :
@@ -206,6 +219,8 @@ namespace csl {
 	    MDState_t dicPos_;
 	    PatternGraph::State patternPos_;
 	    size_t lookAheadDepth_;
+	    // don't forget this class inherits from std::vector< Position >
+
 	}; // class StackItem
 	
 

@@ -28,7 +28,7 @@ Though running quite stable in many tests, the library is constantly under const
 <p>We are always happy to receive feedback, bug reports or suggestions. Please mail to uli@cis.uni-muenchen.de</p>
 
 @section impact Dear IMPACT partners,
-For the time being, We distribute this whole library, because it's the easiest
+For the time being, we distribute this whole library, because it's the easiest
 way to get the whole thing running. Please note that only a small part of this
 library is IMPACT foreground. For the moment, csl::DictSearch is the only
 part constituting IMPACT foreground, together with its "helper classes". csl::Vaam is

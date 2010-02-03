@@ -1,6 +1,6 @@
 *** csl installation ***
 
-To compile the csl library and all command line tools, you need th build
+To compile the csl library and all command line tools, you need the build
 program 'cmake', which is part of virtually any linux distribution.
 
 Unpack the source tarball and change into its root directory. Then type:

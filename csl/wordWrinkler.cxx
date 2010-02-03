@@ -1,7 +1,7 @@
 #include<iostream>
-#include "./MinDic/MinDic.h"
-#include "./Stopwatch.h"
-#include "./Getopt/Getopt.h"
+#include <csl/MinDic/MinDic.h>
+#include <csl/Stopwatch.h>
+#include <csl/Getopt/Getopt.h>
 
 std::wstring indent( size_t depth ) {
     return std::wstring( depth, L'.' );

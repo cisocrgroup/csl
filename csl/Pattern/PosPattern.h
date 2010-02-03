@@ -24,6 +24,11 @@ namespace csl {
 
 	inline void clear();
 
+	/**
+	 * @brief returns if pattern is "empty"
+	 */
+	inline bool empty() const;
+
 	inline size_t getPosition() const;
 
 	inline void setPosition( size_t p );
@@ -64,6 +69,12 @@ namespace csl {
 	position_ = 0;
     }
     
+    inline bool PosPattern::empty() const {
+	return ( Pattern::empty() && 
+		 ( position_ == 0 ) 
+	    );
+    }
+
     size_t PosPattern::getPosition() const {
 	return position_;
     }
