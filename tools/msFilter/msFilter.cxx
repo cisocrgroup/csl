@@ -1,19 +1,31 @@
+#include "csl/Getopt/Getopt.h"
 #include "csl/MSMatch/MSMatch.h"
 #include "csl/ResultSet/ResultSet.h"
 #include "csl/Global.h"
 using namespace csl;
 
 
-int main( int argc, char** argv ) {
+/**
+ * @todo The wstring handling in this program is hopelessly deprecated!!! Update!
+ */
+
+int main( int argc, char const** argv ) {
     setlocale(LC_CTYPE, "de_DE.UTF-8");  /*Setzt das Default Encoding für das Programm */
 
-    if ( argc != 3 ) {
-	std::cerr << "Use like: msFilter <dlev> <fb_dic>" << std::endl;
+    Getopt opt( argc, argv );
+
+    if( opt.getArgumentCount() != 2 ) {
+	std::cerr << "Use like: msFilter [--machineReadable=1] <dlev> <fb_dic>" << std::endl;
 	exit( 1 );
     }
 
+    bool machineReadable = false;
+    if( opt.hasOption( "machineReadable" ) ) {
+	machineReadable = true;
+    }
+
     try {
-	MSMatch< FW_BW > matcher( atoi( argv[1] ), argv[2] );
+	MSMatch< FW_BW > matcher( atoi( opt.getArgument( 0 ).c_str() ), opt.getArgument( 1 ).c_str() );
 //	MSMatch< STANDARD > matcher( atoi( argv[1] ), argv[2] );
 
 	ResultSet list;
@@ -31,7 +43,7 @@ int main( int argc, char** argv ) {
 	    }
 	    mbstowcs( query, (char*)bytesIn, Global::lengthOfLongStr );
 
-	    printf( "Query: %ls\n", query );
+	    //printf( "Query: %ls\n", query );
 
 	    list.reset(); // forget candidates that might be stored from earlier use
 
@@ -47,14 +59,24 @@ int main( int argc, char** argv ) {
 
 
 	    // print all hits
-	    size_t i;
-	    for( i = 0;i < list.getSize();++i ) {
-		printf( "%ls,%d,%d\n", list[i].getStr(), list[i].getLevDistance(), list[i].getAnn() );
+
+	    if( machineReadable ) { // print all hits in one line
+		size_t i = 0;
+		for( i = 0; i < list.getSize(); ++i ) {
+		    printf( "%ls,%d,%d", list[i].getStr(), list[i].getLevDistance(), list[i].getAnn() );
+		    if( i + 1  != list.getSize() ) std::wcout<<"|";
+		}
+		printf( "\n" );
+	    }
+	    else {
+		size_t i = 0;
+		for( i = 0;i < list.getSize();++i ) {
+		    printf( "%ls,%d,%d\n", list[i].getStr(), list[i].getLevDistance(), list[i].getAnn() );
+		}
 	    }
 	}
     }
     catch( exceptions::cslException exc ) {
 	std::cerr << "msFilter caught exception: "<< exc.what() << std::endl;
     }
-
 }

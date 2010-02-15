@@ -8,7 +8,8 @@ This library is a collection of modules we implemented at the CIS. All modules h
 <li>csl::MinDic implements the  construction and usage of minimzed acyclic
  finite-state automata. Also read the @link minDic_manual MinDic manual @endlink</li>
 <li>csl::MSMatch offers a very efficient method to extract correction candidates
-for a garbled token from a huge lexicon.</li>
+for a garbled token from a huge lexicon. A command-line interface to this
+class is documented in the @link msFilter_manual msFilter Manual @endlink</li>
 <li>With csl::ErrDic and csl::createED so-called <em>Error Dictionaries</em> are created and used. 
 They are powerful tools for the computation of error-profiles for a text.</li>
 <li>csl::Vaam is a module to perform approximate lookups in large

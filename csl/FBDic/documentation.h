@@ -1,7 +1,13 @@
 /**
 @page fbDic_manual FBDic Manual
 
+On this page the use of "fbdic"s from the csl library is explained. "fb" means <em>forward-backward</em>: This type of dictionary
+is used for approximate search with csl::MSMatch, which also needs the dictionary of all words in reverse order. FBDic is a simple wrapper
+that holds two data structures of type csl::MinDic, holding the dictionary in regular and in reverse order.
+
 @section compileFBDic Use the program compileFBDic to create binary automata files from text lists
+This section explains how to obtain an FBDic binary file from a text list.
+
 In the directory INSTALL_PREFIX/bin you find a program @c compileFBDic. Use it like:
 
 @code
