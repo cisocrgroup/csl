@@ -1,5 +1,6 @@
 INCLUDE(CPack)
 
+add_subdirectory(Getopt)
 add_subdirectory(Alphabet)
 add_subdirectory(MinDic)
 add_subdirectory(FBDic)
