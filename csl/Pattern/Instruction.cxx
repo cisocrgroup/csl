@@ -36,6 +36,8 @@ namespace csl {
 
     size_t Instruction::parseFromString( std::wstring const& str, size_t offset ) {
 	if( ! this->empty() ) throw exceptions::badInput( "csl::Instruction::parseFromString: Instruction not empty" );
+
+	if( str.empty() ) throw exceptions::badInput( "csl::Instruction::parseFromString: Empty string as input" );
 	
 	if( str.at( offset ) != '[' ) throw exceptions::badInput( "csl::Instruction::parseFromString: Found no opening square bracket" );
 	offset += 1;

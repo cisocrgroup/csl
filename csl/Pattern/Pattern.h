@@ -32,6 +32,11 @@ namespace csl {
 		     ( getRight() == other.getRight() ) );
 	}
 
+	inline bool operator!= ( const Pattern& other ) const {
+	    return ! ( *this == other );
+	}
+
+
 	inline bool operator< ( const Pattern& other ) const {
 	    if( getLeft() < other.getLeft() ) {
 		return true;

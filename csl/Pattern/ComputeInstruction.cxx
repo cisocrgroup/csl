@@ -2,10 +2,11 @@
 
 namespace csl {
     ComputeInstruction::ComputeInstruction() : 
+	debug_( false ),
+	maxNumberOfInstructions_( (size_t) -1 ),
 	patternProbabilities_( 0 ),
 	instructions_( 0 ) {
 
-	debug_ = false;
 
 	/** 
 	 * @todo Find a good, dynamic solution here!
@@ -279,6 +280,7 @@ namespace csl {
 
     } // function computeInstruction
 
+
     /**
      * @brief recursive method to find all best paths through the levenshtein-matrix and store the resulting csl::Instruction s
      */
@@ -305,9 +307,13 @@ namespace csl {
 		    //std::wcerr<<"instr.size() is "<<instructions_->size()<<std::endl;
 		}
 		else { // clone
-		    instructions_->push_back( instructions_->at( instructionIndex ) ); // clone the instruction as built so far
-		    currentInstructionIndex = instructions_->size() - 1;
-		    //std::wcerr<<"Clone instr["<<instructionIndex<<"] to instr["<<currentInstructionIndex<<"]"<<std::endl;
+		    if( ( maxNumberOfInstructions_ != (size_t)-1 ) && ( instructions_->size() >= maxNumberOfInstructions_ ) ) {
+			return;
+		    }
+		    else {
+			instructions_->push_back( instructions_->at( instructionIndex ) ); // clone the instruction as built so far
+			currentInstructionIndex = instructions_->size() - 1;
+		    }
 		}
 
 		// match: continue
@@ -316,7 +322,7 @@ namespace csl {
 				     currentInstructionIndex ); // recursive call
 		}
 		else {
-		
+		    
 		//std::wcout<< wordCorr_.substr( x-patternType->first + 1, patternType->first ) << "->" << wordErr_.substr( y - patternType->second + 1, patternType->second ) << " at pos " << x - patternType->first  << std::endl;
 		
 		    
@@ -338,7 +344,7 @@ namespace csl {
 
 	    }
 	    
-	} // if not at the left upper corner od the matrix
+	} // if not at the left upper corner of the matrix
     } // getInstructions()
     
     

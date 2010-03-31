@@ -44,6 +44,10 @@ namespace csl {
 	 */
 	void connectPatternProbabilities( PatternProbabilities const& levW );
 	
+	void setMaxNumberOfInstructions( size_t n ) {
+	    maxNumberOfInstructions_ = n;
+	}
+
 	/**
 	 * @brief Sets debug_ 
 	 */
@@ -51,7 +55,7 @@ namespace csl {
 	
     private:
 	bool debug_;
-
+	size_t maxNumberOfInstructions_;
 	class PatternTypeChain : public PatternProbabilities::PatternType {
 	public:
 	    PatternTypeChain( PatternProbabilities::PatternType const& patternType, PatternTypeChain* n ) : 
@@ -93,8 +97,8 @@ namespace csl {
 
 	    float value;
 	    PatternTypeChain* patternTypes;
-	};
-
+	}; // class MatrixItem
+	
 	
 	void getInstructions( int x, int y, size_t instructionIndex );
 	
