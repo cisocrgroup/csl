@@ -12,17 +12,28 @@ namespace csl {
     }
 
     bool Interpretation::operator<( Interpretation const& other ) const {
-	float compare = 
-	    ( getInstruction().size() + getLevDistance() * 1.01 ) - 
-	    ( other.getInstruction().size() + other.getLevDistance() * 1.01 );
-	    
-	if     ( compare < 0 ) return true;
-	else if( compare > 0 ) return false;
+	
+	//std::wcout << "compare " << this  << ", " << &other << std::endl;
 
+	// compare the sum of hist patterns and std lev distance
+	int compare = 
+	    ( getInstruction().size() + getLevDistance() ) - 
+	    ( other.getInstruction().size()  + other.getLevDistance() );
+	
+	// In case of equality, let the one with smaller lev distance be smaller
+	if( compare == 0 ) {
+	    compare = getLevDistance() - other.getLevDistance();
+	}
+	
+	if( compare != 0 ) return ( compare < 0 );
+
+	// if still equal, decide on alphabetical order
 	compare = wcscmp( getWord().c_str(), other.getWord().c_str() );
-	if( compare != 0 ) return ( compare >= 0 );
+
+	if( compare != 0 ) return ( compare > 0 );
 	    
-	// otherwise: do it the very un-efficient way:
+	// otherwise: do it the very un-efficient way and compare the pretty-print alphabetically
+	// this should assure that only equal interpretations return 0
 	return ( wcscmp( toString().c_str(), other.toString().c_str() ) > 0 );
     }
 
@@ -110,9 +121,9 @@ namespace csl {
     }
 
     void Interpretation::print( std::wostream& os ) const {
-	os<<word_<<":"<<baseWord_<<"+";
+	os<<word_<<":"<< getBaseWord() <<"+";
 	instruction_.print( os );
-	os<<",dist="<<levDistance_;
+	os<<",dist="<< getLevDistance();
 	//os<<",baseWordScore="<<baseWordScore_;
     }
 	

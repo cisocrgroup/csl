@@ -131,7 +131,7 @@ namespace csl {
 	/**
 	 * destructor
 	 */
-	inline ~TransTable();
+	inline virtual ~TransTable();
 
 
 	virtual bool readyToRead() const;

@@ -40,7 +40,7 @@ namespace csl {
 	/**
 	 * Destructor
 	 */
-	inline ~TransTable();
+	inline virtual ~TransTable();
 
 
 	virtual bool readyToRead() const;

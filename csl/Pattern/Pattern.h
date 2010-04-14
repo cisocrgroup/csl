@@ -23,7 +23,7 @@ namespace csl {
 	inline Pattern();
 
 	/**
-	 * @brief A very self-explaining constructor.
+	 * @brief A very self-explanatory constructor.
 	 */
 	inline Pattern( const std::wstring& left, const std::wstring& right );
 
@@ -83,7 +83,9 @@ namespace csl {
     private:
 	std::wstring left_;
 	std::wstring right_;
-    };
+
+    }; // class Pattern
+
 
     Pattern::Pattern() {
     }
