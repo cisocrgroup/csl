@@ -176,7 +176,7 @@ namespace csl {
 	    LevDEA::Pos levPos_;
 
 	    /**
-	     * @brief Each Position holds one posPattern - this may be an "empty" ord dummy pattern. 
+	     * @brief Each Position holds one posPattern - this may be an "empty" or dummy pattern. 
 	     * @see mother_
 	     */
 	    PosPattern posPattern_;

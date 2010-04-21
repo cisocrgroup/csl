@@ -4,7 +4,7 @@
 #include "csl/Stopwatch.h"
 #include "csl/FBDic/FBDic.h"
 
-//#define CSL_VAAMFILTER_PRINTNONE true
+#define CSL_VAAMFILTER_PRINTNONE true
 
 /**
  * Vaam
@@ -32,6 +32,9 @@ typedef csl::Vaam< csl::MinDic<> > Vaam_t;
 int main(int argc, const char** argv ) {
 
     try {
+
+    Stopwatch watch;
+    watch.start();
 
     std::locale::global( std::locale("") ); // set the environment's default locale
     Getopt opt( argc, argv );
@@ -88,7 +91,9 @@ int main(int argc, const char** argv ) {
 
     size_t maxDistance = atoi( opt.getArgument( 0 ).c_str() );
     vaam.setDistance( maxDistance );
-    Stopwatch watch;
+
+    size_t nrOfQueries = 0;
+    size_t sumOfCandidates = 0;
 
     if( machineReadable ) {
 	std::wcout << "csl::Vaam: READY [machineReadable=true]" << std::endl;
@@ -97,12 +102,17 @@ int main(int argc, const char** argv ) {
 	std::wcout << "csl::Vaam: READY [machineReadable=false]" << std::endl;
     }
 
+    std::wcerr << "vaamFilter startup time: " << watch.readMilliseconds() << "ms" << std::endl;
+    watch.start();
+
     while( std::getline( std::wcin, query ).good() ) {
-	watch.start();
+	++nrOfQueries;
 	answers.clear();
 	vaam.query( query, &answers );
 
 	std::sort( answers.begin(), answers.end() );
+
+	sumOfCandidates += answers.size(); 
 
 	if( answers.empty() ) {
 #ifndef CSL_VAAMFILTER_PRINTNONE
@@ -135,6 +145,11 @@ int main(int argc, const char** argv ) {
 	
 //	std::wcout<<watch.readMilliseconds()<<" ms"<<std::endl;
     } // for all input
+
+    std::wcout<<watch.readMilliseconds()<<" ms for "<< nrOfQueries << " queries. AVG: " 
+	      << (double)watch.readMilliseconds() / (double)nrOfQueries << "ms" << std::endl;
+    std::wcout<<sumOfCandidates << " answers for "<< nrOfQueries << " queries. AVG: " 
+	      << (double)sumOfCandidates / (double)nrOfQueries << std::endl;
     
 
     if( fbdic ) {

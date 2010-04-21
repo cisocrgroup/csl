@@ -747,7 +747,6 @@ namespace csl {
 	}
 	patternGraph_.finishConstruction();
 
-	patternGraph_.writeToFile( "./patterns.mdic" );
     }
 
     void PatternApplier::constructErrDic(  ErrDic& errDic ) {
