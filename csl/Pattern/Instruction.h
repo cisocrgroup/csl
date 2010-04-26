@@ -1,5 +1,5 @@
-#ifndef CSL_INSTRUCTION
-#define CSL_INSTRUCTION CSL_INSTRUCTION
+#ifndef CSL_INSTRUCTION_H
+#define CSL_INSTRUCTION_H CSL_INSTRUCTION_H
 
 #include<fstream>
 #include<vector>

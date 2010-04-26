@@ -220,7 +220,7 @@ namespace csl {
 	    PatternGraph::State patternPos_;
 	    size_t lookAheadDepth_;
 	    // don't forget this class inherits from std::vector< Position >
-
+	    
 	}; // class StackItem
 	
 

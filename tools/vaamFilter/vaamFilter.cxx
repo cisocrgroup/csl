@@ -4,7 +4,7 @@
 #include "csl/Stopwatch.h"
 #include "csl/FBDic/FBDic.h"
 
-#define CSL_VAAMFILTER_PRINTNONE true
+//#define CSL_VAAMFILTER_PRINTNONE true
 
 /**
  * Vaam
