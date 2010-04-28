@@ -42,6 +42,10 @@ namespace csl {
 	// forward declaration
 	class iDictModule;
 
+	/**
+	 * @brief This is a specialisation of csl::Interpretation, tailored to store additional
+	 *        information added by DictSearch
+	 */
 	class Interpretation : public csl::Interpretation {
 	public:
 	    Interpretation() : dictModule_( 0 ) {} 
@@ -101,12 +105,31 @@ namespace csl {
 	}; // class Interpretation
 
 
+
+
+
+	/**
+	 * @brief Whoever wants to receive results from DictSearch, has to implement
+	 *        these two interfaces.
+	 */
+	class iResultReceiver : public csl::LevFilter::CandidateReceiver,
+				public csl::iVaamResultReceiver {
+
+
+	    virtual void setCurrentDictModule( iDictModule const& dm ) = 0;
+
+	}; // class iResultReceiver
+
+
+
+
+
+
 	/**
 	 * @brief CandidateSet is a simple container to collect candidates/interpretations
 	 *        from either a Vaam or a csl::MSMatch object.
 	 */
-	class CandidateSet : public csl::LevFilter::CandidateReceiver,
-			     public csl::iVaamResultReceiver,
+	class CandidateSet : public iResultReceiver,
 			     std::vector< csl::DictSearch::Interpretation > {
 	public:
 	    typedef csl::DictSearch::Interpretation Interpretation_t;
@@ -129,9 +152,10 @@ namespace csl {
 	     * @brief This is to fulfill the csl::iVaamResultReceiver interface
 	     */
 	    void receive( csl::Interpretation const& vaam_interpretation ) {
-		push_back( Interpretation( vaam_interpretation, *currentDictModule_ ) );
+		push_back( csl::DictSearch::Interpretation( vaam_interpretation, *currentDictModule_ ) );
 	    }
 	    
+
 	    /**
 	     * @see currentDictModule_
 	     */
@@ -214,6 +238,12 @@ namespace csl {
 	}; // class CandidateSet
 
 
+
+
+
+
+
+
 	/**
 	 * @brief All classes that are supposed to contribute to the answer set of a DictSearch query
 	 * have to implement this interface.
@@ -243,7 +273,7 @@ namespace csl {
 	    virtual int getPriority() const = 0;
 
 	    /**
-	     * @brief returns a stringto identify the DictModule
+	     * @brief returns a string to identify the DictModule
 	     */
 	    virtual std::wstring const& getName() const = 0;
 	};

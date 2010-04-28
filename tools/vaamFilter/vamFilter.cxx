@@ -45,7 +45,7 @@ int main(int argc, const char** argv ) {
 
     std::wstring query;
 
-    Stopwatch watch;
+    csl::Stopwatch watch;
 
     while( std::wcin >> query ) {
 	watch.start();

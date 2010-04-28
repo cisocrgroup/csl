@@ -33,7 +33,7 @@ int main(int argc, const char** argv ) {
 
     try {
 
-    Stopwatch watch;
+    csl::Stopwatch watch;
     watch.start();
 
     std::locale::global( std::locale("") ); // set the environment's default locale

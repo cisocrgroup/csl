@@ -79,12 +79,12 @@ namespace csl {
 	Instruction& getHistInstruction();
 
 	/**
-	 * @brief const version of getInstruction()
+	 * @brief const version of getHistInstruction()
 	 */
 	Instruction const& getHistInstruction() const;
-
+	
 	// @} // END Getters
-
+	
 	/**
 	 * @name Setters
 	 */
