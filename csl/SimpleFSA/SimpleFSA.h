@@ -11,9 +11,9 @@
 //#define CSL_SIMPLEFSA_SLIMSTATE 1
 
 namespace csl {
-
+    
     namespace SimpleFSA {
-
+	
 	/**
 	 * @brief @c State represents one state of a @c SimpleFSA::Automaton.
 	 *
@@ -27,8 +27,8 @@ namespace csl {
 	     * @brief Internal datatype for the representation of the @c State 's transitions
 	     */
 	    typedef std::map< wchar_t, State* > TransMap_t;
-
-
+	    
+	    
 	    /**
 	     * @brief initialises a state with a number that serves as a name.
 	     *
@@ -51,6 +51,9 @@ namespace csl {
 	public:
 	    friend class Automaton;
 
+	    /**
+	     * @brief A transition is a std::pair containing the transition's label and target state
+	     */
 	    typedef std::pair< wchar_t, State* > Transition_t;
 
 	    /**
@@ -238,6 +241,7 @@ namespace csl {
 	    }
 
 	    /**
+	     * @brief returns a pointer to the root
 	     * @return a pointer to the root
 	     */
 	    State* getRoot() {
@@ -245,6 +249,7 @@ namespace csl {
 	    }
 
 	    /**
+	     * @brief returns a const pointer to the root
 	     * @return a const pointer to the root
 	     */
 	    State const* getRoot() const {
@@ -276,6 +281,9 @@ namespace csl {
 		return newState;
 	    }
 
+	    /**
+	     * @brief Removes a state from the automaton
+	     */
 	    void removeState( State* st ) {
 		if( states_.erase( st ) ) {
 		    // ok
@@ -291,7 +299,7 @@ namespace csl {
 	     * insertTempState()
 	     *
 	     * For the moment the user is responsible for the destruction of the state! Only 
-	     * when the user adds it to the automaton he also gives away this obligation.
+	     * when the user adds it to the automaton she also gives away this obligation.
 	     *
 	     * @return a pointer to a new state.
 	     */
@@ -299,6 +307,9 @@ namespace csl {
 		return new State();
 	    }
 
+	    /**
+	     * @brief Insert a state into the automaton
+	     */
 	    void insertTempState( State* state ) {
 		state->setNumber( nextFreeStateNumber_ );
 		if( states_.insert( state ).second ) {
@@ -318,22 +329,39 @@ namespace csl {
 		return states_.begin();
 	    }
 	    
+	    /**
+	     * @return a const_state_iterator pointing to the first state in the list
+	     */
 	    const_state_iterator states_begin() const {
 		return states_.begin();
 	    }
 	    
+	    /**
+	     * @return a state_iterator pointing to the after-the-end state in the list
+	     */
 	    state_iterator states_end() {
 		return states_.end();
 	    }
 	    
+	    /**
+	     * @return a const_state_iterator pointing to the after-the-end state in the list
+	     */
 	    const_state_iterator states_end() const {
 		return states_.end();
 	    }
 
+	    /**
+	     * @brief returns the number of states in the automaton.
+	     */
 	    size_t getNumberOfStates() const {
 		return states_.size();
 	    }
 
+	    /**
+	     * @brief prints some plaintext statistics of the Automaton to the specified stream
+	     *
+	     * @param[out] a reference to an @c wostream -object, default: std::wcout
+	     */
 	    void analyze( std::wostream& os = std::wcout ) const {
 		std::wcerr << "Compute nr of transitions ... " << std::flush;
 		size_t nrOfTransitions = 0;
@@ -351,7 +379,7 @@ namespace csl {
 	    /**
 	     * @brief print a dot-representation of the FSA
 	     *
-	     * @param out a reference to an @c wostream -object, default: std::wcout
+	     * @param[out] a reference to an @c wostream -object, default: std::wcout
 	     */
 	    void toDot( std::wostream& out = std::wcout ) const {
 		out << 
@@ -382,6 +410,9 @@ namespace csl {
 
 
 	private:
+	    /**
+	     * @brief 
+	     */
 	    std::set< State* > states_;
 	    State* root_;
 

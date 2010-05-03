@@ -37,6 +37,7 @@ int main(int argc, const char** argv ) {
     watch.start();
 
     std::locale::global( std::locale("") ); // set the environment's default locale
+
     Getopt opt( argc, argv );
 
     if( opt.getArgumentCount() < 3 ) {
@@ -138,13 +139,14 @@ int main(int argc, const char** argv ) {
 	    }
 #endif
 	}
-	if( errno == EILSEQ ) {
-	    throw csl::exceptions::badInput( "csl::lookupMD: Input encodig error" );
-	}
-	
 	
 //	std::wcout<<watch.readMilliseconds()<<" ms"<<std::endl;
     } // for all input
+
+    if( errno == EILSEQ ) {
+	throw csl::exceptions::badInput( "csl::vaamFilter: Input encodig error" );
+    }
+    
 
     std::wcout<<watch.readMilliseconds()<<" ms for "<< nrOfQueries << " queries. AVG: " 
 	      << (double)watch.readMilliseconds() / (double)nrOfQueries << "ms" << std::endl;
