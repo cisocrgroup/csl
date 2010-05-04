@@ -28,8 +28,7 @@ namespace csl {
 		std::wifstream in( filename );
   
 		while( std::getline( in, word ).good() ) {
-//		toDot(); // DEBUG
-		    // std::wcerr<<"add "<< word << std::endl;
+
 		    wchar_t const* c = word.c_str();
 		    State_t* splitState = getRoot();
 	
@@ -38,27 +37,58 @@ namespace csl {
 			++c;
 		    }
 
-		    if( *c == 0 ) { // if the whole word was found as prefix in the trie
-			splitState->setFinal( true );
+		    State* last = splitState;
+		    while( *c != 0 ) {
+			State_t* next = newState();
+			last->setTransition( *c, next );
+			last = next;
+			++c;
 		    }
-		    else { 
-			wchar_t const* c2 = word.c_str() + ( word.length() -1 );
-			State_t* lastState = newState();
-			lastState->setFinal( true );
-			while( ! ( c2 == c ) ) {
-			    State_t* newSt = newState();
-			    newSt->setTransition( *c2, lastState );
-			    lastState = newSt;
-			    --c2;
-			}
-			splitState->setTransition( *c, lastState );
-		    }
+		    last->setFinal( true );
 		}
 		std::wcerr<< "csl::SimpleFSA::Trie::compileTrie: autmaton has "
 			  << Automaton::getNumberOfStates()
 			  << " states."<<std::endl;
-
+		
 	    }
+
+
+// 	    void compileTrie( char const* filename ) {
+// 		std::wstring word;
+// 		std::wifstream in( filename );
+  
+// 		while( std::getline( in, word ).good() ) {
+// //		toDot(); // DEBUG
+// 		    // std::wcerr<<"add "<< word << std::endl;
+// 		    wchar_t const* c = word.c_str();
+// 		    State_t* splitState = getRoot();
+	
+// 		    while( splitState->delta( *c ) ) {
+// 			splitState = splitState->delta( *c );
+// 			++c;
+// 		    }
+
+// 		    if( *c == 0 ) { // if the whole word was found as prefix in the trie
+// 			splitState->setFinal( true );
+// 		    }
+// 		    else { 
+// 			wchar_t const* c2 = word.c_str() + ( word.length() -1 );
+// 			State_t* lastState = newState();
+// 			lastState->setFinal( true );
+// 			while( ! ( c2 == c ) ) {
+// 			    State_t* newSt = newState();
+// 			    newSt->setTransition( *c2, lastState );
+// 			    lastState = newSt;
+// 			    --c2;
+// 			}
+// 			splitState->setTransition( *c, lastState );
+// 		    }
+// 		}
+// 		std::wcerr<< "csl::SimpleFSA::Trie::compileTrie: autmaton has "
+// 			  << Automaton::getNumberOfStates()
+// 			  << " states."<<std::endl;
+
+// 	    }
 
 	    /**
 	     * @brief This method demonstrates how a trie can be traversed depth-first using a stack

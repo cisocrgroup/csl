@@ -12,7 +12,7 @@ int main( int argc, const char** argv ) {
 
 
     if( argc != 2 ) {
-	std::wcerr<<"Use like: compileSimpleTrie <txtFile>"<<std::endl;
+	std::wcerr<<"Use like: lookupTrie <txtFile>"<<std::endl;
 	exit( 1 );
     }
 
