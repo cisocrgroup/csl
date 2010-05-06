@@ -11,10 +11,8 @@ if( @ARGV < 3 ) {
     print STDERR <<HELP;
  Use like: \.\/vaamDemo.pl <distance> <dicFile> <patternFile>
 
- A small demo program for the perl Vaam interface.
- Query a word and get a Data::Dumper output of the answer aggregate.
- Note that the non-asscii characters are messed up by Data::Dumper, but
- are ok in the data structure. 
+ A simple command line program using the perl Vaam interface.
+ Query a word and get the answer aggregate printed to stdout.
 
 HELP
 

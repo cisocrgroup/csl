@@ -2,6 +2,9 @@
 #define CSL_GLOBAL_H CSL_GLOBAL_H
 
 #include<cassert>
+#include<stdint.h>
+#include<stdio.h>
+#include<cassert>
 #include<cstring>
 #include<string>
 #include<exception>
