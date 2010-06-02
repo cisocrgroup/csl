@@ -84,41 +84,40 @@ namespace csl {
 	    PatternGraph::State patPos = stack_[depth].patternPos_;
 	    
 	    
-	    do { // for all final states reachable via errorLinks
-		assert( patPos.isFinal() );
-		size_t count = 0;
+	    assert( patPos.isFinal() );
+
+	    // for all patterns fitting a suffix of the current path
+	    for( PatternGraph::Replacements_t::const_iterator rightSide = patPos.getReplacements().begin();
+		 rightSide != patPos.getReplacements().end();
+		 ++rightSide ) {
+
+		
+		size_t sizeOfLeftSide = patternGraph_.at( rightSide->second ).getLeft().length();
 
 		// for all positions of the stackItem (tracked back leftside)
-	    	for( typename StackItem::iterator position = stack_.at( depth - patPos.getDepth() ).begin();
-		     position != stack_.at( depth - patPos.getDepth() ).end();
+		size_t count = 0;
+		for( typename StackItem::iterator position = stack_.at( depth - sizeOfLeftSide ).begin();
+		     position != stack_.at( depth - sizeOfLeftSide ).end();
 		     ++position, ++count ) {
 		    
 		    // check if maxNrOfPatterns_ is reached already
 		    if( ( maxNrOfPatterns_ != Vaam::INFINITE ) && ( position->getNrOfPatternsApplied() == maxNrOfPatterns_ ) )
 			continue;
 
-		    // for all right sides fitting the current leftSide
-		    // Note that there might be final states with empty rightSides, namely those where a suffix
-		    // of the current path leads to a "real" final state with non-empty rightSides
-		    for( PatternGraph::Replacements_t::const_iterator rightSide = patPos.getReplacements().begin();
-			 rightSide != patPos.getReplacements().end();
-			 ++rightSide ) {
 			
-			LevDEA::Pos newLevPos = levDEA_.walkStr( position->levPos_, rightSide->first.c_str() );
-			if( newLevPos.isValid() )  {
-			    //                              1 more applied pattern than cur position       store current position as 'mother'-position
-			    Position newPosition( newLevPos, position->getNrOfPatternsApplied() + 1, std::make_pair( depth - patPos.getDepth(), count ) );
-			    newPosition.addPosPattern( PosPattern( patternGraph_.at( rightSide->second ).getLeft(),
-								   patternGraph_.at( rightSide->second ).getRight(),
-								   depth - patPos.getDepth() ) );
-			    stack_[depth].push_back( newPosition );
-			    stack_[depth].lookAheadDepth_ = 0;
-			}
-		    } // for all rightSides
-		} // for all positions
+		    LevDEA::Pos newLevPos = levDEA_.walkStr( position->levPos_, rightSide->first.c_str() );
+		    if( newLevPos.isValid() )  {
+			//                              1 more applied pattern than cur position       store current position as 'mother'-position
+			Position newPosition( newLevPos, position->getNrOfPatternsApplied() + 1, std::make_pair( depth - sizeOfLeftSide, count ) );
+			newPosition.addPosPattern( PosPattern( patternGraph_.at( rightSide->second ).getLeft(),
+							       patternGraph_.at( rightSide->second ).getRight(),
+							       depth - sizeOfLeftSide ) );
+			stack_[depth].push_back( newPosition );
+			stack_[depth].lookAheadDepth_ = 0;
+		    }
+		} // for all rightSides
+	    } // for all positions
 
-		patPos.walkErrorLink();
-	    } while( patPos.isValid() && patPos.isFinal() && ( patPos.getDepth() >= stack_[depth].lookAheadDepth_ ) );
 	} // if found left pattern side
 
 
@@ -210,6 +209,7 @@ namespace csl {
 	    return;
 	}
 	else {
+	    //std::wcout << cur->mother_.first << "," << cur->mother_.second << "," << stack_.at( cur->mother_.first ).size() << std::endl;
 	    reportMatch_rec( &( stack_.at( cur->mother_.first ).at( cur->mother_.second ) ), interpretation );
 	}
 

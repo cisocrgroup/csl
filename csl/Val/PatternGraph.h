@@ -1,6 +1,3 @@
-#ifndef CSL_PATTERNGRAPH_H
-#define CSL_PATTERNGRAPH_H CSL_PATTERNGRAPH_H
-
 #include<algorithm>
 #include<fstream>
 #include<iostream>
@@ -473,13 +470,9 @@ namespace csl {
 		    back = states_.at( parentBack ).getTransTarget( *c );
 		}
 		if( parentBack == 0 ) back = 1;
-		
+
 		if( states_.at( back ).isFinal_ ) {
 		    states_.at( current ).isFinal_ = true;
-		    // copy all replacements of 'back' to 'current'
-		    states_.at( current ).replacements_.insert( states_.at( current ).replacements_.end(),
-								states_.at( back ).replacements_.begin(),
-								states_.at( back ).replacements_.end() );
 		}
 		states_.at( current ).errorLink_ = back;
 	    }
@@ -519,5 +512,3 @@ namespace csl {
 
 
 } // namespace csl
-
-#endif
