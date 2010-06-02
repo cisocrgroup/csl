@@ -111,7 +111,9 @@ int main(int argc, const char** argv ) {
 	answers.clear();
 	vaam.query( query, &answers );
 
+#ifndef CSL_VAAMFILTER_PRINTNONE
 	std::sort( answers.begin(), answers.end() );
+#endif
 
 	sumOfCandidates += answers.size(); 
 

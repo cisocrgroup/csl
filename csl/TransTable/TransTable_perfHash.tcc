@@ -410,7 +410,7 @@ namespace csl {
     void
     TransTable< TT_PERFHASH, InternalCharType__, SizeType__ >
     ::toDot() const {
-	wprintf( L"Digraph TransTable_out { //DOTCODE\nrankdir=LR; //DOTCODE\n" );
+	wprintf( L"Digraph TransTable_out { //DOTCODE\nrankdir=LR;ordering=out; //DOTCODE\n" );
 	for ( size_t i = 1; i < sizeOfUsedCells_; ++i ) {
 	    if ( cells_[i].isTransition() ) {
 		StateId_t base = i - cells_[i].getKey();

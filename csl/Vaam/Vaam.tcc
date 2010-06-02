@@ -100,8 +100,8 @@ namespace csl {
 		    // for all right sides fitting the current leftSide
 		    // Note that there might be final states with empty rightSides, namely those where a suffix
 		    // of the current path leads to a "real" final state with non-empty rightSides
-		    for( PatternGraph::RightSides_t::const_iterator rightSide = patPos.getRightSides().begin();
-			 rightSide != patPos.getRightSides().end();
+		    for( PatternGraph::Replacements_t::const_iterator rightSide = patPos.getReplacements().begin();
+			 rightSide != patPos.getReplacements().end();
 			 ++rightSide ) {
 			
 			LevDEA::Pos newLevPos = levDEA_.walkStr( position->levPos_, rightSide->first.c_str() );

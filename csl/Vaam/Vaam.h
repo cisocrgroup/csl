@@ -11,8 +11,8 @@
 #include "../MinDic/MinDic.h"
 #include "../LevDEA/LevDEA.h"
 
-#include "./PatternGraph.h"
-#include "../Pattern/Interpretation.h"
+#include <csl/Pattern/PatternGraph.h>
+#include <csl/Pattern/Interpretation.h>
 
 
 namespace csl {
@@ -124,7 +124,7 @@ namespace csl {
 	/**
 	 * @brief set the base dictionary. This restricts output words to words NOT present in this filterDic.
 	 */
-	inline void setBaseDic( MinDic_t const& filterDic );
+	inline void setBaseDic( MinDic_t const& baseDic );
 	
 	/**
 	 * @brief set a filter dictionary. This restricts output words to words NOT present in this filterDic.
@@ -254,7 +254,7 @@ namespace csl {
 
 	PatternGraph patternGraph_;
 	std::vector< std::wstring > leftSidesList_;
-	std::vector< PatternGraph::RightSides_t > rightSides_;
+	std::vector< PatternGraph::Replacements_t > rightSides_;
 	
 	mutable LevDEA levDEA_;
 	mutable std::wstring query_;

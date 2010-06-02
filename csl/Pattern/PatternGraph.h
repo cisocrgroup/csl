@@ -1,5 +1,9 @@
-#include<iostream>
+#ifndef CSL_PATTERNGRAPH_H
+#define CSL_PATTERNGRAPH_H CSL_PATTERNGRAPH_H
+
+#include<algorithm>
 #include<fstream>
+#include<iostream>
 #include<map>
 #include<queue>
 #include<string>
@@ -13,7 +17,7 @@ namespace csl {
 
     /**
      * @brief A specialised variant of the Aho-Corasick trie to search 
-     * in the set of left sides of a PatternSet.
+     * in the set of left or right sides of a PatternSet.
      *
      * For the sake of simplicity and efficiency, the implementation details of
      * class \c PatternSet are used here: Internally we use simple \c size_t variables 
@@ -85,7 +89,7 @@ namespace csl {
 	};
 	
 	// a string and an index into the list of patterns (from PatternSet)
-	typedef std::vector< std::pair< std::wstring, size_t > > RightSides_t;
+	typedef std::vector< std::pair< std::wstring, size_t > > Replacements_t;
 	
 
 	class InternalState {
@@ -151,7 +155,7 @@ namespace csl {
 
 	    Alphabet const* alph_; // it's a pointer because the object needs to work with the assignment-operator
 	    std::vector< size_t > transitions_;
-	    RightSides_t rightSides_;
+	    Replacements_t replacements_;
 	    size_t errorLink_;
 	    std::wstring allLabels_;
 	    int depth_;
@@ -215,11 +219,10 @@ namespace csl {
 	    inline bool isFinal() const;
 
 	    /**
-	     * @return a reference to the list of rightSides attached to the state (which must be final)
+	     * @return a reference to the list of replacements attached to the state (which must be final)
 	     */
-	    inline const RightSides_t& getRightSides() const;
+	    inline const Replacements_t& getReplacements() const;
 
-//	    inline const std::wstring& getWord() const;
 
 	    /**
 	     * @return true iff the current state is not the failstate
@@ -239,9 +242,12 @@ namespace csl {
 	}; // class State
 
 	
+	enum Direction {FORWARD, BACKWARD};
+	enum IndexSide {INDEX_LEFT, INDEX_RIGHT};
 	
 
-	inline PatternGraph();
+	
+	inline PatternGraph( Direction dir = FORWARD, IndexSide indexSide = INDEX_LEFT );
 
 	inline void loadPatterns( const char* patternFile );
 
@@ -254,6 +260,15 @@ namespace csl {
 
 	// *** PRIVATE of PATTERNGRAPH *** 
     private:
+
+
+	Direction direction_;
+
+	/**
+	 * @brief Specifies if the left or right side of the pattern shall be indexed
+	 *        in the trie
+	 */
+	IndexSide indexSide_;
 
 	inline void addErrorLinks();
 
@@ -275,7 +290,9 @@ namespace csl {
 	static const wchar_t patternDelimiter_ = L'_';
     };
 
-    PatternGraph::PatternGraph() :
+    PatternGraph::PatternGraph( Direction dir, IndexSide indexSide ) :
+	direction_( dir ),
+	indexSide_( indexSide ),
 	nrOfPatterns_( 0 ) {
     }
 
@@ -349,8 +366,8 @@ namespace csl {
 	return ( stateIndex_ != 0 );
     }
 
-    inline const PatternGraph::RightSides_t& PatternGraph::State::getRightSides() const {
-	return myGraph_->states_.at( stateIndex_ ).rightSides_;
+    inline const PatternGraph::Replacements_t& PatternGraph::State::getReplacements() const {
+	return myGraph_->states_.at( stateIndex_ ).replacements_;
     }
 
 //     inline const std::wstring& PatternGraph::State::getWord() const {
@@ -369,7 +386,8 @@ namespace csl {
 	for( PatternList_t::const_iterator pattern = patternList().begin() + 1; // skip 1st pattern: it's the empty pattern!
 	     pattern != patternList().end();
 	     ++pattern ) {
-	    for( std::wstring::const_iterator c = pattern->getLeft().begin(); c != pattern->getLeft().end(); ++c ) {
+	    std::wstring const& indexed = ( indexSide_ == INDEX_LEFT )? pattern->getLeft() : pattern->getRight();
+	    for( std::wstring::const_iterator c = indexed.begin(); c != indexed.end(); ++c ) {
 		alph_.addChar( *c );
 	    }
 	}
@@ -379,37 +397,50 @@ namespace csl {
 	states_.push_back( InternalState( alph_ ) ); // root at position 1 
 
 	size_t patternCount = 0;
+	std::wstring indexed, replacement;
 	for( PatternList_t::const_iterator pattern = patternList().begin() + 1; // skip 1st pattern: it's the empty pattern!
 	     pattern != patternList().end();
 	     ++pattern ) {
 
-	    const std::wstring& left = pattern->getLeft();
+	    std::wstring const& indexedRef = ( indexSide_ == INDEX_LEFT )? pattern->getLeft() : pattern->getRight();
+	    std::wstring const& replacementRef = ( indexSide_ == INDEX_LEFT )? pattern->getRight() : pattern->getLeft();
 
+	    if( direction_ == BACKWARD ) {
+		Global::reverse( indexedRef, &indexed );
+		Global::reverse( replacementRef, &replacement );
+	    }
+	    else {
+		indexed = indexedRef;
+		replacement = replacementRef;
+	    }
+
+	    
 	    State state = getRoot();
 
 	    // *** find common prefix ***
-	    std::wstring::const_iterator c = left.begin();
+	    std::wstring::const_iterator c = indexed.begin(); // c must be visible outside the for-loop
 	    for( ;
-		 c != left.end() && state.walkStrict( *c );
+		 c != indexed.end() && state.walkStrict( *c );
 		 ++c ) {
 		// do nothing else
 	    }
 	    
 	    // *** add suffix ***
 	    // prevent the vector from re-allocating during the process
-	    states_.reserve( states_.size() + ( left.end() - c ) );
+	    states_.reserve( states_.size() + ( indexed.end() - c ) );
 	    
 	    State lastState = state;
 	    for( ;
-		 c != left.end();
+		 c != indexed.end();
 		 ++c ) {
 		State newSt = newState();
-		states_.at( newSt.getStateIndex() ).depth_ = c - left.begin() + 1;
+		states_.at( newSt.getStateIndex() ).depth_ = c - indexed.begin() + 1;
 		states_.at( lastState.getStateIndex() ).setTransition( *c, newSt.getStateIndex() );
 		lastState = newSt;
 	    }
 	    states_.at( lastState.getStateIndex() ).isFinal_ = true;
-	    states_.at( lastState.getStateIndex() ).rightSides_.push_back( std::make_pair( pattern->getRight(), pattern - patternList().begin() ) );
+
+	    states_.at( lastState.getStateIndex() ).replacements_.push_back( std::make_pair( replacement, pattern - patternList().begin() ) );
 	}
 
 	addErrorLinks();
@@ -442,9 +473,13 @@ namespace csl {
 		    back = states_.at( parentBack ).getTransTarget( *c );
 		}
 		if( parentBack == 0 ) back = 1;
-
+		
 		if( states_.at( back ).isFinal_ ) {
 		    states_.at( current ).isFinal_ = true;
+		    // copy all replacements of 'back' to 'current'
+// 		    states_.at( current ).replacements_.insert( states_.at( current ).replacements_.end(),
+// 								states_.at( back ).replacements_.begin(),
+// 								states_.at( back ).replacements_.end() );
 		}
 		states_.at( current ).errorLink_ = back;
 	    }
@@ -484,3 +519,5 @@ namespace csl {
 
 
 } // namespace csl
+
+#endif
