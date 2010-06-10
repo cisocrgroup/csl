@@ -7,6 +7,7 @@
 #include "../Interpretation.h"
 #include "../PatternProbabilities.h"
 #include "../ComputeInstruction.h"
+#include "../PatternGraph.h"
 
 #include <cppunit/extensions/HelperMacros.h>
 
@@ -18,7 +19,7 @@ namespace csl {
      */
     class TestPattern : public CppUnit::TestFixture  {
 
- 	CPPUNIT_TEST_SUITE( TestPattern );
+  	CPPUNIT_TEST_SUITE( TestPattern );
 	CPPUNIT_TEST( testPattern );
 	CPPUNIT_TEST( testPatternSet );
 	CPPUNIT_TEST( testPosPattern );
@@ -26,6 +27,7 @@ namespace csl {
 	CPPUNIT_TEST( testInterpretation );
 	CPPUNIT_TEST( testPatternProbabilities );
 	CPPUNIT_TEST( testComputeInstruction );
+	CPPUNIT_TEST( testPatternGraph );
 	CPPUNIT_TEST_SUITE_END();
     public:
 
@@ -36,6 +38,7 @@ namespace csl {
 	void testInterpretation();
 	void testPatternProbabilities();
 	void testComputeInstruction();
+	void testPatternGraph();
 
 	void run();
     private:
@@ -46,13 +49,14 @@ namespace csl {
 
     
     void TestPattern::run() {
- 	testPattern();
- 	testPatternSet();
- 	testPosPattern();
-	testInstruction();
-	testInterpretation();
- 	testPatternProbabilities();
- 	testComputeInstruction();
+//  	testPattern();
+//  	testPatternSet();
+//  	testPosPattern();
+// 	testInstruction();
+// 	testInterpretation();
+//  	testPatternProbabilities();
+//  	testComputeInstruction();
+	testPatternGraph();
     }
 
     /**
@@ -423,6 +427,40 @@ namespace csl {
 	CPPUNIT_ASSERT( ! ci.computeInstruction( L"glich", L"galich", &instructions ) ); // ins (not allowed)
 	CPPUNIT_ASSERT( instructions.empty() );
 
+
+    }
+
+    void TestPattern::testPatternGraph() {
+	std::wcout << "TestPattern::TestPatternGraph()" << std::endl;
+	
+	PatternGraph pg;
+	pg.loadPatterns( "../csl/Val/Test/small.patterns.txt" );
+
+	// implicit copy constructor
+	PatternGraph::State st = pg.getRoot();
+	PatternGraph::State st2 = pg.getRoot();
+
+	// == operator
+	CPPUNIT_ASSERT( st == st2 );
+
+	// basic walk()-operation and isFinal()
+	CPPUNIT_ASSERT( ! st.isFinal() );
+	CPPUNIT_ASSERT( st.walk( 't' ) );
+	CPPUNIT_ASSERT( st.isFinal() );
+
+	st = pg.getRoot();
+	PatternGraph::State st3( st );
+	st2 = st.getTransTarget( 't' );
+	CPPUNIT_ASSERT( st == pg.getRoot() );
+
+
+	/////  Forward, index right
+	PatternGraph pg2( PatternGraph::FORWARD, PatternGraph::INDEX_RIGHT );
+	pg2.loadPatterns( "../csl/Val/Test/small.patterns.txt" );
+	pg2.toDot();
+
+	st = pg2.getRoot();
+	
 
     }
 

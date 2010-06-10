@@ -59,12 +59,105 @@ namespace csl {
 	 * but you can also use Vaam's subclass CandidateReceiver.
 	 * 
 	 */
-	inline bool query( std::wstring const& word, iVaamResultReceiver* interpretations ) const;
+	inline bool query( std::wstring const& word, iInterpretationReceiver* interpretations ) const;
 
 	//@}
 	
 	
     private:
+
+
+	////////////////////// CLASS POSITION /////////////////////////
+	/**
+	 * 
+	 */
+	class Position {
+	public:
+	    Position( MinDic_t::State const& dicPos, size_t nrOfPatternsApplied = 0, const std::pair< int, int >& mother = std::make_pair( -1, -1 ) ) :
+		dicPos_( dicPos ),
+		posPattern_(),
+		nrOfPatternsApplied_( nrOfPatternsApplied ) {
+		mother_ = mother;
+	    }
+	    
+	    void addPosPattern( const PosPattern& posPattern ) {
+		posPattern_ = posPattern;
+	    }
+
+	    size_t getNrOfPatternsApplied() const {
+		return nrOfPatternsApplied_;
+	    }
+
+	    MinDic_t::State dicPos_;
+
+	    /**
+	     * @brief Each Position holds one posPattern - this may be an "empty" or dummy pattern. 
+	     * @see mother_
+	     */
+	    PosPattern posPattern_;
+
+	    /**
+	     * @brief Every Position-object reflects a certain interpretation of the currently processed prefix, and
+	     * this variable tells how many patterns this interpretation involves.
+	     *
+	     * Remember that the complete Instruction that goes with the current Position is not explicitly stored in
+	     * a vector or something - instead it must be collected using the posPattern_ and mother_ members.
+	     */
+	    size_t nrOfPatternsApplied_;
+
+	    /**
+	     * (x,y) indicates that the mother is the y-th element at stackpos x
+	     * Every Position was created as the successor ("child") of another position.
+	     * We need this information to trace back the whole instruction looking at the
+	     * distinct posPattern_ s stored with each Position.
+	     */ 
+	    std::pair< int, int > mother_;
+	    
+	}; // class Position
+	
+
+	class StackItem : public std::vector< Position > {
+	public:
+	    StackItem() :
+		lookAheadDepth_( 0 ) {
+	    }
+	    
+	    void clear() {
+		std::vector< Position >::clear();
+		// somehow reset dicPos_???
+	    }
+	    
+	    size_t lookAheadDepth_;
+	    // don't forget this class inherits from std::vector< Position >
+	    
+	}; // class StackItem
+	
+
+	class Stack : public std::vector< StackItem > {
+	public:
+	    Stack() {
+		// reserve( 500 );
+	    }
+	};
+
+	void reportMatch( const Position* cur, int baseWordScore ) const;
+
+	/**
+	 * This method picks up all patterns used to get the match and adds them
+	 * to the instruction of the \c Interpretation -object
+	 *
+	 * @param[in]  cur
+	 * @param[in]  baseWordScore
+	 * @param[out] answer
+	 */
+
+	void reportMatch_rec( const Position* cur, Interpretation* answer ) const;
+
+
+	mutable Stack stack_;
+
+	mutable std::wstring query_;
+	mutable iInterpretationReceiver* interpretations_;
 
 	MinDic_t const* baseDic_;
 

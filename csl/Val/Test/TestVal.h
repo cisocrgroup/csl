@@ -11,13 +11,11 @@ namespace csl {
     class TestVal : public CppUnit::TestFixture  {
 
 	CPPUNIT_TEST_SUITE( TestVal );
-	CPPUNIT_TEST( testPatternGraph );
-//	CPPUNIT_TEST( testBasics );
+	CPPUNIT_TEST( testBasics );
 	CPPUNIT_TEST_SUITE_END();
     public:
 	TestVal();
 	void testBasics();
-	void testPatternGraph();
 // 	void testConstructionDetails();
 // 	void lookupAllKeys();
 	
@@ -33,29 +31,6 @@ namespace csl {
 
     }
 
-    void TestVal::testPatternGraph() {
-
-	PatternGraph pg;
-	pg.loadPatterns( "../csl/Val/Test/small.patterns.txt" );
-
-	// implicit copy constructor
-	PatternGraph::State st = pg.getRoot();
-	PatternGraph::State st2 = pg.getRoot();
-
-	// == operator
-	CPPUNIT_ASSERT( st == st2 );
-
-	// basic walk()-operation and isFinal()
-	CPPUNIT_ASSERT( ! st.isFinal() );
-	CPPUNIT_ASSERT( st.walk( 't' ) );
-	CPPUNIT_ASSERT( st.isFinal() );
-
-	st = pg.getRoot();
-	PatternGraph::State st3( st );
-	st2 = st.getTransTarget( 't' );
-	CPPUNIT_ASSERT( st == pg.getRoot() );
-	
-    }
 
     void TestVal::testBasics() {
 	MinDic<> baseDic;
@@ -64,8 +39,14 @@ namespace csl {
 	baseDic.addToken( L"teil", 42 );
 	baseDic.finishConstruction();
 
- 	Val val( baseDic,  "../csl/Val/Test/small.patterns.txt" );
+	Val val( baseDic, "../csl/Val/Test/small.patterns.txt" );
+	Val::CandidateReceiver receiver;
 
+	val.query( L"theyl", &receiver );
+	
+	for( Val::CandidateReceiver::const_iterator it = receiver.begin(); it != receiver.end(); ++it ) {
+	    it->print();
+	}
 
     }
 

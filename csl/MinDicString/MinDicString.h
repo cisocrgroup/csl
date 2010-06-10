@@ -18,7 +18,9 @@ namespace csl {
     class MinDicString : public MinDic<> {
     public:
 	typedef MinDic<> MinDic_t;
+
 	inline MinDicString();
+
 	inline void setKeyValueDelimiter( uchar c );
 
 	inline const uchar* lookup( wchar_t* key ) const;

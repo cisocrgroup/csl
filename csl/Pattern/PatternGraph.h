@@ -168,14 +168,25 @@ namespace csl {
 	public:
 	    typedef InternalState::TransIterator iterator;  
 
+	    inline State() :
+		myGraph_( 0 ),
+		stateIndex_( 0 ) {
+		
+	    }
+
 	    inline State( const PatternGraph& myGraph, size_t stateIndex ) :
 		myGraph_( &myGraph ),
 		stateIndex_( stateIndex ) {
 	    }
 	    
-	    inline bool operator==( const State& other ) {
+	    inline bool operator==( State const& other ) {
 		return( ( myGraph_ == other.myGraph_  ) && // compare pointers
 			( stateIndex_ == stateIndex_ ) );
+	    }
+
+	    inline State& operator=( State const& other ) {
+		myGraph_ = other.myGraph_;
+		stateIndex_ = other.stateIndex_;
 	    }
 
 	    /**
@@ -290,20 +301,6 @@ namespace csl {
 	static const wchar_t patternDelimiter_ = L'_';
     };
 
-    PatternGraph::PatternGraph( Direction dir, IndexSide indexSide ) :
-	direction_( dir ),
-	indexSide_( indexSide ),
-	nrOfPatterns_( 0 ) {
-    }
-
-    inline PatternGraph::State PatternGraph::getRoot() const {
-	return State( *this, 1 );
-    }
-
-
-    inline size_t PatternGraph::getNrOfPatterns() const {
-	return nrOfPatterns_;
-    }
 
 
     /********** IMPL   STATE  ********************/
@@ -376,6 +373,22 @@ namespace csl {
 
 
     /********* IMPL  PATTERNGRAPH *****************/
+
+    PatternGraph::PatternGraph( Direction dir, IndexSide indexSide ) :
+	direction_( dir ),
+	indexSide_( indexSide ),
+	nrOfPatterns_( 0 ) {
+    }
+
+    inline PatternGraph::State PatternGraph::getRoot() const {
+	return State( *this, 1 );
+    }
+
+
+    inline size_t PatternGraph::getNrOfPatterns() const {
+	return nrOfPatterns_;
+    }
+
 
     inline void PatternGraph::loadPatterns( const char* patternFile ) {
 	PatternSet::loadPatterns( patternFile );

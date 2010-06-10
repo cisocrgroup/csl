@@ -37,6 +37,7 @@ namespace csl {
 	/**
 	 * @brief apply the instruction to the string passed as pointer argument
 	 * @param[in/out] str the string that is to be changed by the instruction
+	 * @param[in]     If set to -1, replaces right sides for left sides
 	 *
 	 * Note that at the moment the method does not check if the instruction is applicable to @c str,
 	 * i.e. it does not check if the left sides of the patterns really occur in @c str at the given
@@ -45,7 +46,7 @@ namespace csl {
 	 *
 	 * @todo make this method more secure, at least handle the exception that are maybe thrown by std::wstring::replace
 	 */
-	void applyTo( std::wstring* str ) const;
+	void applyTo( std::wstring* str, int direction = 1 ) const;
 
 	/**
 	 * @brief return true if the Instruction contains the given pattern.

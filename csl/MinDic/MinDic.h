@@ -103,6 +103,16 @@ namespace csl {
 		StateId_t newPos = minDic_->walkPerfHash( dicPos_, c, &tmpPHValue );
 		return State( *minDic_, newPos, tmpPHValue );
 	    }
+
+	    /**
+	     *
+	     */
+	    State getTransTarget( wchar_t const* str ) const {
+		size_t tmpPHValue = perfHashValue_;
+		StateId_t newPos = minDic_->walkStrPerfHash( dicPos_, str, &tmpPHValue );
+		return State( *minDic_, newPos, tmpPHValue );
+	    }
+
 	    
 	    /**
 	     * @brief returns a c-string containing all characters which are the label of a transition leaving

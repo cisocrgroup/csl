@@ -17,9 +17,9 @@
 
 namespace csl {
 
-    class iVaamResultReceiver {
+    class iInterpretationReceiver {
     public:
-	virtual ~iVaamResultReceiver() {}
+	virtual ~iInterpretationReceiver() {}
 	virtual void receive( Interpretation const& interpretation ) = 0;
     };
 
@@ -75,8 +75,9 @@ namespace csl {
 	 * A straight-forward implementation of the interface above.
 	 * It inherits from std::vector, has all its features.
 	 */
-	class CandidateReceiver : public iVaamResultReceiver,
+	class CandidateReceiver : public iInterpretationReceiver,
 				  public std::vector< Interpretation > {
+	public:
 	    void receive( csl::Interpretation const& interpretation ) {
 		push_back( interpretation );
 	    }
@@ -144,7 +145,7 @@ namespace csl {
 	 * but you can also use Vaam's subclass CandidateReceiver.
 	 * 
 	 */
-	inline bool query( std::wstring const& word, iVaamResultReceiver* interpretations ) const;
+	inline bool query( std::wstring const& word, iInterpretationReceiver* interpretations ) const;
 
 	//@}
 
@@ -258,7 +259,7 @@ namespace csl {
 	
 	mutable LevDEA levDEA_;
 	mutable std::wstring query_;
-	mutable iVaamResultReceiver* interpretations_;
+	mutable iInterpretationReceiver* interpretations_;
 	mutable bool foundAnswers_;
 	mutable Stack stack_;
 	/**

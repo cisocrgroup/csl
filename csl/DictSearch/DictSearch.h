@@ -113,7 +113,7 @@ namespace csl {
 	 *        these two interfaces.
 	 */
 	class iResultReceiver : public csl::LevFilter::CandidateReceiver,
-				public csl::iVaamResultReceiver {
+				public csl::iInterpretationReceiver {
 
 
 	    virtual void setCurrentDictModule( iDictModule const& dm ) = 0;
@@ -149,7 +149,7 @@ namespace csl {
 	    }
 	    
 	    /**
-	     * @brief This is to fulfill the csl::iVaamResultReceiver interface
+	     * @brief This is to fulfill the csl::iInterpretationReceiver interface
 	     */
 	    void receive( csl::Interpretation const& vaam_interpretation ) {
 		push_back( csl::DictSearch::Interpretation( vaam_interpretation, *currentDictModule_ ) );
