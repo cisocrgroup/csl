@@ -90,7 +90,11 @@ namespace csl {
 	fi.imbue( CSL_UTF8_LOCALE );
 	fi.open( patternFile );
 	if( ! fi ) {
-	    throw exceptions::badFileHandle( "PatternSet::Could not open pattern file" );
+	    std::string message = 
+		std::string( "PatternSet::Could not open pattern file: " ) +
+		patternFile;
+		
+	    throw exceptions::badFileHandle( message );
 	}
 	
 	std::wstring line;
