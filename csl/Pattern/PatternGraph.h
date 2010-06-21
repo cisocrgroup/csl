@@ -187,7 +187,8 @@ namespace csl {
 	    inline State& operator=( State const& other ) {
 		myGraph_ = other.myGraph_;
 		stateIndex_ = other.stateIndex_;
-	    }
+		return *this;
+		}
 
 	    /**
 	     * walk in the AC-Trie. Use error links when needed. 
