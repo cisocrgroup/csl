@@ -1,8 +1,11 @@
 #ifndef CSL_GLOBAL_H
 #define CSL_GLOBAL_H CSL_GLOBAL_H
 
-#include<cassert>
+#ifndef WIN32
 #include<stdint.h>
+#endif
+
+#include<cassert>
 #include<stdio.h>
 #include<cassert>
 #include<cstring>
