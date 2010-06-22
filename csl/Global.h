@@ -2,11 +2,12 @@
 #define CSL_GLOBAL_H CSL_GLOBAL_H
 
 #ifndef WIN32
-#include<stdint.h>
+#include<stdint.h> // Here, uint_32 etc. are defined
 #endif
 
-#include<cassert>
+#include<stdlib.h> // Defines e.g. the exit codes for programs
 #include<stdio.h>
+#include<cassert>
 #include<cassert>
 #include<cstring>
 #include<string>

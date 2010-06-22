@@ -15,11 +15,15 @@ int main(int argc, char const** argv) {
 
     Getopt opt( argc, argv );
 
+    if( opt.hasOption( "help" ) ) {
+	    printHelp();
+	    return EXIT_SUCCESS;
+    }
 
     if( opt.hasOption( "stdin" ) ) {
 	if( opt.getArgumentCount() != 1 ) {
 	    printHelp();
-	    exit( 1 );
+	    return EXIT_FAILURE;
 	}
 
 	try {
@@ -44,13 +48,14 @@ int main(int argc, char const** argv) {
 	    
 	    //   t.toDot();
 	    //   t.printCells();
+	    return EXIT_SUCCESS;
 	    
 	} catch ( csl::exceptions::cslException ex ) {
 	    std::wcout<<"compileMD failed: "<<ex.what()<<std::endl;
-	    return(1);
+	    return EXIT_FAILURE;
 	} catch ( std::exception ex ) {
 	    std::wcout<<"compileMD failed: "<<ex.what()<<std::endl;
-	    return(1);
+	    return EXIT_FAILURE;
 	}
 
     }
@@ -66,13 +71,13 @@ int main(int argc, char const** argv) {
 	    
 	} catch ( std::exception ex ) {
 	    std::wcout<<"compileMD failed: "<<ex.what()<<std::endl;
-	    return(1);
+	    return EXIT_FAILURE;
 	}
 	
     }
     else {
 	printHelp();
-	exit( 1 );
+	return EXIT_FAILURE;
     }
     
 }

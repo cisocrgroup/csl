@@ -12,6 +12,15 @@ namespace csl {
 	
     }
 
+    inline MinDicString::MinDicString( char const* dicFile ) :
+	annStrings_( 0 ),
+	sizeOfAnnStrings_( 0 ),
+	annHash_( 0 ),
+	keyValueDelimiter_( Global::keyValueDelimiter )
+    {
+	loadFromFile( dicFile );
+    }
+
     inline void MinDicString::setKeyValueDelimiter( uchar c ) {
 	keyValueDelimiter_ = c;
     }
@@ -24,10 +33,14 @@ namespace csl {
     }
 
     inline const uchar* MinDicString::getAnnByPerfHashValue( size_t perfHashValue ) const {
-	size_t offset = annotationsAt( perfHashValue );
+	return getAnnByOffset( annotationsAt( perfHashValue ) );
+    }
+
+    inline const uchar* MinDicString::getAnnByOffset( size_t offset ) const {
 	assert( offset < sizeOfAnnStrings_ );
 	return annStrings_ + offset;
     }
+
 
 
     inline void MinDicString::loadFromFile( char const* dicFile ) {
@@ -99,6 +112,8 @@ namespace csl {
 	struct stat f_stat;
 	stat( lexFile, &f_stat );
 	size_t estimatedNrOfKeys = f_stat.st_size / 100;
+	if( estimatedNrOfKeys < 1000 ) estimatedNrOfKeys = 1000; // set a minimum of 1000
+
 	std::wcerr<<"Estimate about "<< estimatedNrOfKeys << " Keys."<< std::endl;
 	
 	annHash_ = new Hash< uchar >( estimatedNrOfKeys, annStrings_, sizeOfAnnStrings_ );

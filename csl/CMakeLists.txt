@@ -20,6 +20,7 @@ ADD_LIBRARY( csl SHARED
   Alphabet/Alphabet.cxx 
   LevDEA/LevDEA.cxx
   DictSearch/DictSearch.cxx
+  Pattern/Pattern.cxx
   Pattern/ComputeInstruction.cxx
   Pattern/Instruction.cxx
   Pattern/Interpretation.cxx

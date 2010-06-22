@@ -9,11 +9,18 @@
 namespace csl {
 
     /**
-     * This class provides the storage and lookup of huge dictionaries whose entries are annotated
+     * @briefThis class provides the storage and lookup of huge dictionaries whose entries are annotated
      * with a string-value of arbitrary length.
      *
+     * Currently the keys of the dictionaries are represented as wide strings, while the annotations are
+     * stored as utf-8 sequences. This makes the data structure smaller, and in some contexts also faster.
+     * But, now that the whole rest of the library has been changed to wide strings, this is definitely
+     * a bit out-dated.
+     *
+     * @todo Change to consistent use of wstring
+     *
      * @author Uli Reffle
-     * @date 2006
+     * @date 2006-2010
      */
     class MinDicString : public MinDic<> {
     public:
@@ -21,14 +28,27 @@ namespace csl {
 
 	inline MinDicString();
 
+	/**
+	 * @brief Create a MinDicString object and load a dic from the specified file
+	 */
+	inline MinDicString( char const* dicFile );
+
 	inline void setKeyValueDelimiter( uchar c );
 
-	inline const uchar* lookup( wchar_t* key ) const;
+	inline uchar const* lookup( wchar_t* key ) const;
 
 	/**
-	 * return the string value annotated to the entry with the given perfect hash value
+	 * @brief return the string value annotated to the entry with the given perfect hash value
 	 */
-	inline const uchar* getAnnByPerfHashValue( size_t perfHashValue ) const;
+	inline uchar const* getAnnByPerfHashValue( size_t perfHashValue ) const;
+
+	/**
+	 * @brief return the string value at the specified offset in the annotation buffer
+	 *
+	 * 
+	 */
+	inline uchar const* getAnnByOffset( size_t offset ) const;
+
 
 	inline void loadFromFile( char const* dicFile );
 	inline void loadFromStream( FILE* fi );

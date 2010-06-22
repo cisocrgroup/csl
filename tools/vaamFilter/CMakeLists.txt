@@ -18,10 +18,3 @@ install(
   
   )
 
-add_executable(vamFilter vamFilter.cxx)
-target_link_libraries (vamFilter csl)
-install( 
-  TARGETS vamFilter
-  DESTINATION bin
-  
-  )

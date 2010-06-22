@@ -9,6 +9,8 @@ int main( int argc, const char** argv ) {
 
     Getopt options( argc, argv );
 
+
+
     if( options.getArgumentCount() != 2 ) {
 	std::cerr<<"Use like: "<<argv[0]<<" <txtDic> <binDic>"<<std::endl;
 	return 1;
@@ -23,7 +25,7 @@ int main( int argc, const char** argv ) {
     mds.compileDic( options.getArgument( 0 ).c_str() );
     mds.writeToFile( options.getArgument( 1 ).c_str() );
     
-//    mds.printDic();
+//   mds.printDic();
 
     return 0;
 }

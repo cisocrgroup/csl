@@ -37,6 +37,11 @@ namespace csl {
 	}
 
 
+	/**
+	 * @brief creates an order relation on Pattern objects, mainly to be able t ostore them in std::set etc.
+	 *
+	 * The order is equivalent to alphabetical order of left sides, in case of equality of the right sides.
+	 */
 	inline bool operator< ( const Pattern& other ) const {
 	    if( getLeft() < other.getLeft() ) {
 		return true;
@@ -78,10 +83,28 @@ namespace csl {
 	inline void print( std::wostream& os = std::wcout ) const;
 
 	inline std::wstring toString() const;
-	
+
+	inline static void setLeftRightDelimiter( wchar_t c ) {
+	    leftRightDelimiter_ = c;
+	}
 
     private:
+	/**
+	 * @brief This value determines which symbol is used as delimiter between left and right
+	 *        pattern side ONLY IN THE OUTPUT. It is NOT USED FOR PARSING patterns from a string.
+	 *
+	 * This value is initialized with a default value in Pattern.cxx
+	 */
+	static wchar_t leftRightDelimiter_;
+
+	/**
+	 * @brief The left pattern side
+	 */
 	std::wstring left_;
+
+	/**
+	 * @brief The right pattern side
+	 */
 	std::wstring right_;
 
     }; // class Pattern
@@ -112,13 +135,12 @@ namespace csl {
     }
 
     void Pattern::print( std::wostream& os ) const {
-	os << getLeft() << "_" << getRight();
-    }
-
-    std::wstring Pattern::toString() const {
-	return getLeft() + L"_" + getRight();
+	os << getLeft() << leftRightDelimiter_ << getRight();
     }
     
+    std::wstring Pattern::toString() const {
+	return getLeft() + leftRightDelimiter_ + getRight();
+    }
 
 
 } // eon
