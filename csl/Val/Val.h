@@ -151,7 +151,10 @@ namespace csl {
 	 * @param[out] answer
 	 */
 
-	void reportMatch_rec( const Position* cur, Interpretation* answer ) const;
+	/**
+	 * @return the difference of lengths of modern word <-> variant
+	 */
+	int reportMatch_rec( const Position* cur, Interpretation* answer ) const;
 
 
 	mutable Stack stack_;

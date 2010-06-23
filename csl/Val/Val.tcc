@@ -7,6 +7,16 @@ namespace csl {
 	patternGraph_.loadPatterns( patternFile );
     }
 
+
+    void Val::setMinNrOfPatterns( size_t n ) {
+	minNrOfPatterns_ = n;
+    }
+
+    void Val::setMaxNrOfPatterns( size_t n ) {
+	maxNrOfPatterns_ = n;
+    }
+
+
     inline bool Val::query( std::wstring const& word, iInterpretationReceiver* interpretations ) const {
 	query_ = word;
 	interpretations_ = interpretations;
@@ -28,7 +38,7 @@ namespace csl {
 	    stack_.push_back( StackItem() );
 	    StackItem& cur = stack_.back();
 
-	    std::wcout << "depth=" << depth << ",#pos=" << last.size() << ", patPos=" << patternPos.getStateIndex() << std::endl;
+	    // std::wcout << "depth=" << depth << ",#pos=" << last.size() << ", patPos=" << patternPos.getStateIndex() << std::endl;
 
 	    size_t count = 0;
 	    for( StackItem::const_iterator pos = last.begin(); pos != last.end(); ++pos, ++count ) {
@@ -75,13 +85,22 @@ namespace csl {
 		    } // for all rightSides
 		} // for all positions
 		
+	    } // if patternPos final
+
+	    if( cur.empty() ) {
+		cur.lookAheadDepth_ = last.lookAheadDepth_ + 1;
+		if( cur.lookAheadDepth_ > patternPos.getDepth() ) {
+		    //std::wcerr << "break" << std::endl;
+		    break;
+		}
 	    }
-	    
+	    //std::wcerr << "lad=" << cur.lookAheadDepth_ << std::endl;
+
 	    
 	} // for all chars of the query word
 
 	// report matches
-	if( ( stack_.back().lookAheadDepth_ == 0 ) ) {  // we are not in the lookahead-phase AND
+	if( ( depth == word.length() + 1 ) && ( stack_.back().lookAheadDepth_ == 0 ) ) {  // we are not in the lookahead-phase
 	    // for all positions
 	    size_t count = 0;
 	    for( StackItem::iterator position = stack_.back().begin();
@@ -106,7 +125,7 @@ namespace csl {
 	interpretation.setWord( query_ ); 
 	// find out what baseWord we're talking about by applying the pattern to the query
 	std::wstring word = query_;
-	interpretation.getInstruction().applyTo( &word );
+	interpretation.getInstruction().applyTo( &word, -1 );
 	interpretation.setBaseWord( word ); 
 
 // 	if( ( filterDic_ && filterDic_->lookup( interpretation.getWord() ) )  || // if there's a filterDic_ and interpretation.word is in it or ..
@@ -119,18 +138,22 @@ namespace csl {
  	interpretations_->receive( interpretation );
    }
 
-    void Val::reportMatch_rec( const Position* cur, Interpretation* interpretation ) const {
+    int Val::reportMatch_rec( const Position* cur, Interpretation* interpretation ) const {
+	int lengthDiff = 0;
 	if( cur->mother_.first == -1 ) {
-	    return;
+	    return 0;
 	}
 	else {
 	    //std::wcout << cur->mother_.first << "," << cur->mother_.second << "," << stack_.at( cur->mother_.first ).size() << std::endl;
-	    reportMatch_rec( &( stack_.at( cur->mother_.first ).at( cur->mother_.second ) ), interpretation );
+	    lengthDiff = reportMatch_rec( &( stack_.at( cur->mother_.first ).at( cur->mother_.second ) ), interpretation );
 	}
 
 	if( ! cur->posPattern_.empty() ) {
 	    interpretation->getInstruction().push_back( cur->posPattern_ );
+	    interpretation->getInstruction().back().setPosition( cur->posPattern_.getPosition() - lengthDiff );
+	    lengthDiff += cur->posPattern_.getRight().size() - cur->posPattern_.getLeft().size(); 
 	}
+	return lengthDiff;
     }
 
     

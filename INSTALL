@@ -20,8 +20,8 @@ you can use 'ccmake' to change the prefix.
 Just do
 
 cmake ..
-ccmake .  # if you want to change paths: just follow the help given in the program.
+ccmake .  # only if you want to change paths. Just follow the help given in the program.
 make
-make install
+make install  # not very well tested
 
-
+Please report bugs, problems etc. to uli _at_ cis _dot_ uni-muenchen _dot_ de .

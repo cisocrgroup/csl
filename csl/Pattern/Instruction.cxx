@@ -64,11 +64,11 @@ namespace csl {
 	    }
 	}
 	else if( direction == -1 ) {
-	    // iterate through PosPatterns in reverse order: that way the positions remain intact
+	    // iterate through PosPatterns in standard, left-to-right order: that way the positions remain intact
 	    // even if the Patterns change the word length
-	    for( const_reverse_iterator rit = rbegin(); rit != rend(); ++rit ) {
-		// std::wcout<<"pos="<< rit->getPosition()<<"left="<<rit->getLeft()<<",llength="<< rit->getLeft().length()<<", right="<< rit->getRight()<<std::endl; // DEBUG
-		str->replace( rit->getPosition(), rit->getLeft().length(), rit->getRight() );
+	    for( const_iterator it = begin(); it != end(); ++it ) {
+		//std::wcout<<"pos="<< it->getPosition()<<"left="<<it->getLeft()<<",length="<< it->getLeft().length()<<", right="<< it->getRight()<<std::endl; // DEBUG
+		str->replace( it->getPosition(), it->getRight().length(), it->getLeft() );
 	    }
 	}
 	else {
