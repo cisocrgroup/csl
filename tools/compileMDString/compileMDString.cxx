@@ -7,25 +7,37 @@ int main( int argc, const char** argv ) {
 
     std::locale::global( std::locale( "" ) );
 
-    Getopt options( argc, argv );
 
+    try { 
+	Getopt options( argc, argv );
+	
+	if( options.getArgumentCount() != 2 ) {
+	    std::cerr<<"Use like: "<<argv[0]<<" <txtDic> <binDic>"<<std::endl;
+	    return 1;
+	}
+	
+	MinDicString mds;
+	
+	if( options.hasOption( "cislex" ) ) {
+	    mds.setKeyValueDelimiter( '.' );
+	}
+	
+	mds.compileDic( options.getArgument( 0 ).c_str() );
+	mds.writeToFile( options.getArgument( 1 ).c_str() );
+	
+//   mds.printDic();
 
-
-    if( options.getArgumentCount() != 2 ) {
-	std::cerr<<"Use like: "<<argv[0]<<" <txtDic> <binDic>"<<std::endl;
+    }
+    catch( csl::exceptions::cslException exc ) {
+	std::wstring wide_what;
+	csl::string2wstring( exc.what(), wide_what );
+	std::wcerr << "csl::compileMDString: caught cslException and aborted: " << wide_what << std::endl;
 	return 1;
     }
-
-    MinDicString mds;
-
-    if( options.hasOption( "cislex" ) ) {
-	mds.setKeyValueDelimiter( '.' );
+    catch( std::exception exc ) {
+	std::wcerr << "csl::compileMDString: caught std::exception. Aborted." << std::endl;
+	return 1;
     }
-    
-    mds.compileDic( options.getArgument( 0 ).c_str() );
-    mds.writeToFile( options.getArgument( 1 ).c_str() );
-    
-//   mds.printDic();
 
     return 0;
 }
