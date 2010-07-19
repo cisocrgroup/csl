@@ -19,6 +19,9 @@ charly#54
 @endcode
 That is, an alphabetically sorted list of keys, followed by a '#' delimiter symbol and some integer value
 which is stored with the key. If delimiter and integer are omitted, the value 0 will be annotated with each key.
+The specified integer value has no pre-defined meaning - it simply will be returned when the respective string is 
+looked up. So you can use the annotation to remember that Bill is 50 years old, or that Anna's favourite umber is 42,
+or that the string 'charly' appears 54 times in your corpus.
 
 It is important that the .lex file is utf8 encoded and sorted properly. You can sort your dictionary with
 the tool @c sortLex included in this package. Much faster is the following unix command:

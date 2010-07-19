@@ -171,7 +171,7 @@ namespace csl {
 	}
 
 	/**
-	 * mark the state as final/ not final
+	 * mark the state as final
 	 */
 	void setFinal() {
 	    if( ! isFinal_ ) {
@@ -181,7 +181,7 @@ namespace csl {
 	    }
 	    isFinal_ = true;
 	}
-
+	
 	/**
 	 * returns true iff state is marked as final
 	 * @returns true iff state is marked as final

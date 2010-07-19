@@ -426,7 +426,7 @@ namespace csl {
 	inline const AnnType_t& annotationsAt( size_t n ) const;
 
     private:
-#include "./StateHash.h" // don't forget to include "StateHash.tcc" below
+#include "./StateHash.h"
 	
 	mutable size_t count_; // is used for counting during printing
 
@@ -472,6 +472,5 @@ namespace csl {
 } //eon
 
 #include "./MinDic.tcc"
-#include "./StateHash.tcc"
 
 #endif

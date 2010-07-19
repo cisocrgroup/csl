@@ -1,33 +1,13 @@
-//#define STATEHASH_USE_NEW 1
 
 
-#ifdef STATEHASH_USE_NEW
-class StateHash {
-public:
-    inline StateHash(TransTable_t& trans);
-    inline void push(const TempState& state, int compId);
-    inline int findState(const TempState& state);
-
-private:
-    const TransTable_t& trans_;
-};
-
-
-#endif
-
-
-
-/***********************************************
- * Here is the old version with chained hashing
- ***********************************************/
-
-#ifndef STATEHASH_USE_NEW
 /**
  * Statehash is a hashtable to store states of a MinDic during dictionary construction.
  * This allows an efficient check if a new state is equivalent to an existing one.
  */
 class StateHash {
- private:
+public:
+
+private:
     TransTable_t& trans_;
 
     class ChainLink {
@@ -43,7 +23,7 @@ class StateHash {
     ChainLink** table_;
 
     static const int HASHC1 = 257;
-    static const int HASHC2 = 107;
+//    static const int HASHC2 = 107;
 
     static const size_t tableSize_ = (size_t)( 1ll<<25 ) - 1;
 
@@ -65,7 +45,7 @@ public:
     StateHash(TransTable_t& trans) : trans_(trans) {
         try {
             table_ = new ChainLink*[tableSize_];
-                memset( table_, 0, tableSize_ * sizeof(ChainLink*) );
+	    memset( table_, 0, tableSize_ * sizeof(ChainLink*) );
         } catch( std::bad_alloc exc ) {
             std::cout<<"csl::StateHash: Could not allocate hashtable: " <<  exc.what() << std::endl;
             throw exc;
@@ -73,20 +53,22 @@ public:
     }
     
     ~StateHash() {
-/* 	ChainLink* ch, *next; */
-/* 	for(int i=0;i<tableSize_;++i) { */
-/* 	    next = table_[i]; */
-/* 	    while((ch = next)) { */
-/* 		std::cout<<"i="<<i<<", ch->next="<<ch->next<<std::endl; */
-/* 		next = (*ch).next; */
-/* //		delete(ch); */
-/* 	    } */
-/*      } */
+ 	ChainLink* cur = 0;
+	ChainLink* next = 0; 
+ 	for( size_t i=0; i < tableSize_ ; ++i ) {
+ 	    cur = table_[i];
+ 	    while( cur != 0 ) {
+ 		//std::wcout<< "i=" <<i << ", cur="<< cur << ", next="<< cur->next << std::endl;
+ 		next = (*cur).next;
+		delete( cur );
+		cur = next;
+ 	    }
+      }
     }
 
     template< typename TempState >
-    void push(const TempState& state, StateId_t compId) {
-        size_t slot = hashcode(state);
+    void push( const TempState& state, StateId_t compId ) {
+        size_t slot = hashcode( state );
         ChainLink* newCL = new ChainLink();
 	(*newCL).value = compId;
 	(*newCL).next = table_[slot];
@@ -96,10 +78,9 @@ public:
     template< typename TempState >
     size_t findState(const TempState& state) {
                 ChainLink* ch = table_[hashcode(state)];
-                while( ch && !trans_.compareStates( state, ch->value ) ) {
+                while( ch && ! trans_.compareStates( state, ch->value ) ) {
                         ch = ch->next;
 		}
 		return ( ch )? ch->value : 0;
     }
 };
-#endif

@@ -5,6 +5,7 @@ namespace csl {
 
 	baseDic_ = &baseDic;
 	patternGraph_.loadPatterns( patternFile );
+	patternGraph_.toDot();
     }
 
 
@@ -26,12 +27,11 @@ namespace csl {
 	stack_.push_back( StackItem() );
 	stack_.back().push_back( Position( baseDic_->getRootState() ) );
 	
-	MinDic_t::State tmp = baseDic_->getRootState();
-	size_t stmp = baseDic_->getRoot();
-
 
 	size_t depth = 1; // depth 0 was initialized above
 	PatternGraph::State patternPos = patternGraph_.getRoot();
+
+	// iterate through query
 	for( std::wstring::const_iterator c = word.begin(); c != word.end(); ++c, ++depth ) {
 	    
 	    StackItem const& last = stack_.back();
@@ -96,6 +96,7 @@ namespace csl {
 	    }
 	    //std::wcerr << "lad=" << cur.lookAheadDepth_ << std::endl;
 
+	    //std::wcout << "sizeof_bucket=" << cur.size() << std::endl;
 	    
 	} // for all chars of the query word
 
