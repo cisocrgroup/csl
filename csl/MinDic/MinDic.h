@@ -10,6 +10,7 @@
 #include "../codecvt/UTF8_Codecvt.h"
 #include "../TransTable/TransTable.h"
 #include "../Alphabet/Alphabet.h"
+#include "./StateHash.h"
 
 namespace csl {
 
@@ -426,13 +427,12 @@ namespace csl {
 	inline const AnnType_t& annotationsAt( size_t n ) const;
 
     private:
-#include "./StateHash.h"
 	
 	mutable size_t count_; // is used for counting during printing
 
 	// Those vars are used for construction
 	TempState_t *tempStates_;
-	StateHash* hashtable_;
+	StateHash< TransTable_t  >* hashtable_;
 
 	wchar_t lastKey_[Global::lengthOfLongStr];
 

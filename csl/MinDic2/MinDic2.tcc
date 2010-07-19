@@ -62,7 +62,7 @@ namespace csl {
 			new( &( tempStates_[i] ) ) TempState_t(); // call constructor for all tempStates
 		}
 
-		hashtable_ = new StateHash( *this );
+		hashtable_ = new StateHash< TransTable_t >( *this );
 
 		nrOfKeys_ = 0;
 		*lastKey_ = 0; // reset the string to ""
@@ -206,7 +206,7 @@ namespace csl {
 		StateId_t storedState = 0;
 		if ( ( storedState = hashtable_->findState( state ) ) == 0 ) { // if equiv. state doesn't exist
 			storedState = storeTempState( state ); // store it
-			hashtable_->push( state, storedState ); // add it to the hashtable
+			hashtable_->insert( state, storedState ); // add it to the hashtable
 		}
 
 		return storedState;

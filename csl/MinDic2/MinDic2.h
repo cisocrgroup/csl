@@ -8,6 +8,7 @@
 #include "../codecvt/UTF8_Codecvt.h"
 #include "../TransTable/TransTable.h"
 #include "../Alphabet/Alphabet.h"
+#include "../MinDic/StateHash.h"
 
 namespace csl {
 
@@ -231,13 +232,12 @@ namespace csl {
 	inline const AnnType_t& annotationsAt( size_t n ) const;
 
     private:
-#include "../MinDic/StateHash.h" // don't forget to include "StateHash.tcc" below
 	
 	mutable size_t count_; // is used for counting during printing
 
 	// Those vars are used for construction
 	TempState_t *tempStates_;
-	StateHash* hashtable_;
+	StateHash< TransTable_t >* hashtable_;
 
 	wchar_t lastKey_[Global::lengthOfLongStr];
 
@@ -274,6 +274,5 @@ namespace csl {
 } //eon
 
 #include "./MinDic2.tcc"
-#include "../MinDic/StateHash.tcc"
 
 #endif
