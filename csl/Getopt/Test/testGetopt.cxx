@@ -3,7 +3,8 @@
 int main() {
     csl::TestGetopt tester;
 
-    tester.run();
+//    tester.run();
+    tester.testSpecified();
     
 
     return 0;

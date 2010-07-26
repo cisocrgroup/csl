@@ -3,8 +3,13 @@
 
 #include<iostream>
 #include<map>
+#include<set>
 #include<vector>
 #include<stdexcept>
+
+#include<csl/Global.h>
+
+namespace csl {
 
 /**
  * @brief A class for thet parsing of command line arguments.
@@ -14,6 +19,7 @@ class Getopt {
 public:
     enum Restrictiveness { IGNORE, WARN, THROW };
     enum ValueType { VOID, STRING };
+    enum Obligatority { OBLIGATORY, OPTIONAL };
 
     Getopt( Restrictiveness restrictiveness = IGNORE ) :
 	restrictiveness_( restrictiveness ) {
@@ -70,32 +76,78 @@ public:
     }
 
 
+    /**
+     * @brief This option permits only options of the form option=value, and regular arguments.
+     */
     void getOptions( size_t argc, char const** argv, Restrictiveness restrictiveness = IGNORE ) {
 	
 	progName_ = argv[0];
 
-	std::string openFlag;
 	for( size_t i = 1; i < argc; ++i ) {
 	    std::string word = argv[i];
 
 	    if( word.length() > 2 && word.at( 0 ) == '-' && word.at( 1 ) == '-' ) { // looks like a flag
-		if( ! openFlag.empty() ) {
-		    optionValues_[openFlag] = "1";
-		    openFlag.clear();
-		}
-
 		size_t pos = word.find( '=' );
 		if( pos != std::string::npos ) {
 		    optionValues_[ word.substr( 2, pos - 2 ) ] = word.substr( pos + 1 );
 		}
 		else {
-		    openFlag = word.substr( 2 );
+		    throw Exception( "csl::Getopt::getOptions: invalid argument structure" );
 		}
 	    }
 	    else { // is no flag
-		if( ! openFlag.empty() && ( optionTypes_[openFlag] != VOID ) ) { // insert as value of open flag
-		    optionValues_[openFlag] = word;
-		    openFlag.clear();
+		addArgument( word );
+	    }
+	} // for all items in argv
+
+
+    } // getOptions
+
+
+    void getOptionsAsSpecified( size_t argc, char const** argv, Restrictiveness restrictiveness = IGNORE ) {
+	
+	progName_ = argv[0];
+
+	std::string keyWaitsForValue;
+
+	for( size_t i = 1; i < argc; ++i ) {
+	    std::string word = argv[i];
+
+	    if( word.length() > 2 && word.at( 0 ) == '-' && word.at( 1 ) == '-' ) { // looks like a flag
+		if( ! keyWaitsForValue.empty() ) {
+		    std::string msg = "csl::Getopt::getOptionsAsSpecified: expected value after non-void option ";
+		    msg += keyWaitsForValue;
+		    throw Exception( msg );
+		}
+
+		std::string key;
+		size_t pos = word.find( '=' );
+		if( pos != std::string::npos ) { // '=' inside the string
+		    key = word.substr( 2, pos - 2 );
+		    std::string value = word.substr( pos + 1 );
+		    
+		    if( optionTypes_[key] == VOID ) {
+			std::string msg = "csl::Getopt::getOptionsAsSpecified: no value expected for void option ";
+			msg += key;
+			throw Exception( msg );
+		    }
+		    optionValues_[ key ] = value;
+		}
+		else { // no '=' inside the string
+		    key = word.substr( 2 );
+		    if( optionTypes_[key] == VOID ) {
+			optionValues_[ key ] = "1";
+		    } else {
+			keyWaitsForValue = word.substr( 2 );
+		    }
+		}
+		std::set< std::string >::iterator ob =  obligatory_.find( key );
+		if( ob != obligatory_.end() ) obligatory_.erase( ob );
+	    }
+	    else { // is no flag
+		if( ! keyWaitsForValue.empty() && ( optionTypes_[keyWaitsForValue] != VOID ) ) { // insert as value of open key
+		    optionValues_[keyWaitsForValue] = word;
+		    keyWaitsForValue.clear();
 		}
 		else { // no flag waiting for value, add as argument
 		    addArgument( word );
@@ -103,7 +155,24 @@ public:
 	    }
 	} // for all items in argv
 
-	if( ! openFlag.empty() ) {
+	if( ! keyWaitsForValue.empty() ) {
+	    std::string msg = "csl::Getopt::getOptionsAsSpecified: expected value for non-void option ";
+	    msg += keyWaitsForValue;
+	    throw Exception( msg );
+	}
+
+	if( hasOption( "help" ) ) {
+	    throw HelpException( "Option --help was given" );
+	}
+	else if( ! obligatory_.empty() ) {
+	    std::string msg = std::string( "csl::Getopt::getOptionsAsSpecified: obligatory options still missing: " );
+	    for( std::set< std::string >::const_iterator it = obligatory_.begin();
+		 it != obligatory_.end();
+		 ++it ) {
+		msg += *it + ",";
+	    }
+	    
+	    throw Exception( msg );
 	}
 
 // 	std::cout<<"Options:"<<std::endl;
@@ -116,8 +185,27 @@ public:
 // 	}
     } // getOptions
 
-    void specifyOption( std::string const& key, ValueType valueType = VOID ) {
+
+    void specifyOption( std::string const& key, ValueType valueType, Obligatority obligatority = OPTIONAL ) {
+	if( optionTypes_.find( key ) != optionTypes_.end() ) {
+	    std::string msg = std::string( "csl::Getopt::specifyOption: Key " ) + key + "was specified before";
+	    throw Exception( "msg" );
+	    
+	}
 	optionTypes_[ key ] = valueType;
+	if( obligatority == OBLIGATORY ) {
+	    obligatory_.insert( key );
+	}
+    }
+
+    void specifyOption( std::string const& key, ValueType valueType, std::string const& defaultValue ) {
+	if( optionTypes_.find( key ) != optionTypes_.end() ) {
+	    std::string msg = std::string( "csl::Getopt::specifyOption: Key " ) + key + "was specified before";
+	    throw Exception( "msg" );
+	    
+	}
+	optionTypes_[ key ]  = valueType;
+	optionValues_[ key ] = defaultValue; 
     }
 
     void setOption( std::string const& key, std::string const& value ) {
@@ -137,8 +225,18 @@ public:
     }
 
     const std::string& getOption( const std::string& key ) {
-	if( ! hasOption( key ) ) throw std::runtime_error( "csl::Getopt::getOption: no such key defined");
+	if( ! hasOption( key ) ) throw std::runtime_error( "csl::Getopt::getOption: no such key defined" );
 	return optionValues_[key];
+    }
+
+    typedef std::map< std::string, ValueType >::const_iterator OptionIterator;
+    
+    OptionIterator optionsBegin() const {
+	return optionTypes_.begin();
+    }
+
+    OptionIterator optionsEnd() const {
+	return optionTypes_.end();
     }
 
     const std::string& getArgument( size_t idx ) const {
@@ -149,13 +247,30 @@ public:
 	return arguments_.size();
     }
 
+    class Exception : public exceptions::cslException {
+    public:
+	Exception( std::string const& what ) :
+	    cslException( what ) {
+	}
+    };
+
+    class HelpException : public Exception {
+    public:
+	HelpException( std::string const& what ) : Exception( what ) {
+	}
+    };
+
 private:
     std::string progName_;
     std::map< std::string, ValueType > optionTypes_;
+    std::set< std::string > obligatory_;
     std::map< std::string, std::string > optionValues_;
     std::vector< std::string > arguments_;
+
     Restrictiveness restrictiveness_;
 
 }; // class Getopt
 
+} // eon
 #endif
+

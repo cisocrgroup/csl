@@ -144,8 +144,8 @@ namespace csl {
 	}
 
 	/**
-	   reset the state for re-use
-	*/
+	 * reset the state for re-use
+	 */
 	inline void reset() {
 	    transitions_.clear();
 

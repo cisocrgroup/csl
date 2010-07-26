@@ -56,7 +56,7 @@ namespace csl {
 
 
     private:
-
+	// no data members, inherits from std::vector< PosPattern >
     }; // class Instruction
     
 
