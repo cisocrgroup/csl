@@ -8,7 +8,7 @@
 int main( int argc, char const** argv ) {
     std::locale::global( std::locale("") ); // set the environment's default locale
 
-    Getopt options( argc, argv );
+    csl::Getopt options( argc, argv );
 
     if( options.hasOption( "help" ) || !options.hasOption( "patternFile" ) ) {
 	std::wcerr<< std::endl

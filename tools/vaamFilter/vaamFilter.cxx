@@ -54,7 +54,7 @@ int main(int argc, const char** argv ) {
 
     std::locale::global( std::locale("") ); // set the environment's default locale
 
-    Getopt opt( argc, argv );
+    csl::Getopt opt( argc, argv );
 
     if( opt.hasOption( "help" ) ) {
 	printHelp();

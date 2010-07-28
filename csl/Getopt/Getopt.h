@@ -161,10 +161,7 @@ public:
 	    throw Exception( msg );
 	}
 
-	if( hasOption( "help" ) ) {
-	    throw HelpException( "Option --help was given" );
-	}
-	else if( ! obligatory_.empty() ) {
+	if( ! obligatory_.empty() ) {
 	    std::string msg = std::string( "csl::Getopt::getOptionsAsSpecified: obligatory options still missing: " );
 	    for( std::set< std::string >::const_iterator it = obligatory_.begin();
 		 it != obligatory_.end();
@@ -254,11 +251,6 @@ public:
 	}
     };
 
-    class HelpException : public Exception {
-    public:
-	HelpException( std::string const& what ) : Exception( what ) {
-	}
-    };
 
 private:
     std::string progName_;

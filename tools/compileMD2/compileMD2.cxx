@@ -13,7 +13,7 @@ void printHelp(); // forward declaration
 int main(int argc, char const** argv) {
     std::locale::global( std::locale( "" ) );
 
-    Getopt opt( argc, argv );
+    csl::Getopt opt( argc, argv );
 
 
     if( opt.hasOption( "stdin" ) ) {

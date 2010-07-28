@@ -8,7 +8,7 @@ using namespace csl;
 int main( int argc, const char** argv ) {
     std::locale::global( std::locale("") ); // set the environment's default locale
 
-    Getopt options( argc, argv );
+    csl::Getopt options( argc, argv );
 
 
     if( options.getArgumentCount() != 1 ) {

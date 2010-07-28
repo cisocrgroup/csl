@@ -9,7 +9,7 @@ int main( int argc, const char** argv ) {
 
     std::locale::global( std::locale( "" ) );
 
-    Getopt options( argc, argv );
+    csl::Getopt options( argc, argv );
     
     if( options.getArgumentCount() != 3 ) {
 	std::wcerr<<"createED"<<std::endl;
