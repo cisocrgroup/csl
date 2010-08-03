@@ -152,8 +152,9 @@ int main(int argc, const char** argv ) {
 	else {
 	    // new line for each interpretation of the query
 	    for( std::vector< csl::Interpretation >::const_iterator it = answers.begin(); it!= answers.end(); ++it ) {
-		std::wcout << it->getBaseWord() 
-			   << "," << it->getInstruction() 
+		std::wcout << it->getWord() << ":"
+		           << it->getBaseWord() 
+			   << "+" << it->getInstruction() 
 			   << ",dist=" << it->getLevDistance();
 
 		if( minDicString ) {
