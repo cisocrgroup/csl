@@ -126,7 +126,12 @@ public:
 		    key = word.substr( 2, pos - 2 );
 		    std::string value = word.substr( pos + 1 );
 		    
-		    if( optionTypes_[key] == VOID ) {
+		    if( optionTypes_.find( key ) == optionTypes_.end() ) {
+			std::string msg = "csl::Getopt::getOptionsAsSpecified: unknown option ";
+			msg += key;
+			throw Exception( msg );
+		    }
+		    else if( optionTypes_[key] == VOID ) {
 			std::string msg = "csl::Getopt::getOptionsAsSpecified: no value expected for void option ";
 			msg += key;
 			throw Exception( msg );
@@ -135,7 +140,12 @@ public:
 		}
 		else { // no '=' inside the string
 		    key = word.substr( 2 );
-		    if( optionTypes_[key] == VOID ) {
+		    if( optionTypes_.find( key ) == optionTypes_.end() ) {
+			std::string msg = "csl::Getopt::getOptionsAsSpecified: unknown option: '";
+			msg += key + "'";
+			throw Exception( msg );
+		    }
+		    else if( optionTypes_[key] == VOID ) {
 			optionValues_[ key ] = "1";
 		    } else {
 			keyWaitsForValue = word.substr( 2 );

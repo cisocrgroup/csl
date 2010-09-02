@@ -115,7 +115,7 @@ namespace csl {
 	class iResultReceiver : public csl::LevFilter::CandidateReceiver,
 				public csl::iInterpretationReceiver {
 
-
+	public:
 	    virtual void setCurrentDictModule( iDictModule const& dm ) = 0;
 
 	}; // class iResultReceiver
@@ -264,7 +264,7 @@ namespace csl {
 	     * @brief Allows to query the iDctModule with some string. The iDictModule is expected
 	     * to add all its answers/ interpretations to the CandidateSet that is passed.
 	     */
-	    virtual void query( std::wstring const& query, CandidateSet* answers ) = 0;
+	    virtual void query( std::wstring const& query, iResultReceiver* answers ) = 0;
 
 	    /**
 	     * @brief returns a value between 0 and 100 to indicate the DictModule's priority as compared to others
@@ -467,7 +467,7 @@ namespace csl {
 		return priority_;
 	    }
 	    
-	    void query( std::wstring const& query, CandidateSet* answers ) {
+	    void query( std::wstring const& query, iResultReceiver* answers ) {
 		if( getDict() ) {
 		    myDictSearch_.msMatch_.setFBDic( *( getDict() ) );
 		    myDictSearch_.msMatch_.setDistance( getDLevByWordlength( query.length() ) );
@@ -524,6 +524,12 @@ namespace csl {
 
 	void addExternalDictModule( iDictModule& extModule );
 
+	/**
+	 * @brief A simple check if any DictModules are activated. This is useful to test
+	 *        in client programs and perhaps to give a warning,
+	 */
+
+	bool hasDictModules() const;
 
 	//@} // END Configuration methods
 
@@ -537,7 +543,7 @@ namespace csl {
 	 * @param[in] query
 	 * @param[out] answers
 	 */
-	void query( std::wstring const& query, CandidateSet* answers );
+	void query( std::wstring const& query, iResultReceiver* answers );
 	
 	//@} // END Lookup methods
 

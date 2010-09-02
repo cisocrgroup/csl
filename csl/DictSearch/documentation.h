@@ -205,8 +205,17 @@ int main() {
 }
 @endcode
 
+@section cascading Cascading dictionary queries
+- Dictionaries with top-ranked "CascadingRank" (lowest numbers) are queries first
+- Dictionaries with lower ranks (higher numbers) are queried only if the higher-ranked
+  dictionaries yielded no results.
+
+@todo write this section on DictSearch::Cascading dictionary queries
+
+
+
+
 @section known_issues Known Bugs/Issues
 - On Windows we're working on a bug related to the decoding of utf-8 files. Programs will crash if you use anything but ascii characters. It works fine under linux, and soon it will work fine for Windows, too.
-- We're aware that Abbyy might be interested in a feature that is more tailor-made to those "fuzzy" word graphs used inside the Abbyy engine. We intend to put effort in that direction.
 
 */

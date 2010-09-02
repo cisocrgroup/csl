@@ -43,7 +43,12 @@ namespace csl {
     }
 
 
-    void DictSearch::query( std::wstring const& query, CandidateSet* answers ) {
+    bool DictSearch::hasDictModules() const {
+	return ( dictModules_.size() + externalDictModules_.size() != 0 );
+    }
+
+
+    void DictSearch::query( std::wstring const& query, iResultReceiver* answers ) {
 	for( std::vector< DictModule* >::iterator dm = dictModules_.begin(); dm != dictModules_.end(); ++dm ) {
 	    try {
 		answers->setCurrentDictModule( **dm );
