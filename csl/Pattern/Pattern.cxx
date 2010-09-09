@@ -5,7 +5,7 @@
 
 namespace csl {
 
-    wchar_t Pattern::leftRightDelimiter_ = L'_';
+    wchar_t Pattern::leftRightDelimiter_ = L':';
     
     // all other methods are defined inline.
 

@@ -103,20 +103,20 @@ namespace csl {
 	if( str.at( leftBracket ) != '(' ) throw exceptions::badInput( "csl::PosPattern::parseFromString: Found no opening bracket" );
 	offset += 1;
 
-	size_t underscore = str.find( '_', offset );
-	if( underscore == str.npos ) throw exceptions::badInput( "csl::Pattern::parseFromString: Found no underscore" );
+	size_t leftRightDelimiter = str.find( Pattern::leftRightDelimiter_, offset );
+	if( leftRightDelimiter == str.npos ) throw exceptions::badInput( "csl::Pattern::parseFromString: Found no leftRightDelimiter" );
 
-	offset = underscore  + 1;
+	offset = leftRightDelimiter  + 1;
 	size_t comma = str.find( ',', offset );
-	if( underscore == str.npos ) throw exceptions::badInput( "csl::Pattern::parseFromString: Found no comma" );
+	if( comma == str.npos ) throw exceptions::badInput( "csl::Pattern::parseFromString: Found no comma" );
 
 	offset = comma  + 1;
 	size_t rightBracket = str.find( ')', offset );
-	if( underscore == str.npos ) throw exceptions::badInput( "csl::Pattern::parseFromString: Found no closing bracket" );
+	if( rightBracket == str.npos ) throw exceptions::badInput( "csl::Pattern::parseFromString: Found no closing bracket" );
 
 
-	setLeft( str.substr( leftBracket + 1, underscore - leftBracket - 1 ) );
-	setRight( str.substr( underscore + 1, comma - underscore - 1 ) );
+	setLeft( str.substr( leftBracket + 1, leftRightDelimiter - leftBracket - 1 ) );
+	setRight( str.substr( leftRightDelimiter + 1, comma - leftRightDelimiter - 1 ) );
 	wchar_t* dummy = 0;
 	setPosition( wcstol( str.substr( comma + 1, rightBracket - comma - 1 ).c_str(), &dummy, 10 ) );
 

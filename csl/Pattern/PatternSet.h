@@ -101,7 +101,7 @@ namespace csl {
 
 	size_t patternCount = 0;
 	while( getline( fi, line ).good() ) {
-	    size_t delimPos = line.find( L' ' );
+	    size_t delimPos = line.find( Pattern::leftRightDelimiter_ );
 	    if( delimPos == std::wstring::npos ) {
 		throw exceptions::badInput( "PatternGraph: Invalid line in pattern file" );
 	    }

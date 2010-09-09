@@ -299,7 +299,6 @@ namespace csl {
 	
 	size_t nrOfPatterns_;
 
-	static const wchar_t patternDelimiter_ = L'_';
     };
 
 

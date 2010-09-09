@@ -71,7 +71,7 @@ namespace csl {
 
     void TestPattern::testPatternSet() {
 	PatternSet pSet;
-	//pSet.loadPatterns( "./test.patterns.txt" );
+	pSet.loadPatterns( "./test.patterns.txt" );
     }
 
     void TestPattern::testPosPattern() {
@@ -439,21 +439,21 @@ namespace csl {
 	// implicit copy constructor
 	PatternGraph::State st = pg.getRoot();
 	PatternGraph::State st2 = pg.getRoot();
-
+	
 	// == operator
 	CPPUNIT_ASSERT( st == st2 );
-
+	
 	// basic walk()-operation and isFinal()
 	CPPUNIT_ASSERT( ! st.isFinal() );
 	CPPUNIT_ASSERT( st.walk( 't' ) );
 	CPPUNIT_ASSERT( st.isFinal() );
-
+	
 	st = pg.getRoot();
 	PatternGraph::State st3( st );
 	st2 = st.getTransTarget( 't' );
 	CPPUNIT_ASSERT( st == pg.getRoot() );
-
-
+	
+	
 	/////  Forward, index right
 	PatternGraph pg2( PatternGraph::FORWARD, PatternGraph::INDEX_RIGHT );
 	pg2.loadPatterns( "../csl/Val/Test/small.patterns.txt" );

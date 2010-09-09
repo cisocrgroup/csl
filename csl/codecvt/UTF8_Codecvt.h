@@ -9,7 +9,7 @@
  * This is a convenience macro to create a new locale with most of
  * the system's standard locale but with the csl_internal utf8 codecvt facet.
  */
-#define CSL_UTF8_LOCALE ( std::locale( std::locale( "" ), new UTF8_Codecvt() ) )
+#define CSL_UTF8_LOCALE ( std::locale( std::locale( "" ), new csl::UTF8_Codecvt() ) )
 
 namespace csl {
 

@@ -73,7 +73,7 @@ namespace csl {
 	
 	size_t patternCount = 0;
 	while( getline( fi, line ).good() ) {
-	    size_t delimPos = line.find( L' ' );
+	    size_t delimPos = line.find( LPattern::leftRightDelimiter_ );
 	    size_t weightDelimPos = line.find( L'#' );
 	    if( ( delimPos == std::wstring::npos  ) || ( weightDelimPos == std::wstring::npos  ) ) {
 		throw exceptions::badInput( "PatternWeights: Invalid line in pattern file" );
@@ -114,8 +114,8 @@ namespace csl {
 	for( std::vector< std::pair< csl::Pattern, float > >::const_iterator it = histPatternCountSorted.begin();
 	     it != histPatternCountSorted.end();
 	     ++it ) {
-	    fo         << it->first.getLeft() << ' ' << it->first.getRight() << "#" << it->second << std::endl;
-	    //std::wcout << it->first.getLeft() << ' ' << it->first.getRight() << "#" << it->second << std::endl;
+	    fo         << it->first.getLeft() << Pattern::leftRightDelimiter_ << it->first.getRight() << "#" << it->second << std::endl;
+	    //std::wcout << it->first.getLeft() << Pattern::leftRightDelimiter_ << it->first.getRight() << "#" << it->second << std::endl;
 	}
 	fo.close();
     }
@@ -164,7 +164,7 @@ namespace csl {
 	for( std::vector< std::pair< csl::Pattern, float > >::const_iterator it = histPatternCountSorted.begin();
 	     it != histPatternCountSorted.end();
 	     ++it ) {
-	    str << it->first.getLeft() << '_' << it->first.getRight() << "#" << it->second << std::endl;
+	    str << it->first.getLeft() << Pattern::leftRightDelimiter_ << it->first.getRight() << "#" << it->second << std::endl;
 //	    if( it - histPatternCountSorted.begin() > 30 )break;
 	}
 	

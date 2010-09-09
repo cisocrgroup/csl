@@ -88,14 +88,17 @@ namespace csl {
 	    leftRightDelimiter_ = c;
 	}
 
-    private:
+
 	/**
 	 * @brief This value determines which symbol is used as delimiter between left and right
-	 *        pattern side ONLY IN THE OUTPUT. It is NOT USED FOR PARSING patterns from a string.
+	 *        pattern side. NOTE THAT, once you change this, it will affect the output of patterns
+	 *        as well as the parsing from pattern files etc.
 	 *
 	 * This value is initialized with a default value in Pattern.cxx
 	 */
 	static wchar_t leftRightDelimiter_;
+
+    private:
 
 	/**
 	 * @brief The left pattern side
