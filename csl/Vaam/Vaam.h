@@ -143,6 +143,8 @@ namespace csl {
 	 *
 	 * You can write your own class that implements the interface iCandidateReceiver to receive all answers,
 	 * but you can also use Vaam's subclass CandidateReceiver.
+	 *
+	 * @return true iff at least one answer was found
 	 * 
 	 */
 	inline bool query( std::wstring const& word, iInterpretationReceiver* interpretations ) const;

@@ -73,7 +73,7 @@ namespace csl {
 	
 	size_t patternCount = 0;
 	while( getline( fi, line ).good() ) {
-	    size_t delimPos = line.find( LPattern::leftRightDelimiter_ );
+	    size_t delimPos = line.find( Pattern::leftRightDelimiter_ );
 	    size_t weightDelimPos = line.find( L'#' );
 	    if( ( delimPos == std::wstring::npos  ) || ( weightDelimPos == std::wstring::npos  ) ) {
 		throw exceptions::badInput( "PatternWeights: Invalid line in pattern file" );

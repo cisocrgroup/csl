@@ -49,13 +49,13 @@ namespace csl {
 
     
     void TestPattern::run() {
-//  	testPattern();
-//  	testPatternSet();
-//  	testPosPattern();
-// 	testInstruction();
-// 	testInterpretation();
-//  	testPatternProbabilities();
-//  	testComputeInstruction();
+  	testPattern();
+  	testPatternSet();
+  	testPosPattern();
+ 	testInstruction();
+ 	testInterpretation();
+  	testPatternProbabilities();
+  	testComputeInstruction();
 	testPatternGraph();
     }
 
@@ -67,11 +67,35 @@ namespace csl {
 	Pattern p1( L"left", L"right" );
 	CPPUNIT_ASSERT( p1.getLeft() == L"left" );
 	CPPUNIT_ASSERT( p1.getRight() == L"right" );
+
+	Pattern p2( L"xy", L"x y" );
+	CPPUNIT_ASSERT( p2.getLeft() == L"xy" );
+	CPPUNIT_ASSERT( p2.getRight() == L"x y" );
+
     }
 
     void TestPattern::testPatternSet() {
 	PatternSet pSet;
-	pSet.loadPatterns( "./test.patterns.txt" );
+	pSet.loadPatterns( "../csl/Pattern/Test/small.patterns.txt" );
+
+	PatternSet::const_iterator pat = pSet.begin();
+	
+ 	CPPUNIT_ASSERT( ( pat->getLeft() == L"a" ) && ( pat->getRight() == L"x" ) );
+	++pat;
+	CPPUNIT_ASSERT( ( pat->getLeft() == L"ei" ) && ( pat->getRight() == L"ey" )  );
+	++pat;
+	CPPUNIT_ASSERT( ( pat->getLeft() == L"k" ) && ( pat->getRight() == L"h" )  );
+	++pat;
+	CPPUNIT_ASSERT( ( pat->getLeft() == L"t" ) && ( pat->getRight() == L"th" )  );
+	++pat;
+	CPPUNIT_ASSERT( ( pat->getLeft() == L"t" ) && ( pat->getRight() == L"x" )  );
+	++pat;
+	CPPUNIT_ASSERT( ( pat->getLeft() == L"xy" ) && ( pat->getRight() == L"x y" )  );
+	++pat;
+
+	CPPUNIT_ASSERT( pat == pSet.end()  );
+       
+	
     }
 
     void TestPattern::testPosPattern() {

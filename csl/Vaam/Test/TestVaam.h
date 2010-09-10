@@ -12,7 +12,7 @@ namespace csl {
 
 	CPPUNIT_TEST_SUITE( TestVaam );
 	CPPUNIT_TEST( testPatternGraph );
-//	CPPUNIT_TEST( testBasics );
+	CPPUNIT_TEST( testBasics );
 	CPPUNIT_TEST_SUITE_END();
     public:
 	TestVaam();
@@ -77,6 +77,21 @@ namespace csl {
 	CPPUNIT_ASSERT( answer.getInstruction().at( 0 ).getRight() == L"x" );
 
 	answers.clear();
+
+	///////  space in pattern
+
+	CPPUNIT_ASSERT( vaam.query( std::wstring( L"uvwx yz" ), &answers ) );
+	CPPUNIT_ASSERT( answers.size() == 1 );
+	Interpretation& answer2 = answers.at( 0 ); 
+	CPPUNIT_ASSERT( answer2.getBaseWord() == L"uvwxyz" );
+	CPPUNIT_ASSERT( answer2.getInstruction().size() == 1 );
+	CPPUNIT_ASSERT( answer2.getInstruction().at( 0 ).getLeft() == L"xy" );
+	CPPUNIT_ASSERT( answer2.getInstruction().at( 0 ).getRight() == L"x y" );
+
+	answers.clear();
+
+
+
 
 	///////////// MAX NR OF PATTERNS ///////////////////////
 	// with at most 0 variants, this should be no variant
