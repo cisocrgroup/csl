@@ -191,7 +191,7 @@ sub lookup {
 		
 		@{$int{instruction}} = (); # see that instruction is defined even if it remains empty
 		
-		while( $instruction =~ m/\((.*?)_(.*?),(\d+)\)/g ) { # for all posPatterns of the instruction
+		while( $instruction =~ m/\((.*?):(.*?),(\d+)\)/g ) { # for all posPatterns of the instruction
 		    push( @{$int{instruction}}, { left => $1, right => $2, pos => $3 } );
 		}
 		if( ! @{$int{instruction}} ) {

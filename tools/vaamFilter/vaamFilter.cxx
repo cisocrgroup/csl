@@ -45,7 +45,10 @@ void printHelp() {
 	      << std::endl
 	      << "--patternDelimiter=c      Lets symbol c appear as the delimiter between left and right pattern side in the output." << std::endl
 	      << "                          Note that this will NOT affect the expected form of the pattern-file." << std::endl  
-	      << "--machineReadable=1       Print (even more) machine-readable output, i.e. all answers in one line, separated by '|'" << std::endl;
+	      << "--machineReadable=1       Print (even more) machine-readable output, i.e. all answers in one line, separated by '|'" << std::endl
+	      << "--noStatusMessage=1       In machineReadable mode, vaamFilter prints a status message at the very beginning." 
+	      << "                          Use this optionto suppress this status message."
+	      << std::endl;
 }
 
 int main(int argc, const char** argv ) {
@@ -125,7 +128,7 @@ int main(int argc, const char** argv ) {
 
     std::wstring wideAnnotation;
 
-    if( machineReadable ) {
+    if( machineReadable && ( ! opt.hasOption( "noStatusMessage" ) ) ) {
 	std::wcout << "csl::Vaam: READY [machineReadable=true]" << std::endl;
     }
 
