@@ -230,8 +230,7 @@ namespace csl {
     };
 
 
-    inline void string2wstring( std::string const& str, std::wstring& wstr ) {
-	std::locale loc( CSL_UTF8_LOCALE );
+    inline void string2wstring( std::string const& str, std::wstring& wstr, std::locale const& loc ) {
 	std::codecvt< wchar_t, char, std::mbstate_t > const& ccvt = std::use_facet< std::codecvt< wchar_t, char, std::mbstate_t > >( loc );
 
 	wstr.resize( str.size() * ccvt.max_length() );
@@ -241,8 +240,14 @@ namespace csl {
 	ccvt.in( state, str.c_str(), str.c_str()+str.size(), fromNext, (wchar_t*)wstr.c_str(),(wchar_t*)wstr.c_str() + wstr.size(), toNext );
 
 	wstr.resize( toNext - wstr.c_str() );
-	
     }
+
+    inline void string2wstring( std::string const& str, std::wstring& wstr ) {
+	std::locale loc( CSL_UTF8_LOCALE );
+	string2wstring( str, wstr, loc );
+    }
+
+
 
 
 } // eon

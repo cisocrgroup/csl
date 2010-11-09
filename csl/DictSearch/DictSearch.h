@@ -255,7 +255,7 @@ namespace csl {
 	public:
 
 	    /**
-	     * @brief virtual destructor, mostly to make the compiler feel good
+	     * @brief A virtual destructor for a virtual class
 	     */
 	    virtual ~iDictModule() {
 	    }
@@ -265,6 +265,8 @@ namespace csl {
 	     * to add all its answers/ interpretations to the CandidateSet that is passed.
 	     */
 	    virtual void query( std::wstring const& query, iResultReceiver* answers ) = 0;
+
+
 
 	    /**
 	     * @brief returns a value between 0 and 100 to indicate the DictModule's priority as compared to others

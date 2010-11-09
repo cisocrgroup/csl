@@ -3,6 +3,10 @@ link_directories (${csl_BINARY_DIR}/csl)
 
 add_executable(vaamFilter vaamFilter.cxx)
 target_link_libraries (vaamFilter csl)
+
+add_executable(vaamEvaluation vaamEvaluation.cxx)
+target_link_libraries (vaamEvaluation csl)
+
 install( 
   TARGETS vaamFilter
   DESTINATION bin

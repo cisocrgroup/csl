@@ -1,5 +1,5 @@
 #include<iostream>
-#include "csl/Vaam/Vaam.h"
+#include "csl/Val/Val.h"
 #include "csl/Getopt/Getopt.h"
 #include "csl/Stopwatch.h"
 #include "csl/FBDic/FBDic.h"
@@ -17,12 +17,6 @@
  */
 
 
-#ifdef CSL_VAAMFILTER_USE_TRANSTABLE
-typedef csl::Vaam< csl::TransTable< csl::TT_PERFHASH, uint16_t, uint32_t > > Vaam_t;
-#else
-typedef csl::Vaam< csl::MinDic<> > Vaam_t;
-#endif
-
 
 int main(int argc, const char** argv ) {
 
@@ -35,8 +29,8 @@ int main(int argc, const char** argv ) {
 
     csl::Getopt opt( argc, argv );
 
-    if( opt.getArgumentCount() < 3 ) {
-	std::wcerr<< "Use like: vaamFilter [options] <distance> <dictionary> <pattern-file>"<<std::endl
+    if( opt.getArgumentCount() < 2 ) {
+	std::wcerr<< "Use like: vaamFilter [options] <dictionary> <pattern-file>"<<std::endl
 		  << std::endl
 		  << "Options:" << std::endl
 		  << "--minNrOfPatterns=N       Allow only interpretations with N or more pattern applications. Defaults to 0." << std::endl
@@ -46,33 +40,33 @@ int main(int argc, const char** argv ) {
     }
 
     
-    Vaam_t::MinDic_t const* baseDic = 0;
+    csl::MinDic<> const* baseDic = 0;
     csl::FBDic<> const* fbdic = 0;
 
     // In case a .fbdic file is passed, open it and use the FWDic
-    if( opt.getArgument( 1 ).substr( opt.getArgument( 1 ).size() - 5 ) == "fbdic" ) {
-	fbdic= new csl::FBDic<>( opt.getArgument( 1 ).c_str() );
+    if( opt.getArgument( 0 ).substr( opt.getArgument( 0 ).size() - 5 ) == "fbdic" ) {
+	fbdic= new csl::FBDic<>( opt.getArgument( 0 ).c_str() );
 	baseDic = &( fbdic->getFWDic() );
     }
     else {
-	Vaam_t::MinDic_t* tmp = 0;
+	csl::MinDic<>* tmp = 0;
 
 	// this tmp-hack is because of the const-ness of baseDic
-	tmp = new Vaam_t::MinDic_t();
-	tmp->loadFromFile( opt.getArgument( 1 ).c_str() );
+	tmp = new csl::MinDic<>();
+	tmp->loadFromFile( opt.getArgument( 0 ).c_str() );
 	baseDic = tmp;
 	
     }
 
 
-    Vaam_t vaam( *baseDic, opt.getArgument( 2 ).c_str() );
+    csl::Val val( *baseDic, opt.getArgument( 1 ).c_str() );
 
     if( opt.hasOption( "maxNrOfPatterns" ) ) {
-	vaam.setMaxNrOfPatterns( atoi( opt.getOption( "maxNrOfPatterns" ).c_str() ) );
+	val.setMaxNrOfPatterns( atoi( opt.getOption( "maxNrOfPatterns" ).c_str() ) );
     }
 
     if( opt.hasOption( "minNrOfPatterns" ) ) {
-	vaam.setMinNrOfPatterns( atoi( opt.getOption( "minNrOfPatterns" ).c_str() ) );
+	val.setMinNrOfPatterns( atoi( opt.getOption( "minNrOfPatterns" ).c_str() ) );
     }
 
     bool machineReadable = false;
@@ -81,12 +75,9 @@ int main(int argc, const char** argv ) {
     }
 
 
-    Vaam_t::CandidateReceiver answers;
+    csl::Val::CandidateReceiver answers;
 
     std::wstring query;
-
-    size_t maxDistance = atoi( opt.getArgument( 0 ).c_str() );
-    vaam.setDistance( maxDistance );
 
     size_t nrOfQueries = 0;
     size_t sumOfCandidates = 0;
@@ -104,7 +95,7 @@ int main(int argc, const char** argv ) {
     while( std::getline( std::wcin, query ).good() ) {
 	++nrOfQueries;
 	answers.clear();
-	vaam.query( query, &answers );
+	val.query( query, &answers );
 
 #ifndef CSL_VAAMFILTER_PRINTNONE
 	std::sort( answers.begin(), answers.end() );
