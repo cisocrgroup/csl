@@ -114,6 +114,15 @@ namespace csl {
 	    static const size_t maxNrOfResults = 100;
 	};
 
+	/**
+	 * @brief Three modes are offered for case handling:
+	 * @see setCaseMode
+	 */
+	enum CaseMode { asIs,        /**< don't change anything, take query as it comes*/
+			toLower,     /**< change query to lower case and return all candidates lower case */
+			restoreCase  /**< do search in lower case, but upcase first character of all cands if query was uppercase */
+	}; 
+	
 
 	static const void reverse(const wchar_t* str, wchar_t* newStr) {
 	    size_t len = wcslen( str );
@@ -237,7 +246,15 @@ namespace csl {
 	std::codecvt< wchar_t, char, std::mbstate_t >::state_type state; 
 	char const* fromNext = 0;
 	wchar_t* toNext = 0;
-	ccvt.in( state, str.c_str(), str.c_str()+str.size(), fromNext, (wchar_t*)wstr.c_str(),(wchar_t*)wstr.c_str() + wstr.size(), toNext );
+	ccvt.in( state, 
+		 str.c_str(), 
+		 str.c_str()+str.size(), 
+		 fromNext, 
+		 (wchar_t*)wstr.
+		 c_str(),
+		 (wchar_t*)wstr.c_str() + wstr.size(), 
+		 toNext 
+	    );
 
 	wstr.resize( toNext - wstr.c_str() );
     }

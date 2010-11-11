@@ -8,6 +8,8 @@ namespace csl {
 	baseDic_( &baseDic ),
 	filterDic_( 0 ),
 	levDEA_( 0 ), // Here the default levenshtein threshold is specified
+	caseMode_( Global::asIs ),
+	locale_( CSL_UTF8_LOCALE ),
 	minNrOfPatterns_( 0 ),
 	maxNrOfPatterns_( Vaam::INFINITE )
     {
@@ -38,6 +40,13 @@ namespace csl {
 	
 	if( ! baseDic_ ) throw csl::exceptions::LogicalError( "csl::Vaam::query: No baseDic_ loaded." );
 	if( ! baseDic_->readyToRead() ) throw csl::exceptions::LogicalError( "csl::Vaam::query: baseDic_ not ready to read." );
+
+	wasUpperCase_ = false;
+	if( ( caseMode_ != Global::asIs ) && std::iswupper( query_.at( 0 )/*, locale_*/ ) ) {
+	    wasUpperCase_ = true;
+	    query_.at( 0 ) = std::tolower( query_.at( 0 ), locale_ );
+	}
+
 
 	levDEA_.loadPattern( query_.c_str() );
 	stack_.clear();
@@ -183,10 +192,11 @@ namespace csl {
 	Interpretation interpretation;
 
 	interpretation.setBaseWord( baseWord_ ); 
+
 	reportMatch_rec( cur, &interpretation );
 	interpretation.setLevDistance( levDEA_.getDistance( cur->levPos_ ) );
 	interpretation.setBaseWordScore( baseWordScore );
-
+	
 	// find out what word we're talking about by applying the pattern to the baseWord
 	std::wstring word = baseWord_;
 	interpretation.getInstruction().applyTo( &word );
@@ -197,6 +207,16 @@ namespace csl {
 	    
 	    ) {
 	    return;
+	}
+
+	if( wasUpperCase_ ) {
+	    std::wstring tmp = interpretation.getBaseWord();
+	    tmp.at( 0 ) = std::tolower( tmp.at( 0 ), locale_ );
+	    interpretation.setBaseWord( tmp );
+
+	    tmp = interpretation.getWord();
+	    tmp.at( 0 ) = std::tolower( tmp.at( 0 ), locale_ );
+	    interpretation.setWord( tmp );
 	}
 
 	foundAnswers_ = true;

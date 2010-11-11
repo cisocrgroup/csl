@@ -168,6 +168,24 @@ namespace csl {
 	    return ok;
 	} // do_out
 
+	inline void string2wstring( std::string const& str, std::wstring& wstr ) {
+	    wstr.resize( str.size() * max_length() );
+	    state_type state; 
+	    char const* fromNext = 0;
+	    wchar_t* toNext = 0;
+	    in( state, 
+		str.c_str(), 
+		str.c_str()+str.size(), 
+		fromNext, 
+		(wchar_t*)wstr.
+		c_str(),
+		(wchar_t*)wstr.c_str() + wstr.size(), 
+		toNext 
+		);
+	    
+	    wstr.resize( toNext - wstr.c_str() );
+	}
+	
     }; // class
 
 } //eon

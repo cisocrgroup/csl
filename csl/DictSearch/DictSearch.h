@@ -59,7 +59,7 @@ namespace csl {
 	    /**
 	     *
 	     * set up a comparison based on the sum of levenshtein or pattern edits.
-	     * Give the leevenshtein operations a marginally higher punishment, so that
+	     * Give the levenshtein operations a marginally higher punishment, so that
 	     * if the sums are equal, the one with less lev. operations and more pattern 
 	     * operations will win.
 	     */
@@ -319,7 +319,9 @@ namespace csl {
 		disposeDict_( false ),  // will perhaps be changed at setDict()
 		maxNrOfPatterns_(),
 		dlev_hypothetic_( 0 ),
-		priority_( 1 ) {
+		priority_( 1 ),
+		caseMode_( Global::asIs )
+		{
 
 		setDict( dicRef );
 		setDLev( 0 );
@@ -333,6 +335,17 @@ namespace csl {
 	     * copy constructor is blocked!!!
 	     */
 	    DictModule( DictModule const& other );
+
+	    /**
+	     * @brief Specify how to handle upper/lower case queries. See Global::CaseMode to find
+	     *        out which options are available.
+
+	     * Note that all options belongto the namespace csl::Global.
+	     *
+	     */
+	    void setCaseMode( Global::CaseMode const& cm ) {
+		caseMode_ = cm;
+	    }
 
 	    /**
 	     * @brief returns a pointer to the connected dictionary. (May be 0)
@@ -493,6 +506,7 @@ namespace csl {
 	    size_t maxNrOfPatterns_;
 	    size_t dlev_hypothetic_;
 	    int priority_;
+	    Global::CaseMode caseMode_;
 	}; // class DictModule
 
 

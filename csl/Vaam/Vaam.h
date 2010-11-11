@@ -5,6 +5,7 @@
 #include<vector>
 #include<stack>
 #include<set>
+#include<locale>
 
 #include "../Global.h"
 #include "../Stopwatch.h"
@@ -83,6 +84,8 @@ namespace csl {
 	    }
 	};
 
+
+
     private:
 
 	/**
@@ -131,6 +134,14 @@ namespace csl {
 	 * @brief set a filter dictionary. This restricts output words to words NOT present in this filterDic.
 	 */
 	inline void setFilterDic( iDictionary< int > const& filterDic );
+
+	/**
+	 * @brief Specify a case mode (one of CaseMode) to decide on the treatment of uppercased input.
+	 * @param caseMode
+	 */
+	inline void setCaseMode( Global::CaseMode caseMode ) {
+	    caseMode_ = caseMode;
+	}
 	
 	// @}
 
@@ -261,6 +272,8 @@ namespace csl {
 	
 	mutable LevDEA levDEA_;
 	mutable std::wstring query_;
+	mutable bool wasUpperCase_;
+	
 	mutable iInterpretationReceiver* interpretations_;
 	mutable bool foundAnswers_;
 	mutable Stack stack_;
@@ -268,6 +281,10 @@ namespace csl {
 	 * The current string under construction
 	 */
 	mutable std::wstring baseWord_;
+
+	Global::CaseMode caseMode_;
+
+	std::locale locale_;
 
 	size_t minNrOfPatterns_;
 	size_t maxNrOfPatterns_;

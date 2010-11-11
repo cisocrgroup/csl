@@ -8,7 +8,7 @@ namespace csl {
 	fbDic_( 0 ),
 	dictFW_( 0 ),
 	dictBW_( 0 ),
-	caseMode_( asIs ),
+	caseMode_( Global::asIs ),
 	k_( k )
     {
 	if( minDicFile ) {
@@ -25,7 +25,7 @@ namespace csl {
 	fbDic_( 0 ),
 	dictFW_( 0 ),
 	dictBW_( 0 ),
-	caseMode_( asIs ),
+	caseMode_( Global::asIs ),
 	k_( k )
     {
 	if( fbDicFile ) {
@@ -362,7 +362,7 @@ namespace csl {
 	}
 
 	bool wasUpperCase = 0;
-	if( ( caseMode_ != asIs ) && iswupper( pattern_[0] ) ) {
+	if( ( caseMode_ != Global::asIs ) && iswupper( pattern_[0] ) ) {
 	    wasUpperCase = 1;
 	    pattern_[0] = std::tolower( pattern_[0] );
 	}
@@ -389,17 +389,17 @@ namespace csl {
 	else if( k_ == 2 ) queryCases_2();
 	else if( k_ == 3 ) queryCases_3();
 	else throw exceptions::invalidLevDistance( "csl::MSMATCH::query: invalid levenshtein distance" );
-
+	
 	for( CandidateMap::iterator it = results_.begin(); it != results_.end(); ++it ) {
-	    if( ( caseMode_ == restoreCase ) && wasUpperCase ) {
-			std::wstring tmp = it->first;
-			tmp.at( 0 ) = std::toupper( tmp.at( 0 ));
-			candReceiver_->receive( tmp.c_str(), (it->second).first , (it->second).second  );
+	    if( ( caseMode_ == Global::restoreCase ) && wasUpperCase ) {
+		std::wstring tmp = it->first;
+		tmp.at( 0 ) = std::toupper( tmp.at( 0 ));
+		candReceiver_->receive( tmp.c_str(), (it->second).first , (it->second).second  );
 	    }
 	    else candReceiver_->receive( (it->first).c_str(), (it->second).first , (it->second).second );
 	}
     }
-
+    
 	
 
 } // eon

@@ -40,14 +40,6 @@ namespace csl {
 	 */
 	typedef MinDic< int > MinDic_t;
 
-	/**
-	 * Three modes are offered for case handling:
-	 * 
-	 */
-	enum CaseMode { asIs, /**< don't change anything, take query as it comes*/
-			toLower, /**< change query to lower case and return all candidates lower case */
-			restoreCase /**< do search in lower case, but upcase first character of all cands if query was uppercase */
-	}; 
 
 	/**
 	 * @brief Create an MSMatch object with a levenshtein threshold \c k and a path specifying a file with a compiled FBDic.
@@ -93,7 +85,7 @@ namespace csl {
 	 * @brief Specify a case mode (one of CaseMode) to decide on the treatment of uppercased input.
 	 * @param caseMode
 	 */
-	inline void setCaseMode( CaseMode caseMode ) {
+	inline void setCaseMode( Global::CaseMode caseMode ) {
 	    caseMode_ = caseMode;
 	}
 
@@ -107,7 +99,7 @@ namespace csl {
 	LevDEA* levDEAFirst_;
 	LevDEA* levDEASecond_;
 
-	CaseMode caseMode_;
+	Global::CaseMode caseMode_;
 
 	LevDEA* curLevDEA_; ///< used for the STANDARD algorithm
 	LevDEA* curLevDEAFirst_; ///< used for the FW_BW algorithm
