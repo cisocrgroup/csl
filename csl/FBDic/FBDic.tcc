@@ -105,7 +105,9 @@ namespace csl {
     template< class AnnType_t >
     inline void FBDic< AnnType_t >::loadFromStream( FILE* fi ) {
 	// read the FBDic-Header
-	fread( &header_, sizeof( Header ), 1, fi );
+	if( fread( &header_, sizeof( Header ), 1, fi ) != 1 ) {
+	  throw exceptions::badDictFile( "csl::FBDic::loadFromStream: Read error while reading header" );
+	}
 
 	if( header_.getMagicNumber() != magicNumber_ ) {
 	    throw exceptions::badDictFile( "FBDic: Magic number comparison failed.\n" );

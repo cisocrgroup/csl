@@ -25,7 +25,9 @@ namespace csl {
 	template< class AnnType_t >
 	inline void MinDic< AnnType_t >::loadFromStream( FILE* fi ) {
 		// read the MinDic-Header
-		fread( &header_, sizeof( Header ), 1, fi );
+	  if( fread( &header_, sizeof( Header ), 1, fi ) != 1 ) {
+	    throw exceptions::badDictFile( "csl::MinDic::loadFromStream: Read error while reading header" );
+	  }
 
 		if( header_.getMagicNumber() != magicNumber_ ) {
 			throw exceptions::badDictFile( "MinDic: Magic number comparison failed.\n" );
@@ -37,7 +39,9 @@ namespace csl {
 		TransTable_t::loadFromStream( fi );
 		// read the annotations
 		annotations_ = new AnnType_t[header_.getNrOfKeys()];
-		fread( annotations_, sizeof( AnnType_t ), header_.getNrOfKeys(), fi );
+		if( fread( annotations_, sizeof( AnnType_t ), header_.getNrOfKeys(), fi ) != header_.getNrOfKeys() ) {
+		  throw exceptions::badDictFile( "csl::MinDic::loadFromStream: Read error while reading annotations" );
+		}
 	}
 
 	template< class AnnType_t >

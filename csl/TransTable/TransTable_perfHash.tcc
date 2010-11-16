@@ -318,7 +318,9 @@ namespace csl {
     void 
     TransTable< TT_PERFHASH, InternalCharType__, SizeType__ >
     ::loadFromStream( FILE* fi ) {
-	fread( &header_, sizeof( Header ), 1, fi );
+	if( fread( &header_, sizeof( Header ), 1, fi ) != 1 ) {
+	  throw exceptions::badDictFile( "csl::TransTable::loadFromStream: Read error while reading header" );
+	}
 
 	if ( ( header_.getMagicNumber() != magicNumber_ ) ) {
 	    throw exceptions::badDictFile( "TransTable: Magic number comparison failed.\n" );
@@ -331,10 +333,14 @@ namespace csl {
 	root_ = header_.getRoot();
 
 	cells_ = (Cell_t*) malloc( nrOfCells_ * sizeof( Cell_t ) );
-	fread( cells_, sizeof( Cell_t ), nrOfCells_, fi );
+	if( fread( cells_, sizeof( Cell_t ), nrOfCells_, fi ) != nrOfCells_ ) {
+	  throw exceptions::badDictFile( "csl::TransTable::loadFromStream: Read error while reading transTable" );	  
+	}
 
 	susoStrings_ = (wchar_t*) malloc( lengthOfSusoStrings_ * sizeof( wchar_t ) );
-	fread( susoStrings_, sizeof( wchar_t ), lengthOfSusoStrings_, fi );
+	if( fread( susoStrings_, sizeof( wchar_t ), lengthOfSusoStrings_, fi ) != lengthOfSusoStrings_ ) {
+	  throw exceptions::badDictFile( "csl::TransTable::loadFromStream: Read error while reading suso strings" );
+	}
 	
 	sizeOfUsedCells_ = nrOfCells_;
 	ready_ = 1;
