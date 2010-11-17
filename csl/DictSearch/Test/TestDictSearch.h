@@ -10,8 +10,9 @@ namespace csl {
     public:
 
 	CPPUNIT_TEST_SUITE( TestDictSearch );
-	CPPUNIT_TEST( testDLev );
-	CPPUNIT_TEST( smokeTest );
+//	CPPUNIT_TEST( testDLev );
+//	CPPUNIT_TEST( smokeTest );
+	CPPUNIT_TEST( testCaseMode );
 	CPPUNIT_TEST_SUITE_END();
 
 	
@@ -101,8 +102,6 @@ namespace csl {
 	}
 
 	
-
-
 	void testDLev() {
 	    DictSearch ds;
 	    DictSearch::DictModule& modernDict = ds.addDictModule( L"modern", std::string( "../csl/DictSearch/Test/small.modern.fbdic" ) );
@@ -132,6 +131,30 @@ namespace csl {
 	    CPPUNIT_ASSERT( modernDict.getDLevByWordlength( 5 ) == 2 );
 	    CPPUNIT_ASSERT( modernDict.getDLevByWordlength( 15 ) == 2 );
 
+	}
+
+
+	void testCaseMode() {
+	    DictSearch ds;
+	    
+
+	    DictSearch::CandidateSet result;
+
+
+	    DictSearch::DictModule& modernDict = ds.addDictModule( L"modern", std::string( "../csl/DictSearch/Test/small.modern.fbdic" ) );
+	    modernDict.setCaseMode( Global::restoreCase );
+
+	    ds.query( L"teile", &result );
+	    CPPUNIT_ASSERT( result.size() == 1 );
+	    CPPUNIT_ASSERT( result.at( 0 ).getWord() == L"teile"  );
+	    CPPUNIT_ASSERT( result.at( 0 ).getInstruction().empty() );
+	    
+	    result.clear();
+	    ds.query( L"Teile", &result );
+	    CPPUNIT_ASSERT( result.size() == 1 );
+	    CPPUNIT_ASSERT( result.at( 0 ).getWord() == L"Teile"  );
+	    CPPUNIT_ASSERT( result.at( 0 ).getInstruction().empty() );
+	    
 	}
 	
     private:

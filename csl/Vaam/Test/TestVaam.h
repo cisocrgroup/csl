@@ -13,6 +13,7 @@ namespace csl {
 	CPPUNIT_TEST_SUITE( TestVaam );
 	CPPUNIT_TEST( testPatternGraph );
 	CPPUNIT_TEST( testBasics );
+	CPPUNIT_TEST( testCaseMode );
 	CPPUNIT_TEST_SUITE_END();
     public:
 	TestVaam();
@@ -20,6 +21,7 @@ namespace csl {
 	void testPatternGraph();
 // 	void testConstructionDetails();
 // 	void lookupAllKeys();
+	void testCaseMode();
 	
     private:
 	std::string path_;
@@ -131,7 +133,23 @@ namespace csl {
 	// now it should be filtered
 	vaam.setFilterDic( filterDic );
 	CPPUNIT_ASSERT( ! vaam.query( std::wstring( L"hanne" ), &answers ) );
+    }
 
+    void TestVaam::testCaseMode() {
+ 	MinDic<> baseDic( "../csl/Vaam/Test/small.base.mdic" );
+	Vaam<> vaam( baseDic,  "../csl/Vaam/Test/small.patterns.txt" );
+	
+	Vaam<>::CandidateReceiver answers;
+	
+	vaam.setCaseMode( Global::restoreCase );
+	
+	vaam.query( L"Kleintheyle", &answers  );
+	CPPUNIT_ASSERT( answers.size() == 1 );
+	Interpretation& answer = answers.at( 0 ); 
+	CPPUNIT_ASSERT( answer.getWord() == L"Kleintheyle" );
+	CPPUNIT_ASSERT( answer.getBaseWord() == L"Kleinteile" );
+	
+	
     }
 
 } // namespace csl

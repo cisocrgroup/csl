@@ -486,12 +486,14 @@ namespace csl {
 		if( getDict() ) {
 		    myDictSearch_.msMatch_.setFBDic( *( getDict() ) );
 		    myDictSearch_.msMatch_.setDistance( getDLevByWordlength( query.length() ) );
+		    myDictSearch_.msMatch_.setCaseMode( caseMode_ );
 		    myDictSearch_.msMatch_.query( query.c_str(), *answers );
 		    
 		    if( maxNrOfPatterns_ > 0 ) {
 			myDictSearch_.vaam_->setBaseDic( dict_->getFWDic() );
 			myDictSearch_.vaam_->setMaxNrOfPatterns( maxNrOfPatterns_ );
 			myDictSearch_.vaam_->setDistance( dlev_hypothetic_ );
+			myDictSearch_.vaam_->setCaseMode( caseMode_ );
 			myDictSearch_.vaam_->query( query, answers );
 		    }
 		}

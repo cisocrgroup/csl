@@ -210,12 +210,13 @@ namespace csl {
 	}
 
 	if( wasUpperCase_ ) {
+	    
 	    std::wstring tmp = interpretation.getBaseWord();
-	    tmp.at( 0 ) = std::tolower( tmp.at( 0 ), locale_ );
+	    tmp.at( 0 ) = std::toupper( tmp.at( 0 ), locale_ );
 	    interpretation.setBaseWord( tmp );
 
 	    tmp = interpretation.getWord();
-	    tmp.at( 0 ) = std::tolower( tmp.at( 0 ), locale_ );
+	    tmp.at( 0 ) = std::toupper( tmp.at( 0 ), locale_ );
 	    interpretation.setWord( tmp );
 	}
 
