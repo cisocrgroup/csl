@@ -69,7 +69,9 @@ namespace csl {
     }
     
     inline void ErrDic::loadFromStream( FILE* fi ) {
-	fread( &header_, sizeof( Header ), 1, fi );
+	if( fread( &header_, sizeof( Header ), 1, fi ) != 1 ) {
+	  throw exceptions::badDictFile( "ErrDic: loadFromStream failed.\n" );
+	}
 	if ( ( header_.getMagicNumber() != magicNumber_ ) ) {
 	    // throw exceptions::badDictFile( "ErrDic: Magic number comparison failed.\n" );
 	}
@@ -79,10 +81,14 @@ namespace csl {
 
 	MinDic_t::loadFromStream( fi );
 	originals_ = (wchar_t*) malloc( sizeOfOriginals_ * sizeof( wchar_t ) );
-	fread( originals_, sizeof( wchar_t ), sizeOfOriginals_, fi );
+	if( fread( originals_, sizeof( wchar_t ), sizeOfOriginals_, fi ) != sizeOfOriginals_ ) {
+	  throw exceptions::badDictFile( "ErrDic: loadFromStream failed.\n" );
+	}
 
 	errorPatterns_ = (wchar_t*) malloc( sizeOfErrorPatterns_ * sizeof( wchar_t ) );
-	fread( errorPatterns_, sizeof( wchar_t ), sizeOfErrorPatterns_, fi );
+	if( fread( errorPatterns_, sizeof( wchar_t ), sizeOfErrorPatterns_, fi ) != sizeOfErrorPatterns_ ) {
+	  throw exceptions::badDictFile( "ErrDic: loadFromStream failed.\n" );
+	}
     }
 
     inline void ErrDic::writeToFile( const char* dicFile ) const {
