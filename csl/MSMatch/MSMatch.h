@@ -1,4 +1,3 @@
-//sdsd
 #ifndef CSL_MSMATCH_H
 #define CSL_MSMATCH_H CSL_MSMATCH_H
 
@@ -70,7 +69,7 @@ namespace csl {
 	 * @param[in] pattern
 	 * @param[out] candReceiver
 	 */
-	inline void query( const wchar_t* pattern, LevFilter::CandidateReceiver& candReceiver );
+	inline bool query( const wchar_t* pattern, LevFilter::CandidateReceiver& candReceiver );
 
 	/**
 	 * @brief returns a reference to the used dictionary.
@@ -122,6 +121,9 @@ namespace csl {
 
 	wchar_t word_[Global::lengthOfWord]; ///< the word that is currently constructed
 	CandidateReceiver* candReceiver_; ///< the currently used candReceiver
+	bool foundAnswers_; ///< currently this is used only in STANDARD mode
+
+
 	// this may also be -1
 	int levDistanceFirst_;
 

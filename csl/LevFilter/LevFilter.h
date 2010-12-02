@@ -23,7 +23,7 @@ namespace csl {
 	 * @param query
 	 * @param candReceiver
 	 */
-	virtual void query( const wchar_t* query, CandidateReceiver& candReceiver ) = 0;
+	virtual bool query( const wchar_t* query, CandidateReceiver& candReceiver ) = 0;
 
 	virtual ~LevFilter() {
 	    // compiler wants a virtual destructor for abstract classes

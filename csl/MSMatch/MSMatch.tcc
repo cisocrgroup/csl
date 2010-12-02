@@ -321,6 +321,7 @@ namespace csl {
 		    for( wchar_t* cc = word_; *cc; ++cc ) {
 			dicPos2 = dictFW_->walkPerfHash( dicPos2, *cc, &perfHashValue );
 		    }
+		    foundAnswers_ = true;
 		    // USE DUMMY VALUE FOR LEVDISTANCE
 		    candReceiver_->receive( word_, 42, dictFW_->getAnnotation( perfHashValue ) );
 		}
@@ -330,7 +331,7 @@ namespace csl {
     }
 
     template<>
-    inline void MSMatch< STANDARD >::query( const wchar_t* pattern, CandidateReceiver& candReceiver ) {
+    inline bool MSMatch< STANDARD >::query( const wchar_t* pattern, CandidateReceiver& candReceiver ) {
 	if( ! dictFW_ ) throw exceptions::LogicalError( "csl::MSMatch< STANDARD >::query: Method called without a dictionary being available" );
 
 	candReceiver_ = &candReceiver;
@@ -339,20 +340,22 @@ namespace csl {
 	curLevDEA_ = levDEASecond_;
 	curLevDEA_->setDistance( k_ );
 	curLevDEA_->loadPattern( pattern );
-	
+	foundAnswers_ = false;
 	intersect( dictFW_->getRoot(), LevDEA::Pos( 0, 0 ), 0 );
-	
+
+	return foundAnswers_;
     } // method query()
 
 
     template<>
-    inline void MSMatch< FW_BW >::query( const wchar_t* pattern, CandidateReceiver& candReceiver ) {
+    inline bool MSMatch< FW_BW >::query( const wchar_t* pattern, CandidateReceiver& candReceiver ) {
 	if( ! ( dictFW_ && dictBW_ ) ) throw exceptions::LogicalError( "csl::MSMatch< STANDARD >::query: Method called without a dictionary being available" );
 	if( ! *pattern ) {
 	    throw( exceptions::badInput( "csl::MSMatch::query: Empty pattern string is forbidden" ) );
 	}
 
 	candReceiver_ = &candReceiver; // is not necessary at the moment
+	
 	results_.clear();
 
 	pattern_[Global::lengthOfWord - 1] = 0;
@@ -389,7 +392,7 @@ namespace csl {
 	else if( k_ == 2 ) queryCases_2();
 	else if( k_ == 3 ) queryCases_3();
 	else throw exceptions::invalidLevDistance( "csl::MSMATCH::query: invalid levenshtein distance" );
-	
+
 	for( CandidateMap::iterator it = results_.begin(); it != results_.end(); ++it ) {
 	    if( ( caseMode_ == Global::restoreCase ) && wasUpperCase ) {
 		std::wstring tmp = it->first;
@@ -398,6 +401,7 @@ namespace csl {
 	    }
 	    else candReceiver_->receive( (it->first).c_str(), (it->second).first , (it->second).second );
 	}
+	return ( ! results_.empty() );
     }
     
 	

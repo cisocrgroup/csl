@@ -2,6 +2,9 @@
 #define CSL_DICTSEARCH_H CSL_DICTSEARCH_H
 
 #include<ostream>
+#include<vector>
+#include<map>
+#include<utility>
 #include<csl/MinDic/MinDic.h>
 #include<csl/FBDic/FBDic.h>
 #include<csl/MSMatch/MSMatch.h>
@@ -254,6 +257,10 @@ namespace csl {
 	class iDictModule {
 	public:
 
+	    iDictModule() :
+		cascadeRank_( 0 ) {
+	    }
+
 	    /**
 	     * @brief A virtual destructor for a virtual class
 	     */
@@ -267,7 +274,6 @@ namespace csl {
 	    virtual void query( std::wstring const& query, iResultReceiver* answers ) = 0;
 
 
-
 	    /**
 	     * @brief returns a value between 0 and 100 to indicate the DictModule's priority as compared to others
 	     * This is used for a rough sorting order of all answers.
@@ -278,6 +284,18 @@ namespace csl {
 	     * @brief returns a string to identify the DictModule
 	     */
 	    virtual std::wstring const& getName() const = 0;
+
+
+	    void setCascadeRank( size_t r ) {
+		cascadeRank_ = r;
+	    }
+	    
+	    size_t getCascadeRank() const {
+		return cascadeRank_;
+	    }
+
+	private:
+	    size_t cascadeRank_;
 	};
 
 
@@ -540,6 +558,9 @@ namespace csl {
 	DictModule& addDictModule( std::wstring const& name, std::string const& dicFile );
 	DictModule& addDictModule( std::wstring const& name, Dict_t const& dicRef );
 
+	/**
+	 * @brief 
+	 */
 	void addExternalDictModule( iDictModule& extModule );
 
 	/**
@@ -570,7 +591,8 @@ namespace csl {
 
 	std::vector< DictModule* > dictModules_;
 	std::vector< iDictModule* > externalDictModules_;
-
+	std::multimap< size_t, iDictModule* > allDictModules_;
+	
 
 	VaamDict_t dummyDic;
 	MSMatch< FW_BW > msMatch_;
