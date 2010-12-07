@@ -11,7 +11,7 @@ namespace csl {
 	/** 
 	 * @todo Find a good, dynamic solution here!
 	 */
-	memset( matrix_, 0, 500 * 500 * sizeof( MatrixItem ) );
+	memset( matrix_, 0, 50 * 50 * sizeof( MatrixItem ) );
 
     }
 	
@@ -26,6 +26,10 @@ namespace csl {
     bool ComputeInstruction::computeInstruction( std::wstring const& wCorr, 
 						 std::wstring const& wErr, 
 						 std::vector< Instruction >* instructions ) {
+
+	if( wCorr.size() >= 45 || wErr.size() >= 45 ) {
+	    throw exceptions::badInput( "csl::ComputeInstruction; input words too long" );
+	}
 	
  	//std::wcerr << "compare " << wCorr << ", " << wErr << std::endl;
 

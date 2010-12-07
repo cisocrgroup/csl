@@ -105,7 +105,7 @@ namespace csl {
 	/** 
 	 * @todo Find a good, dynamic solution here!
 	 */
-	MatrixItem matrix_[500][500];
+	MatrixItem matrix_[50][50];
 	std::wstring wordCorr_;
 	std::wstring wordErr_;
 	const PatternProbabilities* patternProbabilities_;
