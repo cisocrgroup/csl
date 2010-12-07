@@ -152,11 +152,13 @@ namespace csl {
 	    }
 	    
 	    /**
-	     * @brief This is to fulfill the csl::iInterpretationReceiver interface
+	     * @brief This is to fulfill the csl::InterpretationReceiver interface
 	     */
 	    void receive( csl::Interpretation const& vaam_interpretation ) {
 		push_back( csl::DictSearch::Interpretation( vaam_interpretation, *currentDictModule_ ) );
 	    }
+
+	    
 	    
 
 	    /**
