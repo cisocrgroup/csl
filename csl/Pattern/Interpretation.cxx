@@ -37,6 +37,10 @@ namespace csl {
 	return ( wcscmp( toString().c_str(), other.toString().c_str() ) > 0 );
     }
 
+    std::wstring& Interpretation::getWord() {
+	return word_;
+    }
+
     std::wstring const& Interpretation::getWord() const {
 	return word_;
     }

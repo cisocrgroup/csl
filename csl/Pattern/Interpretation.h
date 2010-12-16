@@ -40,7 +40,12 @@ namespace csl {
 	// @{
 
 	/**
-	 * @brief returns the plain string
+	 * @brief returns a reference to the plain string
+	 */
+	std::wstring& getWord();
+
+	/**
+	 * @brief returns a const reference to the plain string
 	 */
 	std::wstring const& getWord() const;
 
