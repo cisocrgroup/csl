@@ -94,12 +94,13 @@ sub new {
     }
 
     my $options =' --machineReadable=1';
-    if( $self->{maxNrOfPatterns} ) {
+    if( defined ( $self->{maxNrOfPatterns} ) ) {
 	$options .= " --maxNrOfPatterns=". $self->{maxNrOfPatterns};
     }
-    if( $self->{minNrOfPatterns} ) {
+    if( defined( $self->{minNrOfPatterns} ) ) {
 	$options .= " --minNrOfPatterns=". $self->{minNrOfPatterns};
     }
+
     my $binary = "$$self{vaamBinary} $options $self->{distance} $self->{dicFile} $self->{patternFile}";
 
     print "$binary\n";
