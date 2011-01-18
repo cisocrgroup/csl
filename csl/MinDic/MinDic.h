@@ -391,14 +391,17 @@ namespace csl {
 	 */
 	inline void initConstruction();
 
-	inline void finishConstruction();
-
 	/**
-	 * processes one input line: separates the key from the annotations (if present)
-	 * and performs the insertion into the trie
-	 * @arg a cstring pointing to the current line
+	 * @brief Add one new entry. Keys must be inserted in alphabetical order.
 	 */
 	inline void addToken( const wchar_t* input, const AnnType_t& value );
+
+
+	/**
+	 * @brief Finalize the construction
+	 * Call after calling addToken() for the last time. 
+	 */
+	inline void finishConstruction();
 
 	//@}
 

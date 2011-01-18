@@ -3,7 +3,10 @@
 
 #include <cppunit/extensions/HelperMacros.h>
 
+
 #include"../DictSearch.h"
+
+#include"../StringDictModule.h"
 
 namespace csl {
     class TestDictSearch : public CppUnit::TestFixture {
@@ -13,6 +16,7 @@ namespace csl {
 //	CPPUNIT_TEST( testDLev );
 //	CPPUNIT_TEST( smokeTest );
 	CPPUNIT_TEST( testCaseMode );
+	CPPUNIT_TEST( testStringDictModule );
 	CPPUNIT_TEST_SUITE_END();
 
 	
@@ -154,6 +158,24 @@ namespace csl {
 	    CPPUNIT_ASSERT( result.size() == 1 );
 	    CPPUNIT_ASSERT( result.at( 0 ).getWord() == L"Teile"  );
 	    CPPUNIT_ASSERT( result.at( 0 ).getInstruction().empty() );
+	    
+	}
+
+	void testStringDictModule() {
+
+
+	    DictSearch ds;
+	    
+
+	    DictSearch::CandidateSet result;
+
+	    StringDictModule histDict( ds, L"histDict", "./test.fbds" );
+
+	    ds.addExternalDictModule( histDict );
+	    //histDict.setCaseMode( Global::restoreCase );
+
+	    ds.query( L"theil", &result );
+	    
 	    
 	}
 	

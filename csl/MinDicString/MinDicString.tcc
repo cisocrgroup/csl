@@ -33,7 +33,7 @@ namespace csl {
     }
 
     inline const uchar* MinDicString::getAnnByPerfHashValue( size_t perfHashValue ) const {
-	return getAnnByOffset( annotationsAt( perfHashValue ) );
+	return getAnnByOffset( getAnnotation( perfHashValue ) );
     }
 
     inline const uchar* MinDicString::getAnnByOffset( size_t offset ) const {

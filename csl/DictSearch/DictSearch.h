@@ -245,10 +245,6 @@ namespace csl {
 
 
 
-
-
-
-
 	/**
 	 * @brief All classes that are supposed to contribute to the answer set of a DictSearch query
 	 * have to implement this interface.
@@ -260,6 +256,7 @@ namespace csl {
 	public:
 
 	    iDictModule() :
+		priority_( 1 ),
 		cascadeRank_( 0 ) {
 	    }
 
@@ -276,11 +273,6 @@ namespace csl {
 	    virtual void query( std::wstring const& query, iResultReceiver* answers ) = 0;
 
 
-	    /**
-	     * @brief returns a value between 0 and 100 to indicate the DictModule's priority as compared to others
-	     * This is used for a rough sorting order of all answers.
-	     */
-	    virtual int getPriority() const = 0;
 
 	    /**
 	     * @brief returns a string to identify the DictModule
@@ -296,104 +288,49 @@ namespace csl {
 		return cascadeRank_;
 	    }
 
+	    /**
+	     * @brief Set a value in the range [0;100]. This value decides which candidate to rank higher if the other
+	     *        criteria (nr of hist/ocr patterns) are equal.
+	     */
+	    void setPriority( int p ) {
+		if( ( p < 0 ) || ( p > 100 ) ) throw csl::exceptions::LogicalError( "csl::DictSearch::DictModule::setPriority: value ranges from 0 to 100" );
+		priority_ = p;
+	    }
+
+	    /**
+	     * @brief returns a value between 0 and 100 to indicate the DictModule's priority as compared to others
+	     * This is used for a rough sorting order of all answers.
+	     */
+	    int getPriority() const {
+		return priority_;
+	    }
+	    
+
 	private:
+	    int priority_;
 	    size_t cascadeRank_;
 	};
 
 
 
-	/**
-	 * @brief An object of this type handles one dictionary that is to be used with DictSearch, including
-	 *        all parameter settings like maximum levenshtein distance etc. 
-	 *
-	 */
-	class DictModule : public iDictModule {
+	class AbstractDictModule : public iDictModule {
 	public:
-	    /**
-	     * @brief A standard constructor using a filepath pointing to a dictionary.
-	     *
-	     * In this case, DictModule will load the dictionary and destroy it when the DictModule dies.
-	     */
-	    DictModule( DictSearch& myDictSearch, std::wstring const& name, std::string const& dicFile ) :
+
+	    AbstractDictModule( DictSearch& myDictSearch, std::wstring const& name ) :
 		name_( name ),
 		myDictSearch_( myDictSearch ),
-		dict_( 0 ),
-		disposeDict_( false ), // will perhaps be changed at setDict()
 		maxNrOfPatterns_(),
-		dlev_hypothetic_( 0 ),
-		priority_( 1 ) {
-
-		setDict( dicFile.c_str() );
-		setDLev( 0 );
-	    }
-
-	    /**
-	     * @brief A standard constructor using a pointer to a dictionary-object in memory.
-	     *
-	     * Of course, in this case, DictModule will leave the dictionary-object alive when DictModule dies.
-	     */
-	    DictModule( DictSearch& myDictSearch, std::wstring const& name, Dict_t const& dicRef ) :
-		name_( name ),
-		myDictSearch_( myDictSearch ),
-		dict_( 0 ),
-		disposeDict_( false ),  // will perhaps be changed at setDict()
-		maxNrOfPatterns_(),
-		dlev_hypothetic_( 0 ),
-		priority_( 1 ),
-		caseMode_( Global::asIs )
+		dlev_hypothetic_( 0 )
 		{
 
-		setDict( dicRef );
 		setDLev( 0 );
 	    }
 
-	    ~DictModule() {
-		if( dict_ && disposeDict_ ) delete( dict_ );
-	    }
-
 	    /**
-	     * copy constructor is blocked!!!
+	     * @name Setters
 	     */
-	    DictModule( DictModule const& other );
+	    //@{
 
-	    /**
-	     * @brief Specify how to handle upper/lower case queries. See Global::CaseMode to find
-	     *        out which options are available.
-
-	     * Note that all options belongto the namespace csl::Global.
-	     *
-	     */
-	    void setCaseMode( Global::CaseMode const& cm ) {
-		caseMode_ = cm;
-	    }
-
-	    /**
-	     * @brief returns a pointer to the connected dictionary. (May be 0)
-	     */
-	    Dict_t const* getDict() const {
-		return dict_;
-	    }
-
-	    /**
-	     * @brief connects the configuration to a certain dictionary
-	     * 
-	     * @param dict a const reference to an existing dictionary.
-	     */
-	    void setDict( Dict_t const& dict ) {
-		if( dict_ && disposeDict_ ) delete dict_;
-		dict_ = &dict;
-		disposeDict_ = false;
-	    }
-	    
-	    /**
-	     * @brief Loads a dictionary from the hard disk and connects it to the configuration 
-	     * 
-	     * @param dictFile a path to a file storing a dictionary of type Dict_t
-	     */
-	    void setDict( char const* dictFile ) {
-		setDict( *( new Dict_t( dictFile ) ) );
-		disposeDict_ = true;
-	    }
 
 	    /**
 	     * @brief Sets a static Levenshtein distance threshold for approximate lookup.
@@ -447,6 +384,18 @@ namespace csl {
 		minWordlengths_[3] = 13;
 	    }
 
+
+	    //@}
+
+	    /**
+	     * @name Getters
+	     */
+	    //@}
+
+	    DictSearch& getMyDictSearch() {
+		return myDictSearch_;
+	    }
+
 	    /**
 	     * @brief get the lev-distance threshold given a word length
 	     */
@@ -455,6 +404,11 @@ namespace csl {
 		    if( ( minWordlengths_[i] != INFINITE ) && ( minWordlengths_[i] <= wordLength ) ) return i;
 		}
 		return 0;
+	    }
+
+
+	    Global::CaseMode getCaseMode() const {
+		return caseMode_;
 	    }
 
 	    /**
@@ -485,43 +439,134 @@ namespace csl {
 	    std::wstring const& getName() const {
 		return name_;
 	    }
+
+
+	private:
+	    std::wstring name_;
+	    DictSearch& myDictSearch_;
+	    size_t minWordlengths_[4];
+	    size_t maxNrOfPatterns_;
+	    size_t dlev_hypothetic_;
 	    
+	    Global::CaseMode caseMode_;
+	}; // class AbstractDictModule
+
+
+
+	/**
+	 * @brief An object of this type handles one dictionary that is to be used with DictSearch, and allows
+	 *        search with approximate search and approximate/hypothetic search.
+	 *
+	 */
+	class DictModule : public AbstractDictModule {
+	public:
 	    /**
-	     * @brief Set a value in the range [0;100]. This value decides which candidate to rank higher if the other
-	     *        criteria (nr of hist/ocr patterns) are equal.
+	     * @brief A standard constructor using a filepath pointing to a dictionary.
+	     *
+	     * In this case, DictModule will load the dictionary and destroy it when the DictModule dies.
 	     */
-	    void setPriority( int p ) {
-		if( ( p < 0 ) || ( p > 100 ) ) throw csl::exceptions::LogicalError( "csl::DictSearch::DictModule::setPriority: value ranges from 0 to 100" );
-		priority_ = p;
+	    DictModule( DictSearch& myDictSearch, std::wstring const& name, std::string const& dicFile ) :
+		AbstractDictModule( myDictSearch, name ),
+		dict_( 0 ),
+		disposeDict_( false ), // will perhaps be changed at setDict()
+		caseMode_( Global::asIs )
+		{
+
+		    setDict( dicFile.c_str() );
+		    setDLev( 0 );
+		}
+
+	    /**
+	     * @brief A standard constructor using a pointer to a dictionary-object in memory.
+	     *
+	     * Of course, in this case, DictModule will leave the dictionary-object alive when DictModule dies.
+	     */
+	    DictModule( DictSearch& myDictSearch, std::wstring const& name, Dict_t const& dicRef ) :
+		AbstractDictModule( myDictSearch, name ),
+		dict_( 0 ),
+		disposeDict_( false ),  // will perhaps be changed at setDict()
+		caseMode_( Global::asIs ) {
+		setDict( dicRef );
+		setDLev( 0 );
+	    }
+
+	    ~DictModule() {
+		if( dict_ && disposeDict_ ) delete( dict_ );
 	    }
 
 	    /**
-	     * @brief see setPriority
+	     * copy constructor is blocked!!!
 	     */
-	    int getPriority() const {
-		return priority_;
+	    DictModule( DictModule const& other );
+
+
+	    /**
+	     * @brief returns a pointer to the connected dictionary. (May be 0)
+	     */
+	    Dict_t const* getDict() const {
+		return dict_;
 	    }
+
+	    /**
+	     * @brief connects the configuration to a certain dictionary
+	     * 
+	     * @param dict a const reference to an existing dictionary.
+	     */
+	    void setDict( Dict_t const& dict ) {
+		if( dict_ && disposeDict_ ) delete dict_;
+		dict_ = &dict;
+		disposeDict_ = false;
+	    }
+	    
+	    /**
+	     * @brief Loads a dictionary from the hard disk and connects it to the configuration 
+	     * 
+	     * @param dictFile a path to a file storing a dictionary of type Dict_t
+	     */
+	    void setDict( char const* dictFile ) {
+		setDict( *( new Dict_t( dictFile ) ) );
+		disposeDict_ = true;
+	    }
+
+
+	    /**
+	     * @brief Specify how to handle upper/lower case queries. See Global::CaseMode to find
+	     *        out which options are available.
+
+	     * Note that all options belongto the namespace csl::Global.
+	     *
+	     */
+	    void setCaseMode( Global::CaseMode const& cm ) {
+		caseMode_ = cm;
+	    }
+
+
+	    Global::CaseMode getCaseMode() const {
+		return caseMode_;
+	    }
+
+
+
 	    
 	    void query( std::wstring const& query, iResultReceiver* answers ) {
 		if( getDict() ) {
-		    myDictSearch_.msMatch_.setFBDic( *( getDict() ) );
-		    myDictSearch_.msMatch_.setDistance( getDLevByWordlength( query.length() ) );
-		    myDictSearch_.msMatch_.setCaseMode( caseMode_ );
-		    myDictSearch_.msMatch_.query( query.c_str(), *answers );
+		    getMyDictSearch().msMatch_.setFBDic( *( getDict() ) );
+		    getMyDictSearch().msMatch_.setDistance( getDLevByWordlength( query.length() ) );
+		    getMyDictSearch().msMatch_.setCaseMode( getCaseMode() );
+		    getMyDictSearch().msMatch_.query( query.c_str(), *answers );
 		    
 		    if( maxNrOfPatterns_ > 0 ) {
-			myDictSearch_.vaam_->setBaseDic( dict_->getFWDic() );
-			myDictSearch_.vaam_->setMaxNrOfPatterns( maxNrOfPatterns_ );
-			myDictSearch_.vaam_->setDistance( dlev_hypothetic_ );
-			myDictSearch_.vaam_->setCaseMode( caseMode_ );
-			myDictSearch_.vaam_->query( query, answers );
+			getMyDictSearch().vaam_->setBaseDic( dict_->getFWDic() );
+			getMyDictSearch().vaam_->setMinNrOfPatterns( 1 ); // get only strictly hypothetic matches
+			getMyDictSearch().vaam_->setMaxNrOfPatterns( maxNrOfPatterns_ );
+			getMyDictSearch().vaam_->setDistance( dlev_hypothetic_ );
+			getMyDictSearch().vaam_->setCaseMode( getCaseMode() );
+			getMyDictSearch().vaam_->query( query, answers );
 		    }
 		}
 	    }
 	    
 	private:
-	    std::wstring name_;
-	    DictSearch& myDictSearch_;
 	    Dict_t const* dict_;
 	    bool disposeDict_;
 	    size_t minWordlengths_[4];

@@ -22,8 +22,21 @@ namespace csl {
 	typedef MinDic< AnnType_t > MinDic_t;
 
 
+	/**
+	 * @name Constructor
+	 */
+	//@{
 	explicit FBDic( const char* dicFile = 0 );
+
+	//@}
+
+
     
+	/**
+	 * @name Access separate dictionaries
+	 */
+	//@{
+
 	/**
 	 * returns a reference to the forward dictionary
 	 * @returns a reference to the forward dictionary
@@ -35,10 +48,14 @@ namespace csl {
 	 * @returns a reference to the backward dictionary
 	 */
 	const MinDic_t& getBWDic() const;
+	//@}
 
-	void initConstruction();
-	void finishConstruction();
-	void addToken( std::wstring const&, AnnType_t );
+
+	/**
+	 * @name Compile a new dictionary
+	 * 
+	 */
+	//@{
 
 	/**
 	 * compiles an FBDic from a .lex file. Consult the @link fbDic_manual FDic Manual@endlink
@@ -46,8 +63,30 @@ namespace csl {
 	 */
 	void compileDic( const char* txtFile );
 
+
 	/**
-	 * @name Loading from /writing to hard disk
+	 * @brief prepares the object for construction of a new FBDic
+	 * Call before calling addToken() for the first time. 
+	 */
+	void initConstruction();
+
+	/**
+	 * @brief Adds one new entry. Keys must be inserted in alphabetical order.
+	 */
+	void addToken( std::wstring const&, AnnType_t );
+
+	/**
+	 * @brief Finalize the construction
+	 * Call after calling addToken() for the last time. 
+	 */
+	void finishConstruction();
+
+	//@}
+
+
+
+	/**
+	 * @name Load from /writing to hard disk
 	 */
 	//@{
 	/**
@@ -103,7 +142,7 @@ namespace csl {
 	private:
 	    std::wstring key_;
 	    AnnType_t annotation_;
-	};
+	}; // class DictEntry
 
 	size_t nrOfTokens_;
 	std::vector< DictEntry > entries_;
