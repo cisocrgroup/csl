@@ -13,9 +13,10 @@ namespace csl {
     public:
 
 	CPPUNIT_TEST_SUITE( TestDictSearch );
-//	CPPUNIT_TEST( testDLev );
-//	CPPUNIT_TEST( smokeTest );
+	CPPUNIT_TEST( testDLev );
+	CPPUNIT_TEST( smokeTest );
 	CPPUNIT_TEST( testCaseMode );
+	CPPUNIT_TEST( testCascades );
 	CPPUNIT_TEST( testStringDictModule );
 	CPPUNIT_TEST_SUITE_END();
 
@@ -35,8 +36,8 @@ namespace csl {
 
 	    DictSearch::DictModule& modernDict = ds.addDictModule( L"modern", std::string( "../csl/DictSearch/Test/small.modern.fbdic" ) );
 	    ds.query( L"teile", &result );
-	    CPPUNIT_ASSERT( result.size() == 1 );
-	    CPPUNIT_ASSERT( result.at( 0 ).getWord() == L"teile"  );
+	    CPPUNIT_ASSERT_EQUAL( (size_t)1, result.size() );
+	    CPPUNIT_ASSERT( L"teile" == result.at( 0 ).getWord()  );
 	    CPPUNIT_ASSERT( result.at( 0 ).getInstruction().empty() );
 	    
 
@@ -56,13 +57,31 @@ namespace csl {
 	    CPPUNIT_ASSERT( result.at( 2 ).getWord() == L"teilen"  );
 	    CPPUNIT_ASSERT( result.at( 3 ).getWord() == L"teller"  );
 
-	    // init the hpothetic dic, with dlev 0
+
+	    // init the hpothetic dic, with hypothetic-dlev 0
 	    ds.initHypothetic( "../csl/DictSearch/Test/small.patterns.txt" );
 	    modernDict.setMaxNrOfPatterns( 1000 );
+	    modernDict.setDLev( 0 );           // no errors on modern
+	    modernDict.setDLevHypothetic( 0 ); // no errors on hypothetic
 	    result.clear();
 	    ds.query( L"theyle", &result );
 	    std::sort( result.begin(), result.end() );
-	    CPPUNIT_ASSERT( result.size() == 2 );
+	    //std::wcout << "cand=" << result.at( 0 ) << std::endl;
+	    CPPUNIT_ASSERT_EQUAL( (size_t)1, result.size() );
+	    CPPUNIT_ASSERT( L"theyle" == result.at( 0 ).getWord() );
+
+
+	    // hpothetic dic, with errors
+	    modernDict.setMaxNrOfPatterns( 1000 );
+	    modernDict.setDLev( 2 );
+	    result.clear();
+	    ds.query( L"theyle", &result );
+	    std::sort( result.begin(), result.end() );
+	    std::wcout << "cand=" << result.at( 0 ) << std::endl;
+	    CPPUNIT_ASSERT_EQUAL( (size_t)2, result.size() );
+	    CPPUNIT_ASSERT( result.at( 0 ).getWord() == L"theyle"  );
+	    CPPUNIT_ASSERT( result.at( 1 ).getWord() == L"teile"  );
+
 
 	    // set dlev=2 for hypothetic dic
 	    modernDict.setDLevHypothetic( 2 );
@@ -166,7 +185,7 @@ namespace csl {
 
 	    DictSearch ds;
 	    
-
+	    
 	    DictSearch::CandidateSet result;
 
 	    StringDictModule histDict( ds, L"histDict", "./test.fbds" );
@@ -175,6 +194,40 @@ namespace csl {
 	    //histDict.setCaseMode( Global::restoreCase );
 
 	    ds.query( L"theil", &result );
+	    
+	    
+	}
+
+	void testCascades() {
+	    DictSearch ds;
+
+	    DictSearch::CandidateSet result;
+
+	    DictSearch::DictModule& exactDict = ds.addDictModule( 
+		L"modernExact", 
+		std::string( "../csl/DictSearch/Test/small.modern.fbdic" ), 
+		0  // cascadeRank
+		);
+
+	    DictSearch::DictModule& fuzzyDict = ds.addDictModule( 
+		L"modernFuzzy", 
+		std::string( "../csl/DictSearch/Test/small.modern.fbdic" ), 
+		1   // cascadeRank
+		);
+	    fuzzyDict.setDLev( 2 );
+
+	    result.clear();
+	    ds.query( L"teile", &result );
+	    CPPUNIT_ASSERT_EQUAL( (size_t)1, result.size() );
+	    CPPUNIT_ASSERT( result.at( 0 ).getWord() == L"teile"  );
+
+	    // result.clear();
+	    // ds.query( L"teite", &result );
+	    // CPPUNIT_ASSERT_EQUAL( (size_t)3, result.size() );
+	    // CPPUNIT_ASSERT( result.at( 0 ).getWord() == L"teile" );
+	    // CPPUNIT_ASSERT( result.at( 0 ).getWord() == L"teilen" );
+	    // CPPUNIT_ASSERT( result.at( 0 ).getWord() == L"feile" );
+
 	    
 	    
 	}

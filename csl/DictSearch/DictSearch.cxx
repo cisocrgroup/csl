@@ -26,15 +26,15 @@ namespace csl {
     }
 
 
-    DictSearch::DictModule& DictSearch::addDictModule( std::wstring const& name, std::string const& dicFile ) {
-	DictModule* newDM = new DictModule( *this, name, dicFile );
+    DictSearch::DictModule& DictSearch::addDictModule( std::wstring const& name, std::string const& dicFile, size_t cascadeRank ) {
+	DictModule* newDM = new DictModule( *this, name, dicFile, cascadeRank );
 	dictModules_.push_back( newDM );
 	allDictModules_.insert( std::make_pair( newDM->getCascadeRank(), newDM ) );
 	return *newDM;
     }
 
-    DictSearch::DictModule& DictSearch::addDictModule( std::wstring const& name, Dict_t const& dicRef ) {
-	DictModule* newDM = new DictModule( *this, name, dicRef );
+    DictSearch::DictModule& DictSearch::addDictModule( std::wstring const& name, Dict_t const& dicRef, size_t cascadeRank ) {
+	DictModule* newDM = new DictModule( *this, name, dicRef, cascadeRank );
 	dictModules_.push_back( newDM );
 	allDictModules_.insert( std::make_pair( newDM->getCascadeRank(), newDM ) );
 	return *newDM;
@@ -51,46 +51,48 @@ namespace csl {
     }
 
 
-    void DictSearch::query( std::wstring const& query, iResultReceiver* answers ) {
+    bool DictSearch::query( std::wstring const& query, iResultReceiver* answers ) {
 	bool foundAnswers = false;
+	
+	size_t cascadeRank = 0;
+	for( std::multimap< size_t, iDictModule* >::const_iterator dm = allDictModules_.begin(); 
+	     dm != allDictModules_.end();
+	     ++dm ) {
+	    if( ((*dm).first) > cascadeRank ) {
+		if( foundAnswers ) {
+		    return true;
+		}
+		else {
+		    cascadeRank = ((*dm).first);
+		}
+	    }
+	    
+	    try {
+		answers->setCurrentDictModule( *( (*dm).second ) );
+		foundAnswers = ( (* (*dm).second ) ).query( query, answers );
+	    } catch( std::exception& exc ) {
+		std::cerr << "csl::DictSearch::query: caught exception: " << exc.what() << std::endl;
+	    }
+	}
+	return foundAnswers;
 
-	// Use of cascades not yet implemented!!!
-
-	// size_t cascadeRank = 0;
-	// for( std::multimap< size_t, iDictModule* >::const_iterator dm = allDictModules_.begin(); 
-	//      dm != allDictModules_.end();
-	//      ++dm ) {
-	//     if( (dm.first)->getCascadeRank() > cascadeRank ) {
-	// 	if( foundAnswers ) return;
-	// 	else cascadeRank = (dm.first)->getCascadeRank();
-	//     }
-
+	// OLD VERSION, without cascading queries
+	// for( std::vector< DictModule* >::iterator dm = dictModules_.begin(); dm != dictModules_.end(); ++dm ) {
 	//     try {
 	// 	answers->setCurrentDictModule( **dm );
-	// 	( *( dm->second ) ).query( query, answers );
+	// 	(**dm).query( query, answers );
 	//     } catch( std::exception& exc ) {
 	// 	std::cerr << "csl::DictSearch::query: caught exception: " << exc.what() << std::endl;
 	//     }
-
-	    
 	// }
-
-	for( std::vector< DictModule* >::iterator dm = dictModules_.begin(); dm != dictModules_.end(); ++dm ) {
-	    try {
-		answers->setCurrentDictModule( **dm );
-		(**dm).query( query, answers );
-	    } catch( std::exception& exc ) {
-		std::cerr << "csl::DictSearch::query: caught exception: " << exc.what() << std::endl;
-	    }
-	}
-	for( std::vector< iDictModule* >::iterator dm = externalDictModules_.begin(); dm != externalDictModules_.end(); ++dm ) {
-	    try {
-		answers->setCurrentDictModule( **dm );
-		(**dm).query( query, answers );
-	    } catch( std::exception& exc ) {
-		std::cerr << "csl::DictSearch::query: caught exception: " << exc.what() << std::endl;
-	    }
-	}
+	// for( std::vector< iDictModule* >::iterator dm = externalDictModules_.begin(); dm != externalDictModules_.end(); ++dm ) {
+	//     try {
+	// 	answers->setCurrentDictModule( **dm );
+	// 	(**dm).query( query, answers );
+	//     } catch( std::exception& exc ) {
+	// 	std::cerr << "csl::DictSearch::query: caught exception: " << exc.what() << std::endl;
+	//     }
+	// }
     }
     
 } // namespace csl

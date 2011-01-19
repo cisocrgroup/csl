@@ -18,6 +18,12 @@
 
 namespace csl {
 
+    /**
+     * @brief iInterpretationReceiver is an interface to be implemented by classes which are supposed to
+     *        receive results from the Vaam matcher (see below). 
+     *
+     * A straight-forward implementation of this interface is Vaam::CandidateReceiver
+     */
     class iInterpretationReceiver {
     public:
 	virtual ~iInterpretationReceiver() {}

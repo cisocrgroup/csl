@@ -17,8 +17,8 @@ namespace csl {
 	 *
 	 * In this case, DictModule will load the dictionary and destroy it when the DictModule dies.
 	 */
-	StringDictModule( csl::DictSearch& myDictSearch, std::wstring const& name, std::string const& dicFile ) :
-	    AbstractDictModule( myDictSearch, name ),
+	StringDictModule( csl::DictSearch& myDictSearch, std::wstring const& name, std::string const& dicFile, size_t cascadeRank = 0 ) :
+	    AbstractDictModule( myDictSearch, name, cascadeRank ),
 	    dict_( 0 ),
 	    disposeDict_( false ), // will perhaps be changed at setDict()
 	    caseMode_( Global::asIs ) {
@@ -96,14 +96,27 @@ namespace csl {
 	     * fulfilling the LevFilter::CandidateReceiver interface
 	     */
 	    void receive( const wchar_t *str, int levDistance, int annotation ) {
-		std::wstring wideAnnotation;
-		string2wstring( (char*)( myDictModule_.getDict()->getAnnByOffset( annotation ) ), wideAnnotation );
+		std::wstring interpretationsString;
+		string2wstring( (char*)( myDictModule_.getDict()->getAnnByOffset( annotation ) ), interpretationsString );
+		
+		size_t startPos = 0;
+		size_t endPos = 0;
+		do {
+		    endPos = interpretationsString.find( '|', startPos + 1 );
+		    if( endPos == std::wstring::npos ) endPos = interpretationsString.size();
+		    std::wcout << "startPos=" << startPos << ", endPos=" << endPos << std::endl;
+
+		    Interpretation interp;
+		    interp.parseFromString( interpretationsString.substr( startPos, endPos - startPos  ) );
+		    std::wcout << "Parsed interpretation:" <<  interp <<  std::endl;
+		    static_cast< iInterpretationReceiver* >(answers_)->receive( interp );
+
+		    startPos = endPos + 1;
+		} while( endPos < interpretationsString.size() );
+
+		
 		
 
-		std::wcout << "Receive answer:" <<  wideAnnotation <<  std::endl;
-		Interpretation interp;
-		interp.parseFromString( wideAnnotation );
-		std::wcout << "Parsed interpretation:" <<  interp <<  std::endl;
 		
 	    }
 
@@ -117,17 +130,15 @@ namespace csl {
 	    DictSearch::iResultReceiver* answers_;
 	}; // class AnswerProcessor
 	    
-	void query( std::wstring const& query, DictSearch::iResultReceiver* answers ) {
+	bool query( std::wstring const& query, DictSearch::iResultReceiver* answers ) {
 	    if( getDict() ) {
 		msMatch_.setFBDic( *( getDict() ) );
 		msMatch_.setDistance( getDLevByWordlength( query.length() ) );
 		msMatch_.setCaseMode( getCaseMode() );
 		
 		AnswerProcessor ap( *this, answers );
-		msMatch_.query( query.c_str(), ap );
+		return msMatch_.query( query.c_str(), ap );
 		
-		
-
 
 		// if( maxNrOfPatterns_ > 0 ) {
 		//     getMyDictSearch().vaam_->setBaseDic( dict_->getFWDic() );

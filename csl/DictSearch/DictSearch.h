@@ -255,9 +255,9 @@ namespace csl {
 	class iDictModule {
 	public:
 
-	    iDictModule() :
+	    iDictModule( size_t cascadeRank = 0 ) :
 		priority_( 1 ),
-		cascadeRank_( 0 ) {
+		cascadeRank_( cascadeRank ) {
 	    }
 
 	    /**
@@ -269,8 +269,10 @@ namespace csl {
 	    /**
 	     * @brief Allows to query the iDctModule with some string. The iDictModule is expected
 	     * to add all its answers/ interpretations to the CandidateSet that is passed.
+	     *
+	     * @return true iff at least one answer was found
 	     */
-	    virtual void query( std::wstring const& query, iResultReceiver* answers ) = 0;
+	    virtual bool query( std::wstring const& query, iResultReceiver* answers ) = 0;
 
 
 
@@ -280,10 +282,6 @@ namespace csl {
 	    virtual std::wstring const& getName() const = 0;
 
 
-	    void setCascadeRank( size_t r ) {
-		cascadeRank_ = r;
-	    }
-	    
 	    size_t getCascadeRank() const {
 		return cascadeRank_;
 	    }
@@ -316,10 +314,11 @@ namespace csl {
 	class AbstractDictModule : public iDictModule {
 	public:
 
-	    AbstractDictModule( DictSearch& myDictSearch, std::wstring const& name ) :
+	    AbstractDictModule( DictSearch& myDictSearch, std::wstring const& name, size_t cascadeRank ) :
+		iDictModule( cascadeRank ),
 		name_( name ),
 		myDictSearch_( myDictSearch ),
-		maxNrOfPatterns_(),
+		maxNrOfPatterns_( 0 ),
 		dlev_hypothetic_( 0 )
 		{
 
@@ -384,6 +383,21 @@ namespace csl {
 		minWordlengths_[3] = 13;
 	    }
 
+	    /**
+	     * @brief sets a new value for the upper bound of applied variant patterns
+	     */
+	    void setMaxNrOfPatterns( size_t max ) {
+		maxNrOfPatterns_ = max;
+	    }
+
+	    /**
+	     * @brief sets a new value for the upper bound of applied variant patterns
+	     */
+	    void setDLevHypothetic( size_t dlev ) {
+		dlev_hypothetic_ = dlev;
+	    }
+	    
+
 
 	    //@}
 
@@ -418,21 +432,12 @@ namespace csl {
 		return maxNrOfPatterns_;
 	    }
 
-	    /**
-	     * @brief sets a new value for the upper bound of applied variant patterns
-	     */
-	    void setMaxNrOfPatterns( size_t max ) {
-		maxNrOfPatterns_ = max;
-	    }
 
-
-	    /**
-	     * @brief sets a new value for the upper bound of applied variant patterns
-	     */
-	    void setDLevHypothetic( size_t dlev ) {
-		dlev_hypothetic_ = dlev;
+	    size_t getDLevHypothetic() const {
+		return dlev_hypothetic_;
 	    }
 	    
+
 	    /**
 	     * @brief returns the DictModule's  name
 	     */
@@ -465,8 +470,8 @@ namespace csl {
 	     *
 	     * In this case, DictModule will load the dictionary and destroy it when the DictModule dies.
 	     */
-	    DictModule( DictSearch& myDictSearch, std::wstring const& name, std::string const& dicFile ) :
-		AbstractDictModule( myDictSearch, name ),
+	    DictModule( DictSearch& myDictSearch, std::wstring const& name, std::string const& dicFile, size_t cascadeRank = 0 ) :
+		AbstractDictModule( myDictSearch, name, cascadeRank ),
 		dict_( 0 ),
 		disposeDict_( false ), // will perhaps be changed at setDict()
 		caseMode_( Global::asIs )
@@ -481,8 +486,8 @@ namespace csl {
 	     *
 	     * Of course, in this case, DictModule will leave the dictionary-object alive when DictModule dies.
 	     */
-	    DictModule( DictSearch& myDictSearch, std::wstring const& name, Dict_t const& dicRef ) :
-		AbstractDictModule( myDictSearch, name ),
+	    DictModule( DictSearch& myDictSearch, std::wstring const& name, Dict_t const& dicRef, size_t cascadeRank = 0 ) :
+		AbstractDictModule( myDictSearch, name, cascadeRank ),
 		dict_( 0 ),
 		disposeDict_( false ),  // will perhaps be changed at setDict()
 		caseMode_( Global::asIs ) {
@@ -548,31 +553,33 @@ namespace csl {
 
 
 	    
-	    void query( std::wstring const& query, iResultReceiver* answers ) {
+	    bool query( std::wstring const& query, iResultReceiver* answers ) {
+		bool foundAnswers = false;
 		if( getDict() ) {
 		    getMyDictSearch().msMatch_.setFBDic( *( getDict() ) );
 		    getMyDictSearch().msMatch_.setDistance( getDLevByWordlength( query.length() ) );
 		    getMyDictSearch().msMatch_.setCaseMode( getCaseMode() );
-		    getMyDictSearch().msMatch_.query( query.c_str(), *answers );
-		    
-		    if( maxNrOfPatterns_ > 0 ) {
+
+		    foundAnswers = getMyDictSearch().msMatch_.query( query.c_str(), *answers );
+
+		    if( getMaxNrOfPatterns() > 0 ) {
 			getMyDictSearch().vaam_->setBaseDic( dict_->getFWDic() );
 			getMyDictSearch().vaam_->setMinNrOfPatterns( 1 ); // get only strictly hypothetic matches
-			getMyDictSearch().vaam_->setMaxNrOfPatterns( maxNrOfPatterns_ );
-			getMyDictSearch().vaam_->setDistance( dlev_hypothetic_ );
+			getMyDictSearch().vaam_->setMaxNrOfPatterns( getMaxNrOfPatterns() );
+			getMyDictSearch().vaam_->setDistance( getDLevHypothetic() );
 			getMyDictSearch().vaam_->setCaseMode( getCaseMode() );
-			getMyDictSearch().vaam_->query( query, answers );
+
+			foundAnswers = 
+			    getMyDictSearch().vaam_->query( query, answers ) 
+			    || foundAnswers;
 		    }
 		}
+		return foundAnswers;
 	    }
 	    
 	private:
 	    Dict_t const* dict_;
 	    bool disposeDict_;
-	    size_t minWordlengths_[4];
-	    size_t maxNrOfPatterns_;
-	    size_t dlev_hypothetic_;
-	    int priority_;
 	    Global::CaseMode caseMode_;
 	}; // class DictModule
 
@@ -602,8 +609,8 @@ namespace csl {
 	void initHypothetic( char const* patternFile );
 
 	
-	DictModule& addDictModule( std::wstring const& name, std::string const& dicFile );
-	DictModule& addDictModule( std::wstring const& name, Dict_t const& dicRef );
+	DictModule& addDictModule( std::wstring const& name, std::string const& dicFile, size_t cascadeRank = 0 );
+	DictModule& addDictModule( std::wstring const& name, Dict_t const& dicRef, size_t cascadeRank = 0 );
 
 	/**
 	 * @brief 
@@ -628,8 +635,10 @@ namespace csl {
 	 *
 	 * @param[in] query
 	 * @param[out] answers
+	 *
+	 * @return true iff at least one answer was found
 	 */
-	void query( std::wstring const& query, iResultReceiver* answers );
+	bool query( std::wstring const& query, iResultReceiver* answers );
 	
 	//@} // END Lookup methods
 
