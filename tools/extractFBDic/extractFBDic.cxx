@@ -15,7 +15,7 @@ int main( int argc, const char** argv ) {
 	std::wcerr<<std::endl
 		 <<"Use like: extractMD [options] <binDic> "<<std::endl
 		 <<"Options:"<<std::endl
-		 <<"--stat=1\tto print statistics of the MinDic"<<std::endl
+		 <<"--stat=1\tto print statistics of the FBDic [currently not implemented]"<<std::endl
 		 <<"--dot=1\tto print dotcode for the MinDic"
 		 <<std::endl<<std::endl;
 

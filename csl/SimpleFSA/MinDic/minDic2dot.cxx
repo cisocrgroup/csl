@@ -21,7 +21,7 @@ int main( int argc, const char** argv ) {
 
     try {
 	minDic.compileDic( argv[1] );
-//	minDic.toDot();
+	minDic.toDot();
     } catch( csl::exceptions::cslException ex ) {
 	std::wcerr<<"minDic2dot: Error: "<< ex.what() << std::endl;
 	

@@ -221,12 +221,14 @@ namespace csl {
 	    CPPUNIT_ASSERT_EQUAL( (size_t)1, result.size() );
 	    CPPUNIT_ASSERT( result.at( 0 ).getWord() == L"teile"  );
 
-	    // result.clear();
-	    // ds.query( L"teite", &result );
-	    // CPPUNIT_ASSERT_EQUAL( (size_t)3, result.size() );
-	    // CPPUNIT_ASSERT( result.at( 0 ).getWord() == L"teile" );
-	    // CPPUNIT_ASSERT( result.at( 0 ).getWord() == L"teilen" );
-	    // CPPUNIT_ASSERT( result.at( 0 ).getWord() == L"feile" );
+	    result.clear();
+	    ds.query( L"teite", &result );
+	    std::sort( result.begin(), result.end() );
+	    
+	    CPPUNIT_ASSERT_EQUAL( (size_t)3, result.size() );
+	    CPPUNIT_ASSERT( result.at( 0 ).getWord() == L"teile" );
+	    CPPUNIT_ASSERT( result.at( 1 ).getWord() == L"feile" ); // here orderis kind of arbitrary :-/
+	    CPPUNIT_ASSERT( result.at( 2 ).getWord() == L"teilen" );//             ----------
 
 	    
 	    

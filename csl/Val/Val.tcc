@@ -5,7 +5,8 @@ namespace csl {
 
 	baseDic_ = &baseDic;
 	patternGraph_.loadPatterns( patternFile );
-	patternGraph_.toDot();
+
+
     }
 
 
@@ -101,6 +102,7 @@ namespace csl {
 	} // for all chars of the query word
 
 	// report matches
+	bool foundAnswers = false;
 	if( ( depth == word.length() + 1 ) && ( stack_.back().lookAheadDepth_ == 0 ) ) {  // we are not in the lookahead-phase
 	    // for all positions
 	    size_t count = 0;
@@ -109,11 +111,12 @@ namespace csl {
 		 ++position ) {
 		if( position->dicPos_.isFinal() ) {
 		    reportMatch( &( *position ), position->dicPos_.getAnnotation() );
+		    foundAnswers = true;
 		}
 		++count;
 	    } // for all positions
 	} // report matches
-	
+	return foundAnswers;
     } // method query
     
     void Val::reportMatch( const Position* cur, int baseWordScore ) const {
@@ -129,6 +132,7 @@ namespace csl {
 	interpretation.getInstruction().applyTo( &word, -1 );
 	interpretation.setBaseWord( word ); 
 
+	// *** if you activate this, take care of the return value of query (stating if matches were found)***
 // 	if( ( filterDic_ && filterDic_->lookup( interpretation.getWord() ) )  || // if there's a filterDic_ and interpretation.word is in it or ..
 // 	    ( interpretation.getInstruction().size() < minNrOfPatterns_ )
 	    

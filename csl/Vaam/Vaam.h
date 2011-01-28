@@ -30,6 +30,7 @@ namespace csl {
 	virtual void receive( Interpretation const& interpretation ) = 0;
     };
 
+
     /*
      * Vaam - Variant-Aware Approximate Matching
      */
@@ -44,10 +45,13 @@ namespace csl {
      *
      * As input the tool needs 
      * - a wordList @c baseDic compiled as FSA (use the tool compileMD to get such an automaton from a word list. 
+     *
      * - a file containing a list of patterns, one per line. A line containing 't th' indicates that a 't' in 
      *   @c baseDic could be transformed to 'th'.
+     *
      * - a threshold @c maxNrOfPatterns specifying the maximum number of pattern applications in one word
      *   (default: 1000, which is near to infinite ).
+     *
      * - a distance threshold @c distance specifying the maximum number of edit operations allowed on top of the
      *   application of variant patterns (default: 0, allow variant patterns only).
      *
@@ -102,6 +106,12 @@ namespace csl {
     public:
 
 	static const size_t INFINITE = (size_t)-1;
+
+	/**
+	 * @name Constructors
+	 */
+	//@{
+
 	/**
 	 * @brief A trivial construtor, taking the input ressources as arguments
 	 *
@@ -110,6 +120,9 @@ namespace csl {
 	 (see class description for some more details). 
 	*/
 	Vaam( const MinDic_t& baseDic, const char* patternFile );
+
+	//@}
+
 
 	/**
 	 * @name Configuration

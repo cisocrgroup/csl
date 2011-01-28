@@ -12,14 +12,19 @@
 namespace csl {
 
 /**
- * @brief A class for thet parsing of command line arguments.
- * Heavily under construction!!!
+ * @brief A class for the parsing of command line arguments.
  */
 class Getopt {
 public:
     enum Restrictiveness { IGNORE, WARN, THROW };
     enum ValueType { VOID, STRING };
     enum Obligatority { OBLIGATORY, OPTIONAL };
+
+
+    /**
+     * @name Constructors
+     */
+    //@{ 
 
     Getopt( Restrictiveness restrictiveness = IGNORE ) :
 	restrictiveness_( restrictiveness ) {
@@ -75,6 +80,47 @@ public:
 // 	}
     }
 
+    //@} end Constructors
+    
+
+
+    /**
+     * @name Configure options
+     */
+    //@{ 
+    void specifyOption( std::string const& key, ValueType valueType, Obligatority obligatority = OPTIONAL ) {
+	if( optionTypes_.find( key ) != optionTypes_.end() ) {
+	    std::string msg = std::string( "csl::Getopt::specifyOption: Key " ) + key + "was specified before";
+	    throw Exception( "msg" );
+	    
+	}
+	optionTypes_[ key ] = valueType;
+	if( obligatority == OBLIGATORY ) {
+	    obligatory_.insert( key );
+	}
+    }
+
+    void specifyOption( std::string const& key, ValueType valueType, std::string const& defaultValue ) {
+	if( optionTypes_.find( key ) != optionTypes_.end() ) {
+	    std::string msg = std::string( "csl::Getopt::specifyOption: Key " ) + key + "was specified before";
+	    throw Exception( "msg" );
+	    
+	}
+	optionTypes_[ key ]  = valueType;
+	optionValues_[ key ] = defaultValue; 
+    }
+
+    void setOption( std::string const& key, std::string const& value ) {
+	optionValues_[key] = value;
+    }
+
+    //@} end configure options
+
+
+    /**
+     * @name Trigger Command line Parsing
+     */
+    //@{ 
 
     /**
      * @brief This option permits only options of the form option=value, and regular arguments.
@@ -193,31 +239,16 @@ public:
     } // getOptions
 
 
-    void specifyOption( std::string const& key, ValueType valueType, Obligatority obligatority = OPTIONAL ) {
-	if( optionTypes_.find( key ) != optionTypes_.end() ) {
-	    std::string msg = std::string( "csl::Getopt::specifyOption: Key " ) + key + "was specified before";
-	    throw Exception( "msg" );
-	    
-	}
-	optionTypes_[ key ] = valueType;
-	if( obligatority == OBLIGATORY ) {
-	    obligatory_.insert( key );
-	}
-    }
 
-    void specifyOption( std::string const& key, ValueType valueType, std::string const& defaultValue ) {
-	if( optionTypes_.find( key ) != optionTypes_.end() ) {
-	    std::string msg = std::string( "csl::Getopt::specifyOption: Key " ) + key + "was specified before";
-	    throw Exception( "msg" );
-	    
-	}
-	optionTypes_[ key ]  = valueType;
-	optionValues_[ key ] = defaultValue; 
-    }
+    //@} end trigger command line parsing
 
-    void setOption( std::string const& key, std::string const& value ) {
-	optionValues_[key] = value;
-    }
+
+    
+    /**
+     * @name Access options and arguments
+     */
+    //@{ 
+
 
     void addArgument( std::string value ) {
 	arguments_.push_back( value );
@@ -253,6 +284,8 @@ public:
     const size_t getArgumentCount() const {
 	return arguments_.size();
     }
+
+    //@}
 
     class Exception : public exceptions::cslException {
     public:

@@ -22,5 +22,5 @@ int main() {
 
     // Return error code 1 if one of the tests failed.
     return wasSucessful ? 0 : 1;    
-
+    
 }

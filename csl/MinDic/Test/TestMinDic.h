@@ -24,15 +24,20 @@ namespace csl {
 
 
     private:
-	csl::Alphabet alph_;
-	char* lexFile_;
 	csl::MinDic<> mdic_;
+	std::wstring oneKey_;
+	int oneValue_;
+	
     };
 
     CPPUNIT_TEST_SUITE_REGISTRATION( TestMinDic );
 
     TestMinDic::TestMinDic() {
-	std::wcout<<"KONSTRUKTOR"<<std::endl;
+	oneKey_  = L"aachen";
+	oneValue_ = 42;
+	mdic_.initConstruction();
+	mdic_.addToken( oneKey_.c_str(), oneValue_ );
+	mdic_.finishConstruction();
     }
 
     void TestMinDic::run() {
@@ -44,8 +49,6 @@ namespace csl {
      * test the basic methods for reading access like getRoot, walk, isFinal etc.
      */
     void TestMinDic::testBasics() {
-	std::wcout<<"TEST"<<std::endl;
-	std::wstring key( L"aachen" );
 	/*
 	 * walk key char by char and test if
 	 * - key could be walked completely
@@ -54,7 +57,7 @@ namespace csl {
 	 */
 	StateId_t pos_1 = mdic_.getRoot(); // set pos_1 to root
 	const wchar_t* c = 0;
-	for( c = key.c_str(); *c && pos_1; ++c ) {
+	for( c = oneKey_.c_str(); *c && pos_1; ++c ) {
 	    pos_1 = mdic_.walk( pos_1, *c );
 	}
 
@@ -66,16 +69,15 @@ namespace csl {
 	/*
 	 * test if the same result is returned by walkStr
 	 */
-	uint_t pos_2 = mdic_.walkStr( mdic_.getRoot(), key.c_str() );
+	uint_t pos_2 = mdic_.walkStr( mdic_.getRoot(), oneKey_.c_str() );
 	CPPUNIT_ASSERT( pos_1 == pos_2 );
 	
 	/*
 	 * test if walking with the empty string works
 	 */
-	key = L"";
-	CPPUNIT_ASSERT( mdic_.walkStr( mdic_.getRoot(), key.c_str() ) == mdic_.getRoot() );
+	std::wstring empty = L"";
+	CPPUNIT_ASSERT( mdic_.walkStr( mdic_.getRoot(), empty.c_str() ) == mdic_.getRoot() );
 
-	CPPUNIT_ASSERT( 0 );
 
 	/*
 	 * test if the proper annotation is returned for the key
