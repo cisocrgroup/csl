@@ -203,7 +203,7 @@ int main(int argc, const char** argv ) {
 	}
     
     } catch( csl::exceptions::cslException ex ) {
-	std::wcout << "Caught exception: " << ex.what() << std::endl;
+	std::wcerr << "Caught exception: " << ex.what() << std::endl;
 	return EXIT_FAILURE;
     }
 
