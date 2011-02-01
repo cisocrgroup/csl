@@ -1,0 +1,7 @@
+IF( CPPUNIT_FOUND )
+  add_executable( testPattern testPattern.cxx )
+  target_link_libraries( testPattern  csl ${CPPUNIT_LIBRARIES} )
+  
+  ADD_TEST( testPattern ${EXECUTABLE_OUTPUT_PATH}/testPattern )
+  
+ENDIF( CPPUNIT_FOUND )
