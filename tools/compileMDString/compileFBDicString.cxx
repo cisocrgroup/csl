@@ -1,5 +1,5 @@
 #include <csl/Global.h>
-#include <csl/MinDicString/MinDicString.h>
+#include <csl/FBDicString/FBDicString.h>
 #include <csl/Getopt/Getopt.h>
 
 using namespace csl;
@@ -16,26 +16,25 @@ int main( int argc, const char** argv ) {
 	    return 1;
 	}
 	
-	MinDicString mds;
+	FBDicString fbds;
 	
 	if( options.hasOption( "cislex" ) ) {
-	    mds.setKeyValueDelimiter( '.' );
+	    fbds.setKeyValueDelimiter( '.' );
 	}
 	
-	mds.compileDic( options.getArgument( 0 ).c_str() );
-	mds.writeToFile( options.getArgument( 1 ).c_str() );
+	fbds.compileDic( options.getArgument( 0 ).c_str() );
+	fbds.writeToFile( options.getArgument( 1 ).c_str() );
 	
-//   mds.printDic();
 
     }
     catch( csl::exceptions::cslException exc ) {
 	std::wstring wide_what;
 	csl::string2wstring( exc.what(), wide_what );
-	std::wcerr << "csl::compileMDString: caught cslException and aborted: " << wide_what << std::endl;
+	std::wcerr << "csl::compileFBDString: caught cslException and aborted: " << wide_what << std::endl;
 	return 1;
     }
     catch( std::exception exc ) {
-	std::wcerr << "csl::compileMDString: caught std::exception. Aborted." << std::endl;
+	std::wcerr << "csl::compileFBDString: caught std::exception. Aborted." << std::endl;
 	return 1;
     }
 
