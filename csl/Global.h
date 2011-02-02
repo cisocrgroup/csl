@@ -16,6 +16,7 @@
 #include<ios>
 #include<locale>
 #include<csl/codecvt/UTF8_Codecvt.h>
+#include<vector>
 
 #define debug(s) (std::cout<<"DEBUG: "<<s<<std::endl)
 
@@ -264,7 +265,17 @@ namespace csl {
 	string2wstring( str, wstr, loc );
     }
 
-
+    template< typename char_t >
+    size_t split( std::basic_string< char_t > const& str, char delimiter, std::vector< std::basic_string< char_t > >* pieces ) {
+	size_t pos = 0;
+	size_t delimPos = str.npos;
+	while( ( delimPos = str.find_first_of( delimiter, pos ) ) != str.npos ) {
+	    pieces->push_back( str.substr( pos, delimPos - pos ) );
+	    pos = delimPos + 1 ;
+	}
+	pieces->push_back( str.substr( pos ) );
+	return pieces->size();
+    }
 
 
 } // eon

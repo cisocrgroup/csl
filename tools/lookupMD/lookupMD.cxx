@@ -32,7 +32,7 @@ int main( int argc, char** argv ) {
 	    else std::wcout<<std::endl;
 	}
 	if( errno == EILSEQ ) {
-	    throw exceptions::badInput( "csl::lookupMD: Input encodig error" );
+	    throw exceptions::badInput( "csl::lookupMD: Input encoding error" );
 	}
 	
     } catch( exceptions::cslException ex ) {

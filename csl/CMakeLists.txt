@@ -16,6 +16,7 @@ add_subdirectory(DictSearch)
 #add_subdirectory(Trie)
 add_subdirectory(Pattern)
 add_subdirectory(Locale)
+add_subdirectory(INIConfig)
 
 ADD_LIBRARY( csl SHARED 
   Alphabet/Alphabet.cxx 
@@ -26,6 +27,7 @@ ADD_LIBRARY( csl SHARED
   Pattern/Instruction.cxx
   Pattern/Interpretation.cxx
   Pattern/PatternWeights.cxx
+  INIConfig/INIConfig.cxx INIConfig/INIParser.cxx INIConfig/dictionary.c
   )
 
 #TARGET_LINK_LIBRARIES( csl Alphabet )

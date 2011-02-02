@@ -5,11 +5,14 @@
 #include<vector>
 #include<map>
 #include<utility>
+#include<csl/Global.h>
 #include<csl/MinDic/MinDic.h>
 #include<csl/FBDic/FBDic.h>
 #include<csl/MSMatch/MSMatch.h>
 #include<csl/LevFilter/LevFilter.h>
 #include<csl/Vaam/Vaam.h>
+#include<csl/Val/Val.h>
+#include<csl/INIConfig/INIConfig.h>
 
 namespace csl {
     
@@ -307,7 +310,7 @@ namespace csl {
 	private:
 	    int priority_;
 	    size_t cascadeRank_;
-	};
+	}; // class iDictModule
 
 
 
@@ -386,6 +389,13 @@ namespace csl {
 	    /**
 	     * @brief sets a new value for the upper bound of applied variant patterns
 	     */
+	    void setMinNrOfPatterns( size_t min ) {
+		minNrOfPatterns_ = min;
+	    }
+
+	    /**
+	     * @brief sets a new value for the upper bound of applied variant patterns
+	     */
 	    void setMaxNrOfPatterns( size_t max ) {
 		maxNrOfPatterns_ = max;
 	    }
@@ -450,6 +460,7 @@ namespace csl {
 	    std::wstring name_;
 	    DictSearch& myDictSearch_;
 	    size_t minWordlengths_[4];
+	    size_t minNrOfPatterns_;
 	    size_t maxNrOfPatterns_;
 	    size_t dlev_hypothetic_;
 	    
@@ -563,15 +574,30 @@ namespace csl {
 		    foundAnswers = getMyDictSearch().msMatch_.query( query.c_str(), *answers );
 
 		    if( getMaxNrOfPatterns() > 0 ) {
-			getMyDictSearch().vaam_->setBaseDic( dict_->getFWDic() );
-			getMyDictSearch().vaam_->setMinNrOfPatterns( 1 ); // get only strictly hypothetic matches
-			getMyDictSearch().vaam_->setMaxNrOfPatterns( getMaxNrOfPatterns() );
-			getMyDictSearch().vaam_->setDistance( getDLevHypothetic() );
-			getMyDictSearch().vaam_->setCaseMode( getCaseMode() );
-
-			foundAnswers = 
-			    getMyDictSearch().vaam_->query( query, answers ) 
-			    || foundAnswers;
+			if( ! getMyDictSearch().hasHypothetic() ) {
+			    throw exceptions::cslException( "csl::DictSearch::DictModule::query: DictSearch has no Vaam ready" );
+			}
+			if( getDLevHypothetic() == 0 ) { // use val
+			    getMyDictSearch().val_->setBaseDic( dict_->getFWDic() );
+			    getMyDictSearch().val_->setMinNrOfPatterns( 1 ); // get only strictly hypothetic matches
+			    getMyDictSearch().val_->setMaxNrOfPatterns( getMaxNrOfPatterns() );
+			    getMyDictSearch().val_->setCaseMode( getCaseMode() );
+			    
+			    foundAnswers = 
+				getMyDictSearch().val_->query( query, answers ) 
+				|| foundAnswers;
+			}
+			else { // use vaam
+			    getMyDictSearch().vaam_->setBaseDic( dict_->getFWDic() );
+			    getMyDictSearch().vaam_->setMinNrOfPatterns( 1 ); // get only strictly hypothetic matches
+			    getMyDictSearch().vaam_->setMaxNrOfPatterns( getMaxNrOfPatterns() );
+			    getMyDictSearch().vaam_->setDistance( getDLevHypothetic() );
+			    getMyDictSearch().vaam_->setCaseMode( getCaseMode() );
+			
+			    foundAnswers = 
+				getMyDictSearch().vaam_->query( query, answers ) 
+				|| foundAnswers;
+			}
 		    }
 		}
 		return foundAnswers;
@@ -597,6 +623,17 @@ namespace csl {
 	 */
 	//@{
 
+
+	/**
+	 * @brief Load a configuration from a configFile
+	 */
+	void readConfiguration( char const* configFile, std::string const& prefix = "" );
+
+	
+	/**
+	 * @brief Load a configuration from an existing INIConfig object
+	 */
+	void readConfiguration( INIConfig const& iniConf, std::string const& prefix = ""  );
 	
 
 	/**
@@ -624,6 +661,8 @@ namespace csl {
 
 	bool hasDictModules() const;
 
+	bool hasHypothetic() const;
+
 	//@} // END Configuration methods
 
 	/**
@@ -644,6 +683,7 @@ namespace csl {
 
     private:
 	Vaam< VaamDict_t >* vaam_;
+	Val* val_;
 
 	std::vector< DictModule* > dictModules_;
 	std::vector< iDictModule* > externalDictModules_;

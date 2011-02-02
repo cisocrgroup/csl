@@ -1,7 +1,9 @@
 namespace csl {
 
     Val::Val( MinDic_t const& baseDic, char const* patternFile ) :
-	patternGraph_( PatternGraph::FORWARD, PatternGraph::INDEX_RIGHT ) {
+	patternGraph_( PatternGraph::FORWARD, PatternGraph::INDEX_RIGHT ),
+	caseMode_( Global::asIs ),
+	locale_( CSL_UTF8_LOCALE ) {
 
 	baseDic_ = &baseDic;
 	patternGraph_.loadPatterns( patternFile );
@@ -21,10 +23,17 @@ namespace csl {
 
     inline bool Val::query( std::wstring const& word, iInterpretationReceiver* interpretations ) const {
 	query_ = word;
+
+	wasUpperCase_ = false;
+	if( ( caseMode_ != Global::asIs ) && std::iswupper( query_.at( 0 )/*, locale_*/ ) ) {
+	    wasUpperCase_ = true;
+	    query_.at( 0 ) = std::tolower( query_.at( 0 ), locale_ );
+	}
+
 	interpretations_ = interpretations;
 	
 	stack_.clear();
-	stack_.reserve( word.length() + 1 );
+	stack_.reserve( query_.length() + 1 );
 	stack_.push_back( StackItem() );
 	stack_.back().push_back( Position( baseDic_->getRootState() ) );
 	
@@ -33,7 +42,7 @@ namespace csl {
 	PatternGraph::State patternPos = patternGraph_.getRoot();
 
 	// iterate through query
-	for( std::wstring::const_iterator c = word.begin(); c != word.end(); ++c, ++depth ) {
+	for( std::wstring::const_iterator c = query_.begin(); c != query_.end(); ++c, ++depth ) {
 	    
 	    StackItem const& last = stack_.back();
 	    stack_.push_back( StackItem() );
@@ -139,6 +148,18 @@ namespace csl {
 // 	    ) {
 // 	    return;
 // 	}
+
+	if( wasUpperCase_ ) {
+	    
+	    std::wstring tmp = interpretation.getBaseWord();
+	    tmp.at( 0 ) = std::toupper( tmp.at( 0 ), locale_ );
+	    interpretation.setBaseWord( tmp );
+
+	    tmp = interpretation.getWord();
+	    tmp.at( 0 ) = std::toupper( tmp.at( 0 ), locale_ );
+	    interpretation.setWord( tmp );
+	}
+
 
  	interpretations_->receive( interpretation );
    }

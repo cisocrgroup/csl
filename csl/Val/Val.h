@@ -1,3 +1,5 @@
+#ifndef CSL_VAL_H
+#define CSL_VAL_H CSL_VAL_H
 
 #include<vector>
 
@@ -23,7 +25,7 @@ namespace csl {
 	 * @param patternFile path to a file containing the spelling variant patterns 
 	 (see class description for some more details). 
 	*/
-	Val( MinDic_t const& baseDic, const char* patternFile );
+	inline Val( MinDic_t const& baseDic, const char* patternFile );
 	
 
 	/**
@@ -44,7 +46,17 @@ namespace csl {
 	/**
 	 * @brief set the base dictionary. This restricts output words to words NOT present in this filterDic.
 	 */
-	inline void setBaseDic( MinDic_t const& baseDic );
+	inline void setBaseDic( MinDic_t const& baseDic ) {
+	    baseDic_ = &baseDic;
+	}
+
+	/**
+	 * @brief Specify a case mode (one of CaseMode) to decide on the treatment of uppercased input.
+	 * @param caseMode
+	 */
+	inline void setCaseMode( Global::CaseMode caseMode ) {
+	    caseMode_ = caseMode;
+	}
 
 	// @}
 
@@ -140,7 +152,7 @@ namespace csl {
 	    }
 	};
 
-	void reportMatch( const Position* cur, int baseWordScore ) const;
+	inline void reportMatch( const Position* cur, int baseWordScore ) const;
 
 	/**
 	 * This method picks up all patterns used to get the match and adds them
@@ -154,17 +166,22 @@ namespace csl {
 	/**
 	 * @return the difference of lengths of modern word <-> variant
 	 */
-	int reportMatch_rec( const Position* cur, Interpretation* answer ) const;
+	inline int reportMatch_rec( const Position* cur, Interpretation* answer ) const;
 
 
 	mutable Stack stack_;
 
 	mutable std::wstring query_;
+	mutable bool wasUpperCase_;
 	mutable iInterpretationReceiver* interpretations_;
 
 	MinDic_t const* baseDic_;
 
 	PatternGraph patternGraph_; 
+
+	
+	Global::CaseMode caseMode_;
+	std::locale locale_;
 
 	size_t minNrOfPatterns_;
 	size_t maxNrOfPatterns_;
@@ -176,3 +193,5 @@ namespace csl {
 } // eon
 
 #include "./Val.tcc"
+
+#endif
