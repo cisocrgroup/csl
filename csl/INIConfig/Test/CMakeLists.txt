@@ -1,7 +1,7 @@
 
 IF( CPPUNIT_FOUND )
  add_executable( testINIConfig exec_testINIConfig.cxx )
- target_link_libraries( testINIConfig OCRCorrection ${CPPUNIT_LIBRARIES}  )
+ target_link_libraries( testINIConfig csl ${CPPUNIT_LIBRARIES}  )
 
  ADD_TEST( testINIConfig ${EXECUTABLE_OUTPUT_PATH}/testINIConfig )
 

@@ -9,7 +9,7 @@
 #include<cppunit/extensions/HelperMacros.h>
 
 
-namespace OCRCorrection {
+namespace csl {
     class TestINIConfig : public CppUnit::TestFixture  {
 
 	CPPUNIT_TEST_SUITE( TestINIConfig );
@@ -69,9 +69,9 @@ namespace OCRCorrection {
 	iniFile << std::endl;
 	iniFile.close();
 	
-	CPPUNIT_ASSERT_THROW( INIConfig iniconf( "test.ini" ), OCRCException  );
+	CPPUNIT_ASSERT_THROW( INIConfig iniconf( "test.ini" ), exceptions::cslException  );
 	
     }
 
-}
+} // eon
 #endif

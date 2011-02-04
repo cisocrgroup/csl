@@ -7,7 +7,7 @@ int main() {
 
     std::locale::global( std::locale( "" ) );
     
-    OCRCorrection::TestINIConfig ti;
+    csl::TestINIConfig ti;
 
     ti.run();
 
