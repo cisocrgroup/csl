@@ -30,9 +30,19 @@ namespace csl {
 	 */
 	INIConfig( std::string const& iniFile );
 
-
+	/**
+	 * @brief load a configuration file 
+	 */
 	void load( std::string const& iniFile );
 
+
+	/**
+	 * @brief Dumps the current configuration as a loadable ini file
+	 *
+	 * Note that this method is not implemented in terms of its c counterpart.
+	 * Because we want to dump to a c++ filehandle
+	 */
+	void dump_ini( std::wostream& os ) const;
 
 	/**
 	 * @brief Finds out if a given entry exists in the configuration
@@ -48,7 +58,7 @@ namespace csl {
 	/* ... */
 
     private:
-	dictionary* dict;
+	dictionary* dict_;
     };
 
 }

@@ -4,6 +4,10 @@
 #include "./Instruction.h"
 namespace csl {
 
+    Instruction::Instruction() :
+	status_(REGULAR) {
+    }
+
     bool Instruction::operator==( Instruction const& other ) const {
 	if( size() != other.size() ) return false;
 
@@ -14,6 +18,14 @@ namespace csl {
 	}
 	
 	return true;
+    }
+
+    void Instruction::setDestroyed(  bool b ) {
+	status_ = b ? DESTROYED : REGULAR;
+    }
+    
+    bool Instruction::isDestroyed() const {
+	return ( status_ == DESTROYED );
     }
 
     void Instruction::print(  std::wostream& os ) const {

@@ -5,7 +5,6 @@
 #include<vector>
 #include "./PosPattern.h"
 
-
 namespace csl {
 
     /**
@@ -14,11 +13,46 @@ namespace csl {
     class Instruction : public std::vector< PosPattern > {
     public:
 
+
+	/**
+	 * @name Constructors/ Destructor / Operators
+	 */
+	//@{
+
+	/**
+	 * @brief standard constructor
+	 */
+	Instruction();
+
 	/**
 	 * @brief Equality of instructions is quite obvious: two instructions are equal if both have the same size and all
 	 *        PosPatterns are equal.
 	 */
 	bool operator==( Instruction const& other ) const;
+
+	//@} // constructors/destructors/operators
+	
+	/**
+	 * @name Serialization
+	 */
+	//@{
+
+	/**
+	 * @brief sets the status of the trace
+	 */
+	void setDestroyed( bool b = true );
+
+	/**
+	 * @brief returns true iff the status of the trace is set to DESTROYED
+	 */
+	bool isDestroyed() const;
+
+	//@}
+
+	/**
+	 * @name Serialization
+	 */
+	//@{
 
 	/**
 	 * @brief prints a string-representation of the instruction to stdout or to another std::wstream 
@@ -33,7 +67,14 @@ namespace csl {
 	 */
 	size_t parseFromString( std::wstring const& str, size_t offset = 0 );
 
+	//@} // Serialization
+
 	
+	/**
+	 * @name Usage of the trace
+	 */
+	//@{
+
 	/**
 	 * @brief apply the instruction to the string passed as pointer argument
 	 * @param[in/out] str the string that is to be changed by the instruction
@@ -54,9 +95,14 @@ namespace csl {
 	 */
 	bool containsPattern( Pattern const& pat ) const;
 
+	//@} // Usage
 
     private:
-	// no data members, inherits from std::vector< PosPattern >
+	// inherits from std::vector< PosPattern >
+
+	enum Status {REGULAR,DESTROYED};
+	Status status_;
+
     }; // class Instruction
     
 
