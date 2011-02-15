@@ -4,7 +4,12 @@
 #include<iostream>
 
 
-void printHelp(); // forward declaration
+void printHelp() {
+    std::wcerr<< "Use like:                compileMD <txtDic> <binDic>"   << std::endl
+	      << "          cat <txtDic> | compileMD --stdin  <binDic>" << std::endl
+	      << std::endl
+	      << std::endl;
+}
 
 /**
  * @brief Program used to compute a MinDic<> from a word list and dump the automaton to a file.
@@ -13,7 +18,10 @@ void printHelp(); // forward declaration
 int main(int argc, char const** argv) {
     std::locale::global( std::locale( "" ) );
 
-    csl::Getopt opt( argc, argv );
+    csl::Getopt opt;
+    opt.specifyOption( "help", csl::Getopt::VOID );
+    opt.specifyOption( "stdin", csl::Getopt::VOID );
+    opt.getOptionsAsSpecified( argc, argv );
 
     if( opt.hasOption( "help" ) ) {
 	    printHelp();
@@ -83,6 +91,3 @@ int main(int argc, char const** argv) {
 }
 
 
-void printHelp() {
-    std::wcerr<<"Use like: compileMD <txtDic> <binDic>" <<std::endl;
-}
