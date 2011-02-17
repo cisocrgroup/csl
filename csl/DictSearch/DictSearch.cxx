@@ -17,7 +17,7 @@ namespace csl {
 	}
 	if( vaam_ ) delete vaam_;
 	if( val_ ) delete val_;
-
+	
     }
     
 
@@ -30,7 +30,9 @@ namespace csl {
     void DictSearch::readConfiguration( INIConfig const& iniConf, std::string const& prefix ) {
 	
 	std::vector< std::string > activeDictionaries;
-	split( std::string( iniConf.getstring("dictionaries:activeDictionaries" ) ), ' ', &activeDictionaries );
+	if( ! std::string( iniConf.getstring("dictionaries:activeDictionaries" ) ).empty() ) {
+	    split( std::string( iniConf.getstring("dictionaries:activeDictionaries" ) ), ' ', &activeDictionaries );
+	}
 
 	for( std::vector< std::string >::const_iterator it = activeDictionaries.begin(); it != activeDictionaries.end(); ++it ) {
 	    std::wstring wideName;

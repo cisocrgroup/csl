@@ -85,6 +85,29 @@ namespace csl {
 
 
 
+	    
+	bool query( std::wstring const& query, DictSearch::iResultReceiver* answers ) {
+	    if( getDict() ) {
+		msMatch_.setFBDic( *( getDict() ) );
+		msMatch_.setDistance( getDLevByWordlength( query.length() ) );
+		msMatch_.setCaseMode( getCaseMode() );
+		
+		AnswerProcessor ap( *this, answers );
+		return msMatch_.query( query.c_str(), ap );
+
+		// if( maxNrOfPatterns_ > 0 ) {
+		//     getMyDictSearch().vaam_->setBaseDic( dict_->getFWDic() );
+		//     getMyDictSearch().vaam_->setMinNrOfPatterns( 1 ); // get only strictly hypothetic matches
+		//     getMyDictSearch().vaam_->setMaxNrOfPatterns( maxNrOfPatterns_ );
+		//     getMyDictSearch().vaam_->setDistance( dlev_hypothetic_ );
+		//     getMyDictSearch().vaam_->setCaseMode( getCaseMode() );
+		//     getMyDictSearch().vaam_->query( query, answers );
+		// }
+	    }
+	    else return false;
+	}
+	    
+    private:
 	class AnswerProcessor : public LevFilter::CandidateReceiver {
 	public:
 	    AnswerProcessor( StringDictModule& myDictModule, DictSearch::iResultReceiver* answers ) :
@@ -104,11 +127,9 @@ namespace csl {
 		do {
 		    endPos = interpretationsString.find( '|', startPos + 1 );
 		    if( endPos == std::wstring::npos ) endPos = interpretationsString.size();
-		    std::wcout << "startPos=" << startPos << ", endPos=" << endPos << std::endl;
-
+		    
 		    Interpretation interp;
 		    interp.parseFromString( interpretationsString.substr( startPos, endPos - startPos  ) );
-		    std::wcout << "Parsed interpretation:" <<  interp <<  std::endl;
 		    static_cast< iInterpretationReceiver* >(answers_)->receive( interp );
 
 		    startPos = endPos + 1;
@@ -129,29 +150,8 @@ namespace csl {
 	    StringDictModule& myDictModule_;
 	    DictSearch::iResultReceiver* answers_;
 	}; // class AnswerProcessor
-	    
-	bool query( std::wstring const& query, DictSearch::iResultReceiver* answers ) {
-	    if( getDict() ) {
-		msMatch_.setFBDic( *( getDict() ) );
-		msMatch_.setDistance( getDLevByWordlength( query.length() ) );
-		msMatch_.setCaseMode( getCaseMode() );
-		
-		AnswerProcessor ap( *this, answers );
-		return msMatch_.query( query.c_str(), ap );
-		
 
-		// if( maxNrOfPatterns_ > 0 ) {
-		//     getMyDictSearch().vaam_->setBaseDic( dict_->getFWDic() );
-		//     getMyDictSearch().vaam_->setMinNrOfPatterns( 1 ); // get only strictly hypothetic matches
-		//     getMyDictSearch().vaam_->setMaxNrOfPatterns( maxNrOfPatterns_ );
-		//     getMyDictSearch().vaam_->setDistance( dlev_hypothetic_ );
-		//     getMyDictSearch().vaam_->setCaseMode( getCaseMode() );
-		//     getMyDictSearch().vaam_->query( query, answers );
-		// }
-	    }
-	}
-	    
-    private:
+
 	FBDicString const* dict_;
 	bool disposeDict_;
 	size_t minWordlengths_[4];
@@ -160,6 +160,9 @@ namespace csl {
 	int priority_;
 	Global::CaseMode caseMode_;
 
+	/**
+	 * @brief for conventional approximate search on dictitonary keys
+	 */
 	MSMatch< FW_BW > msMatch_;
 
     }; // class StringDictModule

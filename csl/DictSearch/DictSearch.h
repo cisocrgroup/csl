@@ -658,7 +658,6 @@ namespace csl {
 	 * @brief A simple check if any DictModules are activated. This is useful to test
 	 *        in client programs and perhaps to give a warning,
 	 */
-
 	bool hasDictModules() const;
 
 	bool hasHypothetic() const;
@@ -685,8 +684,23 @@ namespace csl {
 	Vaam< VaamDict_t >* vaam_;
 	Val* val_;
 
+	/**
+	 * @brief holds the conventional DictModules as addedd by addDictModule()
+	 *
+	 * These DictModules are destroyed when the DictSearch object is destroyed.
+	 */
 	std::vector< DictModule* > dictModules_;
+
+	/**
+	 * @brief holds the external DictModules as addedd by addExternalDictModule()
+	 *
+	 * Whoever added these modules must take care of their deletion.
+	 */
 	std::vector< iDictModule* > externalDictModules_;
+
+	/**
+	 * @brief Holds pointers to all conventional and external
+	 */
 	std::multimap< size_t, iDictModule* > allDictModules_;
 	
 
