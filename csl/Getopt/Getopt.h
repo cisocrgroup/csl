@@ -16,7 +16,6 @@ namespace csl {
  */
 class Getopt {
 public:
-    enum Restrictiveness { IGNORE, WARN, THROW };
     enum ValueType { VOID, STRING };
     enum Obligatority { OBLIGATORY, OPTIONAL };
 
@@ -26,8 +25,10 @@ public:
      */
     //@{ 
 
-    Getopt( Restrictiveness restrictiveness = IGNORE ) :
-	restrictiveness_( restrictiveness ) {
+    /**
+     * A standard constructor
+     */
+    Getopt() {
     }
     
     /**
@@ -87,7 +88,17 @@ public:
     /**
      * @name Configure options
      */
-    //@{ 
+    //@{
+
+
+    /**
+     * @brief specify an option.
+     *
+     * @param key  the name of the key
+     * @param valueType  the valueType, one of VOID or STRING
+     * @param obligatority  one of OBLIGATORY or OPTIONAL
+     *
+     */
     void specifyOption( std::string const& key, ValueType valueType, Obligatority obligatority = OPTIONAL ) {
 	if( optionTypes_.find( key ) != optionTypes_.end() ) {
 	    std::string msg = std::string( "csl::Getopt::specifyOption: Key " ) + key + "was specified before";
@@ -100,6 +111,15 @@ public:
 	}
     }
 
+    /**
+     * @brief Specify an option with a defaultValue
+     *
+     * This obviously makes the option OPTIONAL: If it's not there ,the default valkue is used.
+     *
+     * @param key
+     * @param valueType
+     * @param defaultValue
+     */
     void specifyOption( std::string const& key, ValueType valueType, std::string const& defaultValue ) {
 	if( optionTypes_.find( key ) != optionTypes_.end() ) {
 	    std::string msg = std::string( "csl::Getopt::specifyOption: Key " ) + key + "was specified before";
@@ -125,7 +145,7 @@ public:
     /**
      * @brief This option permits only options of the form option=value, and regular arguments.
      */
-    void getOptions( size_t argc, char const** argv, Restrictiveness restrictiveness = IGNORE ) {
+    void getOptions( size_t argc, char const** argv ) {
 	
 	progName_ = argv[0];
 
@@ -150,7 +170,7 @@ public:
     } // getOptions
 
 
-    void getOptionsAsSpecified( size_t argc, char const** argv, Restrictiveness restrictiveness = IGNORE ) {
+    void getOptionsAsSpecified( size_t argc, char const** argv ) {
 	
 	progName_ = argv[0];
 
@@ -257,11 +277,22 @@ public:
     const std::string& getProgName() const {
 	return progName_;
     }
-    
+
+    /**
+     * @brief returns true iff an option with the specified key exists.
+     * @param key
+     * @return true iff an option with the specified key exists.
+     */
     bool hasOption( const std::string& key ) {
 	return ( optionValues_.find( key ) != optionValues_.end() );
     }
 
+    /**
+     * @brief returns the string value of the option with the specified key.
+     * @param key
+     * @return the string value of the option with the specified key.
+     * @throws a std::runtime_error if the specified key is not defined.
+     */
     const std::string& getOption( const std::string& key ) {
 	if( ! hasOption( key ) ) throw std::runtime_error( "csl::Getopt::getOption: no such key defined" );
 	return optionValues_[key];
@@ -318,7 +349,6 @@ private:
     std::map< std::string, std::string > optionValues_;
     std::vector< std::string > arguments_;
 
-    Restrictiveness restrictiveness_;
 
 }; // class Getopt
 
