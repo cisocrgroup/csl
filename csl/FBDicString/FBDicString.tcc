@@ -62,7 +62,12 @@ namespace csl {
     }
     
     inline void FBDicString::loadFromStream( FILE* fi ) {
-	fread( &header_, sizeof( Header ), 1, fi );
+	size_t freadReturn = 0; 
+	freadReturn = fread( &header_, sizeof( Header ), 1, fi );
+	if( freadReturn != 1 ) {
+	    throw exceptions::badDictFile( "FBDicString: Failure during reading of header.\n" );	    
+	}
+
 	if ( ( header_.getMagicNumber() != magicNumber_ ) ) {
 	    throw exceptions::badDictFile( "FBDicString: Magic number comparison failed.\n" );
 	}
@@ -70,8 +75,11 @@ namespace csl {
 	sizeOfAnnStrings_ = header_.getSizeOfAnnStrings();
 	FBDic_t::loadFromStream( fi );
 	annStrings_ = (uchar*) malloc( sizeOfAnnStrings_ * sizeof( uchar ) );
-	fread( annStrings_, sizeof( uchar ), sizeOfAnnStrings_, fi );
-	
+	freadReturn = fread( annStrings_, sizeof( uchar ), sizeOfAnnStrings_, fi );
+	if( freadReturn != sizeOfAnnStrings_ ) {
+	    throw exceptions::badDictFile( "FBDicString: Failure during reading of annStrings.\n" );	    
+	}
+
     }
 
     inline void FBDicString::writeToFile( char const* dicFile ) const {

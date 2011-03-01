@@ -1,5 +1,6 @@
 #include<cstdlib>
 #include "csl/MinDic/MinDic.h"
+#include "csl/FBDic/FBDic.h"
 #include<errno.h>
 
 using namespace csl;
@@ -14,8 +15,20 @@ int main( int argc, char** argv ) {
 	    exit(1);
 	}
 
-	MinDic< int > mdic;
-	mdic.loadFromFile( argv[1] );
+
+
+	csl::MinDic<>* minDic = 0;
+	csl::FBDic<>* fbdic = 0; // this one is loaded in case a fbdic is passed to the program
+
+	// In case a .fbdic file is passed, open it and use the FWDic
+	if( ( opt.getArgument( 0 ).size() >= 5 ) && opt.getArgument( 0 ).substr( opt.getArgument( 0 ).size() - 5 ) == "fbdic" ) {
+	    fbdic= new csl::FBDic<>( opt.getArgument( 0 ).c_str() );
+	    minDic = &( fbdic->getFWDic() );
+	}
+	else {
+	    minDic = new csl::MinDic<>( opt.getArgument( 0 ).c_str() );
+	}
+	
 
 	
 	std::wstring query;
@@ -26,7 +39,7 @@ int main( int argc, char** argv ) {
 	    }
 	    
 	    int ann = 0;
-	    if( mdic.lookup( query.c_str(), &ann ) ) {
+	    if( mdic->lookup( query.c_str(), &ann ) ) {
 		std::wcout<<ann<<std::endl;
 	    }
 	    else std::wcout<<std::endl;
