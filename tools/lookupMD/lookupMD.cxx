@@ -1,14 +1,18 @@
 #include<cstdlib>
 #include "csl/MinDic/MinDic.h"
 #include "csl/FBDic/FBDic.h"
+#include "csl/Getopt/Getopt.h"
 #include<errno.h>
 
 using namespace csl;
 
-int main( int argc, char** argv ) {
+int main( int argc, char const** argv ) {
     std::locale::global( std::locale("") ); // set the environment's default locale
 
     try {
+
+        csl::Getopt options;
+        options.getOptionsAsSpecified( argc, argv );
 
 	if(argc != 2) {
 	    std::cerr<<"Use like: "<<argv[0]<<" <binDic>"<<std::endl;
@@ -17,16 +21,16 @@ int main( int argc, char** argv ) {
 
 
 
-	csl::MinDic<>* minDic = 0;
+	csl::MinDic<> const* minDic = 0;
 	csl::FBDic<>* fbdic = 0; // this one is loaded in case a fbdic is passed to the program
 
 	// In case a .fbdic file is passed, open it and use the FWDic
-	if( ( opt.getArgument( 0 ).size() >= 5 ) && opt.getArgument( 0 ).substr( opt.getArgument( 0 ).size() - 5 ) == "fbdic" ) {
-	    fbdic= new csl::FBDic<>( opt.getArgument( 0 ).c_str() );
+	if( ( options.getArgument( 0 ).size() >= 5 ) && options.getArgument( 0 ).substr( options.getArgument( 0 ).size() - 5 ) == "fbdic" ) {
+	    fbdic= new csl::FBDic<>( options.getArgument( 0 ).c_str() );
 	    minDic = &( fbdic->getFWDic() );
 	}
 	else {
-	    minDic = new csl::MinDic<>( opt.getArgument( 0 ).c_str() );
+	    minDic = new csl::MinDic<>( options.getArgument( 0 ).c_str() );
 	}
 	
 
@@ -39,7 +43,7 @@ int main( int argc, char** argv ) {
 	    }
 	    
 	    int ann = 0;
-	    if( mdic->lookup( query.c_str(), &ann ) ) {
+	    if( minDic->lookup( query.c_str(), &ann ) ) {
 		std::wcout<<ann<<std::endl;
 	    }
 	    else std::wcout<<std::endl;
