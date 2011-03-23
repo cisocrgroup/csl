@@ -6,18 +6,19 @@
 
 #include"../DictSearch.h"
 
-#include"../StringDictModule.h"
+#include"../AnnotatedDictModule.h"
 
 namespace csl {
     class TestDictSearch : public CppUnit::TestFixture {
     public:
 
 	CPPUNIT_TEST_SUITE( TestDictSearch );
-	CPPUNIT_TEST( testDLev );
 	CPPUNIT_TEST( smokeTest );
+	CPPUNIT_TEST( testConfiguration );
+	CPPUNIT_TEST( testDLev );
 	CPPUNIT_TEST( testCaseMode );
 	CPPUNIT_TEST( testCascades );
-	CPPUNIT_TEST( testStringDictModule );
+	CPPUNIT_TEST( testAnnotatedDictModule );
 	CPPUNIT_TEST_SUITE_END();
 
 	
@@ -124,6 +125,10 @@ namespace csl {
 
 	}
 
+
+	void testConfiguration() {
+	    
+	}
 	
 	void testDLev() {
 	    DictSearch ds;
@@ -180,7 +185,7 @@ namespace csl {
 	    
 	}
 
-	void testStringDictModule() {
+	void testAnnotatedDictModule() {
 
 
 	    DictSearch ds;
@@ -188,7 +193,7 @@ namespace csl {
 	    
 	    DictSearch::CandidateSet result;
 
-	    StringDictModule histDict( ds, L"histDict", "./test.fbds" );
+	    DictSearch::AnnotatedDictModule histDict( ds, L"histDict", "./test.fbds" );
 
 	    ds.addExternalDictModule( histDict );
 	    //histDict.setCaseMode( Global::restoreCase );

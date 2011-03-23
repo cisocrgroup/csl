@@ -50,6 +50,8 @@ namespace csl {
 	iniFile << "string_test = 'passt scho'" << std::endl;
 	iniFile << "[eineKategorie]" << std::endl;
 	iniFile << "string_test = 'passt immer no'" << std::endl;
+	iniFile << "[andereKategorie]" << std::endl;
+	iniFile << "string_test = 'passt anders auch'" << std::endl;
 	iniFile.close();
 
 	INIConfig iniconf( "test.ini" );
@@ -58,6 +60,15 @@ namespace csl {
 	CPPUNIT_ASSERT( iniconf.getdouble( ":double_test" ) == 42.4242 );
 	CPPUNIT_ASSERT( ! strcmp( iniconf.getstring( ":string_test" ), "passt scho" ) );
 	CPPUNIT_ASSERT( ! strcmp( iniconf.getstring( "eineKategorie:string_test" ), "passt immer no" ) );
+
+	// test SectionIterator
+	INIConfig::SectionIterator it = iniconf.sectionsBegin();
+	CPPUNIT_ASSERT_EQUAL( std::string( *it ), std::string("einekategorie") );
+	++it;
+	CPPUNIT_ASSERT( std::string( *it ) == "anderekategorie" );
+	++it;
+	CPPUNIT_ASSERT( it == iniconf.sectionsEnd() );
+
     }
 
     void TestINIConfig::testLongLine() {
@@ -70,7 +81,6 @@ namespace csl {
 	iniFile.close();
 	
 	CPPUNIT_ASSERT_THROW( INIConfig iniconf( "test.ini" ), exceptions::cslException  );
-	
     }
 
 } // eon

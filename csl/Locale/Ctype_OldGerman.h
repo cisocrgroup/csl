@@ -22,13 +22,16 @@ public:
     Ctype_OldGerman( std::locale const& loc ) :
 	builtInLocale_( loc ) { // copy given locale
 
+        // initialize codepoint-mapping. 0 means that for teh given codepoint no special CharInfo exists.
 	char2index_.resize( maxChar, 0 );
 	
 	masks_.push_back( CharInfo( 0, 0, 0 ) ); // block the the 0-th field of the vector
 
 	// map upper-lower case characters for Latin-1 supplement of unicode
 	// see: http://triggertek.com/r/unicode/00A0-00FF
-	for( size_t c = 0xB0; c <= 0xDE; ++c ) {
+	for( size_t c = 0xC0; c <= 0xDE; ++c ) {
+            if( c == 0xD7 ) continue; // this is the "MULTIPLICATION SIGN" and is an exception!
+
 	    // the uppercase char at pos c
 	    masks_.push_back( CharInfo( c, ( alnum | alpha | upper | graph | print ), c + 0x20 ) );
 	    char2index_.at( c ) = masks_.size() - 1;
@@ -102,7 +105,12 @@ private:
 
     std::locale builtInLocale_;
     static const size_t maxChar = 65535;
+
+    /**
+     * has size maxChar and maps codepoints to CharInfos in the masks_ vector
+     */
     std::vector< size_t > char2index_;
+    
     std::vector< CharInfo > masks_;
 
 }; // class

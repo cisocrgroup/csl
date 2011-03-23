@@ -49,13 +49,86 @@ namespace csl {
 	 */
 	bool hasKey( std::string const& key ) const;
 
+	/**
+	 * throws a cslException if there is no such key
+	 */
 	char const* getstring( char const* key ) const;
+
+	/**
+	 * throws a cslException if there is no such key
+	 */
 	char const* getstring( std::string const& key ) const;
+
+	/**
+	 * throws a cslException if there is no such key
+	 */
 	int getint( char const* key ) const;
+
+	/**
+	 * throws a cslException if there is no such key
+	 */
 	int getint( std::string const& key ) const;
+
+	/**
+	 * throws a cslException if there is no such key
+	 */
 	double getdouble( char const* key ) const;
+
+	/**
+	 * throws a cslException if there is no such key
+	 */
 	double getdouble( std::string const& key ) const;
-	/* ... */
+
+
+
+	/**
+	 * @brief Iterates over all sections 
+	 */
+	class SectionIterator {
+	public:
+	    SectionIterator( INIConfig const& myINIConfig ) :
+		myINIConfig_( myINIConfig ),
+		index_( 0 ) {
+		
+	    }
+
+	    inline bool operator==( SectionIterator const& other ) const {
+		return ( index_ == other.index_ );
+	    }
+
+	    inline bool operator!=( SectionIterator const& other ) const {
+		return ! ( index_ == other.index_ );
+	    }
+
+	    inline char const* operator*() {
+		return iniparser_getsecname( myINIConfig_.dict_ , index_ );
+	    }
+
+	    inline SectionIterator& operator++() {
+		++index_;
+                return *this;
+	    }
+
+	private:
+	    friend class INIConfig;
+	    SectionIterator( INIConfig const& myINIConfig, size_t index ) :
+		myINIConfig_( myINIConfig ),
+		index_( index ) {
+	    }
+
+	    
+	    INIConfig const& myINIConfig_;
+	    size_t index_;
+	};
+
+	SectionIterator sectionsBegin() const {
+	    return SectionIterator( *this );
+	}
+
+	SectionIterator sectionsEnd() const {
+	    return SectionIterator( *this, iniparser_getnsec( dict_ ) );
+	}
+
 
     private:
 	dictionary* dict_;

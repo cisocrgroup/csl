@@ -14,6 +14,8 @@
 #include<csl/Val/Val.h>
 #include<csl/INIConfig/INIConfig.h>
 
+// "AnnotatedDictModule.h" is included at the end of this header file!
+
 namespace csl {
     
     /**
@@ -42,6 +44,7 @@ namespace csl {
 	typedef MinDic<> VaamDict_t;
 
 	class DictModule; // forward declaration
+        class AnnotatedDictModule;
 
 	static const size_t INFINITE = (size_t)-1;
 
@@ -626,14 +629,16 @@ namespace csl {
 
 	/**
 	 * @brief Load a configuration from a configFile
+	 *
+	 * 
 	 */
-	void readConfiguration( char const* configFile, std::string const& prefix = "" );
+	void readConfiguration( char const* configFile );
 
 	
 	/**
 	 * @brief Load a configuration from an existing INIConfig object
 	 */
-	void readConfiguration( INIConfig const& iniConf, std::string const& prefix = ""  );
+	void readConfiguration( INIConfig const& iniConf );
 	
 
 	/**
@@ -647,7 +652,16 @@ namespace csl {
 
 	
 	DictModule& addDictModule( std::wstring const& name, std::string const& dicFile, size_t cascadeRank = 0 );
-	DictModule& addDictModule( std::wstring const& name, Dict_t const& dicRef, size_t cascadeRank = 0 );
+
+        DictModule& addDictModule( std::wstring const& name, Dict_t const& dicRef, size_t cascadeRank = 0 );
+
+        /**
+         * @brief Adds an AnnotatedDictModule to DictSearch. This module will be deleted by DictSearch, so
+         *        be sure to create it on the heap and not to delete it yourself.
+         * @param newDM
+         * @return
+         */
+        AnnotatedDictModule& addAnnotatedDictModule( AnnotatedDictModule* newDM );
 
 	/**
 	 * @brief 
@@ -687,9 +701,9 @@ namespace csl {
 	/**
 	 * @brief holds the conventional DictModules as addedd by addDictModule()
 	 *
-	 * These DictModules are destroyed when the DictSearch object is destroyed.
+	 * These iDictModules are destroyed when the DictSearch object is destroyed.
 	 */
-	std::vector< DictModule* > dictModules_;
+	std::vector< iDictModule* > internalDictModules_;
 
 	/**
 	 * @brief holds the external DictModules as addedd by addExternalDictModule()
@@ -711,6 +725,9 @@ namespace csl {
 
 
 } // namespace csl
+
+#include "./AnnotatedDictModule.h"
+
 
 namespace std {
     inline wostream& operator<<( wostream& os, csl::DictSearch::Interpretation const& obj ) {

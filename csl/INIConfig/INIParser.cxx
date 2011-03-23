@@ -585,7 +585,6 @@ dictionary * iniparser_load(const char * ininame)
 
 //	if( in.rdstate() & ( std::ifstream::failbit ) ) {
 	if( len > ASCIILINESZ - 20 ) {
-	    std::wcerr << "iniparser: input line too long!" << std::endl;
 	    dictionary_del(dict);
 	    in.close();
 	    return NULL ;

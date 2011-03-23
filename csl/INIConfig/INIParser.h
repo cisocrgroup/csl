@@ -1,6 +1,8 @@
 
 /*-------------------------------------------------------------------------*/
 /**
+   Copyright (c) 2000-2011 by Nicolas Devillard.
+
    @file    iniparser.h
    @author  N. Devillard
    @date    Sep 2007

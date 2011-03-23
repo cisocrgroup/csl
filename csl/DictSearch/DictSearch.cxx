@@ -12,7 +12,8 @@ namespace csl {
 
 
     DictSearch::~DictSearch() {
-	for( std::vector< DictModule* >::iterator dm = dictModules_.begin(); dm != dictModules_.end(); ++dm ) {
+	// delete all DictModules that were added via addDictModule
+	for( std::vector< iDictModule* >::iterator dm = internalDictModules_.begin(); dm != internalDictModules_.end(); ++dm ) {
 	    delete( *dm );
 	}
 	if( vaam_ ) delete vaam_;
@@ -22,47 +23,95 @@ namespace csl {
     
 
 
-    void DictSearch::readConfiguration( char const* configFile, std::string const& prefix ) {
+    void DictSearch::readConfiguration( char const* configFile ) {
 	INIConfig iniConf( configFile );
-	readConfiguration( iniConf, prefix );
+	readConfiguration( iniConf );
     }
 
-    void DictSearch::readConfiguration( INIConfig const& iniConf, std::string const& prefix ) {
+    void DictSearch::readConfiguration( INIConfig const& iniConf ) {
 	
+	// of all sections in iniConf, find those which start with "dict_" and have a key-value pair "active = true"
 	std::vector< std::string > activeDictionaries;
-	if( ! std::string( iniConf.getstring("dictionaries:activeDictionaries" ) ).empty() ) {
-	    split( std::string( iniConf.getstring("dictionaries:activeDictionaries" ) ), ' ', &activeDictionaries );
+	for( INIConfig::SectionIterator section = iniConf.sectionsBegin(); section != iniConf.sectionsEnd(); ++section ) {
+	    if( ( std::string( *section ).substr( 0, 5 ) == "dict_" ) &&
+		iniConf.hasKey( std::string( *section ) + ":active" ) &&
+		( strcmp( iniConf.getstring( std::string( *section ) + ":active" ), "true" ) == 0 )
+		) {
+		activeDictionaries.push_back( *section );
+	    }
 	}
 
 	for( std::vector< std::string >::const_iterator it = activeDictionaries.begin(); it != activeDictionaries.end(); ++it ) {
 	    std::wstring wideName;
 	    csl::string2wstring( *it, wideName );
-	    std::wcerr << "OCRC::Profiler::readConfiguration: load DictModule " << wideName << std::endl;
-	    DictModule& dm = addDictModule( wideName, iniConf.getstring( *it + ":path" ), iniConf.getint( *it + ":cascadeRank" ) );
+	    size_t cascadeRank = iniConf.hasKey( *it + ":cascadeRank" ) ? iniConf.getint( *it + ":cascadeRank" ) : 0;
+	    std::wcerr << "cslDictSearch::readConfiguration: load DictModule " << wideName << ", cascadeRank=" << cascadeRank << std::endl;
+
+	    if( ! iniConf.hasKey( *it + ":dict_type" ) ) {
+		throw exceptions::cslException( std::string( "csl::DictSearch::readConfiguration: dictionary " ) 
+						+ *it + " has no specified dict_type."  );
+	    }
+
+	    // Standard "word-list" dictionaries
+	    if( iniConf.getstring( *it + ":dict_type" ) == std::string( "simple" ) ) {
+	    
+		DictModule& dm = addDictModule( wideName, iniConf.getstring( *it + ":path" ), cascadeRank );
+		
+		dm.setMaxNrOfPatterns( iniConf.getint( *it + ":histPatterns" ) );
+		dm.setDLev( iniConf.getint( *it + ":ocrErrors" ) );
+		dm.setDLevHypothetic( iniConf.getint( *it + ":ocrErrorsOnHypothetic" ) );
+		dm.setPriority( iniConf.getint( *it + ":priority" ) );
+		if( iniConf.hasKey( *it + ":caseMode" ) ) {
+		    if( std::string( "asIs" ) == iniConf.getstring( *it + ":caseMode" ) ) {
+			dm.setCaseMode( Global::asIs );
+		    }
+		    else if( std::string( "toLower" ) == iniConf.getstring( *it + ":caseMode" ) ) {
+			dm.setCaseMode( Global::toLower );
+		    }
+		    else if( std::string( "restoreCase" ) == iniConf.getstring( *it + ":caseMode" ) ) {
+			dm.setCaseMode( Global::restoreCase );
+		    }
+		    else {
+			throw exceptions::cslException( "csl::DictSearch::readConfiguration: unknown Global::caseMode" );
+		    }
+		}
+	    }
+	    // annotated dictionaries
+	    else if( iniConf.getstring( *it + ":dict_type" ) == std::string( "annotated" ) ) {
+		AnnotatedDictModule* sdm = new AnnotatedDictModule( *this,
+									wideName, 
+									iniConf.getstring( *it+ ":path" ), 
+                                                			cascadeRank );
+                sdm->setDLev( iniConf.getint( *it + ":ocrErrors" ) );
+
+		if( iniConf.hasKey( *it + ":caseMode" ) ) {
+		    if( std::string( "asIs" ) == iniConf.getstring( *it + ":caseMode" ) ) {
+			sdm->setCaseMode( Global::asIs );
+		    }
+		    else if( std::string( "toLower" ) == iniConf.getstring( *it + ":caseMode" ) ) {
+			sdm->setCaseMode( Global::toLower );
+		    }
+		    else if( std::string( "restoreCase" ) == iniConf.getstring( *it + ":caseMode" ) ) {
+			sdm->setCaseMode( Global::restoreCase );
+		    }
+		    else {
+			throw exceptions::cslException( "csl::DictSearch::readConfiguration: unknown Global::caseMode" );
+		    }
+		}
+                
+                addAnnotatedDictModule( sdm );
 
 
-	    dm.setMaxNrOfPatterns( iniConf.getint( *it + ":histPatterns" ) );
-	    dm.setDLev( iniConf.getint( *it + ":ocrErrors" ) );
-	    dm.setDLevHypothetic( iniConf.getint( *it + ":ocrErrorsOnHypothetic" ) );
-	    dm.setPriority( iniConf.getint( *it + ":priority" ) );
-	    if( iniConf.hasKey( *it + ":caseMode" ) ) {
-		if( std::string( "asIs" ) == iniConf.getstring( *it + ":caseMode" ) ) {
-		    dm.setCaseMode( Global::asIs );
-		}
-		else if( std::string( "toLower" ) == iniConf.getstring( *it + ":caseMode" ) ) {
-		    dm.setCaseMode( Global::toLower );
-		}
-		else if( std::string( "restoreCase" ) == iniConf.getstring( *it + ":caseMode" ) ) {
-		    dm.setCaseMode( Global::restoreCase );
-		}
-		else {
-		    throw exceptions::cslException( "csl::DictSearch::readConfiguration: unknown Global::caseMode" );
-		}
+		
+		
+	    }
+	    else {
+		throw exceptions::cslException( "csl::DictSearch::readConfiguration: unknown dict_type for dictionary " + *it );
 	    }
 	    
 	}
     }
-
+    
 
     void DictSearch::initHypothetic( char const* patternFile ) {
 	if ( vaam_ || val_ ) throw exceptions::LogicalError( "csl::DictSearch: Tried to initialise Vaam twice." );
@@ -78,16 +127,21 @@ namespace csl {
 
     DictSearch::DictModule& DictSearch::addDictModule( std::wstring const& name, std::string const& dicFile, size_t cascadeRank ) {
 	DictModule* newDM = new DictModule( *this, name, dicFile, cascadeRank );
-	dictModules_.push_back( newDM );
+	internalDictModules_.push_back( newDM );
 	allDictModules_.insert( std::make_pair( newDM->getCascadeRank(), newDM ) );
 	return *newDM;
     }
 
     DictSearch::DictModule& DictSearch::addDictModule( std::wstring const& name, Dict_t const& dicRef, size_t cascadeRank ) {
 	DictModule* newDM = new DictModule( *this, name, dicRef, cascadeRank );
-	dictModules_.push_back( newDM );
+	internalDictModules_.push_back( newDM );
 	allDictModules_.insert( std::make_pair( newDM->getCascadeRank(), newDM ) );
 	return *newDM;
+    }
+
+    DictSearch::AnnotatedDictModule& DictSearch::addAnnotatedDictModule( AnnotatedDictModule* newDM ) {
+	internalDictModules_.push_back( newDM );
+	allDictModules_.insert( std::make_pair( newDM->getCascadeRank(), newDM ) );
     }
 
     void DictSearch::addExternalDictModule( iDictModule& extModule ) {
@@ -97,7 +151,7 @@ namespace csl {
     
 
     bool DictSearch::hasDictModules() const {
-	return ( dictModules_.size() + externalDictModules_.size() != 0 );
+	return ( internalDictModules_.size() + externalDictModules_.size() != 0 );
     }
 
     bool DictSearch::hasHypothetic() const {
@@ -130,23 +184,6 @@ namespace csl {
 	}
 	return foundAnswers;
 
-	// OLD VERSION, without cascading queries
-	// for( std::vector< DictModule* >::iterator dm = dictModules_.begin(); dm != dictModules_.end(); ++dm ) {
-	//     try {
-	// 	answers->setCurrentDictModule( **dm );
-	// 	(**dm).query( query, answers );
-	//     } catch( std::exception& exc ) {
-	// 	std::cerr << "csl::DictSearch::query: caught exception: " << exc.what() << std::endl;
-	//     }
-	// }
-	// for( std::vector< iDictModule* >::iterator dm = externalDictModules_.begin(); dm != externalDictModules_.end(); ++dm ) {
-	//     try {
-	// 	answers->setCurrentDictModule( **dm );
-	// 	(**dm).query( query, answers );
-	//     } catch( std::exception& exc ) {
-	// 	std::cerr << "csl::DictSearch::query: caught exception: " << exc.what() << std::endl;
-	//     }
-	// }
     }
     
 } // namespace csl

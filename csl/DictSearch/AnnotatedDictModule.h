@@ -1,8 +1,9 @@
-#ifndef CSL_STRINGDICTMODULE_H
-#define CSL_STRINGDICTMODULE_H CSL_STRINGDICTMODULE_H
+#ifndef CSL_ANNOTATEDDICTMODULE_H
+#define CSL_ANNOTATEDDICTMODULE_H CSL_ANNOTATEDDICTMODULE_H
 
 #include"./DictSearch.h"
 #include<csl/FBDicString/FBDicString.h>
+
 
 namespace csl {
 
@@ -10,14 +11,14 @@ namespace csl {
      * @brief This implementation of DictSearch::iDictModule is used for lexica containing historical variants,
      *        including a specification of all possible links to modern words. 
      */
-    class StringDictModule : public csl::DictSearch::AbstractDictModule {
+    class DictSearch::AnnotatedDictModule : public csl::DictSearch::AbstractDictModule {
     public:
 	/**
 	 * @brief A standard constructor using a filepath pointing to a dictionary.
 	 *
 	 * In this case, DictModule will load the dictionary and destroy it when the DictModule dies.
 	 */
-	StringDictModule( csl::DictSearch& myDictSearch, std::wstring const& name, std::string const& dicFile, size_t cascadeRank = 0 ) :
+	AnnotatedDictModule( csl::DictSearch& myDictSearch, std::wstring const& name, std::string const& dicFile, size_t cascadeRank = 0 ) :
 	    AbstractDictModule( myDictSearch, name, cascadeRank ),
 	    dict_( 0 ),
 	    disposeDict_( false ), // will perhaps be changed at setDict()
@@ -28,14 +29,14 @@ namespace csl {
 	}
 
 
-	~StringDictModule() {
+	~AnnotatedDictModule() {
 	    if( dict_ && disposeDict_ ) delete( dict_ );
 	}
 
 	/**
 	 * copy constructor is blocked!!!
 	 */
-	StringDictModule( StringDictModule const& other );
+	AnnotatedDictModule( AnnotatedDictModule const& other );
 
 
 	/**
@@ -110,7 +111,7 @@ namespace csl {
     private:
 	class AnswerProcessor : public LevFilter::CandidateReceiver {
 	public:
-	    AnswerProcessor( StringDictModule& myDictModule, DictSearch::iResultReceiver* answers ) :
+	    AnswerProcessor( AnnotatedDictModule& myDictModule, DictSearch::iResultReceiver* answers ) :
 		myDictModule_( myDictModule ),
 		answers_( answers ) {
 	    }
@@ -147,7 +148,7 @@ namespace csl {
 	    
 
 	private:
-	    StringDictModule& myDictModule_;
+	    AnnotatedDictModule& myDictModule_;
 	    DictSearch::iResultReceiver* answers_;
 	}; // class AnswerProcessor
 
