@@ -48,7 +48,8 @@ namespace csl {
 	if ( !fi )
 	    throw exceptions::badFileHandle( "csl::Alphabet:loadFromStream: Couldn't read from filehandle." );
 
-	fread( &header_, sizeof( Header ), 1, fi );
+	size_t readElements = fread( &header_, sizeof( Header ), 1, fi );
+	if( readElements != 1 ) thow exceptions::cslException( "csl::Alphabet::loadFromStream: Errors while reading Header." );
 	
 	if ( ( header_.magicNumber_ != magicNumber_ ) )
 	    throw exceptions::badDictFile( "csl::Alphabet::loadFromStream: Magic number comparison failed.\n" );
@@ -56,7 +57,9 @@ namespace csl {
 	allChars_.reserve( (size_t)header_.size_ );
 	wchar_t c;
 	for( size_t i = 0; i < header_.size_; ++i ) {
-	    fread( &c, sizeof( wchar_t), 1, fi );
+	    readElements = fread( &c, sizeof( wchar_t), 1, fi );
+	    if( readElements != 1 ) thow exceptions::cslException( "csl::Alphabet::loadFromStream: Errors while reading alphabet characters." );
+
 	    addChar( c );
 	    hasChar_.at( c ) = true;
 	}
