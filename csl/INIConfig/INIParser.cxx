@@ -1,3 +1,4 @@
+#include<csl/Global.h>
 
 /*-------------------------------------------------------------------------*/
 /**
@@ -437,7 +438,28 @@ int iniparser_find_entry(
 /*--------------------------------------------------------------------------*/
 int iniparser_set(dictionary * ini, char * entry, char * val)
 {
-    return dictionary_set(ini, strlwc(entry), val) ;
+
+    // perform variable substitution
+    std::string stdValue( val );
+    size_t startPos = 0;
+    size_t endPos = 0;
+    while( ( ( startPos = stdValue.find( "${", startPos ) ) != std::string::npos ) &&
+	   ( ( endPos = stdValue.find( "}", startPos + 2 ) ) != std::string::npos )
+	) {
+	if( ( endPos = stdValue.find( "}", startPos + 2 ) ) != std::string::npos ) {
+	    std::string variable = stdValue.substr( startPos + 2, endPos - startPos - 2  );
+	    std::wstring wideVariable;
+	    csl::string2wstring( variable, wideVariable );
+	    char* replace = iniparser_getstring( ini, variable.c_str(), 0 );
+	    if( replace ) {
+		stdValue.replace( startPos, endPos - startPos + 1, replace );
+	    }
+	}
+	startPos = endPos + 1;
+    }
+    std::wstring wide;
+    csl::string2wstring( stdValue, wide );
+    return dictionary_set(ini, strlwc(entry), (char*)stdValue.c_str() ) ;
 }
 
 /*-------------------------------------------------------------------------*/
@@ -522,7 +544,9 @@ static line_status iniparser_line(
         /* Generate syntax error */
         sta = LINE_ERROR ;
     }
-    return sta ;
+ 
+    
+     return sta ;
 }
 
 /*-------------------------------------------------------------------------*/
@@ -617,7 +641,7 @@ dictionary * iniparser_load(const char * ininame)
 
             case LINE_VALUE:
             sprintf(tmp, "%s:%s", section, key);
-            errs = dictionary_set(dict, tmp, val) ;
+            errs = iniparser_set(dict, tmp, val) ;
             break ;
 
             case LINE_ERROR:

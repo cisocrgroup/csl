@@ -224,7 +224,7 @@ char * dictionary_get(dictionary * d, char * key, char * def)
   This function returns non-zero in case of failure.
  */
 /*--------------------------------------------------------------------------*/
-int dictionary_set(dictionary * d, char * key, char * val)
+int dictionary_set(dictionary * d, char const* key, char const* val)
 {
 	int			i ;
 	unsigned	hash ;

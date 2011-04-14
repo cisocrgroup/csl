@@ -15,6 +15,7 @@ namespace csl {
 	CPPUNIT_TEST_SUITE( TestINIConfig );
 	CPPUNIT_TEST( testBasics );
 	CPPUNIT_TEST( testLongLine );
+	CPPUNIT_TEST( testVariableSubstitution );
 	CPPUNIT_TEST_SUITE_END();
     public:
 	TestINIConfig();
@@ -23,6 +24,7 @@ namespace csl {
 
 	void testBasics();
 	void testLongLine();
+	void testVariableSubstitution();
 
 
     private:
@@ -31,12 +33,12 @@ namespace csl {
     CPPUNIT_TEST_SUITE_REGISTRATION( TestINIConfig );
 
     TestINIConfig::TestINIConfig() {
-
     }
 
     void TestINIConfig::run() {
 	testBasics();
 	testLongLine();
+	testVariableSubstitution();
     }
     
 
@@ -44,6 +46,7 @@ namespace csl {
      * test the basic methods
      */
     void TestINIConfig::testBasics() {
+
 	std::ofstream iniFile( "test.ini" );
 	iniFile << "int_test = 42" << std::endl;
 	iniFile << "double_test = 42.4242" << std::endl;
@@ -52,6 +55,7 @@ namespace csl {
 	iniFile << "string_test = 'passt immer no'" << std::endl;
 	iniFile << "[andereKategorie]" << std::endl;
 	iniFile << "string_test = 'passt anders auch'" << std::endl;
+	
 	iniFile.close();
 
 	INIConfig iniconf( "test.ini" );
@@ -81,6 +85,19 @@ namespace csl {
 	iniFile.close();
 	
 	CPPUNIT_ASSERT_THROW( INIConfig iniconf( "test.ini" ), exceptions::cslException  );
+    }
+
+    void TestINIConfig::testVariableSubstitution() {
+	std::ofstream iniFile( "test.ini" );
+	iniFile << "int_test=42" << std::endl;
+	iniFile << "should_replace=${:int_test}mal" << std::endl;
+	iniFile << "should_not_replace=${:unknown_key}mal" << std::endl;
+	
+	iniFile.close();
+	INIConfig iniconf( "test.ini" );
+
+	CPPUNIT_ASSERT_EQUAL( std::string( iniconf.getstring( ":should_replace" ) ), std::string( "42mal" ) );
+	CPPUNIT_ASSERT_EQUAL( std::string( iniconf.getstring( ":should_not_replace" ) ), std::string( "${:unknown_key}mal" ) );
     }
 
 } // eon

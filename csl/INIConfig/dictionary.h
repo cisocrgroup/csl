@@ -72,7 +72,7 @@ typedef struct _dictionary_ {
   by comparing the key itself in last resort.
  */
 /*--------------------------------------------------------------------------*/
-unsigned dictionary_hash(char * key);
+unsigned dictionary_hash(char* key);
 
 /*-------------------------------------------------------------------------*/
 /**
@@ -141,7 +141,7 @@ char * dictionary_get(dictionary * d, char * key, char * def);
   This function returns non-zero in case of failure.
  */
 /*--------------------------------------------------------------------------*/
-int dictionary_set(dictionary * vd, char * key, char * val);
+int dictionary_set(dictionary * vd, char const* key, char const* val);
 
 /*-------------------------------------------------------------------------*/
 /**
