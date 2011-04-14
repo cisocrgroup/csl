@@ -17,8 +17,12 @@ namespace csl {
      * @brief {@link INIConfig} is an object-oriented interface to the c-style "iniparser" to 
      *        parse simple ini-style configuration files.
      *
-     * @author Thorsten Vobl
-     * @year 2010
+     * The parser supports a simple form of variable replacement. All keys that were defined in previous lines
+     * of the ini file can be accessed using the syntax ${someSection:someKey}.
+     * You can always access the directory containing the ini file with ${INIConfig:iniDir}
+     *
+     * @author Thorsten Vobl, Ulrich Reffle
+     * @year 2010, 2011
      */
     class INIConfig {
     public:

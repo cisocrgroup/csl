@@ -436,7 +436,7 @@ int iniparser_find_entry(
   It is Ok to set val to NULL.
  */
 /*--------------------------------------------------------------------------*/
-int iniparser_set(dictionary * ini, char * entry, char * val)
+int iniparser_set(dictionary * ini, char const* entry, char const* val)
 {
 
     // perform variable substitution
@@ -595,6 +595,19 @@ dictionary * iniparser_load(const char * ininame)
         in.close();
         return NULL ;
     }
+
+    // SET SPECIAL KEY INIConfig:iniDir
+    std::string iniFile( ininame );
+    std::string iniDir;
+    size_t lastSlash = iniFile.find_last_of( "/\\" ); // last slash or backslash
+    if( lastSlash == std::string::npos ) {
+	iniDir = ".";
+    }
+    else {
+	iniDir = iniFile.substr( 0, lastSlash );
+    }
+
+    iniparser_set( dict, "INIConfig:iniDir", iniDir.c_str() );
 
     memset(line,    0, ASCIILINESZ);
     memset(section, 0, ASCIILINESZ);

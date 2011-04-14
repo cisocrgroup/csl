@@ -22,6 +22,7 @@ namespace csl {
 	if( dict_ != 0 ) {
 	    throw exceptions::cslException( "csl::INIConfig::load: conf was already loaded." );
 	}
+
 	dict_ = iniparser_load( iniFile.c_str() );
 	
 	if( dict_ == 0 ) throw exceptions::cslException( "csl::INIConfig: Cannot parse file" );

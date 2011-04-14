@@ -91,7 +91,7 @@ static char * xstrdup(char * s)
   by comparing the key itself in last resort.
  */
 /*--------------------------------------------------------------------------*/
-unsigned dictionary_hash(char * key)
+unsigned dictionary_hash(char const* key)
 {
 	int			len ;
 	unsigned	hash ;
@@ -243,7 +243,7 @@ int dictionary_set(dictionary * d, char const* key, char const* val)
 					/* Found a value: modify and return */
 					if (d->val[i]!=NULL)
 						free(d->val[i]);
-                    d->val[i] = val ? xstrdup(val) : NULL ;
+                    d->val[i] = val ? xstrdup((char*)val) : NULL ;
                     /* Value has been modified: return */
 					return 0 ;
 				}
@@ -274,8 +274,8 @@ int dictionary_set(dictionary * d, char const* key, char const* val)
         }
     }
 	/* Copy key */
-	d->key[i]  = xstrdup(key);
-    d->val[i]  = val ? xstrdup(val) : NULL ;
+    d->key[i]  = xstrdup((char*)key);
+    d->val[i]  = val ? xstrdup((char*)val) : NULL ;
 	d->hash[i] = hash;
 	d->n ++ ;
 	return 0 ;
