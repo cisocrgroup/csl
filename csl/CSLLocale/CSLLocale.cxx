@@ -3,14 +3,15 @@
 
 
 #include "./CSLLocale.h"
+#include<csl/codecvt/UTF8_Codecvt.h>
 
 namespace csl {
 
     CSLLocale::CSLLocale() :
 	//std::locale( "" ) {
 	//std::locale( std::locale( "" ), new Ctype_OldGerman( std::locale( "" ) ) ) {
-	//std::locale( CSL_UTF8_LOCALE, new Ctype_OldGerman( std::locale( "" ) ) ) {
-	std::locale( CSL_UTF8_LOCALE ) {
+	std::locale( std::locale( std::locale( "C" ), new UTF8_Codecvt() ), new Ctype_OldGerman( std::locale( "C" ) ) )  {
+	//std::locale( CSL_UTF8_LOCALE ) {
 	std::wcerr << "Create CSLLocale" << std::endl;
     }
 

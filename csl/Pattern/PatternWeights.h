@@ -8,6 +8,7 @@
 #include<map>
 #include<math.h>
 #include<csl/Global.h>
+#include<csl/CSLLocale/CSLLocale.h>
 #include<csl/Pattern/Pattern.h>
 
 namespace csl {

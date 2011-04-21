@@ -59,7 +59,7 @@ namespace csl {
 
     void PatternWeights::loadFromFile( const char* patternFile ) {
 	std::wifstream fi;
-	fi.imbue( CSL_UTF8_LOCALE );
+	fi.imbue( CSLLocale::Instance() );
 	fi.open( patternFile );
 	if( ! fi ) {
 	    std::string message = 
@@ -79,17 +79,24 @@ namespace csl {
 		throw exceptions::badInput( "PatternWeights: Invalid line in pattern file" );
 	    }
 
-	    wchar_t* endOfWeight = 0;
 	    
 	    // std::wcout << "left side is " << line.substr( 0, delimPos ) << std::endl;
 	    // std::wcout << "right side is " << line.substr( delimPos + 1, weightDelimPos - delimPos -1 ) << std::endl;
 	    // std::wcout << "weight is " << line.substr( weightDelimPos+1 ).c_str() << std::endl;
 
+	    float weight = 0;
+
+
+	    try {
+		csl::CSLLocale::string2number( line.substr( weightDelimPos+1 ), &weight );
+	    } catch( std::exception& exc ) {
+		throw exceptions::badInput( "csl::PatternWeights: Could not parse float number." );
+	    }
+
 	    patternWeights_[ Pattern( line.substr( 0, delimPos ), 
 				      line.substr( delimPos + 1, weightDelimPos - delimPos - 1 ) ) ]
-		    
-		= wcstod( line.substr( weightDelimPos+1 ).c_str(), &endOfWeight );
-
+		= weight;
+	    
 		    
 	    ++patternCount;
 	}
@@ -99,12 +106,17 @@ namespace csl {
 
 	//std::wcerr << "csl::PatternWeights: Loaded " << patternCount << L" patterns."<< std::endl;
 
-	writeToXML( std::wcout );
+	std::wofstream fo;
+	fo.imbue( CSLLocale::Instance() );
+	fo.open( "/tmp/patterns.xml" );
+	
+	writeToXML( fo );
+	fo.close();
     } // loadFromFile
     
     void PatternWeights::writeToFile( const char* patternFile ) const {
 	std::wofstream fo;
-	fo.imbue( std::locale( "" ) );
+	fo.imbue( CSLLocale::Instance() );
 	fo.open( patternFile );
 	if( ! fo ) {
 	    throw exceptions::badFileHandle( "csl::PatternWeights: Could not open pattern file for writing" );
