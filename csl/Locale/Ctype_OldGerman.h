@@ -3,6 +3,7 @@
 
 #include<locale>
 #include<iostream>
+#include<vector>
 #include<errno.h>
 
 /**

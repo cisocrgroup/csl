@@ -1,5 +1,6 @@
 INCLUDE(CPack)
 
+add_subdirectory(CSLLocale)
 add_subdirectory(Getopt)
 add_subdirectory(Alphabet)
 add_subdirectory(MinDic)
@@ -19,6 +20,7 @@ add_subdirectory(Locale)
 add_subdirectory(INIConfig)
 
 ADD_LIBRARY( csl SHARED 
+  CSLLocale/CSLLocale.cxx
   Alphabet/Alphabet.cxx 
   LevDEA/LevDEA.cxx
   DictSearch/DictSearch.cxx

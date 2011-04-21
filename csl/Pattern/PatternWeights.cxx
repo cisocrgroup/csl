@@ -81,14 +81,15 @@ namespace csl {
 
 	    wchar_t* endOfWeight = 0;
 	    
-// 	    std::wcout << "left side is " << line.substr( 0, delimPos ) << std::endl;
-// 	    std::wcout << "right side is " << line.substr( delimPos + 1, weightDelimPos - delimPos -1 ) << std::endl;
-// 	    std::wcout << "weight is " << line.substr( weightDelimPos+1 ).c_str() << std::endl;
+	    // std::wcout << "left side is " << line.substr( 0, delimPos ) << std::endl;
+	    // std::wcout << "right side is " << line.substr( delimPos + 1, weightDelimPos - delimPos -1 ) << std::endl;
+	    // std::wcout << "weight is " << line.substr( weightDelimPos+1 ).c_str() << std::endl;
 
 	    patternWeights_[ Pattern( line.substr( 0, delimPos ), 
 				      line.substr( delimPos + 1, weightDelimPos - delimPos - 1 ) ) ]
 		    
 		= wcstod( line.substr( weightDelimPos+1 ).c_str(), &endOfWeight );
+
 		    
 	    ++patternCount;
 	}
@@ -97,7 +98,8 @@ namespace csl {
 	}
 
 	//std::wcerr << "csl::PatternWeights: Loaded " << patternCount << L" patterns."<< std::endl;
-	    
+
+	writeToXML( std::wcout );
     } // loadFromFile
     
     void PatternWeights::writeToFile( const char* patternFile ) const {
