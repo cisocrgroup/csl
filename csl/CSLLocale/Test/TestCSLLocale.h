@@ -17,6 +17,7 @@ namespace csl {
 	void run();
 
 	void testBasics();
+	void testSTDIO();
 	
 
     private:
@@ -27,6 +28,7 @@ namespace csl {
 
     void TestCSLLocale::run() {
 	testBasics();
+	testSTDIO();
     }
     
 
@@ -34,6 +36,7 @@ namespace csl {
      * test the basic methods
      */
     void TestCSLLocale::testBasics() {
+
 
 	CPPUNIT_ASSERT_EQUAL_MESSAGE( "Test if decimal point is dot not comma", 
 				      L'.', std::use_facet< std::numpunct< wchar_t > >( CSLLocale::Instance() ).decimal_point() );
@@ -55,11 +58,26 @@ namespace csl {
 	// throw exception for comma as decimal point
 	CPPUNIT_ASSERT_THROW( CSLLocale::string2number( L"42,13", &x_float ), exceptions::cslException );
 
-
-
-
     }
 
+    void TestCSLLocale::testSTDIO() {
+	std::wstring wideName;
+
+	csl::string2wstring( std::wcout.getloc().name(), wideName );
+	std::wcout << "Name " << wideName << std::endl;
+
+	std::wcout.imbue( std::locale( "de_CH.utf8" ) );
+
+	csl::string2wstring( std::wcout.getloc().name(), wideName );
+	std::wcout << "Name " << wideName << std::endl;
+
+	std::wcout.imbue( CSLLocale::Instance() );
+
+	csl::string2wstring( std::wcout.getloc().name(), wideName );
+	std::wcout << "Name " << wideName << std::endl;
+
+	
+    }
 
 } // namespace csl
 
