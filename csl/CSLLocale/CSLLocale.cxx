@@ -9,7 +9,7 @@ namespace csl {
 
     CSLLocale::CSLLocale() :
 	std::locale( std::locale( std::locale( "C" ), new UTF8_Codecvt() ), new Ctype_OldGerman( std::locale( "C" ) ) )  {
-	{
+	
 	std::wcerr << "Create CSLLocale" << std::endl;
     }
 

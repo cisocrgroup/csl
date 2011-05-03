@@ -96,14 +96,6 @@ namespace csl {
 		AnswerProcessor ap( *this, answers );
 		return msMatch_.query( query.c_str(), ap );
 
-		// if( maxNrOfPatterns_ > 0 ) {
-		//     getMyDictSearch().vaam_->setBaseDic( dict_->getFWDic() );
-		//     getMyDictSearch().vaam_->setMinNrOfPatterns( 1 ); // get only strictly hypothetic matches
-		//     getMyDictSearch().vaam_->setMaxNrOfPatterns( maxNrOfPatterns_ );
-		//     getMyDictSearch().vaam_->setDistance( dlev_hypothetic_ );
-		//     getMyDictSearch().vaam_->setCaseMode( getCaseMode() );
-		//     getMyDictSearch().vaam_->query( query, answers );
-		// }
 	    }
 	    else return false;
 	}
@@ -131,16 +123,13 @@ namespace csl {
 		    
 		    Interpretation interp;
 		    interp.parseFromString( interpretationsString.substr( startPos, endPos - startPos  ) );
+		    interp.setLevDistance( levDistance );
+		    interp.setBaseWordScore( annotation );
 		    static_cast< iInterpretationReceiver* >(answers_)->receive( interp );
 
 		    startPos = endPos + 1;
 		} while( endPos < interpretationsString.size() );
-
-		
-		
-
-		
-	    }
+	    } // receive()
 
 	    void reset() {
 		throw exceptions::cslException( "reset() not implemented in AnswerProcessor of csl::StringDictModule" );

@@ -1,57 +1,44 @@
-#include <locale>
+#include <csl/CSLLocale/CSLLocale.h>
 #include <csl/DictSearch/DictSearch.h>
 #include <csl/Getopt/Getopt.h>
 
 // uncomment this if you want so suppress output for the words
 //#define CSL_DICTSEARCH_PRINTNONE 1;
 
+void printHelp() {
+    std::wcerr<< std::endl
+	      << "Use like: runDictSearch"<<std::endl
+	      << "--config=<configFile>         configuration file (obligatory)" << std::endl
+	      << "--machineReadable             Print (even more) machine-readable output, that is, all answers in one line, separated by '|'" << std::endl
+	      << std::endl<<std::endl;
+}
+
+
 int main( int argc, char const** argv ) {
-    std::locale::global( std::locale("") ); // set the environment's default locale
+    std::locale::global( csl::CSLLocale::Instance() ); // set a default locale
 
-    csl::Getopt options( argc, argv );
+    csl::Getopt options;
+    options.specifyOption( "help", csl::Getopt::VOID );
+    options.specifyOption( "config", csl::Getopt::STRING );
+    options.specifyOption( "machineReadable", csl::Getopt::VOID );
 
-    if( options.hasOption( "help" ) || !options.hasOption( "patternFile" ) ) {
-	std::wcerr<< std::endl
-		  << "Use like: runDictSearch"<<std::endl
-		  << "--modernDict=<dictFile>       Modern vocabulary (obligatory)" << std::endl
-		  << "--patternFile=<patternFile>   Patternset to use (obligatory)"<< std::endl
-		  << "--histDict=<dictFile>         Vocabulary from a historical corpus" << std::endl
-		  << "--NEDict=<dictFile>           Named-entities" << std::endl
-		  << "--machineReadable=1           Print (even more) machine-readable output, i.e. all answers in one line, separated by '|'" << std::endl
-		  << std::endl<<std::endl;
-	exit(1);
+    options.getOptionsAsSpecified( argc, argv );
+
+
+    if( options.hasOption( "help" ) ) {
+	printHelp();
+	return EXIT_SUCCESS;
+    }
+    if( !options.hasOption( "config" ) ) {
+	printHelp();
+	return EXIT_FAILURE;
     }
     
     // create a DictSearch-object
     csl::DictSearch dictSearch;
 
-    // initialise the hypothetic dict. with a file of patterns
-    dictSearch.initHypothetic( options.getOption( "patternFile" ).c_str() );
-
-    // set a modern dictionary
-    if( options.hasOption( "modernDict" ) ) {
-	csl::DictSearch::DictModule& modernMod = dictSearch.addDictModule( L"modern", options.getOption( "modernDict" ) );
-	modernMod.setDLevWordlengths();
-	modernMod.setPriority( 100 );
-	modernMod.setMaxNrOfPatterns( 1000 );
-    }
-    else {
-	throw std::runtime_error( "Please specify a modern dict as command line option (--modernDict=some.fbdic)" );
-    }
-
-    // set a historical dictionary
-    if( options.hasOption( "histDict" ) ) {
-	csl::DictSearch::DictModule& historicMod = dictSearch.addDictModule( L"histCorpus", options.getOption( "histDict" ) );
-	historicMod.setDLevWordlengths();
-	historicMod.setPriority( 90 );
-    }
+    dictSearch.readConfiguration( options.getOption( "config" ) );
     
-    // set a NE dictionary
-    if( options.hasOption( "NEDict" ) ) {
-	csl::DictSearch::DictModule& NEMod = dictSearch.addDictModule( L"NamedEnt", options.getOption( "NEDict" ) );
-	NEMod.setDLevWordlengths();
-	NEMod.setPriority( 90 );
-    }
     
     std::wstring query;
     csl::DictSearch::CandidateSet candSet;
@@ -82,15 +69,6 @@ int main( int argc, char const** argv ) {
 	else {
 	    for( csl::DictSearch::CandidateSet::const_iterator it = candSet.begin(); it != candSet.end(); ++it ) {
 		std::wcout << *it << std::endl;
-
-		continue;
-
-		std::wcout <<  it->getWord() << std::endl;
-		std::wcout <<  "  baseWord="  << it->getBaseWord() << std::endl;
-		std::wcout <<  "  intruction="  << it->getInstruction() << std::endl;
-		std::wcout <<  "  levDistance="  << it->getLevDistance() << std::endl;
-		std::wcout <<  "  dict="  << it->getDictModule().getName() << std::endl;
-		std::wcout << std::endl;
 	    }
 	}
 #endif
