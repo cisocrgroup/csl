@@ -85,10 +85,8 @@ namespace csl {
 	    // std::wcout << "weight is " << line.substr( weightDelimPos+1 ).c_str() << std::endl;
 
 	    float weight = 0;
-
-
 	    try {
-		csl::CSLLocale::string2number( line.substr( weightDelimPos+1 ), &weight );
+		weight = csl::CSLLocale::string2number< float >( line.substr( weightDelimPos+1 ) );
 	    } catch( std::exception& exc ) {
 		throw exceptions::badInput( "csl::PatternWeights: Could not parse float number." );
 	    }

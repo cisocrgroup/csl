@@ -22,23 +22,23 @@ namespace csl {
 	/**
 	 * @brief Goes the STL facet-based way to transform a string to a number
 	 * @param[in]  str     a string containing the number and nothing else
-	 * @param[out] number  Pointer to a numeric type where the result can be written
 	 *
 	 * Throws a cslException if the conversion causes problems.
 	 */
-	template< typename T >
-	inline static void string2number( std::wstring const& str, T* number ) {
-	    std::wistringstream iss;
+	template< typename T, typename char_type >
+	inline static T string2number( std::basic_string< char_type > const& str ) {
+	    T number;
+	    std::basic_istringstream< char_type > iss;
 	    iss.imbue( Instance() );
 	    iss.str( str );
 
-	    iss >> *number;
+	    iss >> number;
 	    
 	    // no badbit, no failbit, no goodbit: only the eofbit, because the complete string should be interpreted
 	    if( iss.rdstate() != (  std::wistringstream::eofbit ) ) {
 		throw exceptions::cslException( "csl::CSLLocale::string2number: could not interpret string." );
 	    }
-	    
+	    return number;
 	}
 
     private:
