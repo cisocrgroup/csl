@@ -5,3 +5,6 @@ IF( CPPUNIT_FOUND )
   ADD_TEST( testPattern ${EXECUTABLE_OUTPUT_PATH}/testPattern )
   
 ENDIF( CPPUNIT_FOUND )
+
+add_executable( patterns2dot exec_patterns2dot.cxx )
+target_link_libraries( patterns2dot  csl ${CPPUNIT_LIBRARIES} )
