@@ -1,6 +1,7 @@
 
 
 #include "./TestINIConfig.h"
+#include <csl/CSLLocale/CSLLocale.h>
 
 
 int main() {
@@ -12,7 +13,7 @@ int main() {
 	ti.run();
     } catch( std::exception& exc ) {
 	std::wstring wideWhat;
-	csl::string2wstring( exc.what(), wideWhat );
+	csl::CSLLocale::string2wstring( exc.what(), wideWhat );
 	std::wcout << "Exception: " << wideWhat << std::endl;
 	
     }

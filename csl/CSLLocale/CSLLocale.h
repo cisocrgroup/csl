@@ -41,6 +41,49 @@ namespace csl {
 	    return number;
 	}
 
+
+	inline static void wstring2string( std::wstring const& wstr, std::string& str ) {
+	    std::codecvt< wchar_t, char, std::mbstate_t > const& ccvt = std::use_facet< std::codecvt< wchar_t, char, std::mbstate_t > >( Instance() );
+
+	    str.resize( wstr.size() * ccvt.max_length() );
+	    std::codecvt< wchar_t, char, std::mbstate_t >::state_type state; 
+	    wchar_t const* fromNext = 0;
+	    char* toNext = 0;
+	    ccvt.out( state, 
+		      wstr.c_str(), 
+		      wstr.c_str()+wstr.size(), 
+		      fromNext, 
+		      (char*)str.c_str(),
+		      (char*)str.c_str() + str.size(), 
+		      toNext 
+		);
+
+	    str.resize( toNext - str.c_str() );
+	}
+
+
+	inline static void string2wstring( std::string const& str, std::wstring& wstr ) {
+	    std::codecvt< wchar_t, char, std::mbstate_t > const& ccvt = std::use_facet< std::codecvt< wchar_t, char, std::mbstate_t > >( Instance() );
+	    
+	    wstr.resize( str.size() * ccvt.max_length() ); // this makes no sense?! str.size() would be enough
+	    std::codecvt< wchar_t, char, std::mbstate_t >::state_type state; 
+	    char const* fromNext = 0;
+	    wchar_t* toNext = 0;
+	    ccvt.in( state, 
+		     str.c_str(), 
+		     str.c_str()+str.size(), 
+		     fromNext, 
+		     (wchar_t*)wstr.
+		     c_str(),
+		     (wchar_t*)wstr.c_str() + wstr.size(), 
+		     toNext 
+		);
+	    
+	    wstr.resize( toNext - wstr.c_str() );
+	}
+	
+
+
     private:
 	/**
 	 * @brief private constructor

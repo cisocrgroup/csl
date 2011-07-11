@@ -43,8 +43,8 @@ namespace csl {
 		if (dict_->key[i]==NULL)
 		    continue ;
 
-		csl::string2wstring( dict_->key[i], wideKey );
-		csl::string2wstring( dict_->val[i], wideValue );
+		CSLLocale::string2wstring( dict_->key[i], wideKey );
+		CSLLocale::string2wstring( dict_->val[i], wideValue );
 		os << wideKey << " = " << wideValue << std::endl;
 	    }
 	    return ;
@@ -52,7 +52,7 @@ namespace csl {
 	else { // there are sections
 	    for ( int i = 0 ; i < nsec ; i++ ) {
 		sectionName = iniparser_getsecname(dict_, i) ;
-		csl::string2wstring( sectionName, wideSection );
+		CSLLocale::string2wstring( sectionName, wideSection );
 		os << std::endl << '[' << wideSection << ']' << std::endl;
 
 		sectionNameColon = sectionName + ':';
@@ -61,12 +61,12 @@ namespace csl {
 			continue ;
 		    }
 		    if( !strncmp(dict_->key[j], sectionNameColon.c_str(), sectionNameColon.size() ) ) {
-			csl::string2wstring( dict_->key[j], wideKey );
+			CSLLocale::string2wstring( dict_->key[j], wideKey );
 			if( dict_->val[j] ) { // obviously this can be 0 
 			    wideValue.clear();
 			}
 			else {
-			    csl::string2wstring( dict_->val[j], wideValue );
+			    CSLLocale::string2wstring( dict_->val[j], wideValue );
 			}
 
 			os << wideKey.substr( sectionNameColon.size() ) << " = " << wideValue << std::endl;

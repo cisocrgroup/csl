@@ -1,5 +1,6 @@
 #include<iostream>
 #include<csl/Global.h>
+#include <csl/CSLLocale/CSLLocale.h>
 #include<csl/Vaam/Vaam.h>
 #include<csl/Vaam/Vaam.h>
 #include<csl/Getopt/Getopt.h>
@@ -174,7 +175,7 @@ int main(int argc, const char** argv ) {
 
 		    if( minDicString ) {
 			// in a MinDicString the annotation ("score") is the offset of the word's respective annotation
-			csl::string2wstring( (char const*)minDicString->getAnnByOffset( it->getBaseWordScore() ), wideAnnotation );
+			csl::CSLLocale::string2wstring( (char const*)minDicString->getAnnByOffset( it->getBaseWordScore() ), wideAnnotation );
 			std::wcout << ",annotation=" << wideAnnotation;
 		    }
 		    std::wcout<<std::endl;

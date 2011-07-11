@@ -1,4 +1,5 @@
 #include <csl/Global.h>
+#include <csl/CSLLocale/CSLLocale.h>
 #include <csl/FBDicString/FBDicString.h>
 #include <csl/Getopt/Getopt.h>
 
@@ -29,7 +30,7 @@ int main( int argc, const char** argv ) {
     }
     catch( csl::exceptions::cslException exc ) {
 	std::wstring wide_what;
-	csl::string2wstring( exc.what(), wide_what );
+	csl::CSLLocale::string2wstring( exc.what(), wide_what );
 	std::wcerr << "csl::compileFBDString: caught cslException and aborted: " << wide_what << std::endl;
 	return 1;
     }

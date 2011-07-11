@@ -240,33 +240,48 @@ namespace csl {
     };
 
 
-    inline void string2wstring( std::string const& str, std::wstring& wstr, std::locale const& loc ) {
-	std::codecvt< wchar_t, char, std::mbstate_t > const& ccvt = std::use_facet< std::codecvt< wchar_t, char, std::mbstate_t > >( loc );
 
-	wstr.resize( str.size() * ccvt.max_length() );
-	std::codecvt< wchar_t, char, std::mbstate_t >::state_type state; 
-	char const* fromNext = 0;
-	wchar_t* toNext = 0;
-	ccvt.in( state, 
-		 str.c_str(), 
-		 str.c_str()+str.size(), 
-		 fromNext, 
-		 (wchar_t*)wstr.
-		 c_str(),
-		 (wchar_t*)wstr.c_str() + wstr.size(), 
-		 toNext 
-	    );
+    /**
+     * @deprecated Use the implementation in csl::CSLLocale instead!!
+     */
+    // inline void string2wstring( std::string const& str, std::wstring& wstr, std::locale const& loc ) {
+    // 	std::codecvt< wchar_t, char, std::mbstate_t > const& ccvt = std::use_facet< std::codecvt< wchar_t, char, std::mbstate_t > >( loc );
+	
+    // 	wstr.resize( str.size() * ccvt.max_length() ); // this makes no sense?! str.size() would be enough
+    // 	std::codecvt< wchar_t, char, std::mbstate_t >::state_type state; 
+    // 	char const* fromNext = 0;
+    // 	wchar_t* toNext = 0;
+    // 	ccvt.in( state, 
+    // 		 str.c_str(), 
+    // 		 str.c_str()+str.size(), 
+    // 		 fromNext, 
+    // 		 (wchar_t*)wstr.
+    // 		 c_str(),
+    // 		 (wchar_t*)wstr.c_str() + wstr.size(), 
+    // 		 toNext 
+    // 	    );
 
-	wstr.resize( toNext - wstr.c_str() );
-    }
+    // 	wstr.resize( toNext - wstr.c_str() );
+    // }
 
-    inline void string2wstring( std::string const& str, std::wstring& wstr ) {
-	std::locale loc( CSL_UTF8_LOCALE );
-	string2wstring( str, wstr, loc );
-    }
+    // /**
+    //  * @deprecated Use the implementation in csl::CSLLocale instead!!
+    //  */
+    // inline void string2wstring( std::string const& str, std::wstring& wstr ) {
+    // 	std::locale loc( CSL_UTF8_LOCALE );
+    // 	string2wstring( str, wstr, loc );
+    // }
 
+
+    /**
+     * @brief Split a string using the given delimiter and collect the pieces in the given vector.
+     *
+     * @param[in]  str the input string
+     * @param[in]  delimiter The delimiter symbol
+     * @param[out] A pointer to the result vector
+     */
     template< typename char_t >
-    size_t split( std::basic_string< char_t > const& str, char delimiter, std::vector< std::basic_string< char_t > >* pieces ) {
+    size_t split( std::basic_string< char_t > const& str, char_t delimiter, std::vector< std::basic_string< char_t > >* pieces ) {
 	size_t pos = 0;
 	size_t delimPos = str.npos;
 	while( ( delimPos = str.find_first_of( delimiter, pos ) ) != str.npos ) {

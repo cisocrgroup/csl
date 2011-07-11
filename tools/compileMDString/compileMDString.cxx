@@ -1,6 +1,7 @@
 #include <csl/Global.h>
 #include <csl/MinDicString/MinDicString.h>
 #include <csl/Getopt/Getopt.h>
+#include <csl/CSLLocale/CSLLocale.h>
 
 using namespace csl;
 int main( int argc, const char** argv ) {
@@ -30,7 +31,7 @@ int main( int argc, const char** argv ) {
     }
     catch( csl::exceptions::cslException exc ) {
 	std::wstring wide_what;
-	csl::string2wstring( exc.what(), wide_what );
+	csl::CSLLocale::string2wstring( exc.what(), wide_what );
 	std::wcerr << "csl::compileMDString: caught cslException and aborted: " << wide_what << std::endl;
 	return 1;
     }

@@ -113,7 +113,7 @@ namespace csl {
 	     */
 	    void receive( const wchar_t *str, int levDistance, int annotation ) {
 		std::wstring interpretationsString;
-		string2wstring( (char*)( myDictModule_.getDict()->getAnnByOffset( annotation ) ), interpretationsString );
+		CSLLocale::string2wstring( (char*)( myDictModule_.getDict()->getAnnByOffset( annotation ) ), interpretationsString );
 		
 		size_t startPos = 0;
 		size_t endPos = 0;

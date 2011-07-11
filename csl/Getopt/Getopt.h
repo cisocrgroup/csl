@@ -8,6 +8,7 @@
 #include<stdexcept>
 
 #include<csl/Global.h>
+#include<csl/CSLLocale/CSLLocale.h>
 
 namespace csl {
 
@@ -319,13 +320,13 @@ public:
     void print( std::wostream& os ) {
 	for( OptionIterator it = optionsBegin(); it != optionsEnd(); ++it ) {
 	    std::wstring wideKey;
-	    csl::string2wstring( it->first, wideKey );
+	    CSLLocale::string2wstring( it->first, wideKey );
 	    if( it->second == VOID ) {
 		os << wideKey << " = " << "true" << std::endl;
 	    }
 	    else {
 		std::wstring wideValue;
-		csl::string2wstring( getOption(it->first), wideValue );
+		CSLLocale::string2wstring( getOption(it->first), wideValue );
 		os << wideKey << " = " << wideValue << std::endl;
 	    }
 	}

@@ -61,17 +61,17 @@ namespace csl {
     void TestCSLLocale::testSTDIO() {
 	std::wstring wideName;
 
-	csl::string2wstring( std::wcout.getloc().name(), wideName );
+	CSLLocale::string2wstring( std::wcout.getloc().name(), wideName );
 	std::wcout << "Name " << wideName << std::endl;
 
 	std::wcout.imbue( std::locale( "de_CH.utf8" ) );
 
-	csl::string2wstring( std::wcout.getloc().name(), wideName );
+	CSLLocale::string2wstring( std::wcout.getloc().name(), wideName );
 	std::wcout << "Name " << wideName << std::endl;
 
 	std::wcout.imbue( CSLLocale::Instance() );
 
-	csl::string2wstring( std::wcout.getloc().name(), wideName );
+	CSLLocale::string2wstring( std::wcout.getloc().name(), wideName );
 	std::wcout << "Name " << wideName << std::endl;
 
 	
