@@ -42,6 +42,12 @@ namespace csl {
 	}
 
 
+	/**
+	 * @brief converts a std::wstring into its byte-character equivalent
+	 *
+	 * @param[in]  wstr the input string
+	 * @param[out] str  the output string
+	 */
 	inline static void wstring2string( std::wstring const& wstr, std::string& str ) {
 	    std::codecvt< wchar_t, char, std::mbstate_t > const& ccvt = std::use_facet< std::codecvt< wchar_t, char, std::mbstate_t > >( Instance() );
 
@@ -62,6 +68,12 @@ namespace csl {
 	}
 
 
+	/**
+	 * @brief converts a std::string into its wide-character equivalent
+	 *
+	 * @param[in]  str  the input string
+	 * @param[out] wstr the output string
+	 */
 	inline static void string2wstring( std::string const& str, std::wstring& wstr ) {
 	    std::codecvt< wchar_t, char, std::mbstate_t > const& ccvt = std::use_facet< std::codecvt< wchar_t, char, std::mbstate_t > >( Instance() );
 	    
@@ -82,6 +94,16 @@ namespace csl {
 	    wstr.resize( toNext - wstr.c_str() );
 	}
 	
+	/**
+	 * @brief Returns a copy of a wide string equivalent to the given narrow string.
+	 */
+	inline static std::wstring string2wstring( std::string const& str ) {
+	    std::wstring ret;
+	    string2wstring( str, ret );
+	    return ret;
+	}
+
+
 
 
     private:
