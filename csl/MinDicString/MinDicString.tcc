@@ -55,7 +55,12 @@ namespace csl {
     }
     
     inline void MinDicString::loadFromStream( FILE* fi ) {
-	fread( &header_, sizeof( Header ), 1, fi );
+	size_t elementsRead = fread( &header_, sizeof( Header ), 1, fi );
+	if( elementsRead != 1 ) {
+	    throw exceptions::badInput( "csl::MinDicString::loadFromStream: could not read Header" );
+	}
+
+
 	if ( ( header_.getMagicNumber() != magicNumber_ ) ) {
 	    throw exceptions::badDictFile( "MinDicString: Magic number comparison failed.\n" );
 	}
@@ -63,7 +68,10 @@ namespace csl {
 	sizeOfAnnStrings_ = header_.getSizeOfAnnStrings();
 	MinDic_t::loadFromStream( fi );
 	annStrings_ = (uchar*) malloc( sizeOfAnnStrings_ * sizeof( uchar ) );
-	fread( annStrings_, sizeof( uchar ), sizeOfAnnStrings_, fi );
+	elementsRead = fread( annStrings_, sizeof( uchar ), sizeOfAnnStrings_, fi );
+	if( elementsRead != sizeOfAnnStrings_ ) {
+	    throw exceptions::badInput( "csl::MinDicString::loadFromStream: could not read annotations" );
+	}
 	
     }
 

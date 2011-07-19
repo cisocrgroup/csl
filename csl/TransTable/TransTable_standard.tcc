@@ -262,7 +262,11 @@ namespace csl {
     void 
     TransTable< TT_STANDARD, InternalCharType__, SizeType__ >
     ::loadFromStream( FILE* fi ) {
-	fread( &header_, sizeof( Header ), 1, fi );
+	size_t elementsRead = fread( &header_, sizeof( Header ), 1, fi );
+	if( elementsRead != 1 ) {
+	    throw exceptions::badInput( "csl::TransTable< TT_STANDARD >::loadFromStream: could not read Header" );
+	}
+
 
 	if ( ( header_.getMagicNumber() != magicNumber_ ) ) {
 	    throw exceptions::badDictFile( "TransTable: Magic number comparison failed.\n" );
@@ -274,7 +278,10 @@ namespace csl {
 	root_ = header_.getRoot();
 
 	cells_ = (Cell_t*) malloc( nrOfCells_ * sizeof( Cell_t ) );
-	fread( cells_, sizeof( Cell_t ), nrOfCells_, fi );
+	elementsRead = fread( cells_, sizeof( Cell_t ), nrOfCells_, fi );
+	if( elementsRead != nrOfCells_ ) {
+	    throw exceptions::badInput( "csl::TransTable< TT_STANDARD >::loadFromStream: could not read cells." );
+	}
 
 	sizeOfUsedCells_ = nrOfCells_;
     }

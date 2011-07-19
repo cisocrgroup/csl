@@ -21,17 +21,20 @@ namespace csl {
 
 
 	inline void MinDic2::loadFromStream( FILE* fi ) {
-		// read the MinDic2-Header
-		fread( &header_, sizeof( Header ), 1, fi );
-
-		if( header_.getMagicNumber() != magicNumber_ ) {
-			throw exceptions::badDictFile( "MinDic2: Magic number comparison failed.\n" );
-		}
-
-		nrOfKeys_ = header_.getNrOfKeys();
-
-		// read the TransTable
-		TransTable_t::loadFromStream( fi );
+	    // read the MinDic2-Header
+	    size_t elementsRead = fread( &header_, sizeof( Header ), 1, fi );
+	    if( elementsRead != 1 ) {
+		throw exceptions::badInput( "csl::MinDic2::loadFromStream: could not read Header" );
+	    }
+	    
+	    if( header_.getMagicNumber() != magicNumber_ ) {
+		throw exceptions::badDictFile( "MinDic2: Magic number comparison failed.\n" );
+	    }
+	    
+	    nrOfKeys_ = header_.getNrOfKeys();
+	    
+	    // read the TransTable
+	    TransTable_t::loadFromStream( fi );
 	}
 
 	inline void MinDic2::writeToFile( char const* binFile ) const {

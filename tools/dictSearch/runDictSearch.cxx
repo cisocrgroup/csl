@@ -1,6 +1,7 @@
 #include <csl/CSLLocale/CSLLocale.h>
 #include <csl/DictSearch/DictSearch.h>
 #include <csl/Getopt/Getopt.h>
+#include <csl/INIConfig/INIConfig.h>
 
 // uncomment this if you want so suppress output for the words
 //#define CSL_DICTSEARCH_PRINTNONE 1;
@@ -15,7 +16,7 @@ void printHelp() {
 
 
 int main( int argc, char const** argv ) {
-    std::locale::global( csl::CSLLocale::Instance() ); // set a default locale
+    std::locale::global( std::locale( "" ) ); // set a default locale
 
     csl::Getopt options;
     options.specifyOption( "help", csl::Getopt::VOID );
@@ -24,7 +25,7 @@ int main( int argc, char const** argv ) {
 
     options.getOptionsAsSpecified( argc, argv );
 
-
+    
     if( options.hasOption( "help" ) ) {
 	printHelp();
 	return EXIT_SUCCESS;
@@ -37,7 +38,10 @@ int main( int argc, char const** argv ) {
     // create a DictSearch-object
     csl::DictSearch dictSearch;
 
-    dictSearch.readConfiguration( options.getOption( "config" ) );
+    csl::INIConfig config( options.getOption( "config" ) );
+    dictSearch.readConfiguration( config );
+    dictSearch.initHypothetic( config.getstring( "language_model:patternFile" ) );
+    
     
     
     std::wstring query;
