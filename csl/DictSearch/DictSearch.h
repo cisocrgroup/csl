@@ -73,17 +73,31 @@ namespace csl {
 	     * operations will win.
 	     */
 	    bool operator<( Interpretation const& other ) const {
+/* 	      std::wcout << "op< this=" << this << std::endl; */
+/* 	      std::wcout << "op< other=" << &other << std::endl; */
+/* 	      std::wcout << "op< this=" << this->toString() << std::endl; */
+/* 	      std::wcout << "op< other=" << other.toString() << std::endl; */
+
+/* 		float compareSumOfOperations =  */
+/* 		    ( getInstruction().size() + getLevDistance() * 1.01 ) -  */
+/* 		    ( other.getInstruction().size() + other.getLevDistance() * 1.01 ); */
+
 		float compareSumOfOperations = 
-		    ( getInstruction().size() + getLevDistance() * 1.01 ) - 
-		    ( other.getInstruction().size() + other.getLevDistance() * 1.01 );
+		    ( getInstruction().size() + getLevDistance()  ) - 
+		    ( other.getInstruction().size() + other.getLevDistance() );
 
 		if     ( compareSumOfOperations < 0 ) return true;
 		else if( compareSumOfOperations > 0 ) return false;
-		else if( getDictModule().getPriority() != other.getDictModule().getPriority() )
-		    return ( getDictModule().getPriority() > other.getDictModule().getPriority() );
-		else return ( getWord() < other.getWord() );
+		else if( getLevDistance() < other.getLevDistance() ) return true;
+	
+		else if( getDictModule().getPriority() > other.getDictModule().getPriority() ) return true;
+		else if( getWord().compare( other.getWord() ) < 0 ) return true;
+		else {
+		  return false;
+		}
 	    }
 	    
+
 	    /**
 	     * @brief specify the dictModule which the interpretation comes from
 	     * @see dictModule_
@@ -138,8 +152,8 @@ namespace csl {
 	 * @brief CandidateSet is a simple container to collect candidates/interpretations
 	 *        from either a Vaam or a csl::MSMatch object.
 	 */
-	class CandidateSet : public iResultReceiver,
-			     std::vector< csl::DictSearch::Interpretation > {
+	class CandidateSet : public iResultReceiver
+	{
 	public:
 	    typedef csl::DictSearch::Interpretation Interpretation_t;
 	    typedef std::vector< Interpretation_t >::iterator iterator;
@@ -161,7 +175,7 @@ namespace csl {
 	     * @brief This is to fulfill the csl::InterpretationReceiver interface
 	     */
 	    void receive( csl::Interpretation const& vaam_interpretation ) {
-		push_back( csl::DictSearch::Interpretation( vaam_interpretation, *currentDictModule_ ) );
+	      myVector_.push_back( csl::DictSearch::Interpretation( vaam_interpretation, *currentDictModule_ ) );
 	    }
 
 	    
@@ -177,63 +191,63 @@ namespace csl {
 	     * @see clear()
 	     */
 	    void reset() {
-		std::vector< Interpretation_t >::clear();
+		myVector_.clear();
 	    }
 
 	    /**
 	     * @brief method defined as usual for containers, e.g. in the std library
 	     */
 	    void clear() {
-		std::vector< Interpretation_t >::clear();
+		myVector_.clear();
 	    }
 
 	    /**
 	     * @brief method defined as usual for containers, e.g. in the std library
 	     */
 	    iterator begin() {
-		return std::vector< Interpretation_t >::begin();
+		return myVector_.begin();
 	    }
 
 	    /**
 	     * @brief method defined as usual for containers, e.g. in the std library
 	     */
 	    const_iterator begin() const {
-		return std::vector< Interpretation_t >::begin();
+		return myVector_.begin();
 	    }
 
 	    /**
 	     * @brief method defined as usual for containers, e.g. in the std library
 	     */
 	    iterator end() {
-		return std::vector< Interpretation_t >::end();
+		return myVector_.end();
 	    }
 
 	    /**
 	     * @brief method defined as usual for containers, e.g. in the std library
 	     */
 	    const_iterator end() const {
-		return std::vector< Interpretation_t >::end();
+		return myVector_.end();
 	    }
 
 	    /**
 	     * @brief method defined as usual for containers, e.g. in the std library
 	     */
 	    size_t size() const {
-		return std::vector< Interpretation_t >::size();
+		return myVector_.size();
 	    }
 
 	    /**
 	     * @brief method defined as usual for containers, e.g. in the std library
 	     */
 	    bool empty() const {
-		return std::vector< Interpretation_t >::empty();
+		return myVector_.empty();
 	    }
 
 	    /**
 	     * @brief method defined as usual for containers, e.g. in the std library
 	     */
 	    Interpretation_t const& at( size_t i ) const {
-		return std::vector< Interpretation_t >::at( i );
+		return myVector_.at( i );
 	    }
 
 
@@ -245,6 +259,7 @@ namespace csl {
 	     * This is somewhat messy. Certainly it is not thread-safe!!!
 	     */
 	    iDictModule const* currentDictModule_;
+	    std::vector< csl::DictSearch::Interpretation > myVector_;
 
 	}; // class CandidateSet
 
