@@ -73,27 +73,36 @@ namespace csl {
 	     * operations will win.
 	     */
 	    bool operator<( Interpretation const& other ) const {
-/* 	      std::wcout << "op< this=" << this << std::endl; */
-/* 	      std::wcout << "op< other=" << &other << std::endl; */
-/* 	      std::wcout << "op< this=" << this->toString() << std::endl; */
-/* 	      std::wcout << "op< other=" << other.toString() << std::endl; */
+		
+		// std::wcout << "op< this=" << this << std::endl;
+		// std::wcout << "op< other=" << &other << std::endl;
+		// std::wcout << "op< this=" << this->toString() << std::endl;
+		// std::wcout << "op< other=" << other.toString() << std::endl;
 
-/* 		float compareSumOfOperations =  */
-/* 		    ( getInstruction().size() + getLevDistance() * 1.01 ) -  */
-/* 		    ( other.getInstruction().size() + other.getLevDistance() * 1.01 ); */
-
-		float compareSumOfOperations = 
+		// float compareSumOfOperations =
+		//     ( getInstruction().size() + getLevDistance() * 1.01 ) -
+		//     ( other.getInstruction().size() + other.getLevDistance() * 1.01 );
+		
+		int compareSumOfOperations = 
 		    ( getInstruction().size() + getLevDistance()  ) - 
 		    ( other.getInstruction().size() + other.getLevDistance() );
-
+		
+		if( compareSumOfOperations == 0 ) {
+		    compareSumOfOperations = getLevDistance() - other.getLevDistance();
+		}
+		// std::wcout 
+		//     << "BLA:" << getInstruction().size() << L" + " << getLevDistance() << L" - " 
+		//     << other.getInstruction().size() << L" + " << other.getLevDistance() << std::endl
+		//     <<"sum=" << compareSumOfOperations << std::endl
+		//     ;
+		
 		if     ( compareSumOfOperations < 0 ) return true;
 		else if( compareSumOfOperations > 0 ) return false;
-		else if( getLevDistance() < other.getLevDistance() ) return true;
-	
+		
 		else if( getDictModule().getPriority() > other.getDictModule().getPriority() ) return true;
 		else if( getWord().compare( other.getWord() ) < 0 ) return true;
 		else {
-		  return false;
+		    return false;
 		}
 	    }
 	    
@@ -175,9 +184,9 @@ namespace csl {
 	     * @brief This is to fulfill the csl::InterpretationReceiver interface
 	     */
 	    void receive( csl::Interpretation const& vaam_interpretation ) {
-	      myVector_.push_back( csl::DictSearch::Interpretation( vaam_interpretation, *currentDictModule_ ) );
+		myVector_.push_back( csl::DictSearch::Interpretation( vaam_interpretation, *currentDictModule_ ) );
 	    }
-
+	    
 	    
 	    
 
@@ -191,7 +200,7 @@ namespace csl {
 	     * @see clear()
 	     */
 	    void reset() {
-		myVector_.clear();
+		clear();
 	    }
 
 	    /**
@@ -262,6 +271,8 @@ namespace csl {
 	    std::vector< csl::DictSearch::Interpretation > myVector_;
 
 	}; // class CandidateSet
+
+
 
 
 

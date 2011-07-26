@@ -31,7 +31,7 @@ int main( int argc, char const** argv ) {
 	ResultSet list;
 
 
-	uchar bytesIn[Global::lengthOfLongStr]; // = "and,artificiall,distributed,inteligence,machiene";
+	uchar bytesIn[Global::lengthOfLongStr];
 	wchar_t query[Global::lengthOfLongStr];
 
 	// set the last byte to 0. So we can recognize when an overlong string was read by getline().
@@ -43,8 +43,8 @@ int main( int argc, char const** argv ) {
 	    }
 	    mbstowcs( query, (char*)bytesIn, Global::lengthOfLongStr );
 
-	    //printf( "Query: %ls\n", query );
-
+	    // printf( "Query: %ls\n", query );
+	    
 	    list.reset(); // forget candidates that might be stored from earlier use
 
 	    try {
@@ -63,7 +63,7 @@ int main( int argc, char const** argv ) {
 	    if( machineReadable ) { // print all hits in one line
 		size_t i = 0;
 		for( i = 0; i < list.getSize(); ++i ) {
-		    printf( "%ls,%d,%d", list[i].getStr(), list[i].getLevDistance(), list[i].getAnn() );
+		    wprintf( "%ls,%d,%d", list[i].getStr(), list[i].getLevDistance(), list[i].getAnn() );
 		    if( i + 1  != list.getSize() ) std::wcout<<"|";
 		}
 		printf( "\n" );
@@ -71,7 +71,7 @@ int main( int argc, char const** argv ) {
 	    else {
 		size_t i = 0;
 		for( i = 0;i < list.getSize();++i ) {
-		    printf( "%ls,%d,%d\n", list[i].getStr(), list[i].getLevDistance(), list[i].getAnn() );
+		    wprintf( L"%ls,%d,%d\n", list[i].getStr(), list[i].getLevDistance(), list[i].getAnn() );
 		}
 	    }
 	}

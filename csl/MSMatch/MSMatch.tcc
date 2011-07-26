@@ -59,6 +59,8 @@ namespace csl {
 	static int newDicPos;
 	static LevDEA::Pos newLevPos;
 
+	if( (size_t)depth > ( Global::lengthOfWord-1 ) ) throw exceptions::cslException( "csl::MSMatch: candidate too long" );
+
 	// store w if node is final in dic and lev;
 	static int levDistanceSecond;
 	levDistanceSecond = levDEASecond_->getDistance( levPos );
@@ -89,16 +91,20 @@ namespace csl {
 	    // printf( "FOUND SECOND:%ls, dist of 2nd part is %d\n", word_, levDistanceSecond ); // DEBUG
 	    // printf( "levDistanceFirst_ = %d\n", levDistanceFirst_ ); // DEBUG
 
-	    // push word and annotated value into the output list
-	    // USE DUMMY VALUE FOR LEVDISTANCE
-	    // candReceiver_->receive( wordCorrectDir, 42, dictFW_->getAnnotation( perfHashValue ) );
+	    // push word and annotated value into the results_ container
 	    size_t levDistance = levDistanceFirst_ + levDistanceSecond;
 	    CandidateMap::iterator pos = results_.find( wordCorrectDir );
 	    if( pos == results_.end() ) {
 		// printf( "MATCH FIRST TIME :%ls, dist is %d\n", wordCorrectDir, levDistance ); // DEBUG
-		results_.insert( std::pair< std::wstring, std::pair< size_t, int > >( std::wstring( wordCorrectDir ), std::pair< size_t, int >( levDistance, dictFW_->getAnnotation( perfHashValue ) ) ) );
+		results_.insert( std::pair< std::wstring, std::pair< size_t, int > >( 
+				     std::wstring( wordCorrectDir ), 
+				     std::pair< size_t, int >( 
+					 levDistance, 
+					 dictFW_->getAnnotation( perfHashValue ) 
+					 ) 
+				     )
+		    );
 	    }
-
 	    else {
 		// printf( "MATCH AGAIN:%ls, dist is %d\n", wordCorrectDir, levDistance ); // DEBUG
 		// (pos->second).first holds the lev.-distance of the candidate
@@ -356,6 +362,12 @@ namespace csl {
 
 	candReceiver_ = &candReceiver; // is not necessary at the moment
 	
+	// std::wcout << "query=" << pattern << std::flush;
+	// std::wcout << ",results=" << &results_ << std::flush;
+	// std::wcout << ",size=" << results_.size() << std::endl;
+	// for( CandidateMap::iterator it = results_.begin(); it != results_.end(); ++it ) {
+	//     std::wcout << ">>" << it->first << std::endl;
+	// }
 	results_.clear();
 
 	pattern_[Global::lengthOfWord - 1] = 0;
@@ -393,10 +405,10 @@ namespace csl {
 	else if( k_ == 3 ) queryCases_3();
 	else throw exceptions::invalidLevDistance( "csl::MSMATCH::query: invalid levenshtein distance" );
 
-	for( CandidateMap::iterator it = results_.begin(); it != results_.end(); ++it ) {
+	for( CandidateMap::const_iterator it = results_.begin(); it != results_.end(); ++it ) {
 	    if( ( caseMode_ == Global::restoreCase ) && wasUpperCase ) {
 		std::wstring tmp = it->first;
-		tmp.at( 0 ) = std::toupper( tmp.at( 0 ));
+		if( ! tmp.empty() ) tmp.at( 0 ) = std::toupper( tmp.at( 0 ) );
 		candReceiver_->receive( tmp.c_str(), (it->second).first , (it->second).second  );
 	    }
 	    else candReceiver_->receive( (it->first).c_str(), (it->second).first , (it->second).second );
