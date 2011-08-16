@@ -150,6 +150,11 @@ namespace csl {
 	public:
 	    virtual void setCurrentDictModule( iDictModule const& dm ) = 0;
 
+	    /**
+	     *
+	     */
+	    virtual void handleWordBoundaries( bool b ) = 0;
+
 	}; // class iResultReceiver
 
 
@@ -187,7 +192,8 @@ namespace csl {
 		myVector_.push_back( csl::DictSearch::Interpretation( vaam_interpretation, *currentDictModule_ ) );
 	    }
 	    
-	    
+	    void handleWordBoundaries( bool b ) {
+	    }
 	    
 
 	    /**
@@ -195,6 +201,8 @@ namespace csl {
 	     */
 	    void setCurrentDictModule( iDictModule const& dm ) { currentDictModule_ = &dm; }
 	    
+
+
 	    /**
 	     * @brief alias for clear()
 	     * @see clear()
