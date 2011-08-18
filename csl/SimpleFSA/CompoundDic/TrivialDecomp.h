@@ -17,22 +17,22 @@ namespace csl {
 	    }
 
 	    bool decomp( std::wstring const& word ) const {
-		// std::wcout<<"!"<<word<<std::endl;
+		std::wcout<<"!"<<word<<std::endl;
 		std::stack< std::wstring > alternatives;
 		State const* st = minDic_.getRoot();
 		// std::wcerr<<"startstate is "<< st <<std::endl;
 		std::wstring::const_iterator c = word.begin();
 		while( ( c != word.end() ) && 
 		       ( st = st->delta( *c ) ) ) {
-
-		    // std::wcerr<<"char is "<<*c<< ", state is "<< st <<std::endl;
+		    
+		    std::wcerr<<"char is "<<*c<< ", state is "<< st <<std::endl;
 		    if( st->delta('#') ) {
 			alternatives.push( word.substr( c - word.begin() + 1 ) );
 		    }
 		    ++c;
 		}
 		if( st && st->delta('$') ) {
-		    //std::wcerr<<"state is final:"<< st <<std::endl;
+		    std::wcerr<<"state is final:"<< st <<std::endl;
 		
 		    return true;
 		}
@@ -65,6 +65,7 @@ namespace csl {
 		if( ++count % 100000 == 0 ) std::wcerr<< count / 1000 << "k tokens processed."<<std::endl;
 
 
+		// note that line 'foo#11'  adds two lines to the dic: foo# and foo$
 		if( *( line.end() - 2 ) == L'1' ) {
 		    minDic_.addToken( line.substr( 0, line.size() - 3 ) + L'#' );
 		}
