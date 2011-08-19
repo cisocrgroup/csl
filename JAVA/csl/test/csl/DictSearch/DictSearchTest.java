@@ -42,14 +42,36 @@ public class DictSearchTest {
      * Test of query method, of class DictSearch.
      */
     @Test
+    public void testConstructor() {
+        DictSearch instance;
+
+        try {
+            instance = new DictSearch("/no/such/inifile");
+            fail( "Expected an exception to be thrown.");
+        } catch (DictSearchException ex) {
+            // is expected
+        }
+        
+    }
+
+    /**
+     * Test of query method, of class DictSearch.
+     */
+    @Test
     public void testQuery() {
         System.out.println("query");
-        String q = "";
-        DictSearch instance = new DictSearch("/mounts/Users/student/uli/implement/OCRC_trunk/dictionaries/ocrc.ini");
-        List<Interpretation> expResult = new ArrayList<Interpretation>();
-        List result = instance.query(q);
-        assertEquals(expResult, result);
-        // TODO review the generated test code and remove the default call to fail.
+
+        try {
+            DictSearch instance = new DictSearch("/mounts/Users/student/uli/implement/OCRC_trunk/dictionaries/ocrc.ini");
+            
+            List<Interpretation> l = instance.query( "tneil" );
+            
+            assertEquals( 1, l.size() );
+
+        } catch (DictSearchException ex) {
+            fail( "Unexpected exception" + ex.getMessage() );
+        }
+        
     }
 
 }

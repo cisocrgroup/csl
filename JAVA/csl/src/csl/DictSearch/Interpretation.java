@@ -5,9 +5,18 @@ package csl.DictSearch;
  *
  * @author uli
  */
-class Interpretation {
+public class Interpretation {
     public Interpretation( String s ) {
-           nativeString = s;
+            
+        nativeString = new String( s );
+        
+        int begin = 0;
+        int end = nativeString.indexOf(':');
+        word = nativeString.substring( begin, end );
+        begin = end + 1;
+        end = nativeString.indexOf('+');
+        modernWord = nativeString.substring( begin, end );
+               
     }    
     
     @Override

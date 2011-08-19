@@ -586,7 +586,6 @@ dictionary * iniparser_load(const char * ininame)
 
     in.open( ininame );
     if ( ! in.good() ) {
-	std::wcerr << "iniparser: cannot open file" << std::endl;
         return NULL ;
     }
 

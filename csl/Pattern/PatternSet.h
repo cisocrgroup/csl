@@ -89,7 +89,7 @@ namespace csl {
 	std::wifstream fi;
 	fi.imbue( CSL_UTF8_LOCALE );
 	fi.open( patternFile );
-	if( ! fi ) {
+	if( ! fi.good() ) {
 	    std::string message = 
 		std::string( "PatternSet::Could not open pattern file: " ) +
 		patternFile;
@@ -103,7 +103,7 @@ namespace csl {
 	while( getline( fi, line ).good() ) {
 	    size_t delimPos = line.find( Pattern::leftRightDelimiter_ );
 	    if( delimPos == std::wstring::npos ) {
-		throw exceptions::badInput( "PatternGraph: Invalid line in pattern file" );
+		throw exceptions::badInput( "PatternSet: Invalid line in pattern file" );
 	    }
 
 	    patternList_.push_back( Pattern( line.substr( 0, delimPos ), line.substr( delimPos + 1 ) ) );

@@ -109,7 +109,9 @@ namespace csl {
 		throw exceptions::cslException( "csl::DictSearch::readConfiguration: unknown dict_type for dictionary " + *it );
 	    }
 	    
-	}
+	} // for all dictModules
+
+	initHypothetic( iniConf.getstring( "language_model:patternFile" ) );
     }
     
 

@@ -40,7 +40,6 @@ int main( int argc, char const** argv ) {
 
     csl::INIConfig config( options.getOption( "config" ) );
     dictSearch.readConfiguration( config );
-    dictSearch.initHypothetic( config.getstring( "language_model:patternFile" ) );
     
     
     

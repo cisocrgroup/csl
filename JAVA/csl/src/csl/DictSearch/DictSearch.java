@@ -1,7 +1,10 @@
 package csl.DictSearch;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
@@ -13,8 +16,9 @@ public class DictSearch<T> {
         System.loadLibrary( "JNIDictSearch" );
     }
     
-    public DictSearch( String configFile ) {
-        native_init(configFile);
+    
+    public DictSearch( String configFile ) throws DictSearchException {
+        pointer_ = native_init(configFile);  
     }
     
     /**
@@ -35,15 +39,37 @@ public class DictSearch<T> {
     
     public List<Interpretation> query( String q ) {
         List answerList = new ArrayList<Interpretation>();
-        long nativeAnswerSet = native_query( q, new ResultReceiver( answerList ) );
+        native_query( q, new ResultReceiver( answerList ) );
         
         return answerList;
     }
     
     
     
-    private native void native_init( String config );
+    private native long native_init( String config ) throws DictSearchException;
 
-    private native long native_query(String q, ResultReceiver answerList );
+    private native void native_query(String q, ResultReceiver answerList );
     
-}
+    private long pointer_;
+    
+    
+    public static void main( String[] argv ) {
+        try {
+            DictSearch ds = new DictSearch( argv[0] );
+            java.io.BufferedReader stdin = new java.io.BufferedReader(new java.io.InputStreamReader(System.in));
+            String line;
+            List<Interpretation> cands;
+            while( ( line = stdin.readLine() ) != null ) {
+                cands = ds.query( line );
+                Iterator<Interpretation> it  = cands.iterator();
+                while( it.hasNext() ) {
+                    System.out.println( it.next().toString() );
+                }
+            }
+        } catch (Exception ex) {
+            Logger.getLogger(DictSearch.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        
+    }
+    
+} // class DictSearch
