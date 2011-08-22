@@ -90,6 +90,13 @@ namespace csl {
 		if( compareSumOfOperations == 0 ) {
 		    compareSumOfOperations = getLevDistance() - other.getLevDistance();
 		}
+		if( compareSumOfOperations == 0 ) {
+		    compareSumOfOperations = other. getDictModule().getPriority() - getDictModule().getPriority();
+		}
+		if( compareSumOfOperations == 0 ) {
+		    compareSumOfOperations = getWord().compare( other.getWord() );
+		}
+
 		// std::wcout 
 		//     << "BLA:" << getInstruction().size() << L" + " << getLevDistance() << L" - " 
 		//     << other.getInstruction().size() << L" + " << other.getLevDistance() << std::endl
@@ -98,9 +105,6 @@ namespace csl {
 		
 		if     ( compareSumOfOperations < 0 ) return true;
 		else if( compareSumOfOperations > 0 ) return false;
-		
-		else if( getDictModule().getPriority() > other.getDictModule().getPriority() ) return true;
-		else if( getWord().compare( other.getWord() ) < 0 ) return true;
 		else {
 		    return false;
 		}

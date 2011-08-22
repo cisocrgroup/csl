@@ -64,7 +64,7 @@ public class DictSearchTest {
         try {
             DictSearch instance = new DictSearch("/mounts/Users/student/uli/implement/OCRC_trunk/dictionaries/ocrc.ini");
             
-            List<Interpretation> l = instance.query( "tneil" );
+            List<Interpretation> l = instance.query( "theil" );
             
             assertEquals( 1, l.size() );
 
