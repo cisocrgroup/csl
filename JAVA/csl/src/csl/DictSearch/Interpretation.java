@@ -19,6 +19,10 @@ public class Interpretation {
                
     }    
     
+    public String getModernWord() {
+        return modernWord;
+    }
+
     @Override
     public String toString() {
         return nativeString;
@@ -27,4 +31,5 @@ public class Interpretation {
     private String word;
     private String modernWord;
     private String nativeString;
+
 }
