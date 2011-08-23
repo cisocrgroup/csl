@@ -201,8 +201,6 @@ namespace csl {
 
 	    patternList_.push_back( Pattern( left, right ) );
 
-	    std::wcout << "left=" << left << ",right=" << right << std::endl;
-
 	    if( wordBegin_left ) { // then also wordBegin_right must be true
 		left.erase( 0, 1 );
 		right.erase( 0, 1 );
@@ -212,7 +210,6 @@ namespace csl {
 		right.erase( right.size()-1, 1 );
 	    }
 
-	    std::wcout << "left=" << left << ",right=" << right << std::endl;
 
 	    strippedPatternList_.push_back( Pattern( left, right ) );
 	    
