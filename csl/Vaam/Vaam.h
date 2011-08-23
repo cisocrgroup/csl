@@ -81,6 +81,7 @@ namespace csl {
 	 */
 	typedef MinDicType MinDic_t;
 
+	
 
 	/**
 	 * A straight-forward implementation of the interface above.
@@ -279,6 +280,9 @@ namespace csl {
 	 * @param[out] answer
 	 */
 	void reportMatch_rec( const Position* cur, Interpretation* answer ) const;
+
+	void applyPatterns( size_t depth ) const;
+	void checkForMatches( size_t depth ) const;
 
 	/////   DATA MEMBERS OF VAAM    //////////////////////
 

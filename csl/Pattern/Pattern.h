@@ -3,6 +3,7 @@
 
 #include<string>
 #include<iostream>
+#include<csl/Global.h>
 
 namespace csl {
 
@@ -80,6 +81,12 @@ namespace csl {
 
 	inline void setRight( std::wstring const& right );
 
+	/**
+	 * @brief Get rid of wordBegin- and wordEnd-markers
+	 *
+	 */
+	inline void strip();
+
 	inline void print( std::wostream& os = std::wcout ) const;
 
 	inline std::wstring toString() const;
@@ -135,6 +142,11 @@ namespace csl {
 
     inline void Pattern::setRight( std::wstring const& right ) {
 	right_ = right;
+    }
+
+    inline void Pattern::strip() {
+	if( (! left_.empty()) && ( left_.at( 0 ) == Global::wordBeginMarker ) ) left_.erase( 0, 1 );
+	if( (! left_.empty()) && ( left_.at( left_.size()-1 ) == Global::wordEndMarker ) ) left_.erase( left_.size()-1, 1 );
     }
 
     void Pattern::print( std::wostream& os ) const {

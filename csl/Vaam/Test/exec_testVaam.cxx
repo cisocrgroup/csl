@@ -7,6 +7,15 @@
 
 int main() {
 
+// this is easier for debugging
+#if false
+    csl::TestVaam testVaam;
+    
+    testVaam.testWordBorders();
+    return( 1 );
+#endif
+
+
     // Adds the test to the list of test to run
     CppUnit::TextUi::TestRunner runner;
     runner.addTest( csl::TestVaam::suite() );

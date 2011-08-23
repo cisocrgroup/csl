@@ -95,7 +95,7 @@ namespace csl {
 	class InternalState {
 	public:
 	    InternalState( Alphabet const& alph ) :
-		alph_( &alph ), errorLink_( 0 ), depth_( 0 ), isFinal_( false ) {
+		alph_( &alph ), errorLink_( 0 ), prefixLength_( 0 ), isFinal_( false ) {
 		
 		transitions_.resize( alph_->size(), 0 );
 	    }
@@ -158,7 +158,7 @@ namespace csl {
 	    Replacements_t replacements_;
 	    size_t errorLink_;
 	    std::wstring allLabels_;
-	    int depth_;
+	    int prefixLength_;
 	    bool isFinal_;
 	}; // class InternalState
 
@@ -226,7 +226,7 @@ namespace csl {
 	    /**
 	     * @return the "distance" from the root to the target state
 	     */
-	    inline size_t getDepth() const;
+	    inline size_t getPrefixLength() const;
 	    
 	    inline bool isFinal() const;
 
@@ -338,8 +338,8 @@ namespace csl {
 	return newState;
     }
 
-    inline size_t PatternGraph::State::getDepth() const {
-	return myGraph_->states_.at( stateIndex_ ).depth_;
+    inline size_t PatternGraph::State::getPrefixLength() const {
+	return myGraph_->states_.at( stateIndex_ ).prefixLength_;
     }
 
 
@@ -363,7 +363,7 @@ namespace csl {
 	return ( stateIndex_ != 0 );
     }
 
-    inline const PatternGraph::Replacements_t& PatternGraph::State::getReplacements() const {
+    inline PatternGraph::Replacements_t const& PatternGraph::State::getReplacements() const {
 	return myGraph_->states_.at( stateIndex_ ).replacements_;
     }
 
@@ -391,6 +391,8 @@ namespace csl {
 
 
     inline void PatternGraph::loadPatterns( const char* patternFile ) {
+
+	// Use the base class method to read the patterns from the file
 	PatternSet::loadPatterns( patternFile );
 
 
@@ -447,7 +449,10 @@ namespace csl {
 		 c != indexed.end();
 		 ++c ) {
 		State newSt = newState();
-		states_.at( newSt.getStateIndex() ).depth_ = c - indexed.begin() + 1;
+		size_t newPrefixLength = lastState.getPrefixLength();
+		if( (*c != Global::wordBeginMarker ) && (*c != Global::wordEndMarker ) ) ++newPrefixLength; // begin and end-markers do not contribute to prefixLength
+
+		states_.at( newSt.getStateIndex() ).prefixLength_ = newPrefixLength;
 		states_.at( lastState.getStateIndex() ).setTransition( *c, newSt.getStateIndex() );
 		lastState = newSt;
 	    }
@@ -513,6 +518,14 @@ namespace csl {
 	size_t count = 0;
 	for( std::vector< InternalState >::const_iterator st = states_.begin() ; st != states_.end(); ++st ) {
 	    std::wcout<<count<<"[label=\""<<count<<"\",peripheries="<< ( (st->isFinal_)? "2" : "1" ) << "] // DOTCODE" << std::endl;
+
+	    if( st->isFinal_ ) {
+		std::wcout << count << "->" << count << "[color=\"#dddddd\", label=\"";
+		for( Replacements_t::const_iterator r = st->replacements_.begin(); r != st->replacements_.end(); ++r ) {
+		    std::wcout << "(" << this->at(r->second).toString() << ")";
+		}
+		std::wcout << "\"] // DOTCODE\n";
+	    }
 
 	    for( std::wstring::const_iterator c = st->allLabels_.begin();
 		 c !=  st->allLabels_.end();

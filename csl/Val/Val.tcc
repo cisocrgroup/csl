@@ -99,7 +99,7 @@ namespace csl {
 
 	    if( cur.empty() ) {
 		cur.lookAheadDepth_ = last.lookAheadDepth_ + 1;
-		if( cur.lookAheadDepth_ > patternPos.getDepth() ) {
+		if( cur.lookAheadDepth_ > patternPos.getPrefixLength() ) {
 		    //std::wcerr << "break" << std::endl;
 		    break;
 		}

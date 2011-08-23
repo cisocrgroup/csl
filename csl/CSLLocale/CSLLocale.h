@@ -103,6 +103,15 @@ namespace csl {
 	    return ret;
 	}
 
+	/**
+	 * @brief Returns a copy of a narrow string equivalent to the given wide string.
+	 */
+	inline static std::string wstring2string( std::wstring const& str ) {
+	    std::string ret;
+	    wstring2string( str, ret );
+	    return ret;
+	}
+
 
 
 

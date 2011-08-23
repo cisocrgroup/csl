@@ -51,6 +51,9 @@ void printHelp() {
 	      << "                          Use this optionto suppress this status message." << std::endl
 	      << "--systemlocale            Use the system locale. This is the default STILL." << std::endl
 	      << "                          But the default is likely to change to the csl utf8 locale." << std::endl
+	      << std::endl
+	      << "--printQuery              Print the query word to STDOUT. (Mostly for debug purposes.) " << std::endl
+	
 	      << std::endl;
 }
 
@@ -65,8 +68,8 @@ int main(int argc, const char** argv ) {
 	opt.specifyOption( "machineReadable", csl::Getopt::VOID );
 	opt.specifyOption( "noStatusMessage", csl::Getopt::VOID );
 	opt.specifyOption( "patternDelimiter", csl::Getopt::STRING );
-
 	opt.specifyOption( "systemlocale", csl::Getopt::VOID );
+	opt.specifyOption( "printQuery", csl::Getopt::VOID );
 	opt.getOptionsAsSpecified( argc, argv );
 	
 
@@ -148,6 +151,11 @@ int main(int argc, const char** argv ) {
 	while( std::getline( std::wcin, query ).good() ) {
 	    ++nrOfQueries;
 	    answers.clear();
+
+	    if( opt.hasOption( "printQuery" ) ) {
+		std::wcout << ">>>" << query << "<<<" << std::endl;
+	    }
+
 	    vaam.query( query, &answers );
 
 	    std::sort( answers.begin(), answers.end() );

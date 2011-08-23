@@ -102,6 +102,9 @@ namespace csl {
 	static const wchar_t keyValueDelimiter = '#';
 	static const uchar valuesDelimiter = ',';
 
+	static const wchar_t wordBeginMarker = L'^';
+	static const wchar_t wordEndMarker = L'$';
+
 	// For more results, the program should not break but do a (maybe not so efficient) realloc
 	static const int LevMaxNrOfResults = 200;
 

@@ -72,7 +72,10 @@ namespace csl {
 	    // even if the Patterns change the word length
 	    for( const_reverse_iterator rit = rbegin(); rit != rend(); ++rit ) {
 		// std::wcout<<"pos="<< rit->getPosition()<<"left="<<rit->getLeft()<<",llength="<< rit->getLeft().length()<<", right="<< rit->getRight()<<std::endl; // DEBUG
-		str->replace( rit->getPosition(), rit->getLeft().length(), rit->getRight() );
+		
+		Pattern pat = *rit;
+		pat.strip(); // get rid of word-boundary markers
+		str->replace( rit->getPosition(), pat.getLeft().length(), pat.getRight() );
 	    }
 	}
 	else if( direction == -1 ) {

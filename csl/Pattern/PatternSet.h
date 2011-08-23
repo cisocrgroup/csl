@@ -39,6 +39,15 @@ namespace csl {
 	    return patternList_.at( i );
 	}
 
+	/**
+	 * @brief Returns a reference pointing to the \c i -th position of the
+	 *        STRIPPED set. 
+	 *
+	 */
+	inline Pattern const& stripped_at( size_t i ) const {
+	    return strippedPatternList_.at( i );
+	}
+
 
 	/**
 	 * @brief returns an iterator at the first pattern of the list
@@ -78,11 +87,17 @@ namespace csl {
 
     private:
 	PatternList_t patternList_;
+
+	/**
+	 * @brief This list holds all patterns which are also in patternList_, but WITHOUT the ^ and $ markers.
+	 */
+	PatternList_t strippedPatternList_;
     }; // class PatternSet
 
 
     PatternSet::PatternSet() {
 	patternList_.push_back( Pattern() );
+	strippedPatternList_.push_back( Pattern() );
     }
 
     void PatternSet::loadPatterns( const char* patternFile ) {
@@ -101,12 +116,24 @@ namespace csl {
 
 	size_t patternCount = 0;
 	while( getline( fi, line ).good() ) {
+
+	    if( line.empty() ) continue;
+	    if( line.at(0) == '#' ) continue;
+	    
 	    size_t delimPos = line.find( Pattern::leftRightDelimiter_ );
 	    if( delimPos == std::wstring::npos ) {
-		throw exceptions::badInput( "PatternSet: Invalid line in pattern file" );
+		throw exceptions::badInput( std::string( "PatternSet: Invalid line in pattern file: " ) + csl::CSLLocale::wstring2string( line ) );
 	    }
 
-	    patternList_.push_back( Pattern( line.substr( 0, delimPos ), line.substr( delimPos + 1 ) ) );
+	    std::wstring left = line.substr( 0, delimPos );
+	    std::wstring right = line.substr( delimPos + 1 );
+	    patternList_.push_back( Pattern( left, right ) );
+
+	    if( (! left.empty()) && ( left.at( 0 ) == Global::wordBeginMarker ) ) left.erase( 0, 1 );
+	    if( (! left.empty()) && ( left.at( left.size()-1 ) == Global::wordEndMarker ) ) left.erase( left.size()-1, 1 );
+	    strippedPatternList_.push_back( Pattern( left, right ) );
+
+	    
 	}
 	if( errno == EILSEQ ) { // catch encoding error
 	    throw exceptions::badInput( "csl::PatternSet: Encoding error in input sequence." );
