@@ -40,6 +40,7 @@ namespace csl {
 
 	size_t depth = 1; // depth 0 was initialized above
 	PatternGraph::State patternPos = patternGraph_.getRoot();
+	patternPos.walk( Global::wordBeginMarker );
 
 	// iterate through query
 	for( std::wstring::const_iterator c = query_.begin(); c != query_.end(); ++c, ++depth ) {

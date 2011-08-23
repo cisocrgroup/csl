@@ -63,7 +63,7 @@ int main( int argc, char const** argv ) {
 	    if( machineReadable ) { // print all hits in one line
 		size_t i = 0;
 		for( i = 0; i < list.getSize(); ++i ) {
-		    wprintf( "%ls,%d,%d", list[i].getStr(), list[i].getLevDistance(), list[i].getAnn() );
+		    wprintf( L"%ls,%d,%d", list[i].getStr(), list[i].getLevDistance(), list[i].getAnn() );
 		    if( i + 1  != list.getSize() ) std::wcout<<"|";
 		}
 		printf( "\n" );

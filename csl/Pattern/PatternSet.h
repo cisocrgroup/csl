@@ -7,6 +7,7 @@
 
 #include "../Global.h"
 #include "./Pattern.h"
+#include<csl/CSLLocale/CSLLocale.h>
 
 
 namespace csl {
@@ -92,6 +93,11 @@ namespace csl {
 	 * @brief This list holds all patterns which are also in patternList_, but WITHOUT the ^ and $ markers.
 	 */
 	PatternList_t strippedPatternList_;
+
+	static bool either_or( bool a, bool b ) {
+	    return ( ( a && !b ) || ( !a && b ) );
+	}
+
     }; // class PatternSet
 
 
@@ -122,26 +128,103 @@ namespace csl {
 	    
 	    size_t delimPos = line.find( Pattern::leftRightDelimiter_ );
 	    if( delimPos == std::wstring::npos ) {
-		throw exceptions::badInput( std::string( "PatternSet: Invalid line in pattern file: " ) + csl::CSLLocale::wstring2string( line ) );
+		throw exceptions::badInput( std::string( "PatternSet: Invalid pattern - no separator found: " ) + csl::CSLLocale::wstring2string( line ) );
 	    }
 
 	    std::wstring left = line.substr( 0, delimPos );
 	    std::wstring right = line.substr( delimPos + 1 );
+
+	    // check for word border markers
+	    bool wordBegin_left, wordEnd_left, wordBegin_right, wordEnd_right;
+	    size_t pos = left.find( Global::wordBeginMarker );
+	    if( pos == left.npos ) {
+		wordBegin_left = false;
+	    }
+	    else if( pos == 0 ) {
+		wordBegin_left = true;
+	    }
+	    else {
+		throw exceptions::badInput( 
+		    std::string( "PatternSet: Invalid pattern - wordBeginMarker in middle of left side: " ) 
+		    + csl::CSLLocale::wstring2string( line ) );
+	    }
+
+	    pos = right.find( Global::wordBeginMarker );
+	    if( pos == right.npos ) {
+		wordBegin_right = false;
+	    }
+	    else if( pos == 0 ) {
+		wordBegin_right = true;
+	    }
+	    else {
+		throw exceptions::badInput( 
+		    std::string( "PatternSet: Invalid pattern - wordBeginMarker in middle of right side: " )
+		    + csl::CSLLocale::wstring2string( line ) );
+	    }
+
+	    pos = left.find( Global::wordEndMarker );
+	    if( pos == left.npos ) {
+		wordEnd_left = false;
+	    }
+	    else if( pos == left.size()-1 ) {
+		wordEnd_left = true;
+	    }
+	    else {
+		throw exceptions::badInput( 
+		    std::string( "PatternSet: Invalid pattern - wordEndMarker in middle of left side: " ) 
+		    + csl::CSLLocale::wstring2string( line ) );
+	    }
+
+	    pos = right.find( Global::wordEndMarker );
+	    if( pos == right.npos ) {
+		wordEnd_right = false;
+	    }
+	    else if( pos == right.size() - 1 ) {
+		wordEnd_right = true;
+	    }
+	    else {
+		throw exceptions::badInput( std::string( "PatternSet: Invalid pattern - wordEndMarker in middle of right side: " ) + csl::CSLLocale::wstring2string( line ) );
+	    }
+
+	    if( either_or( wordBegin_left, wordBegin_right ) ) {
+		throw exceptions::badInput( 
+		    std::string( "PatternSet: Invalid pattern - wordBeginMarker must be specified on left AND right side: " ) 
+		    + csl::CSLLocale::wstring2string( line ) );
+	    }
+
+	    if( either_or( wordEnd_left, wordEnd_right ) ) {
+		throw exceptions::badInput( 
+		    std::string( "PatternSet: Invalid pattern - wordEndMarker must be specified on left AND right side: " ) 
+		    + csl::CSLLocale::wstring2string( line ) );
+	    }
+	    // end: check for markers
+
 	    patternList_.push_back( Pattern( left, right ) );
 
-	    if( (! left.empty()) && ( left.at( 0 ) == Global::wordBeginMarker ) ) left.erase( 0, 1 );
-	    if( (! left.empty()) && ( left.at( left.size()-1 ) == Global::wordEndMarker ) ) left.erase( left.size()-1, 1 );
-	    strippedPatternList_.push_back( Pattern( left, right ) );
+	    std::wcout << "left=" << left << ",right=" << right << std::endl;
 
+	    if( wordBegin_left ) { // then also wordBegin_right must be true
+		left.erase( 0, 1 );
+		right.erase( 0, 1 );
+	    }
+	    if( wordEnd_left ) { // then also wordBegin_right must be true
+		left.erase( left.size()-1, 1 );
+		right.erase( right.size()-1, 1 );
+	    }
+
+	    std::wcout << "left=" << left << ",right=" << right << std::endl;
+
+	    strippedPatternList_.push_back( Pattern( left, right ) );
 	    
 	}
 	if( errno == EILSEQ ) { // catch encoding error
 	    throw exceptions::badInput( "csl::PatternSet: Encoding error in input sequence." );
 	}
-
-	std::wcerr<<"csl::PatternSet: Loaded "<<patternList_.size() - 1 << " patterns." << std::endl;
+	
+	std::wcerr << "csl::PatternSet: Loaded " << patternList_.size() - 1 << " patterns." << std::endl;
     } // PatternSet::loadPatterns
-
+    
+    
 
 } // eon
 
