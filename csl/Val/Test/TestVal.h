@@ -11,11 +11,13 @@ namespace csl {
     class TestVal : public CppUnit::TestFixture  {
 
 	CPPUNIT_TEST_SUITE( TestVal );
-	CPPUNIT_TEST( testBasics );
+//	CPPUNIT_TEST( testBasics );
+	CPPUNIT_TEST( testWordBorders );
 	CPPUNIT_TEST_SUITE_END();
     public:
 	TestVal();
 	void testBasics();
+	void testWordBorders();
 // 	void testConstructionDetails();
 // 	void lookupAllKeys();
 	
@@ -114,6 +116,110 @@ namespace csl {
 // 	CPPUNIT_ASSERT( ! val.query( std::wstring( L"hanne" ), &answers ) );
 
 //     }
+
+
+    // stolen from testVaam
+    void TestVal::testWordBorders() {
+	std::wcout << "*** TestVal::testWordBorders ***" << std::endl;
+ 	MinDic<> baseDic;
+	baseDic.initConstruction();
+	baseDic.addToken( L"abra", 0 );
+	baseDic.addToken( L"abracadabra", 0 );
+	baseDic.finishConstruction();
+	Val val( baseDic, "../csl/Val/Test/patterns.borders.txt" );
+	
+	Val::CandidateReceiver answers;
+	
+	// this is the word as it is in the dic
+	val.query( L"abracadabra", &answers  );
+	CPPUNIT_ASSERT_EQUAL( (size_t) 1, (size_t) answers.size() );
+	CPPUNIT_ASSERT( answers.at(0).getWord() == L"abracadabra" );
+
+	// wordBegin pattern works at wordBegin : ^ab:beb
+	answers.clear();
+	val.query( L"bebracadabra", &answers  );
+	CPPUNIT_ASSERT_EQUAL( (size_t) 1, (size_t) answers.size() );
+	CPPUNIT_ASSERT( answers.at(0).getBaseWord() == L"abracadabra" );
+	CPPUNIT_ASSERT( answers.at(0).getWord() == L"bebracadabra" );
+	
+	// wordBegin pattern does NOT work in the middle
+	answers.clear();
+	val.query( L"abracadbebra", &answers  );
+	CPPUNIT_ASSERT_EQUAL( (size_t) 0, (size_t) answers.size() );
+	
+	// standard patterns works also at beginning and end
+	answers.clear();
+	val.query( L"zebracadabra", &answers  );
+	CPPUNIT_ASSERT_EQUAL( (size_t) 1, (size_t) answers.size() );
+	CPPUNIT_ASSERT( answers.at(0).getBaseWord() == L"abracadabra" );
+	CPPUNIT_ASSERT( answers.at(0).getWord() == L"zebracadabra" );
+
+	answers.clear();
+	val.query( L"abracadzebra", &answers  );
+	CPPUNIT_ASSERT_EQUAL( (size_t) 1, (size_t) answers.size() );
+	CPPUNIT_ASSERT( answers.at(0).getBaseWord() == L"abracadabra" );
+	CPPUNIT_ASSERT( answers.at(0).getWord() == L"abracadzebra" );
+
+	// wordEnd pattern works at the end
+	answers.clear();
+	val.query( L"abracadabpo", &answers  );
+	CPPUNIT_ASSERT_EQUAL( (size_t)1, (size_t)answers.size() );
+	CPPUNIT_ASSERT( answers.at(0).getBaseWord() == L"abracadabra" );
+	CPPUNIT_ASSERT( answers.at(0).getWord() == L"abracadabpo" );
+	
+	// wordEnd pattern works at the end of word that is prefix of another one.
+	answers.clear();
+	val.query( L"abpo", &answers  );
+	CPPUNIT_ASSERT_EQUAL( (size_t)1, (size_t)answers.size() );
+	CPPUNIT_ASSERT( answers.at(0).getBaseWord() == L"abra" );
+	
+	// wordEnd pattern does NOT work in the middle
+	answers.clear();
+	val.query( L"abpocadabra", &answers  );
+	CPPUNIT_ASSERT_EQUAL( (size_t)0, (size_t)answers.size() );
+
+
+	// standard pattern that has wordEnd pattern as prefix works
+	answers.clear();
+	val.query( L"abtakadabra", &answers  );
+	CPPUNIT_ASSERT_EQUAL( (size_t)1, (size_t)answers.size() );
+	CPPUNIT_ASSERT( answers.at(0).getBaseWord() == L"abracadabra" );
+	CPPUNIT_ASSERT( answers.at(0).getWord() == L"abtakadabra" );
+
+	// this refers to an insertion at wordend: $:sim
+	answers.clear();
+	val.query( L"abracadabrasim", &answers  );
+	CPPUNIT_ASSERT_EQUAL( (size_t)1, (size_t)answers.size() );
+	CPPUNIT_ASSERT( answers.at(0).getBaseWord() == L"abracadabra" );
+	CPPUNIT_ASSERT( answers.at(0).getWord() == L"abracadabrasim" );
+
+	// this refers to a deletion at wordend: $bra:
+	answers.clear();
+	val.query( L"abracada", &answers  );
+	CPPUNIT_ASSERT_EQUAL( (size_t)1, (size_t)answers.size() );
+	CPPUNIT_ASSERT( answers.at(0).getBaseWord() == L"abracadabra" );
+	CPPUNIT_ASSERT( answers.at(0).getWord() == L"abracada" );
+
+
+	// this refers to an insertion at wordBegin: ^:rumb
+	answers.clear();
+	val.query( L"rumbabracadabra", &answers  );
+	CPPUNIT_ASSERT_EQUAL( (size_t)1, (size_t)answers.size() );
+	CPPUNIT_ASSERT( answers.at(0).getBaseWord() == L"abracadabra" );
+	CPPUNIT_ASSERT( answers.at(0).getWord() == L"rumbabracadabra" );
+
+	// this refers to a deletion at wordBegin: ^abr:
+	answers.clear();
+	val.query( L"acadabra", &answers  );
+	CPPUNIT_ASSERT_EQUAL( (size_t)1, (size_t)answers.size() );
+	CPPUNIT_ASSERT( answers.at(0).getBaseWord() == L"abracadabra" );
+	CPPUNIT_ASSERT( answers.at(0).getWord() == L"acadabra"  );
+
+
+
+
+	
+    }
 
 } // namespace csl
 

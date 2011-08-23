@@ -181,7 +181,6 @@ namespace csl {
 
 	
 	Global::CaseMode caseMode_;
-	std::locale locale_;
 
 	size_t minNrOfPatterns_;
 	size_t maxNrOfPatterns_;

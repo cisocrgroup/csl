@@ -2,8 +2,9 @@ namespace csl {
 
     Val::Val( MinDic_t const& baseDic, char const* patternFile ) :
 	patternGraph_( PatternGraph::FORWARD, PatternGraph::INDEX_RIGHT ),
-	caseMode_( Global::asIs ),
-	locale_( CSL_UTF8_LOCALE ) {
+	caseMode_( Global::asIs ),	
+	maxNrOfPatterns_( Val::INFINITE )
+	{
 
 	baseDic_ = &baseDic;
 	patternGraph_.loadPatterns( patternFile );
@@ -25,9 +26,9 @@ namespace csl {
 	query_ = word;
 
 	wasUpperCase_ = false;
-	if( ( caseMode_ != Global::asIs ) && std::iswupper( query_.at( 0 )/*, locale_*/ ) ) {
+	if( ( caseMode_ != Global::asIs ) && std::iswupper( query_.at( 0 ) /** , csl::CSLLocale::Instance() **/ ) ) {
 	    wasUpperCase_ = true;
-	    query_.at( 0 ) = std::tolower( query_.at( 0 ), locale_ );
+	    query_.at( 0 ) = std::tolower( query_.at( 0 ), csl::CSLLocale::Instance() );
 	}
 
 	interpretations_ = interpretations;
@@ -71,9 +72,9 @@ namespace csl {
 		     leftSide != patternPos.getReplacements().end();
 		     ++leftSide ) {
 		    
-		    size_t sizeOfRightSide = patternGraph_.at( leftSide->second ).getRight().length();
+		    size_t sizeOfRightSide = patternGraph_.stripped_at( leftSide->second ).getRight().length();
 		    
-		    // for all positions of the stackItem (tracked back leftside)
+		    // for all positions of the stackItem (tracked back rightside)
 		    size_t count = 0;
 		    for( StackItem::const_iterator pos = stack_.at( depth - sizeOfRightSide ).begin();
 			 pos != stack_.at( depth - sizeOfRightSide ).end();
@@ -83,7 +84,7 @@ namespace csl {
 			if( ( maxNrOfPatterns_ != Val::INFINITE ) && ( pos->getNrOfPatternsApplied() == maxNrOfPatterns_ ) )
 			    continue;
 			
-			MinDic_t::State newDicPos = pos->dicPos_.getTransTarget( leftSide->first.c_str() );
+			MinDic_t::State newDicPos = pos->dicPos_.getTransTarget( patternGraph_.stripped_at( leftSide->second ).getLeft().c_str() );
 			if( newDicPos.isValid() )  {
 			    //                              1 more applied pattern than cur position       store current position as 'mother'-position
 			    Position newPosition( newDicPos, pos->getNrOfPatternsApplied() + 1, std::make_pair( depth - sizeOfRightSide, count ) );
@@ -153,14 +154,13 @@ namespace csl {
 	if( wasUpperCase_ ) {
 	    
 	    std::wstring tmp = interpretation.getBaseWord();
-	    tmp.at( 0 ) = std::toupper( tmp.at( 0 ), locale_ );
+	    tmp.at( 0 ) = std::toupper( tmp.at( 0 ), csl::CSLLocale::Instance() );
 	    interpretation.setBaseWord( tmp );
 
 	    tmp = interpretation.getWord();
-	    tmp.at( 0 ) = std::toupper( tmp.at( 0 ), locale_ );
+	    tmp.at( 0 ) = std::toupper( tmp.at( 0 ), csl::CSLLocale::Instance() );
 	    interpretation.setWord( tmp );
 	}
-
 
  	interpretations_->receive( interpretation );
    }

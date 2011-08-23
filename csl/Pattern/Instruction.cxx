@@ -83,7 +83,9 @@ namespace csl {
 	    // even if the Patterns change the word length
 	    for( const_iterator it = begin(); it != end(); ++it ) {
 		//std::wcout<<"pos="<< it->getPosition()<<"left="<<it->getLeft()<<",length="<< it->getLeft().length()<<", right="<< it->getRight()<<std::endl; // DEBUG
-		str->replace( it->getPosition(), it->getRight().length(), it->getLeft() );
+		Pattern pat = *it;
+		pat.strip(); // get rid of word-boundary markers
+		str->replace( it->getPosition(), pat.getRight().length(), pat.getLeft() );
 	    }
 	}
 	else {
