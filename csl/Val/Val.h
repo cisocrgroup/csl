@@ -150,7 +150,10 @@ namespace csl {
 	    Stack() {
 		// reserve( 500 );
 	    }
-	};
+	}; // class Stack
+
+
+	inline void applyPatterns( size_t depth, PatternGraph::State const& patternPos ) const;
 
 	inline void reportMatch( const Position* cur, int baseWordScore ) const;
 

@@ -67,9 +67,11 @@ namespace csl {
     typename TransTable< TT_PERFHASH, InternalCharType__, SizeType__ >::StateId_t
     TransTable< TT_PERFHASH, InternalCharType__, SizeType__ >
     ::walkPerfHash( StateId_t state, wchar_t c, size_t* phValue ) const {
+	//std::wcout << "walk from " << state << " with " << c << "," << (size_t)c << std::endl;
 	assert( cells_[state].isState() );
 	if( ( c > 0 ) && ( state + c < sizeOfUsedCells_  ) && ( cells_[state + c].getKey() == c ) ) {
 	    *phValue += cells_[state + c].getThirdValue();
+	    //std::wcout << "To " << cells_[state + c].getValue() << std::endl;
 	    return cells_[state + c].getValue();
 	}
 	return 0;

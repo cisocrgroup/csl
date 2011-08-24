@@ -33,22 +33,24 @@ namespace csl {
 
 	interpretations_ = interpretations;
 	
-	stack_.clear();
-	stack_.reserve( query_.length() + 1 );
-	stack_.push_back( StackItem() );
-	stack_.back().push_back( Position( baseDic_->getRootState() ) );
-	
-
 	size_t depth = 1; // depth 0 was initialized above
 	PatternGraph::State patternPos = patternGraph_.getRoot();
 	patternPos.walk( Global::wordBeginMarker );
 
-	// iterate through query
+	stack_.clear();
+	stack_.reserve( query_.length() + 1 );
+	stack_.push_back( StackItem() );
+	stack_.back().push_back( Position( baseDic_->getRootState() ) );
+	applyPatterns( 0, patternPos );
+	
+
+
+	// for all chars of the query word
 	for( std::wstring::const_iterator c = query_.begin(); c != query_.end(); ++c, ++depth ) {
 	    
-	    StackItem const& last = stack_.back();
+	    StackItem const& last = stack_.back(); // this is stack_.at( depth - 1 )
 	    stack_.push_back( StackItem() );
-	    StackItem& cur = stack_.back();
+	    StackItem& cur = stack_.back();        // this is stack_.at( depth )
 
 	    // std::wcout << "depth=" << depth << ",#pos=" << last.size() << ", patPos=" << patternPos.getStateIndex() << std::endl;
 
@@ -66,38 +68,9 @@ namespace csl {
 	    }
 	    
 	    patternPos.walk( *c );
-	    if( patternPos.isFinal() ) {
-		// for all patterns fitting a suffix of the current path
-		for( PatternGraph::Replacements_t::const_iterator leftSide = patternPos.getReplacements().begin();
-		     leftSide != patternPos.getReplacements().end();
-		     ++leftSide ) {
-		    
-		    size_t sizeOfRightSide = patternGraph_.stripped_at( leftSide->second ).getRight().length();
-		    
-		    // for all positions of the stackItem (tracked back rightside)
-		    size_t count = 0;
-		    for( StackItem::const_iterator pos = stack_.at( depth - sizeOfRightSide ).begin();
-			 pos != stack_.at( depth - sizeOfRightSide ).end();
-			 ++pos, ++count ) {
-			
-			// check if maxNrOfPatterns_ is reached already
-			if( ( maxNrOfPatterns_ != Val::INFINITE ) && ( pos->getNrOfPatternsApplied() == maxNrOfPatterns_ ) )
-			    continue;
-			
-			MinDic_t::State newDicPos = pos->dicPos_.getTransTarget( patternGraph_.stripped_at( leftSide->second ).getLeft().c_str() );
-			if( newDicPos.isValid() )  {
-			    //                              1 more applied pattern than cur position       store current position as 'mother'-position
-			    Position newPosition( newDicPos, pos->getNrOfPatternsApplied() + 1, std::make_pair( depth - sizeOfRightSide, count ) );
-			    newPosition.addPosPattern( PosPattern( patternGraph_.at( leftSide->second ).getLeft(),
-								   patternGraph_.at( leftSide->second ).getRight(),
-								   depth - sizeOfRightSide ) );
-			    cur.push_back( newPosition );
-			    cur.lookAheadDepth_ = 0;
-			}
-		    } // for all rightSides
-		} // for all positions
-		
-	    } // if patternPos final
+
+	    applyPatterns( depth, patternPos );
+
 
 	    if( cur.empty() ) {
 		cur.lookAheadDepth_ = last.lookAheadDepth_ + 1;
@@ -112,24 +85,72 @@ namespace csl {
 	    
 	} // for all chars of the query word
 
-	// report matches
-	bool foundAnswers = false;
-	if( ( depth == word.length() + 1 ) && ( stack_.back().lookAheadDepth_ == 0 ) ) {  // we are not in the lookahead-phase
-	    // for all positions
-	    size_t count = 0;
-	    for( StackItem::iterator position = stack_.back().begin();
-		 position != stack_.back().end();
-		 ++position ) {
-		if( position->dicPos_.isFinal() ) {
-		    reportMatch( &( *position ), position->dicPos_.getAnnotation() );
-		    foundAnswers = true;
-		}
-		++count;
-	    } // for all positions
-	} // report matches
-	return foundAnswers;
+
+	if( depth == word.length() + 1 ) { // we reached the end of the query word
+
+	    patternPos.walk( Global::wordEndMarker );
+	    applyPatterns( depth - 1, patternPos );
+	    
+	    if( stack_.back().lookAheadDepth_ == 0 ) {  // we are not in the lookahead-phase
+		
+		// report matches
+		bool foundAnswers = false;
+		// for all positions
+		size_t count = 0;
+		for( StackItem::iterator position = stack_.back().begin();
+		     position != stack_.back().end();
+		     ++position ) {
+		    if( position->dicPos_.isFinal() ) {
+			reportMatch( &( *position ), position->dicPos_.getAnnotation() );
+			foundAnswers = true;
+		    }
+		    ++count;
+		} // for all positions
+		return foundAnswers;
+	    } // not in lookahead phase 
+	    else return false;
+	} // reached end of word
+	else return false;
+
     } // method query
     
+    void Val::applyPatterns( size_t depth, PatternGraph::State const& patternPos ) const {
+	if( patternPos.isFinal() ) {
+	    // for all patterns fitting a suffix of the current path
+	    for( PatternGraph::Replacements_t::const_iterator leftSide = patternPos.getReplacements().begin();
+		 leftSide != patternPos.getReplacements().end();
+		 ++leftSide ) {
+		    
+		size_t sizeOfRightSide = patternGraph_.stripped_at( leftSide->second ).getRight().length();
+		    
+		// for all exisitng positions of the stackItem (tracked back rightside)
+		// If we are dealing with an empty right side, new positions might be added to this StackItem - 
+		// So we don't use iterators here, they might become invalid during the process!
+		size_t nrOfOldPositions = stack_.at( depth - sizeOfRightSide ).size();
+		for( size_t i = 0; i < nrOfOldPositions; ++i ) {
+		    Position& pos = stack_.at( depth - sizeOfRightSide ).at( i );
+			
+		    // check if maxNrOfPatterns_ is reached already
+		    if( ( maxNrOfPatterns_ != Val::INFINITE ) && ( pos.getNrOfPatternsApplied() == maxNrOfPatterns_ ) )
+			continue;
+			
+		    MinDic_t::State newDicPos = pos.dicPos_.getTransTarget( patternGraph_.stripped_at( leftSide->second ).getLeft().c_str() );
+		    if( newDicPos.isValid() )  {
+			//std::wcerr << "Apply Pattern " << patternGraph_.at( leftSide->second ).toString() << std::endl;
+			//                              1 more applied pattern than cur position       store current position as 'mother'-position
+			Position newPosition( newDicPos, pos.getNrOfPatternsApplied() + 1, std::make_pair( depth - sizeOfRightSide, i ) );
+			newPosition.addPosPattern( PosPattern( patternGraph_.at( leftSide->second ).getLeft(),
+							       patternGraph_.at( leftSide->second ).getRight(),
+							       depth - sizeOfRightSide ) );
+
+			stack_.at( depth ).push_back( newPosition ); // CAUTION! Here the vector might realloc, the reference 'pos' might become invalid!
+			stack_.at( depth ).lookAheadDepth_ = 0;
+		    }
+		} // for all rightSides
+	    } // for all positions
+	} // if patternPos final
+    }
+
     void Val::reportMatch( const Position* cur, int baseWordScore ) const {
 	Interpretation interpretation;
 

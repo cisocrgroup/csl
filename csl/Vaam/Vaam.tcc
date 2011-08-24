@@ -93,7 +93,7 @@ namespace csl {
 
 	applyPatterns( depth );
 
-	size_t nrOfPositions = stack_[depth].size();
+	size_t nrOfPositions = stack_[depth].size(); //remember the nr of postitions before applying the wordEndMarker
 	if( stack_[depth].dicPos_.isFinal() ) {
 	    PatternGraph::State oldPatternPos = stack_[depth].patternPos_;
 	    stack_[depth].patternPos_.walk( Global::wordEndMarker );
@@ -174,9 +174,9 @@ namespace csl {
 		size_t count = 0;
 		size_t nrOfOldPositions = stack_.at( depth - sizeOfLeftSide ).size();
 		for( typename StackItem::iterator position = stack_.at( depth - sizeOfLeftSide ).begin();
-		     count < nrOfOldPositions; // don't check for end() here, because the container is changed during the loop
+		     count < nrOfOldPositions; // don't check for end() here, because if the container is changed during the loop
 		     ++position, ++count ) {
-		    
+
 		    // check if maxNrOfPatterns_ is reached already
 		    if( ( maxNrOfPatterns_ != Vaam::INFINITE ) && ( position->getNrOfPatternsApplied() == maxNrOfPatterns_ ) )
 			continue;
@@ -189,6 +189,8 @@ namespace csl {
 			newPosition.addPosPattern( PosPattern( patternGraph_.at( rightSide->second ).getLeft(),
 							       patternGraph_.at( rightSide->second ).getRight(),
 							       depth - sizeOfLeftSide ) );
+			// CAUTION! Here stack_[depth] might re-alloc and make
+
 			stack_[depth].push_back( newPosition );
 			stack_[depth].lookAheadDepth_ = 0;
 		    }

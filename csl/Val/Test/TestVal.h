@@ -130,35 +130,35 @@ namespace csl {
 	
 	Val::CandidateReceiver answers;
 	
-	// this is the word as it is in the dic
-	val.query( L"abracadabra", &answers  );
-	CPPUNIT_ASSERT_EQUAL( (size_t) 1, (size_t) answers.size() );
-	CPPUNIT_ASSERT( answers.at(0).getWord() == L"abracadabra" );
+	// // This is the word as it is in the dic
+	// val.query( L"abracadabra", &answers  );
+	// CPPUNIT_ASSERT_EQUAL( (size_t) 1, (size_t) answers.size() );
+	// CPPUNIT_ASSERT( answers.at(0).getWord() == L"abracadabra" );
 
-	// wordBegin pattern works at wordBegin : ^ab:beb
-	answers.clear();
-	val.query( L"bebracadabra", &answers  );
-	CPPUNIT_ASSERT_EQUAL( (size_t) 1, (size_t) answers.size() );
-	CPPUNIT_ASSERT( answers.at(0).getBaseWord() == L"abracadabra" );
-	CPPUNIT_ASSERT( answers.at(0).getWord() == L"bebracadabra" );
+	// // wordBegin pattern works at wordBegin : ^ab:beb
+	// answers.clear();
+	// val.query( L"bebracadabra", &answers  );
+	// CPPUNIT_ASSERT_EQUAL( (size_t) 1, (size_t) answers.size() );
+	// CPPUNIT_ASSERT( answers.at(0).getBaseWord() == L"abracadabra" );
+	// CPPUNIT_ASSERT( answers.at(0).getWord() == L"bebracadabra" );
 	
-	// wordBegin pattern does NOT work in the middle
-	answers.clear();
-	val.query( L"abracadbebra", &answers  );
-	CPPUNIT_ASSERT_EQUAL( (size_t) 0, (size_t) answers.size() );
+	// // wordBegin pattern does NOT work in the middle
+	// answers.clear();
+	// val.query( L"abracadbebra", &answers  );
+	// CPPUNIT_ASSERT_EQUAL( (size_t) 0, (size_t) answers.size() );
 	
-	// standard patterns works also at beginning and end
-	answers.clear();
-	val.query( L"zebracadabra", &answers  );
-	CPPUNIT_ASSERT_EQUAL( (size_t) 1, (size_t) answers.size() );
-	CPPUNIT_ASSERT( answers.at(0).getBaseWord() == L"abracadabra" );
-	CPPUNIT_ASSERT( answers.at(0).getWord() == L"zebracadabra" );
+	// // standard patterns works also at beginning and end
+	// answers.clear();
+	// val.query( L"zebracadabra", &answers  );
+	// CPPUNIT_ASSERT_EQUAL( (size_t) 1, (size_t) answers.size() );
+	// CPPUNIT_ASSERT( answers.at(0).getBaseWord() == L"abracadabra" );
+	// CPPUNIT_ASSERT( answers.at(0).getWord() == L"zebracadabra" );
 
-	answers.clear();
-	val.query( L"abracadzebra", &answers  );
-	CPPUNIT_ASSERT_EQUAL( (size_t) 1, (size_t) answers.size() );
-	CPPUNIT_ASSERT( answers.at(0).getBaseWord() == L"abracadabra" );
-	CPPUNIT_ASSERT( answers.at(0).getWord() == L"abracadzebra" );
+	// answers.clear();
+	// val.query( L"abracadzebra", &answers  );
+	// CPPUNIT_ASSERT_EQUAL( (size_t) 1, (size_t) answers.size() );
+	// CPPUNIT_ASSERT( answers.at(0).getBaseWord() == L"abracadabra" );
+	// CPPUNIT_ASSERT( answers.at(0).getWord() == L"abracadzebra" );
 
 	// wordEnd pattern works at the end
 	answers.clear();
@@ -173,6 +173,7 @@ namespace csl {
 	CPPUNIT_ASSERT_EQUAL( (size_t)1, (size_t)answers.size() );
 	CPPUNIT_ASSERT( answers.at(0).getBaseWord() == L"abra" );
 	
+
 	// wordEnd pattern does NOT work in the middle
 	answers.clear();
 	val.query( L"abpocadabra", &answers  );
@@ -193,7 +194,7 @@ namespace csl {
 	CPPUNIT_ASSERT( answers.at(0).getBaseWord() == L"abracadabra" );
 	CPPUNIT_ASSERT( answers.at(0).getWord() == L"abracadabrasim" );
 
-	// this refers to a deletion at wordend: $bra:
+	// this refers to a deletion at wordend: $bra:$
 	answers.clear();
 	val.query( L"abracada", &answers  );
 	CPPUNIT_ASSERT_EQUAL( (size_t)1, (size_t)answers.size() );
@@ -201,22 +202,19 @@ namespace csl {
 	CPPUNIT_ASSERT( answers.at(0).getWord() == L"abracada" );
 
 
-	// this refers to an insertion at wordBegin: ^:rumb
+	// this refers to an insertion at wordBegin: ^:^rumb
 	answers.clear();
 	val.query( L"rumbabracadabra", &answers  );
 	CPPUNIT_ASSERT_EQUAL( (size_t)1, (size_t)answers.size() );
 	CPPUNIT_ASSERT( answers.at(0).getBaseWord() == L"abracadabra" );
 	CPPUNIT_ASSERT( answers.at(0).getWord() == L"rumbabracadabra" );
 
-	// this refers to a deletion at wordBegin: ^abr:
+	// this refers to a deletion at wordBegin: ^abr:^
 	answers.clear();
 	val.query( L"acadabra", &answers  );
 	CPPUNIT_ASSERT_EQUAL( (size_t)1, (size_t)answers.size() );
 	CPPUNIT_ASSERT( answers.at(0).getBaseWord() == L"abracadabra" );
 	CPPUNIT_ASSERT( answers.at(0).getWord() == L"acadabra"  );
-
-
-
 
 	
     }

@@ -201,6 +201,7 @@ namespace csl {
 
 	    patternList_.push_back( Pattern( left, right ) );
 
+
 	    if( wordBegin_left ) { // then also wordBegin_right must be true
 		left.erase( 0, 1 );
 		right.erase( 0, 1 );
@@ -210,6 +211,11 @@ namespace csl {
 		right.erase( right.size()-1, 1 );
 	    }
 
+	    if( left.empty() && right.empty() ) {
+		throw exceptions::badInput( 
+		    std::string( "PatternSet: Invalid pattern - empty pattern: " ) 
+		    + csl::CSLLocale::wstring2string( line ) );
+	    }
 
 	    strippedPatternList_.push_back( Pattern( left, right ) );
 	    
