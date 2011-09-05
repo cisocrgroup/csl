@@ -27,7 +27,7 @@ namespace csl {
 	
 	if( dict_ == 0 ) throw exceptions::cslException( "csl::INIConfig: Cannot parse file" );
     }
-
+    
     void INIConfig::dump_ini( std::wostream& os ) const {
 	if( dict_ == NULL ) throw exceptions::cslException( "csl::INIConfig: No configuration loaded" );
 
@@ -101,7 +101,7 @@ namespace csl {
 
     int INIConfig::getint( char const* key ) const {
 	if( dict_ == NULL ) throw exceptions::cslException( "csl::INIConfig: No configuration loaded" );
-	return iniparser_getint(dict_, key, -1);
+	return CSLLocale::string2number< int >( std::string( getstring( key ) ) );
     }
 
     int INIConfig::getint( std::string const& key ) const {
@@ -111,12 +111,25 @@ namespace csl {
 
     double INIConfig::getdouble( char const* key ) const {
 	if( dict_ == NULL ) throw exceptions::cslException( "csl::INIConfig: No configuration loaded" );
-	return iniparser_getdouble(dict_, key, -1.0);
+	return CSLLocale::string2number< double >( std::string( getstring( key ) ) );
     }
 
     double INIConfig::getdouble( std::string const& key ) const {
 	if( dict_ == NULL ) throw exceptions::cslException( "csl::INIConfig: No configuration loaded" );
 	return getdouble( key.c_str() );
+    }
+
+    bool INIConfig::getbool( std::string const& key ) const {
+	if( dict_ == NULL ) throw exceptions::cslException( "csl::INIConfig: No configuration loaded" );
+	
+	try {
+	    int numericValue = getint( key );
+	    return ( numericValue != 0 );
+	} catch( exceptions::cslException& exc ) {
+	}
+	if( std::string( getstring( key ) ) == "true" ) return true;
+	else if( std::string( getstring( key ) ) == "false" ) return false;
+	else throw exceptions::cslException( "csl::INIConfig: can not interpret bool from value." );
     }
 
 } // eon

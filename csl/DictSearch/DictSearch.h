@@ -416,15 +416,12 @@ namespace csl {
 	     * @brief Sets sensible standard values for word-length dependent distance bounds for approximate search
 	     *
 	     * - lev. distance 1 for wordslengths 1-6
-	     * - lev. distance 2 for wordslengths 7-12
-	     * - lev. distance 3 for wordslengths > 13
+	     * - lev. distance 2 for words of length 7 and longer
 	     *
 	     * @see setDLevWordlengths( size_t wordlength_1, size_t wordlength_2, size_t wordlength_3 ), setDLev
 	     */
 	    void setDLevWordlengths() {
-		minWordlengths_[1] = 1;
-		minWordlengths_[2] = 7;
-		minWordlengths_[3] = 13;
+		setDLevWordlengths( 1, 7, INFINITE );
 	    }
 
 	    /**
@@ -565,7 +562,8 @@ namespace csl {
 	    }
 
 	    /**
-	     * @brief connects the configuration to a certain dictionary
+	     * @brief connects the configuration to a certain dictionary.
+	     *        This dictionary will NOT be deleted in the destructor.
 	     * 
 	     * @param dict a const reference to an existing dictionary.
 	     */
@@ -576,7 +574,8 @@ namespace csl {
 	    }
 	    
 	    /**
-	     * @brief Loads a dictionary from the hard disk and connects it to the configuration 
+	     * @brief Loads a dictionary from the hard disk and connects it to the configuration.
+	     *        This dictionary will NOT be deleted in the destructor.
 	     * 
 	     * @param dictFile a path to a file storing a dictionary of type Dict_t
 	     */
@@ -590,7 +589,7 @@ namespace csl {
 	     * @brief Specify how to handle upper/lower case queries. See Global::CaseMode to find
 	     *        out which options are available.
 
-	     * Note that all options belongto the namespace csl::Global.
+	     * Note that all options belong to the namespace csl::Global.
 	     *
 	     */
 	    void setCaseMode( Global::CaseMode const& cm ) {

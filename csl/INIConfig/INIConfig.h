@@ -82,6 +82,15 @@ namespace csl {
 	 */
 	double getdouble( std::string const& key ) const;
 
+	/**
+	 * returns
+	 *  - true iff  the value is a valid integer not equal to 0 
+	 *  - true iff  the value is the string "true"
+	 *  - false iff the value is the integer number 0 
+	 *  - false iff the value is the string "false"
+	 * Throws a cslException otherwise.
+	 */
+	bool getbool( std::string const& key ) const;
 
 
 	/**

@@ -55,10 +55,18 @@ namespace csl {
 	    // Standard "word-list" dictionaries
 	    if( iniConf.getstring( *it + ":dict_type" ) == std::string( "simple" ) ) {
 	    
+		
 		DictModule& dm = addDictModule( wideName, iniConf.getstring( *it + ":path" ), cascadeRank );
 		
 		dm.setMaxNrOfPatterns( iniConf.getint( *it + ":histPatterns" ) );
-		dm.setDLev( iniConf.getint( *it + ":ocrErrors" ) );
+
+		if( std::string( iniConf.getstring( *it + ":ocrErrors" ) ) == "LENGTH_SENSITIVE" ) {
+		    dm.setDLevWordlengths();
+		}
+		else {
+		    dm.setDLev( iniConf.getint( *it + ":ocrErrors" ) );
+		}
+
 		dm.setDLevHypothetic( iniConf.getint( *it + ":ocrErrorsOnHypothetic" ) );
 		dm.setPriority( iniConf.getint( *it + ":priority" ) );
 		if( iniConf.hasKey( *it + ":caseMode" ) ) {
@@ -82,7 +90,13 @@ namespace csl {
 									wideName, 
 									iniConf.getstring( *it+ ":path" ), 
                                                 			cascadeRank );
-                sdm->setDLev( iniConf.getint( *it + ":ocrErrors" ) );
+		if( std::string( iniConf.getstring( *it + ":ocrErrors" ) ) == "LENGTH_SENSITIVE" ) {
+		    sdm->setDLevWordlengths();
+		}
+		else {
+		    sdm->setDLev( iniConf.getint( *it + ":ocrErrors" ) );
+		}
+
 
 		if( iniConf.hasKey( *it + ":caseMode" ) ) {
 		    if( std::string( "asIs" ) == iniConf.getstring( *it + ":caseMode" ) ) {

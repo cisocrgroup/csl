@@ -5,7 +5,6 @@
 #include<string.h>
 
 #include "../INIConfig.h"
-
 #include<cppunit/extensions/HelperMacros.h>
 
 
@@ -51,6 +50,15 @@ namespace csl {
 	iniFile << "int_test = 42" << std::endl;
 	iniFile << "double_test = 42.4242" << std::endl;
 	iniFile << "string_test = 'passt scho'" << std::endl;
+	iniFile << "bad_double = 42,4242" << std::endl; // with comma!
+
+	iniFile << "bool_test_true = true"   << std::endl;
+	iniFile << "bool_test_false = false" << std::endl;
+	iniFile << "bool_test_0 = 0"   << std::endl;
+	iniFile << "bool_test_1 = 1"   << std::endl;
+	iniFile << "bool_test_1_5 = 1.5"   << std::endl;
+	iniFile << "bool_test_bla = bla"   << std::endl;
+	
 	iniFile << "[eineKategorie]" << std::endl;
 	iniFile << "string_test = 'passt immer no'" << std::endl;
 	iniFile << "[andereKategorie]" << std::endl;
@@ -64,6 +72,41 @@ namespace csl {
 	CPPUNIT_ASSERT( iniconf.getdouble( ":double_test" ) == 42.4242 );
 	CPPUNIT_ASSERT( ! strcmp( iniconf.getstring( ":string_test" ), "passt scho" ) );
 	CPPUNIT_ASSERT( ! strcmp( iniconf.getstring( "eineKategorie:string_test" ), "passt immer no" ) );
+
+	try {
+	    double d = iniconf.getdouble( ":bad_double" );
+	    CPPUNIT_FAIL( "Exception expected" );
+	} 
+	catch( exceptions::cslException& exc ) {
+	    // as expected
+	}
+	catch( std::exception& exc ) {
+	    CPPUNIT_FAIL( "Did not expect this kind of exception." );
+	}
+
+	CPPUNIT_ASSERT( iniconf.getbool( ":bool_test_true" ) == true );
+	CPPUNIT_ASSERT( iniconf.getbool( ":bool_test_false" ) == false );
+	CPPUNIT_ASSERT( iniconf.getbool( ":bool_test_0" ) == false );
+	CPPUNIT_ASSERT( iniconf.getbool( ":bool_test_1" ) == true );
+
+	try {
+	    CPPUNIT_ASSERT( iniconf.getbool( ":bool_test_1_5" ) == true );
+	} catch( exceptions::cslException& exc ) {
+	    // as expected
+	} catch( std::exception& exc ) {
+	    CPPUNIT_FAIL( "Did not expect this kind of exception." );
+	}
+
+	try {
+	    CPPUNIT_ASSERT( iniconf.getbool( ":bool_test_bla" ) == true );
+	} catch( exceptions::cslException& exc ) {
+		// as expected
+	} catch( std::exception& exc ) {
+	    CPPUNIT_FAIL( "Did not expect this kind of exception." );
+	}
+
+
+	
 
 	// test SectionIterator
 	INIConfig::SectionIterator it = iniconf.sectionsBegin();
