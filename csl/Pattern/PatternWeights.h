@@ -51,7 +51,7 @@ namespace csl {
 	 */
 	void clear();
 
-	inline size_t size() {
+	inline size_t size() const {
 	    return patternWeights_.size();
 	}
 
