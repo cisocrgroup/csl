@@ -51,6 +51,10 @@ namespace csl {
 	 */
 	void clear();
 
+	inline size_t size() {
+	    return patternWeights_.size();
+	}
+
 	/**
 	 * @return the weight for a given pattern, or PatternWeights::UNDEF if the pattern is not known
 	 */
