@@ -6,25 +6,29 @@ namespace csl {
     PatternWeights::PatternWeights() : smartMerge_( false ) {
     }
     
-    void PatternWeights::reset() {
-	clear();
-    }
-
     void PatternWeights::clear() {
 	patternWeights_.clear();
 	defaultWeights_.clear();
     }
 
+    void PatternWeights::clearExplicitWeights() {
+	patternWeights_.clear();
+    }
+
+    
     float PatternWeights::getWeight( const csl::Pattern& pattern ) const {
+	// try and find it in the list of explicitly defined weights
 	std::map< csl::Pattern, float >::const_iterator it = patternWeights_.find( pattern );
 	if( it != patternWeights_.end() )
 	    return it->second;
-
+	
+	// Smart merge filter
 	if( smartMerge_ ) {
 	    if( pattern.getLeft().size() > 0 && ( pattern.getRight().find( pattern.getLeft() ) != std::wstring::npos )  ) return UNDEF;
 	    if( pattern.getRight().size() > 0 && ( pattern.getLeft().find( pattern.getRight() ) != std::wstring::npos )  ) return UNDEF;
 	}
 	
+	// otherwise, return default value for the respective pattern type (which might be UNDEF as well)
 	return getDefault( PatternType( pattern.getLeft().size(), pattern.getRight().size() ) );
     }
 
@@ -170,6 +174,7 @@ namespace csl {
     }
     
     void PatternWeights::print( std::wostream& str ) const{
+	str << "*** PatternWEights::DebugPrint ***" << std::endl;
 	std::vector< std::pair< csl::Pattern, float > > histPatternCountSorted;
 	sortToVector( &histPatternCountSorted );
 

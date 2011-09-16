@@ -66,7 +66,7 @@ int main( int argc, char const** argv ) {
 		    wprintf( L"%ls,%d,%d", list[i].getStr(), list[i].getLevDistance(), list[i].getAnn() );
 		    if( i + 1  != list.getSize() ) std::wcout<<"|";
 		}
-		printf( "\n" );
+		wprintf( L"\n" );
 	    }
 	    else {
 		size_t i = 0;

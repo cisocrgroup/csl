@@ -64,7 +64,7 @@ namespace csl {
 	
 	//Set the values for the first column
 	for(int i=1; i < matrixH; ++i ) {
-	    float prob = patternProbabilities_->getWeight( Pattern( wordErr_.substr( i, 1 ), L"" ) );
+	    float prob = patternProbabilities_->getWeight( Pattern( L"", wordErr_.substr( i, 1 ) ) );
 	    if( ( matrix_[i-1][0].value != PatternProbabilities::UNDEF) && ( prob != PatternProbabilities::UNDEF ) ) {
 		matrix_[i][0].value = matrix_[i-1][0].value + ( -log( prob ) );
 		matrix_[i][0].addPatternType( PatternProbabilities::PatternType( 0, 1 ) );
@@ -201,7 +201,7 @@ namespace csl {
 		
 		
 	    } // for( y = 1 .. matrixW )
-
+	    
 	    //std::wcout << "-------------------------------" <<std::endl;
 			
 	} // for(y = 1 .. matrixH)
