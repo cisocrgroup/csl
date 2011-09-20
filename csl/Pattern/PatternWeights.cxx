@@ -16,9 +16,9 @@ namespace csl {
     }
 
     
-    float PatternWeights::getWeight( const csl::Pattern& pattern ) const {
+    double PatternWeights::getWeight( const csl::Pattern& pattern ) const {
 	// try and find it in the list of explicitly defined weights
-	std::map< csl::Pattern, float >::const_iterator it = patternWeights_.find( pattern );
+	std::map< csl::Pattern, double >::const_iterator it = patternWeights_.find( pattern );
 	if( it != patternWeights_.end() )
 	    return it->second;
 	
@@ -32,16 +32,16 @@ namespace csl {
 	return getDefault( PatternType( pattern.getLeft().size(), pattern.getRight().size() ) );
     }
 
-    void PatternWeights::setWeight( const csl::Pattern& pattern, float weight ) {
+    void PatternWeights::setWeight( const csl::Pattern& pattern, double weight ) {
 	if( weight == UNDEF ) {
 	    patternWeights_.erase( pattern );
 	}
 	else patternWeights_[ pattern ] = weight;
     }
 
-    float PatternWeights::getDefault( PatternType const& patternType ) const {
+    double PatternWeights::getDefault( PatternType const& patternType ) const {
 	// look for a default setting suitable for the pattern's type (that is, for its ratio lefthand-size/righthand-size)
-	std::map< PatternType, float >::const_iterator defaultIt = defaultWeights_.find( patternType );
+	std::map< PatternType, double >::const_iterator defaultIt = defaultWeights_.find( patternType );
 	if( ( defaultIt != defaultWeights_.end() ) ) {
 	    return defaultIt->second;
 	}
@@ -49,7 +49,7 @@ namespace csl {
 	return UNDEF;
     }
 
-    void PatternWeights::setDefault( PatternType const& patternType, float weight ) {
+    void PatternWeights::setDefault( PatternType const& patternType, double weight ) {
 	if( weight == UNDEF ) {
 	    defaultWeights_.erase( patternType );
 	}
@@ -88,11 +88,11 @@ namespace csl {
 	    // std::wcout << "right side is " << line.substr( delimPos + 1, weightDelimPos - delimPos -1 ) << std::endl;
 	    // std::wcout << "weight is " << line.substr( weightDelimPos+1 ).c_str() << std::endl;
 
-	    float weight = 0;
+	    double weight = 0;
 	    try {
-		weight = csl::CSLLocale::string2number< float >( line.substr( weightDelimPos+1 ) );
+		weight = csl::CSLLocale::string2number< double >( line.substr( weightDelimPos+1 ) );
 	    } catch( std::exception& exc ) {
-		throw exceptions::badInput( "csl::PatternWeights: Could not parse float number." );
+		throw exceptions::badInput( "csl::PatternWeights: Could not parse double number." );
 	    }
 
 	    patternWeights_[ Pattern( line.substr( 0, delimPos ), 
@@ -108,12 +108,12 @@ namespace csl {
 
 	//std::wcerr << "csl::PatternWeights: Loaded " << patternCount << L" patterns."<< std::endl;
 
-	std::wofstream fo;
-	fo.imbue( CSLLocale::Instance() );
-	fo.open( "/tmp/patterns.xml" );
+	// std::wofstream fo;
+	// fo.imbue( CSLLocale::Instance() );
+	// fo.open( "/tmp/patterns.xml" );
 	
-	writeToXML( fo );
-	fo.close();
+	// writeToXML( fo );
+	// fo.close();
     } // loadFromFile
     
     void PatternWeights::writeToFile( const char* patternFile ) const {
@@ -124,10 +124,10 @@ namespace csl {
 	    throw exceptions::badFileHandle( "csl::PatternWeights: Could not open pattern file for writing" );
 	}
 
-	std::vector< std::pair< csl::Pattern, float > > histPatternCountSorted;
+	std::vector< std::pair< csl::Pattern, double > > histPatternCountSorted;
 	sortToVector( &histPatternCountSorted );
 
-	for( std::vector< std::pair< csl::Pattern, float > >::const_iterator it = histPatternCountSorted.begin();
+	for( std::vector< std::pair< csl::Pattern, double > >::const_iterator it = histPatternCountSorted.begin();
 	     it != histPatternCountSorted.end();
 	     ++it ) {
 	    fo         << it->first.getLeft() << Pattern::leftRightDelimiter_ << it->first.getRight() << "#" << it->second << std::endl;
@@ -165,20 +165,20 @@ namespace csl {
     }
 
     
-    void PatternWeights::sortToVector( std::vector< std::pair< csl::Pattern, float > >* vec ) const {
+    void PatternWeights::sortToVector( std::vector< std::pair< csl::Pattern, double > >* vec ) const {
 	if( ! vec->empty() ) throw exceptions::cslException( "csl::PatternWeights::sortToVector: output vector not empty." );
-        for( std::map< csl::Pattern, float >::const_iterator it = patternWeights_.begin(); it != patternWeights_.end(); ++it ) {
+        for( std::map< csl::Pattern, double >::const_iterator it = patternWeights_.begin(); it != patternWeights_.end(); ++it ) {
 	    vec->push_back( *it );
 	}
-	std::sort( vec->begin(), vec->end(), sortBySecond< std::pair< csl::Pattern, float > > );
+	std::sort( vec->begin(), vec->end(), sortBySecond< std::pair< csl::Pattern, double > > );
     }
     
     void PatternWeights::print( std::wostream& str ) const{
 	str << "*** PatternWEights::DebugPrint ***" << std::endl;
-	std::vector< std::pair< csl::Pattern, float > > histPatternCountSorted;
+	std::vector< std::pair< csl::Pattern, double > > histPatternCountSorted;
 	sortToVector( &histPatternCountSorted );
 
-	for( std::vector< std::pair< csl::Pattern, float > >::const_iterator it = histPatternCountSorted.begin();
+	for( std::vector< std::pair< csl::Pattern, double > >::const_iterator it = histPatternCountSorted.begin();
 	     it != histPatternCountSorted.end();
 	     ++it ) {
 	    str << it->first.getLeft() << Pattern::leftRightDelimiter_ << it->first.getRight() << "#" << it->second << std::endl;
@@ -186,7 +186,7 @@ namespace csl {
 	}
 	
 	str << "Default settings:" << std::endl;
-	for(std::map< PatternType, float >::const_iterator defaultIt = defaultWeights_.begin(); defaultIt != defaultWeights_.end(); defaultIt++){
+	for(std::map< PatternType, double >::const_iterator defaultIt = defaultWeights_.begin(); defaultIt != defaultWeights_.end(); defaultIt++){
 	    str << "<" <<  defaultIt->first.first << ',' << defaultIt->first.second << "> : " << defaultIt->second << std::endl;
 	}
     }

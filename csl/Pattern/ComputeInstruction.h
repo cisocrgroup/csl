@@ -95,12 +95,16 @@ namespace csl {
 		patternTypes = new PatternTypeChain( patternType, patternTypes );
 	    }
 
-	    float value;
+	    double value;
 	    PatternTypeChain* patternTypes;
 	}; // class MatrixItem
 	
 	
 	void getInstructions( int x, int y, size_t instructionIndex );
+
+	inline static bool positiveProb( double prob ) {
+	    return ( ( prob != PatternProbabilities::UNDEF ) && ( prob > 0 ) );
+	}
 	
 	/** 
 	 * @todo Find a good, dynamic solution here!

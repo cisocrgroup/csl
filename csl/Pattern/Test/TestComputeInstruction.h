@@ -50,7 +50,7 @@ namespace csl {
 
 
 	// sub
-	pp.reset();
+	pp.clear();
 	pp.setWeight( Pattern( L"x", L"y" ), 0.0001 );
 	CPPUNIT_ASSERT( ci.computeInstruction( L"abxcd", L"abycd", &instructions ) ); // 1 sub
 	CPPUNIT_ASSERT( instructions.size() == 1 );
@@ -59,7 +59,7 @@ namespace csl {
 
 
 	// insert
-	pp.reset();
+	pp.clear();
 	instructions.clear();
 	pp.setWeight( Pattern( L"", L"x" ), 0.0001 );
 	CPPUNIT_ASSERT( ci.computeInstruction( L"muh", L"mxuh", &instructions ) ); // 1 ins
@@ -68,7 +68,7 @@ namespace csl {
 	CPPUNIT_ASSERT( instructions.at( 0 ).at( 0 ) == PosPattern( L"", L"x", 1 ) );
 
 	// delete
-	pp.reset();
+	pp.clear();
 	instructions.clear();
 	pp.setWeight( Pattern( L"x", L"" ), 0.0001 );
 	CPPUNIT_ASSERT( ci.computeInstruction( L"mxuh", L"muh", &instructions ) ); // 1 del
@@ -77,7 +77,7 @@ namespace csl {
 	CPPUNIT_ASSERT( instructions.at( 0 ).at( 0 ) == PosPattern( L"x", L"", 1 ) );
 
 	// merge
-	pp.reset();
+	pp.clear();
 	instructions.clear();
 	pp.setWeight( Pattern( L"xy", L"z" ), 0.0001 );
 	CPPUNIT_ASSERT( ci.computeInstruction( L"mxyuh", L"mzuh", &instructions ) ); // 1 del
@@ -86,7 +86,7 @@ namespace csl {
 	CPPUNIT_ASSERT( instructions.at( 0 ).at( 0 ) == PosPattern( L"xy", L"z", 1 ) );
 
 	// split
-	pp.reset();
+	pp.clear();
 	instructions.clear();
 	pp.setWeight( Pattern( L"x", L"yz" ), 0.0001 );
 	CPPUNIT_ASSERT( ci.computeInstruction( L"mxuh", L"myzuh", &instructions ) ); // 1 del
@@ -95,7 +95,7 @@ namespace csl {
 	CPPUNIT_ASSERT( instructions.at( 0 ).at( 0 ) == PosPattern( L"x", L"yz", 1 ) );
 
 	
-	pp.reset();
+	pp.clear();
 	pp.setDefault( PatternProbabilities::PatternType( 0, 1 ), 0.00001 ); // standard ins
 	pp.setDefault( PatternProbabilities::PatternType( 1, 0 ), 0.00001 ); // standard del
 	pp.setDefault( PatternProbabilities::PatternType( 1, 1 ), 0.00001 ); // standard sub
@@ -112,10 +112,11 @@ namespace csl {
 
 	instructions.clear();
 	CPPUNIT_ASSERT( ci.computeInstruction( L"muh", L"mxuh", &instructions ) ); // 1 ins
+	std::wcout << "#####" << std::endl;
 	for( std::vector< Instruction >::const_iterator it = instructions.begin(); it != instructions.end(); ++it ) {
 	    it->print();std::wcout<<std::endl;
 	}
-	CPPUNIT_ASSERT( instructions.size() == 3 );
+	CPPUNIT_ASSERT_EQUAL( (size_t)3, instructions.size() );
 	CPPUNIT_ASSERT( instructions.at( 0 ).size() == 1 );
 	CPPUNIT_ASSERT( instructions.at( 0 ).at( 0 ) == PosPattern( L"", L"x", 1 ) );
 	CPPUNIT_ASSERT( instructions.at( 1 ).size() == 1 );
@@ -193,7 +194,7 @@ namespace csl {
 
 	// this is a setup that is used for the Profiler, for instance
 	/// obviously the merges and splits give additional trouble
-	pp.reset();
+	pp.clear();
 	pp.setDefault( PatternProbabilities::PatternType( 1, 1 ), 0.00001 );
 	pp.setDefault( PatternProbabilities::PatternType( 1, 0 ), 0.00001 );
 	pp.setDefault( PatternProbabilities::PatternType( 0, 1 ), 0.00001 );

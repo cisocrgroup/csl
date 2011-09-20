@@ -22,8 +22,8 @@ namespace csl {
     public:
 	static const int UNDEF = -1;
 
-	typedef std::map< csl::Pattern, float >::iterator PatternIterator;
-	typedef std::map< csl::Pattern, float >::const_iterator const_PatternIterator;
+	typedef std::map< csl::Pattern, double >::iterator PatternIterator;
+	typedef std::map< csl::Pattern, double >::const_iterator const_PatternIterator;
 
 	/**
 	 * @brief a PatternType describes the relation of the lengths of both pattern sides.
@@ -59,19 +59,19 @@ namespace csl {
 	/**
 	 * @return the weight for a given pattern, or PatternWeights::UNDEF if the pattern is not known
 	 */
-	float getWeight( const  csl::Pattern& pattern ) const;
+	double getWeight( const  csl::Pattern& pattern ) const;
 
 	/**
 	 * @brief set a new weight for a pattern
 	 */
-	void setWeight( const csl::Pattern& pattern, float weight );
+	void setWeight( const csl::Pattern& pattern, double weight );
 
 
 
-	float getDefault( PatternType const& patternType ) const;   
+	double getDefault( PatternType const& patternType ) const;   
 
 
-	void setDefault( PatternType const& patternType, float weight );
+	void setDefault( PatternType const& patternType, double weight );
 
 
 	/**
@@ -114,19 +114,19 @@ namespace csl {
 	void writeToXML( const char* xmlFile ) const;
 
 
-	void sortToVector( std::vector< std::pair< csl::Pattern, float > >* vec ) const;
+	void sortToVector( std::vector< std::pair< csl::Pattern, double > >* vec ) const;
 
 	private:
 
 	/**
 	 * @brief This data structure maps the known patterns to their weights
 	 */
-	std::map< csl::Pattern, float> patternWeights_;
+	std::map< csl::Pattern, double> patternWeights_;
 
 	/**
 	 *
 	 */
-	std::map< PatternType, float > defaultWeights_;
+	std::map< PatternType, double > defaultWeights_;
 
 	bool smartMerge_;
 

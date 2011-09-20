@@ -12,9 +12,9 @@ namespace csl {
 	 * @todo Find a good, dynamic solution here!
 	 */
 	memset( matrix_, 0, 50 * 50 * sizeof( MatrixItem ) );
-
-    }
 	
+    }
+    
     ComputeInstruction::~ComputeInstruction(){
     }
 
@@ -51,8 +51,8 @@ namespace csl {
 	//Set the values for the first row
 	matrix_[0][0].value = 0;
 	for(int i=1; i < matrixW; ++i ) {
-	    float prob = patternProbabilities_->getWeight( Pattern( wordCorr_.substr( i, 1 ), L"" ) );
-	    if( ( matrix_[0][i-1].value != PatternProbabilities::UNDEF ) && ( prob != PatternProbabilities::UNDEF ) ) {
+	    double prob = patternProbabilities_->getWeight( Pattern( wordCorr_.substr( i, 1 ), L"" ) );
+	    if( ( matrix_[0][i-1].value != PatternProbabilities::UNDEF ) && ( positiveProb( prob ) ) ) {
 		matrix_[0][i].value = matrix_[0][i-1].value + ( -log( prob ) );
 		matrix_[0][i].addPatternType( PatternProbabilities::PatternType( 1, 0 ) );
 	    }
@@ -64,8 +64,8 @@ namespace csl {
 	
 	//Set the values for the first column
 	for(int i=1; i < matrixH; ++i ) {
-	    float prob = patternProbabilities_->getWeight( Pattern( L"", wordErr_.substr( i, 1 ) ) );
-	    if( ( matrix_[i-1][0].value != PatternProbabilities::UNDEF) && ( prob != PatternProbabilities::UNDEF ) ) {
+	    double prob = patternProbabilities_->getWeight( Pattern( L"", wordErr_.substr( i, 1 ) ) );
+	    if( ( matrix_[i-1][0].value != PatternProbabilities::UNDEF) && ( positiveProb( prob ) ) ) {
 		matrix_[i][0].value = matrix_[i-1][0].value + ( -log( prob ) );
 		matrix_[i][0].addPatternType( PatternProbabilities::PatternType( 0, 1 ) );
 	    }
@@ -77,12 +77,12 @@ namespace csl {
 
 	
 	// Set the values of the matrix.
-	float prob = 0;
+	double prob = 0;
 
 	for( int y=1; y < matrixH; y++ ) {
 	    for( int x = 1; x < matrixW; ++x ){
-		float minValue =  PatternProbabilities::UNDEF;
-		float newValue = 0;
+		double minValue =  PatternProbabilities::UNDEF;
+		double newValue = 0;
 
 		// match, substitution
 		if( matrix_[y-1][x-1].value == PatternProbabilities::UNDEF ) {
@@ -103,7 +103,7 @@ namespace csl {
 		else {
 		    prob = patternProbabilities_->getWeight( Pattern( wordCorr_.substr( x, 1 ), wordErr_.substr( y, 1 ) ) );
 
-		    if( ( prob != PatternProbabilities::UNDEF ) ) {
+		    if( ( positiveProb( prob ) ) ) {
 			newValue = matrix_[y-1][x-1].value + ( -log( prob ) );
 		    
 			if( ( minValue == PatternProbabilities::UNDEF ) || ( newValue < minValue ) ) {
@@ -122,7 +122,7 @@ namespace csl {
 		// Insert
 		if( ( matrix_[y-1][x].value != PatternProbabilities::UNDEF ) ) {
 		    prob = patternProbabilities_->getWeight( Pattern( L"", wordErr_.substr( y, 1 ) ) );
-		    if( ( prob != PatternProbabilities::UNDEF ) ) {
+		    if( ( positiveProb( prob ) ) ) {
 			newValue = matrix_[y-1][x].value + ( -log( prob ) );
 
 			if( ( minValue == PatternProbabilities::UNDEF ) || ( newValue < minValue ) ) {
@@ -139,7 +139,7 @@ namespace csl {
 		// Delete
 		if( ( matrix_[y][x-1].value != PatternProbabilities::UNDEF ) ) {
 		    prob = patternProbabilities_->getWeight( Pattern( wordCorr_.substr( x, 1 ), L"" ) );
-		    if( ( prob != PatternProbabilities::UNDEF ) ) {
+		    if( ( positiveProb( prob ) ) ) {
 			newValue = matrix_[y][x-1].value + ( -log( prob ) );
 			
 			if( ( minValue == PatternProbabilities::UNDEF ) || ( newValue < minValue ) ) {
@@ -158,7 +158,7 @@ namespace csl {
 		//Merge
 		if( ( x >= 2 ) && ( matrix_[y-1][x-2].value != PatternProbabilities::UNDEF ) ) {
 		    prob = patternProbabilities_->getWeight( Pattern( wordCorr_.substr( x-1, 2 ), wordErr_.substr( y, 1 ) ) );
-		    if( prob != PatternProbabilities::UNDEF ) {
+		    if( positiveProb( prob ) ) {
 			newValue = matrix_[y-1][x-2].value + ( -log( prob ) );
 
 			if( ( minValue == PatternProbabilities::UNDEF ) || (newValue < minValue ) ) {
@@ -178,7 +178,7 @@ namespace csl {
 
 		    
 		    prob = patternProbabilities_->getWeight( Pattern( wordCorr_.substr( x, 1 ), wordErr_.substr( y-1, 2 ) ) );
-		    if( prob != PatternProbabilities::UNDEF ) {
+		    if( positiveProb( prob ) ) {
 			newValue = matrix_[y-2][x-1].value + ( -log( prob ) );
 			
 
@@ -289,7 +289,9 @@ namespace csl {
      * @brief recursive method to find all best paths through the levenshtein-matrix and store the resulting csl::Instruction s
      */
     void ComputeInstruction::getInstructions( int x, int y, size_t instructionIndex ) {
-	if( ( x== 0 && y == 0 ) ) {
+	//std::wcout << "Enter getInstructions" << std::endl;
+
+	if( ( ( x == 0 ) && ( y == 0  ) ) ) {
 	    // no recursive calls, we're at the end. Reverse the complete instruction
 	    std::reverse( instructions_->at( instructionIndex ).begin(), instructions_->at( instructionIndex ).end() );
 	}
@@ -305,6 +307,10 @@ namespace csl {
 	    while( patternType ) {
 		size_t currentInstructionIndex = 0;
 		
+		if( patternType->first == 0 && patternType->second == 0 ) {
+		    throw std::runtime_error( "patternType can not be (0,0)" );
+		}
+		
 		if( patternType->next == 0  ) { // no need to clone for the last patternType
 		    currentInstructionIndex = instructionIndex; 
 		    //std::wcerr<<"Do not clone: work on instr["<<instructionIndex<<"]"<<std::endl;
@@ -315,8 +321,11 @@ namespace csl {
 			return;
 		    }
 		    else {
+			//std::wcout << "size=" << instructions_->size() << std::endl;
+			instructions_->reserve( instructions_->size() + 1 );
 			instructions_->push_back( instructions_->at( instructionIndex ) ); // clone the instruction as built so far
 			currentInstructionIndex = instructions_->size() - 1;
+			//std::wcout << "size=" << instructions_->size() << ", currentInstructionIndex=" << currentInstructionIndex << std::endl;
 		    }
 		}
 
@@ -337,6 +346,7 @@ namespace csl {
 			    x - patternType->first ) 
 			);
 		    
+		    //std::wcout << "Rec call(" << x - patternType->first<< "," << y - patternType->second << "," << currentInstructionIndex << std::endl;
 		    getInstructions(  x - patternType->first, y - patternType->second, 
 				      currentInstructionIndex ); // recursive call
 		    
