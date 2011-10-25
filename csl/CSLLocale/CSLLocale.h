@@ -36,7 +36,7 @@ namespace csl {
 	    
 	    // no badbit, no failbit, no goodbit: only the eofbit, because the complete string should be interpreted
 	    if( iss.rdstate() != (  std::wistringstream::eofbit ) ) {
-		throw exceptions::cslException( "csl::CSLLocale::string2number: could not interpret string." );
+		throw exceptions::cslException( "csl::CSLLocale::string2number: could not interpret string:" );
 	    }
 	    return number;
 	}

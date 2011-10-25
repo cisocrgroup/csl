@@ -310,6 +310,7 @@ public:
     }
 
     const std::string& getArgument( size_t idx ) const {
+	if( idx >= getArgumentCount() ) throw std::runtime_error( "csl::Getopt::getArgument: out of range." );
 	return arguments_.at( idx );
     }
 

@@ -45,12 +45,12 @@ namespace csl {
 	/**
 	 * @brief Removes all the weights and defaults. Does NOT change the setting of the smartMerge mode.
 	 */
-	void clear();
+	virtual void clear();
 
 	/**
 	 * @brief Removes all the explicit weights, but leaves the defaults intact. Does NOT change the setting of the smartMerge mode.
 	 */
-	void clearExplicitWeights();
+	virtual void clearExplicitWeights();
 
 	inline size_t size() const {
 	    return patternWeights_.size();
