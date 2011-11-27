@@ -211,7 +211,7 @@ namespace csl {
 	CPPUNIT_ASSERT( pp.getWeight( Pattern( L"x", L"yz" ) ) == static_cast< float >( 1.3 ) ); // default value
 	CPPUNIT_ASSERT( pp.getWeight( Pattern( L"xy", L"z" ) ) == PatternProbabilities::UNDEF ); // as before
 
-	pp.reset();
+	pp.clear();
 	CPPUNIT_ASSERT( pp.getWeight( Pattern( L"t", L"th" ) ) == PatternProbabilities::UNDEF );
 	CPPUNIT_ASSERT( pp.getWeight( Pattern( L"x", L"yz" ) ) == PatternProbabilities::UNDEF );
 	CPPUNIT_ASSERT( pp.getWeight( Pattern( L"xy", L"z" ) ) == PatternProbabilities::UNDEF );

@@ -69,6 +69,17 @@ IF( CPPUNIT_FOUND )
 ENDIF( CPPUNIT_FOUND )
 
 
+INCLUDE(FindJNI) # FINDS THE FOLLOWING VARIABLES
+#  JAVA_AWT_LIB_PATH     = the path to the jawt library
+#  JAVA_JVM_LIB_PATH     = the path to the jvm library
+#  JAVA_INCLUDE_PATH     = the include path to jni.h
+#  JAVA_INCLUDE_PATH2    = the include path to jni_md.h
+#  JAVA_AWT_INCLUDE_PATH = the include path to jawt.h
+
+INCLUDE_DIRECTORIES( "." ${JAVA_INCLUDE_PATH} ${JAVA_INCLUDE_PATH2} )
+
+
+
 SET(LIBRARY_OUTPUT_PATH ${PROJECT_BINARY_DIR}/lib)
 SET(EXECUTABLE_OUTPUT_PATH ${PROJECT_BINARY_DIR}/bin)
 
