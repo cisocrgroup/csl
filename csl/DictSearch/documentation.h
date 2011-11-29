@@ -49,11 +49,13 @@ The meaning of all components can be seen best when investigating the 2nd answer
 @code
 theile:teile+[(t_th,0)],dist=0,baseWordScore=84(modern)
 @endcode
-- 'theile' is the candidate string itself.
-- It is derived from 'teile' using a variant pattern 't -> th' on position 0. This tells us the word is taken from the hypothetic dictionary.
-- The exact string was found in the dictionary, thus the levenshtein distance is 0.
-- The baseword (on which the variant pattern was applied) comes from the modern dictionary and had a score '84' attached.
 
+<ul>
+ <li>'theile' is the candidate string itself.</li>
+ <li>It is derived from 'teile' using a variant pattern 't->th' on position 0. This tells us the word is taken from the hypothetic dictionary.</li>
+ <li>The exact string was found in the dictionary, thus the levenshtein distance is 0.</li>
+ <li>The baseword (on which the variant pattern was applied) comes from the modern dictionary and had a score '84' attached.</li>
+</ul>
 
 @section installation Compilation/ Installation
 Please read the INSTALL file in the project root directory. The make command will compile a whole lot of things you don't need, but never mind.
@@ -82,8 +84,11 @@ of orthographical variants and an upper bound for the number of applied variant 
 
 For configuration of the lookup in modern and historical dictionaries, DictSearch provides configuration objects via the 
 following two methods:
-- csl::DictSearch::ConfigLookup& csl::DictSearch::getConfigModern()
-- csl::DictSearch::ConfigLookup& csl::DictSearch::getConfigHistoric()
+<ul>
+<li>csl::DictSearch::ConfigLookup& csl::DictSearch::getConfigModern()</li>
+<li>csl::DictSearch::ConfigLookup& csl::DictSearch::getConfigHistoric()</li>
+</ul>
+
 
 Please consult the class reference of csl::DictSearch::ConfigLookup or the demo program below for details on how to set
 the above mentioned parameters. 
@@ -95,11 +100,11 @@ The hypothetic dictionary uses a slightly extended object for configuration:
 Furthermore the hypothetic dictionary must be initialised separately, using the method csl::DictSearch::initHypothetic( char const* patternFile ).
 This method will activate the hypothetic dictionary, and its configuration can be changed as explained above.
 
-Here is an example @c patternFile, the first line specifies that 't' might be spelled 'th' in historic documents. Use a simple <SPACE> as delimiter.
+Here is an example @c patternFile, the first line specifies that 't' might be spelled 'th' in historic documents. Use a colon ':' as delimiter.
 @code
-t th
-ei ey
-u v
+t:th
+ei:ey
+u:v
 @endcode
 
 This code-snippet shows a very simple way to initialise and configure a DictSearch. A more detailed example can be found at the bottom

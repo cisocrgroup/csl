@@ -5,7 +5,7 @@
 
 
 void printHelp() {
-    std::wcerr<< "Use like:                compileMD <txtDic> <binDic>"   << std::endl
+    std::wcerr<< "Use like:                compileMD <txtDic> [<binDic>]"   << std::endl
 	      << "          cat <txtDic> | compileMD --stdin  <binDic>" << std::endl
 	      << std::endl
 	      << std::endl;
@@ -18,18 +18,23 @@ void printHelp() {
 int main(int argc, char const** argv) {
     std::locale::global( std::locale( "" ) );
 
-    csl::Getopt opt;
-    opt.specifyOption( "help", csl::Getopt::VOID );
-    opt.specifyOption( "stdin", csl::Getopt::VOID );
-    opt.getOptionsAsSpecified( argc, argv );
+    csl::Getopt options;
+    options.specifyOption( "help", csl::Getopt::VOID );
+    options.specifyOption( "stdin", csl::Getopt::VOID );
+    options.getOptionsAsSpecified( argc, argv );
 
-    if( opt.hasOption( "help" ) ) {
+    if( options.hasOption( "help" ) ) {
 	    printHelp();
 	    return EXIT_SUCCESS;
     }
 
-    if( opt.hasOption( "stdin" ) ) {
-	if( opt.getArgumentCount() != 1 ) {
+    if( options.getArgumentCount() == 0 ) {
+	printHelp();
+	return EXIT_FAILURE;
+    }
+    
+    if( options.hasOption( "stdin" ) ) {
+	if( options.getArgumentCount() != 1 ) {
 	    printHelp();
 	    return EXIT_FAILURE;
 	}
@@ -52,7 +57,7 @@ int main(int argc, char const** argv) {
 	    }
 	    t.finishConstruction();
 	    
-	    t.writeToFile( opt.getArgument( 0 ).c_str() );
+	    t.writeToFile( options.getArgument( 0 ).c_str() );
 	    
 	    //   t.toDot();
 	    //   t.printCells();
@@ -67,12 +72,29 @@ int main(int argc, char const** argv) {
 	}
 
     }
-    else if( opt.getArgumentCount() == 2 ) {
+    else  {
 	try {
-	    csl::MinDic< int > t;
-	    t.compileDic( argv[1] );
+	    std::string inFile = options.getArgument( 0 );
+	    std::string outFile;
 	    
-	    t.writeToFile( argv[2] );
+	    if( options.getArgumentCount() == 2 ) {
+		outFile = options.getArgument( 1 );
+	    }
+	    else {
+		outFile = inFile;
+		if( outFile.substr( outFile.size() - 4 ) == ".lex" ) {
+		    outFile.replace( outFile.size() - 4, 4, ".mdic" );
+		}
+		else {
+		    std::wcerr << "Your input filename does not end with '.lex'. In this case please provide an output filename as second argument." << std::endl;
+		    return EXIT_FAILURE;
+		}
+	    }
+
+	    csl::MinDic< int > t;
+	    t.compileDic( inFile.c_str() );
+	    
+	    t.writeToFile( outFile.c_str() );
 	    
 	    //   t.toDot();
 	    //   t.printCells();
@@ -82,10 +104,6 @@ int main(int argc, char const** argv) {
 	    return EXIT_FAILURE;
 	}
 	
-    }
-    else {
-	printHelp();
-	return EXIT_FAILURE;
     }
     
 }
