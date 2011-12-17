@@ -30,6 +30,11 @@ public class Interpretation {
     
     private String word;
     private String modernWord;
+    
+    /**
+     * Query: tneil
+     * theil:{teil+[t:th]}+ocr[h:n]
+     */
     private String nativeString;
 
 }

@@ -1,18 +1,37 @@
 /**
 @page dictSearch_manual DictSearch Manual - \n Approximate Search in Dictionaries in the Context of Historical Language
 
-@section DictSearch_general General Notes
-csl::DictSearch is a combined interface for approximate dictionary lookup in the context of historical language. The scenario is that the users
-specify a modern as well as a historical dictionary to perform exact or approximate dictionary lookups.
-A third component is what we call the "hypothetic dictionary", containing all orthographical variants that
-can possibly be derived from some word of the modern dictionary and the application of some "orthographical
-variant patterns". These patterns are simple rewrite rules and can be specified by the user.
+@section DictSearch_summary Summary
 
-For a query word @c w the users receive as answer a set of words, containing exact and approximate matches for 
-either of the three dictionaries. In the usual application this answer set is understood as set of correction
-candidates for a (probably garbled) token @c w. The task of ranking these candidates is explicitly out of the scope of 
-csl::DictSearch: To decide for a correction candidate, various other techniques for channel and language modelling have 
-to be taken into account.
+csl::DictSearch is a combined interface for approximate dictionary
+lookup in the context of historical language. The scenario is that the
+users specify a variety of dictionaries of different types to perform
+exact or approximate dictionary lookups. These types include
+- ordinary word lists, maybe with some frequency or other annotation
+- historical dictionaries with annotated information on spelling variation
+- "hypothetic" historical dictionaries defined by a modern word list and a set of rewrite rules describing spelling variation.
+
+@subsection DictSearch_summary_queries What you query, what you get as
+DictSearch can be configured to process query words @c w which might
+contain historical spelling variants, or OCR errors, or both. As an
+answer, you receive a set of "interpretations" for @c w, containing
+exact and approximate matches from either of the dictionaries. Such an
+interpretation has the following components:
+
+- @c w your query word
+- @c w_correct the suggested correct word as it was found in the dictionary
+- @c ocr_trace a description of which OCR errors were involved when turning @c w into @c w_suggest
+- @c w_modern the suggested modern equivalent word
+- @c hist_trace a description of which spelling variant patterns led to @c w_modern be spelled as @c w_correct
+
+
+
+In the usual application this answer set is understood as set of
+correction candidates for a (probably garbled) token @c w. The task of
+ranking these candidates is explicitly out of the scope of
+csl::DictSearch: To decide for a correction candidate, various other
+techniques for channel and language modelling have to be taken into
+account.
 
 This module is under construction. Please do help to extend the 'Known Issues' section at the end of this page.
 Also, this manual is work in progress. For now it concentrates on practical issues for the usage of the module. Some more details 
