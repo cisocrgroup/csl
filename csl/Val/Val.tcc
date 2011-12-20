@@ -3,6 +3,7 @@ namespace csl {
     Val::Val( MinDic_t const& baseDic, char const* patternFile ) :
 	patternGraph_( PatternGraph::FORWARD, PatternGraph::INDEX_RIGHT ),
 	caseMode_( Global::asIs ),	
+	minNrOfPatterns_( 0 ),
 	maxNrOfPatterns_( Val::INFINITE )
 	{
 
@@ -101,8 +102,10 @@ namespace csl {
 		     position != stack_.back().end();
 		     ++position ) {
 		    if( position->dicPos_.isFinal() ) {
-			reportMatch( &( *position ), position->dicPos_.getAnnotation() );
-			foundAnswers = true;
+			if( position->getNrOfPatternsApplied() >= minNrOfPatterns_ ) {
+			    reportMatch( &( *position ), position->dicPos_.getAnnotation() );
+			    foundAnswers = true;
+			}
 		    }
 		    ++count;
 		} // for all positions
@@ -163,14 +166,6 @@ namespace csl {
 	std::wstring word = query_;
 	interpretation.getInstruction().applyTo( &word, -1 );
 	interpretation.setBaseWord( word ); 
-
-	// *** if you activate this, take care of the return value of query (stating if matches were found)***
-// 	if( ( filterDic_ && filterDic_->lookup( interpretation.getWord() ) )  || // if there's a filterDic_ and interpretation.word is in it or ..
-// 	    ( interpretation.getInstruction().size() < minNrOfPatterns_ )
-	    
-// 	    ) {
-// 	    return;
-// 	}
 
 	if( wasUpperCase_ ) {
 	    

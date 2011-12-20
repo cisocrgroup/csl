@@ -11,11 +11,12 @@ namespace csl {
     class TestVal : public CppUnit::TestFixture  {
 
 	CPPUNIT_TEST_SUITE( TestVal );
-//	CPPUNIT_TEST( testBasics );
+	CPPUNIT_TEST( testBasics );
 	CPPUNIT_TEST( testWordBorders );
 	CPPUNIT_TEST_SUITE_END();
     public:
 	TestVal();
+	void testPrint();
 	void testBasics();
 	void testWordBorders();
 // 	void testConstructionDetails();
@@ -34,7 +35,7 @@ namespace csl {
     }
 
 
-    void TestVal::testBasics() {
+    void TestVal::testPrint() {
 	MinDic<> baseDic;
 	baseDic.initConstruction();
 	baseDic.addToken( L"anna", 42 );
@@ -55,55 +56,55 @@ namespace csl {
 
 
 
-//     /**
-//      * test the basic methods for reading access like getRoot, walk, isFinal etc.
-//      */
-//     void TestVal::testBasics() {
-//  	MinDic<> baseDic( "../csl/Val/Test/small.base.mdic" );
-// 	MinDic<> filterDic( "../csl/Val/Test/small.filter.mdic" );
-// 	Val<> val( baseDic,  "../csl/Val/Test/small.patterns.txt" );
+    /**
+     * test the basic methods for reading access like getRoot, walk, isFinal etc.
+     */
+    void TestVal::testBasics() {
+ 	MinDic<> baseDic( "../csl/Vaam/Test/small.base.mdic" );
+	MinDic<> filterDic( "../csl/Vaam/Test/small.filter.mdic" );
+	Val val( baseDic,  "../csl/Vaam/Test/small.patterns.txt" );
 	
-// 	Val<>::CandidateReceiver answers;
+	Val::CandidateReceiver answers;
 
-// 	// a standard variant
-// 	CPPUNIT_ASSERT( val.query( std::wstring( L"xachen" ), &answers ) );
-// 	CPPUNIT_ASSERT( answers.size() == 1 );
-// 	Interpretation& answer = answers.at( 0 ); 
-// 	CPPUNIT_ASSERT( answer.getBaseWord() == L"aachen" );
-// 	CPPUNIT_ASSERT( answer.getInstruction().size() == 1 );
-// 	CPPUNIT_ASSERT( answer.getInstruction().at( 0 ).getLeft() == L"a" );
-// 	CPPUNIT_ASSERT( answer.getInstruction().at( 0 ).getRight() == L"x" );
+	// a standard variant
+	CPPUNIT_ASSERT( val.query( std::wstring( L"xachen" ), &answers ) );
+	CPPUNIT_ASSERT( answers.size() == 1 );
+	Interpretation& answer = answers.at( 0 ); 
+	CPPUNIT_ASSERT( answer.getBaseWord() == L"aachen" );
+	CPPUNIT_ASSERT( answer.getInstruction().size() == 1 );
+	CPPUNIT_ASSERT( answer.getInstruction().at( 0 ).getLeft() == L"a" );
+	CPPUNIT_ASSERT( answer.getInstruction().at( 0 ).getRight() == L"x" );
 
-// 	answers.clear();
+	answers.clear();
 
-// 	///////////// MAX NR OF PATTERNS ///////////////////////
-// 	// with at most 0 variants, this should be no variant
-// 	val.setMaxNrOfPatterns( 0 );
-// 	CPPUNIT_ASSERT( ! val.query( std::wstring( L"xachen" ), &answers ) );
-// 	// with at most 1 variant, this should work again
-// 	val.setMaxNrOfPatterns( 1 );
-// 	CPPUNIT_ASSERT( val.query( std::wstring( L"xachen" ), &answers ) );
-// 	// but not a word with 2 patterns
-// 	CPPUNIT_ASSERT( ! val.query( std::wstring( L"kleintheyle" ), &answers ) );
+	///////////// MAX NR OF PATTERNS ///////////////////////
+	// with at most 0 variants, this should be no variant
+	val.setMaxNrOfPatterns( 0 );
+	CPPUNIT_ASSERT( ! val.query( std::wstring( L"xachen" ), &answers ) );
+	// with at most 1 variant, this should work again
+	val.setMaxNrOfPatterns( 1 );
+	CPPUNIT_ASSERT( val.query( std::wstring( L"xachen" ), &answers ) );
+	// but not a word with 2 patterns
+	CPPUNIT_ASSERT( ! val.query( std::wstring( L"kleintheyle" ), &answers ) );
 
-// 	// switch back to an infinite nr of patterns
-// 	val.setMaxNrOfPatterns( Val<>::INFINITE );
-// 	CPPUNIT_ASSERT( val.query( std::wstring( L"kleintheyle" ), &answers ) );
+	// switch back to an infinite nr of patterns
+	val.setMaxNrOfPatterns( Val::INFINITE );
+	CPPUNIT_ASSERT( val.query( std::wstring( L"kleintheyle" ), &answers ) );
 
 
-// 	///////////// MIN NR OF PATTERNS ///////////////////////
+	///////////// MIN NR OF PATTERNS ///////////////////////
 
-// 	// default should be 0
-// 	CPPUNIT_ASSERT( val.query( std::wstring( L"aachen" ), &answers ) );
+	// default should be 0
+	CPPUNIT_ASSERT( val.query( std::wstring( L"aachen" ), &answers ) );
 
-// 	val.setMinNrOfPatterns( 1 );
-// 	CPPUNIT_ASSERT( ! val.query( std::wstring( L"aachen" ), &answers ) );
+	val.setMinNrOfPatterns( 1 );
+	CPPUNIT_ASSERT( ! val.query( std::wstring( L"aachen" ), &answers ) );
 	
-// 	val.setMinNrOfPatterns( 2 );
-// 	CPPUNIT_ASSERT( ! val.query( std::wstring( L"xachen" ), &answers ) );
-// 	CPPUNIT_ASSERT( val.query( std::wstring( L"xxchen" ), &answers ) );
+	val.setMinNrOfPatterns( 2 );
+	CPPUNIT_ASSERT( ! val.query( std::wstring( L"xachen" ), &answers ) );
+	CPPUNIT_ASSERT( val.query( std::wstring( L"xxchen" ), &answers ) );
 	
-// 	val.setMinNrOfPatterns( 0 );
+	val.setMinNrOfPatterns( 0 );
 
 
 // 	///////// FILTER DIC ///////////////////////////////
@@ -115,7 +116,7 @@ namespace csl {
 // 	val.setFilterDic( filterDic );
 // 	CPPUNIT_ASSERT( ! val.query( std::wstring( L"hanne" ), &answers ) );
 
-//     }
+    }
 
 
     // stolen from testVaam
