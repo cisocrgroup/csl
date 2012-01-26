@@ -51,7 +51,12 @@ namespace csl {
 
 	if( str.empty() ) throw exceptions::badInput( "csl::Instruction::parseFromString: Empty string as input" );
 	
-	if( str.at( offset ) != '[' ) throw exceptions::badInput( "csl::Instruction::parseFromString: Found no opening square bracket" );
+	if( str.at( offset ) != '[' ) {
+	    throw exceptions::badInput( 
+		std::string( "csl::Instruction::parseFromString: Found no opening square bracket: string='" ) +
+		CSLLocale::wstring2string( str )
+		);
+	}
 	offset += 1;
 	
 	csl::PosPattern pp;

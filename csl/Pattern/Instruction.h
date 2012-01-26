@@ -3,6 +3,7 @@
 
 #include<fstream>
 #include<vector>
+#include <csl/CSLLocale/CSLLocale.h>
 #include "./PosPattern.h"
 
 namespace csl {
