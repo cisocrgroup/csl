@@ -10,7 +10,7 @@ import java.util.logging.Logger;
  *
  * @author uli
  */
-public class DictSearch<T> {
+public class DictSearch {
 
     static {
         System.loadLibrary( "JNIDictSearch" );

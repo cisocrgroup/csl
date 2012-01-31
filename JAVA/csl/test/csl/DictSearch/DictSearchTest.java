@@ -44,7 +44,6 @@ public class DictSearchTest {
     @Test
     public void testConstructor() {
         DictSearch instance;
-
         try {
             instance = new DictSearch("/no/such/inifile");
             fail( "Expected an exception to be thrown.");
@@ -62,7 +61,7 @@ public class DictSearchTest {
         System.out.println("query");
 
         try {
-            DictSearch instance = new DictSearch("/mounts/Users/student/uli/implement/OCRC_trunk/dictionaries/ocrc.ini");
+            DictSearch instance = new DictSearch("/daten/implement/OCRC_trunk/dictionaries/ocrc.ini");
             
             List<Interpretation> l = instance.query( "theil" );
             
