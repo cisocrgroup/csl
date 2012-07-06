@@ -40,7 +40,7 @@ namespace csl {
 	};
 
 	PatternWeights();
-
+        virtual ~PatternWeights() {}
 
 	/**
 	 * @brief Removes all the weights and defaults. Does NOT change the setting of the smartMerge mode.
@@ -68,7 +68,7 @@ namespace csl {
 
 
 
-	double getDefault( PatternType const& patternType ) const;   
+	double getDefault( PatternType const& patternType ) const;
 
 
 	void setDefault( PatternType const& patternType, double weight );
@@ -76,10 +76,10 @@ namespace csl {
 
 	/**
 	 * @brief If "smartMerge" is activated, it will override the default settings
-	 *        (set via setDefault()) and return the weight UNDEF for 
+	 *        (set via setDefault()) and return the weight UNDEF for
 	 *        all merges and splits of the form "xy <-> x" and "xy <-> y".
 	 *        It does NOT override the specific weights added via setWeight()
-	 * 
+	 *
 	 */
 	void setSmartMerge( bool t = true );
 
@@ -87,28 +87,28 @@ namespace csl {
 	const_PatternIterator patternsBegin() const {
 	    return patternWeights_.begin();
 	}
-	
+
 	PatternIterator patternsBegin() {
 	    return patternWeights_.begin();
 	}
-	
+
 	const_PatternIterator patternsEnd() const {
 	    return patternWeights_.end();
 	}
-	
+
 	PatternIterator patternsEnd() {
 	    return patternWeights_.end();
 	}
-	
+
 
 	/**
 	 * @brief prints the pattern weights
 	 */
 	void print( std::wostream& str = std::wcout ) const;
-	
 
-	void loadFromFile( const char* patternFile );	
-	void writeToFile( const char* patternFile ) const;	
+
+	void loadFromFile( const char* patternFile );
+	void writeToFile( const char* patternFile ) const;
 
 	void writeToXML( std::wostream& os ) const;
 	void writeToXML( const char* xmlFile ) const;
@@ -137,7 +137,7 @@ namespace csl {
 	static bool sortBySecond( pair_t const& a, pair_t const& b ) {
 	    return ( a.second > b.second ); // reverse ordering
 	}
-	
+
    }; // class PatternWeights
 
 
