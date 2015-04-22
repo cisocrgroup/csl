@@ -14,7 +14,7 @@ This should build the library in ./lib and all executables in ./bin .
 If cmake gives you trouble concerning the jni include directories, it might help
 to specify a correct JAVA_HOME environment variable:
 $ JAVA_HOME=/path/to/java/sdk  cmake #[...], see above
-
+Example: $ JAVA_HOME=/usr/lib/jvm/java7-openjdk cmake -DCMAKE_BUILD_TYPE=relase ..
 
 You can also try 'make install', but I don't guarantee I haven't forgotten
 to specify one or the other binary to be installed. It does install the
